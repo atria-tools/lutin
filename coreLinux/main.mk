@@ -122,10 +122,15 @@ USER_MAKEFILES:=$(TARGET_OUT_BUILD)/makefiles.mk
 ifeq ("$(findstring $(SCAN_TARGET),$(MAKECMDGOALS))","")
 include $(USER_MAKEFILES)
 endif
-$(info mydir="$(my-dir)")
-$(info pwd="$(shell pwd)")
-$(info TOP_DIR="$(TOP_DIR)")
-$(info USER_PACKAGES="$(USER_PACKAGES)")
+
+#display the properties of the currend building folder ...
+ifeq ("$(V)","1")
+    $(info mydir="$(my-dir)")
+    $(info pwd="$(shell pwd)")
+    $(info TOP_DIR="$(TOP_DIR)")
+    $(info USER_PACKAGES="$(USER_PACKAGES)")
+endif
+
 # Create a file that will contain all user makefiles available
 define create-user-makefiles-file
 	rm -f $(USER_MAKEFILES); \

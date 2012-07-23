@@ -100,7 +100,7 @@ modules-LOCALS += SHARED_LIBRARIES
 modules-LOCALS += EXTERNAL_LIBRARIES
 
 # Additional include directories to pass into the C/C++ compilers
-# Format : -I<fullpath>
+# Format : <fullpath>
 modules-LOCALS += C_INCLUDES
 
 # Additional flags to pass into the C or C++ compiler
