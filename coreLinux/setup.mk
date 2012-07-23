@@ -57,7 +57,7 @@ endif
 
 # To be able to use ccache with pre-complied headers, some env variables are required
 CCACHE := 
-ifeq ("$(USE_CCACHE)","1")
+ifeq ("$(CCACHE)","1")
   ifneq ("$(shell which ccache)","")
     CCACHE := CCACHE_SLOPPINESS=time_macros ccache
     TARGET_GLOBAL_CFLAGS += -fpch-preprocess
@@ -65,7 +65,7 @@ ifeq ("$(USE_CCACHE)","1")
 endif
 
 # Pre-compiled header generation flag
-ifneq ("$(USE_CLANG)","1")
+ifneq ("$(CLANG)","1")
   TARGET_PCH_FLAGS := -c
 else
   TARGET_PCH_FLAGS := -x c++-header
@@ -108,8 +108,8 @@ endif
 
 GCC_PATH := $(shell which $(GCC))
 
-ifneq ("$(USE_CLANG)","1")
+ifneq ("$(CLANG)","1")
 GCC_VERSION := $(shell $(GCC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
 else
-GCC_VERSION := 0.0.0
+GCC_VERSION := $(shell $(GCC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]-[0-9]\).*/\1/")
 endif

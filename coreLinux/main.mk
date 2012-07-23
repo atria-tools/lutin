@@ -16,32 +16,29 @@ SHELL := /bin/bash
 # Turns off suffix rules built into make
 .SUFFIXES:
 
-# Tools for target
-GCC ?= $(CROSS)gcc
-GXX ?= $(CROSS)g++
-AR ?= $(CROSS)ar
-LD ?= $(CROSS)ld
-NM ?= $(CROSS)nm
-STRIP ?= $(CROSS)strip
-
-# Tools for host
-HOST_GCC ?= gcc
-HOST_GXX ?= g++
-HOST_AR ?= ar
-HOST_LD ?= ld
-HOST_STRIP ?= strip
-
 # Overridable settings
 V := 0
 W := 0
 DEBUG := 0
-USE_CLANG := 0
-USE_CCACHE := 0
+CLANG := 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
   Q := @
 endif
+
+# Tools for target
+ifneq ("$(CLANG)","1")
+GCC ?= $(CROSS)gcc
+GXX ?= $(CROSS)g++
+else
+GCC ?= $(CROSS)clang
+GXX ?= $(CROSS)clang++
+endif
+AR ?= $(CROSS)ar
+LD ?= $(CROSS)ld
+NM ?= $(CROSS)nm
+STRIP ?= $(CROSS)strip
 
 # This is the default target.  It must be the first declared target.
 all:
