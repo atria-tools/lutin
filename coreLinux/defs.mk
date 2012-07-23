@@ -53,27 +53,6 @@ check-pwd-is-top-dir = \
 		$(error Not at the top directory))
 
 ###############################################################################
-## Use some colors if requested.
-###############################################################################
-ifeq ("$(USE_COLORS)","1")
-  CLR_DEFAULT := $(shell echo -e "\033[00m")
-  CLR_RED     := $(shell echo -e "\033[31m")
-  CLR_GREEN   := $(shell echo -e "\033[32m")
-  CLR_YELLOW  := $(shell echo -e "\033[33m")
-  CLR_BLUE    := $(shell echo -e "\033[34m")
-  CLR_PURPLE  := $(shell echo -e "\033[35m")
-  CLR_CYAN    := $(shell echo -e "\033[36m")
-else
-  CLR_DEFAULT :=
-  CLR_RED     :=
-  CLR_GREEN   :=
-  CLR_YELLOW  :=
-  CLR_BLUE    :=
-  CLR_PURPLE  :=
-  CLR_CYAN    :=
-endif
-
-###############################################################################
 ## Modules database.
 ## For each module 'mod', __modules.mod.<field> is used to store
 ## module-specific information.
@@ -350,29 +329,12 @@ define generate-autoconf-file
 endef
 
 ###############################################################################
-## Print some banners.
-## $1 : operation.
-## $2 : module.
-## $3 : file.
-###############################################################################
-
-CLR_TOOL   := $(CLR_PURPLE)
-CLR_MODULE := $(CLR_CYAN)
-CLR_FILE   := $(CLR_YELLOW)
-
-print-banner1 = \
-	@echo "$(CLR_TOOL)$1:$(CLR_DEFAULT) $(CLR_MODULE)$2$(CLR_DEFAULT) <= $(CLR_FILE)$3$(CLR_DEFAULT)"
-
-print-banner2 = \
-	@echo "$(CLR_TOOL)$1:$(CLR_DEFAULT) $(CLR_MODULE)$2$(CLR_DEFAULT) => $(CLR_FILE)$3$(CLR_DEFAULT)"
-
-###############################################################################
 ## Commands for running gcc to generate a precompiled file.
 ###############################################################################
 
 define transform-h-to-gch
 @mkdir -p $(dir $@)
-$(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
+@echo "Precompile: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(GXX) \
 	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
@@ -388,7 +350,7 @@ endef
 
 define transform-cpp-to-o
 @mkdir -p $(dir $@)
-$(call print-banner1,"$(PRIVATE_ARM_MODE) CPP",$(PRIVATE_MODULE),$(call path-from-top,$<))
+@echo "$(DISPLAY_ARM_MODE)C++: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(GXX) \
 	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
@@ -404,7 +366,7 @@ endef
 ###############################################################################
 
 define transform-c-to-o
-$(call print-banner1,"$(PRIVATE_ARM_MODE) C",$(PRIVATE_MODULE),$(call path-from-top,$<))
+@echo "$(DISPLAY_ARM_MODE)C: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(GCC) \
@@ -421,7 +383,7 @@ endef
 ###############################################################################
 
 define transform-s-to-o
-$(call print-banner1,"ASM",$(PRIVATE_MODULE),$(call path-from-top,$<))
+@ echo "ASM: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(GCC) \
@@ -441,7 +403,7 @@ endef
 # try to add to an existing archive.
 define transform-o-to-static-lib
 @mkdir -p $(dir $@)
-$(call print-banner2,"StaticLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
+@echo "StaticLib: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
 @rm -f $@
 $(Q)$(AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
@@ -453,7 +415,7 @@ endef
 
 define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
-$(call print-banner2,"SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
+@echo "SharedLib: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
 $(Q)$(GXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
@@ -480,7 +442,7 @@ endef
 
 define transform-o-to-executable
 @mkdir -p $(dir $@)
-$(call print-banner2,"Executable",$(PRIVATE_MODULE),$(call path-from-top,$@))
+@echo "Executable: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
 $(Q)$(GXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
@@ -516,7 +478,7 @@ endef
 # $(2) : destination file
 define copy-one-file
 $(2): $(1)
-	@echo "$(CLR_TOOL)Copy: $(CLR_FILE)$$(call path-from-top,$$@)$(CLR_DEFAULT)"
+	@echo "Copy: $$(call path-from-top,$$@)"
 	$$(copy-file-to-target)
 endef
 
@@ -551,3 +513,4 @@ local-get-build-dir = $(call module-get-build-dir,$(LOCAL_MODULE))
 local-add-module = \
 	$(call module-add,$(LOCAL_MODULE)) \
 	$(eval $(call def-rules,$(LOCAL_MODULE)))
+

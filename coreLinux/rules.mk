@@ -44,6 +44,12 @@ ifneq ("$(LOCAL_ARM_MODE)","THUMB")
   $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
 endif
 endif
+# for diplay :
+ifeq ("$(LOCAL_ARM_MODE)","")
+  DISPLAY_ARM_MODE=
+else
+  DISPLAY_ARM_MODE=$(LOCAL_ARM_MODE)_
+endif
 
 ## Check that compilation flags do not include forbidden stuff.
 check-flags-arm-mode := -marm -mthumb

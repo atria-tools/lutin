@@ -204,14 +204,13 @@ dump:
 ###############################################################################
 # Display configuration.
 ###############################################################################
-msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
 $(info ----------------------------------------------------------------------)
-$(call msg, + HOST_OS = $(HOST_OS))
-$(call msg, + TARGET_OS = $(TARGET_OS))
-$(call msg, + TARGET_ARCH = $(TARGET_ARCH))
-$(call msg, + TARGET_OUT_BUILD = $(TARGET_OUT_BUILD))
-$(call msg, + TARGET_OUT_STAGING = $(TARGET_OUT_STAGING))
-$(call msg, + TARGET_OUT_FINAL = $(TARGET_OUT_FINAL))
-$(call msg, + GCC_PATH = $(GCC_PATH))
-$(call msg, + GCC_VERSION = $(GCC_VERSION))
+$(info HOST_OS: $(HOST_OS))
+$(info TARGET_OS: $(TARGET_OS))
+$(info TARGET_ARCH: $(TARGET_ARCH))
+$(info TARGET_OUT_BUILD: $(TARGET_OUT_BUILD))
+$(info TARGET_OUT_STAGING: $(TARGET_OUT_STAGING))
+$(info TARGET_OUT_FINAL: $(TARGET_OUT_FINAL))
+$(info GCC_PATH: $(GCC_PATH))
+$(info GCC_VERSION: $(GCC_VERSION))
 $(info ----------------------------------------------------------------------)
