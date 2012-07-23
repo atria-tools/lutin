@@ -115,13 +115,6 @@ TARGET_OUT_FINAL ?= $(shell pwd)/out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/bin
 SCAN_TARGET := scan
 #TODO : change this in function of the platform ...
 USER_MAKEFILE_NAME := Linux.mk
-USER_MAKEFILES:=$(TARGET_OUT_BUILD)/makefiles.mk
-
-# Include makefile containing all available makefile
-# If it does not exists, it will trigger its creation
-ifeq ("$(findstring $(SCAN_TARGET),$(MAKECMDGOALS))","")
-include $(USER_MAKEFILES)
-endif
 
 #display the properties of the currend building folder ...
 ifeq ("$(V)","1")
@@ -131,26 +124,10 @@ ifeq ("$(V)","1")
     $(info USER_PACKAGES="$(USER_PACKAGES)")
 endif
 
-# Create a file that will contain all user makefiles available
-define create-user-makefiles-file
-	rm -f $(USER_MAKEFILES); \
-	mkdir -p $(dir $(USER_MAKEFILES)); \
-	touch $(USER_MAKEFILES); \
-	echo "Scanning $(TOP_DIR) for makefiles..."; \
-	for f in `find $(USER_PACKAGES) -name $(USER_MAKEFILE_NAME)`; do \
-		echo "$$f"; \
-		echo "include $$f" >> $(USER_MAKEFILES); \
-	done;
-endef
+# Get the list of all makefiles available and include them
+makefiles += $(shell find $(USER_PACKAGES) -name $(USER_MAKEFILE_NAME))
+include $(makefiles)
 
-# Rule that will trigger creation of list of makefiles when needed
-$(USER_MAKEFILES):
-	@$(create-user-makefiles-file)
-
-# Rule to force creation of list of makefiles
-.PHONY: $(SCAN_TARGET)
-$(SCAN_TARGET):
-	@$(create-user-makefiles-file)
 
 ###############################################################################
 # Module dependencies generation.
@@ -190,7 +167,6 @@ all: $(foreach __mod,$(__modules),$(__mod)) $(AUTOCONF_MERGE_FILE)
 .PHONY: clean
 clean: $(foreach __mod,$(__modules),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
-	@rm -f $(USER_MAKEFILES)
 
 # Generate final tree
 .PHONY: final
