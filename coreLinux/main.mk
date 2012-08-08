@@ -168,15 +168,6 @@ all: $(foreach __mod,$(__modules),$(__mod)) $(AUTOCONF_MERGE_FILE)
 clean: $(foreach __mod,$(__modules),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
 
-# Generate final tree
-.PHONY: final
-final: all
-	@echo "Generating final tree..."
-	@$(BUILD_SYSTEM)/make-final.py \
-		--strip="$(STRIP)" \
-		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
-	@echo "Done generating final tree"
-
 # Dump the module database for debuging the build system
 .PHONY: dump
 dump:
