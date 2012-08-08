@@ -23,7 +23,7 @@ ifneq ("$(shell echo $$OSTYPE | grep msys)","")
   HOST_EXE_SUFFIX := .exe
   HOST_SHARED_LIB_SUFFIX := .dll
 else
-  HOST_OS := LINUX
+  HOST_OS := Linux
   HOST_EXE_SUFFIX :=
   HOST_SHARED_LIB_SUFFIX := .so
 endif

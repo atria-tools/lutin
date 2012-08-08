@@ -269,24 +269,24 @@ module-get-all-dependencies = \
 
 # Recursively get dependency of a modules
 __modules-get-closure = \
-    $(eval __closure_deps  := $(strip $1)) \
-    $(if $(__closure_deps), \
+	$(eval __closure_deps  := $(strip $1)) \
+	$(if $(__closure_deps), \
 		$(eval __closure_wq    := $(__closure_deps)) \
 		$(eval __closure_field := $(strip $2)) \
 		$(call __modules-closure)) \
-    $(__closure_deps)
+	$(__closure_deps) \
 
 # Used internally by modules-get-all-dependencies. Note the tricky use of
 # conditional recursion to work around the fact that the GNU Make language does
 # not have any conditional looping construct like 'while'.
 __modules-closure = \
-    $(eval __closure_mod := $(call first,$(__closure_wq))) \
-    $(eval __closure_wq  := $(call rest,$(__closure_wq))) \
-    $(eval __closure_val := $(__modules.$(__closure_mod).$(__closure_field))) \
-    $(eval __closure_new := $(filter-out $(__closure_deps),$(__closure_val))) \
-    $(eval __closure_deps += $(__closure_new)) \
-    $(eval __closure_wq  := $(strip $(__closure_wq) $(__closure_new))) \
-    $(if $(__closure_wq),$(call __modules-closure)) \
+	$(eval __closure_mod := $(call first,$(__closure_wq))) \
+	$(eval __closure_wq  := $(call rest,$(__closure_wq))) \
+	$(eval __closure_val := $(__modules.$(__closure_mod).$(__closure_field))) \
+	$(eval __closure_new := $(filter-out $(__closure_deps),$(__closure_val))) \
+	$(eval __closure_deps += $(__closure_new)) \
+	$(eval __closure_wq  := $(strip $(__closure_wq) $(__closure_new))) \
+	$(if $(__closure_wq),$(call __modules-closure)) \
 
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
@@ -296,10 +296,10 @@ module-get-build-dir = \
 	$(TARGET_OUT_BUILD)/$1
 
 module-get-build-filename = \
-	$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME)
+	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME) )
 
 module-get-staging-filename = \
-	$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME)
+	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) )
 
 ###############################################################################
 ## Generate autoconf.h file from config file.
@@ -357,7 +357,7 @@ $(Q)$(CCACHE) $(GXX) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
-	-c -MMD -MP -o $@ \
+	-c -MMD -MP -g -o $@ \
 	$(call path-from-top,$<)
 endef
 
@@ -374,7 +374,7 @@ $(Q)$(CCACHE) $(GCC) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
-	-c -MMD -MP -o $@ \
+	-c -MMD -MP -g -o $@ \
 	$(call path-from-top,$<)
 endef
 
@@ -391,7 +391,7 @@ $(Q)$(CCACHE) $(GCC) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
-	-c -MMD -MP -o $@ \
+	-c -MMD -MP -g -o $@ \
 	$(call path-from-top,$<)
 endef
 
@@ -417,7 +417,10 @@ define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 @echo "SharedLib: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
-$(Q)$(GXX) \
+@#$(info PRIVATE_ALL_SHARED_LIBRARIES = $(PRIVATE_ALL_SHARED_LIBRARIES))
+@#$(info PRIVATE_ALL_STATIC_LIBRARIES = $(PRIVATE_ALL_STATIC_LIBRARIES))
+$(Q)
+$(GXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-shared \

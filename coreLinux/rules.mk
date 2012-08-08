@@ -31,44 +31,42 @@ LOCAL_C_INCLUDES := $(build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
 ## ARM specific checks.
 ###############################################################################
 ifeq ("$(TARGET_ARCH)","ARM")
-
-# Make sure LOCAL_ARM_MODE is valid
-# If not set, use default mode
-# Convert to upper case for further use
-LOCAL_ARM_MODE := $(call upcase,$(strip $(LOCAL_ARM_MODE)))
-ifeq ("$(LOCAL_ARM_MODE)","")
-  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
-endif
-ifneq ("$(LOCAL_ARM_MODE)","ARM")
-ifneq ("$(LOCAL_ARM_MODE)","THUMB")
-  $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
-endif
-endif
-# for diplay :
-ifeq ("$(LOCAL_ARM_MODE)","")
-  DISPLAY_ARM_MODE=
-else
-  DISPLAY_ARM_MODE=$(LOCAL_ARM_MODE)_
-endif
-
-## Check that compilation flags do not include forbidden stuff.
-check-flags-arm-mode := -marm -mthumb
-check-flags = \
-	$(foreach flags,$1, \
-		$(if $(findstring $($3),$(flags)), \
-			$(error $(LOCAL_PATH): $3 contains $(flags) : $2) \
-		) \
-	)
-
-# Check that -marm or -mthumb is not forced in compilation flags
-flags-arm-mode := -marm -mthumb
-check-message := please use LOCAL_ARM_MODE
-check-flags-arm-mode = $(call check-flags,$(flags-arm-mode),$(check-message),$1)
+	# Make sure LOCAL_ARM_MODE is valid
+	# If not set, use default mode
+	# Convert to upper case for further use
+	LOCAL_ARM_MODE := $(call upcase,$(strip $(LOCAL_ARM_MODE)))
+	ifeq ("$(LOCAL_ARM_MODE)","")
+		LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
+	endif
+	ifneq ("$(LOCAL_ARM_MODE)","ARM")
+		ifneq ("$(LOCAL_ARM_MODE)","THUMB")
+			$(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
+		endif
+	endif
+	# for diplay :
+	ifeq ("$(LOCAL_ARM_MODE)","")
+		DISPLAY_ARM_MODE=
+	else
+		DISPLAY_ARM_MODE=$(LOCAL_ARM_MODE)_
+	endif
+	
+	## Check that compilation flags do not include forbidden stuff.
+	check-flags-arm-mode := -marm -mthumb
+	check-flags = \
+		$(foreach flags,$1, \
+			$(if $(findstring $($3),$(flags)), \
+				$(error $(LOCAL_PATH): $3 contains $(flags) : $2) \
+			) \
+		)
+	
+	# Check that -marm or -mthumb is not forced in compilation flags
+	flags-arm-mode := -marm -mthumb
+	check-message := please use LOCAL_ARM_MODE
+	check-flags-arm-mode = $(call check-flags,$(flags-arm-mode),$(check-message),$1)
 $(call check-flags-arm-mode,LOCAL_CFLAGS)
 $(call check-flags-arm-mode,LOCAL_CPPFLAGS)
 $(call check-flags-arm-mode,LOCAL_EXPORT_CFLAGS)
 $(call check-flags-arm-mode,LOCAL_EXPORT_CPPFLAGS)
-
 endif
 
 ###############################################################################
@@ -310,4 +308,5 @@ $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_EXTERNAL_LIBRARIES := $(all_external_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
+
 

@@ -5,19 +5,27 @@
 ##
 ## Setup warning flags.
 ###############################################################################
-
-COMMON_FLAGS_WARNINGS :=
-GCC_FLAGS_WARNINGS :=
-GXX_FLAGS_WARNINGS :=
+ifeq ("$(TARGET_OS)","Android")
+	COMMON_FLAGS_WARNINGS := -DANDROID -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
+	                         -fpic -ffunction-sections -funwind-tables -fstack-protector \
+	                         -Wno-psabi -march=armv5te -mtune=xscale -msoft-float -fno-exceptions -mthumb \
+	                         -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -MMD -MP -MF -D_STLP_USE_SIMPLE_NODE_ALLOC
+	GCC_FLAGS_WARNINGS :=
+	GXX_FLAGS_WARNINGS := -fno-rtti -Wa,--noexecstack   
+else
+	COMMON_FLAGS_WARNINGS :=
+	GCC_FLAGS_WARNINGS :=
+	GXX_FLAGS_WARNINGS :=
+endif
 
 # show option associated with warning (gcc >= 4.0.0)
 ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.0.0))
-COMMON_FLAGS_WARNINGS += -fdiagnostics-show-option
+	COMMON_FLAGS_WARNINGS += -fdiagnostics-show-option
 endif
 
-COMMON_FLAGS_WARNINGS += -Wall
+###COMMON_FLAGS_WARNINGS += -Wall
 #COMMON_FLAGS_WARNINGS += -Wextra
-COMMON_FLAGS_WARNINGS += -Wno-unused -Wno-unused-parameter -Wunused-value -Wunused-variable -Wunused-label
+###COMMON_FLAGS_WARNINGS += -Wno-unused -Wno-unused-parameter -Wunused-value -Wunused-variable -Wunused-label
 #COMMON_FLAGS_WARNINGS += -Wshadow
 #COMMON_FLAGS_WARNINGS += -Wswitch-default
 #COMMON_FLAGS_WARNINGS += -Wwrite-strings
@@ -38,14 +46,16 @@ COMMON_FLAGS_WARNINGS += -Wno-unused -Wno-unused-parameter -Wunused-value -Wunus
 #GXX_FLAGS_WARNINGS += -Wreorder
 #GXX_FLAGS_WARNINGS += -Woverloaded-virtual
 
-# gcc >= 4.5.0 (too many false positives with previous versions)
-ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.5.0))
-#COMMON_FLAGS_WARNINGS += -Wunreachable-code
-endif
 
-# gcc >= 4.5.2
-ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.5.2))
-#COMMON_FLAGS_WARNINGS += -Wlogical-op
+ifneq ("$(CLANG)","1")
+	# gcc >= 4.5.0 (too many false positives with previous versions)
+	ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.5.0))
+		COMMON_FLAGS_WARNINGS += -Wunreachable-code
+	endif
+	# gcc >= 4.5.2
+	ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.5.2))
+		COMMON_FLAGS_WARNINGS += -Wlogical-op
+	endif
 endif
 
 # Extra warnings
@@ -63,7 +73,3 @@ endif
 GCC_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
 GXX_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
 
-ifeq ("$(DEBUG)","1")
-	TARGET_GLOBAL_CFLAGS += -g
-	TARGET_GLOBAL_CPPFLAGS += -g
-endif

@@ -27,6 +27,13 @@ ifeq ("$(V)","0")
   Q := @
 endif
 
+# Tools for host
+HOST_GCC ?= gcc
+HOST_GXX ?= g++
+HOST_AR ?= ar
+HOST_LD ?= ld
+HOST_STRIP ?= strip
+
 # Tools for target
 ifneq ("$(CLANG)","1")
 	GCC ?= $(CROSS)gcc
@@ -113,8 +120,6 @@ TARGET_OUT_FINAL ?= $(shell pwd)/out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/bin
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
-#TODO : change this in function of the platform ...
-USER_MAKEFILE_NAME := Linux.mk
 
 #display the properties of the currend building folder ...
 ifeq ("$(V)","1")
@@ -122,10 +127,11 @@ ifeq ("$(V)","1")
     $(info pwd="$(shell pwd)")
     $(info TOP_DIR="$(TOP_DIR)")
     $(info USER_PACKAGES="$(USER_PACKAGES)")
+    $(info list packet=$(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk))
 endif
 
 # Get the list of all makefiles available and include them
-makefiles += $(shell find $(USER_PACKAGES) -name $(USER_MAKEFILE_NAME))
+makefiles += $(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk)
 include $(makefiles)
 
 
