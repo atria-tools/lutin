@@ -50,19 +50,20 @@ endif
 
 # Extra warnings
 ifeq ("$(W)","1")
-
-COMMON_FLAGS_WARNINGS += -Wconversion
-COMMON_FLAGS_WARNINGS += -Wswitch-enum
-COMMON_FLAGS_WARNINGS += -Wcast-qual
-
-# gcc >= 4.4.0
-ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.4.0))
-COMMON_FLAGS_WARNINGS += -Wframe-larger-than=1024
-endif
-
+	COMMON_FLAGS_WARNINGS += -Wconversion
+	COMMON_FLAGS_WARNINGS += -Wswitch-enum
+	COMMON_FLAGS_WARNINGS += -Wcast-qual
+	# gcc >= 4.4.0
+	ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.4.0))
+		COMMON_FLAGS_WARNINGS += -Wframe-larger-than=1024
+	endif
 endif
 
 # Add common flags to specific flags
 GCC_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
 GXX_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
 
+ifeq ("$(DEBUG)","1")
+	TARGET_GLOBAL_CFLAGS += -g
+	TARGET_GLOBAL_CPPFLAGS += -g
+endif

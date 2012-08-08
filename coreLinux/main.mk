@@ -29,18 +29,18 @@ endif
 
 # Tools for target
 ifneq ("$(CLANG)","1")
-GCC ?= $(CROSS)gcc
-GXX ?= $(CROSS)g++
+	GCC ?= $(CROSS)gcc
+	GXX ?= $(CROSS)g++
 else
-GCC ?= $(CROSS)clang
-GXX ?= $(CROSS)clang++
+	GCC ?= $(CROSS)clang
+	GXX ?= $(CROSS)clang++
 endif
 AR ?= $(CROSS)ar
 LD ?= $(CROSS)ld
 NM ?= $(CROSS)nm
 STRIP ?= $(CROSS)strip
 
-# This is the default target.  It must be the first declared target.
+# This is the default target. It must be the first declared target.
 all:
 
 # Target global variables
