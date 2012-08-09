@@ -296,10 +296,12 @@ module-get-build-dir = \
 	$(TARGET_OUT_BUILD)/$1
 
 module-get-build-filename = \
-	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME) )
+	$(info build of $1) \
+	$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME)
 
 module-get-staging-filename = \
-	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) )
+	$(info staging of $1    ==> $(__modules.$1.MODULE_FILENAME)) \
+	$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME)
 
 ###############################################################################
 ## Generate autoconf.h file from config file.
@@ -417,10 +419,7 @@ define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 @echo "SharedLib: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
-@#$(info PRIVATE_ALL_SHARED_LIBRARIES = $(PRIVATE_ALL_SHARED_LIBRARIES))
-@#$(info PRIVATE_ALL_STATIC_LIBRARIES = $(PRIVATE_ALL_STATIC_LIBRARIES))
-$(Q)
-$(GXX) \
+$(Q)$(GXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-shared \
