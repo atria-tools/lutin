@@ -40,9 +40,10 @@ tmp+=$(shell sed -i "s|__PROJECT_VENDOR__|$(PROJECT_VENDOR)|" jni/ewolAndroidAbs
 tmp+=$(shell sed -i "s|__PROJECT_NAME__|$(PROJECT_NAME)|" jni/ewolAndroidAbstraction.cpp)
 tmp+=$(shell sed -i "s|__PROJECT_PACKAGE__|$(PROJECT_PACKAGE)|" jni/ewolAndroidAbstraction.cpp)
 $(info $(tmp))
-
+# C include folder
+TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl/gabi++/include
+# C++ include folder
 TARGET_GLOBAL_C_INCLUDES=-I$(PROJECT_NDK)/sources/cxx-stl/stlport/stlport
-TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl//gabi++/include
 TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/platforms/android-14/arch-arm/usr/include
 
 
@@ -54,10 +55,11 @@ PATH:=$(PROJECT_SDK)/tools/:$(PROJECT_SDK)/platform-tools/:$(PATH) ant -Dsdk.dir
 $(info "    (sh) Clear previous sources ")
 #$(shell rm -rf src jni/ewolAndroidAbstraction.cpp)
 
-TARGET_GLOBAL_LDLIBS_SHARED = -shared --sysroot=$(PROJECT_NDK)/platforms/android-14/arch-arm \
-                        $(PROJECT_NDK)/platforms/android-14/arch-arm/usr/lib/libstdc++.a \
+TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-14/arch-arm \
+                        $(PROJECT_NDK)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/libgnustl_static.a \
                         $(PROJECT_NDK)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/libsupc++.a \
-                        -lstdc++
+                        -lstdc++ \
+                        $(PROJECT_NDK)/platforms/android-14/arch-arm/usr/lib/libstdc++.a
 
 
 
