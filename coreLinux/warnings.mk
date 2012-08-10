@@ -5,18 +5,10 @@
 ##
 ## Setup warning flags.
 ###############################################################################
-ifeq ("$(TARGET_OS)","Android")
-	COMMON_FLAGS_WARNINGS := -DANDROID -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
-	                         -fpic -ffunction-sections -funwind-tables -fstack-protector \
-	                         -Wno-psabi -march=armv5te -mtune=xscale -msoft-float -fno-exceptions -mthumb \
-	                         -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -MMD -MP -MF 
-	GCC_FLAGS_WARNINGS :=
-	GXX_FLAGS_WARNINGS := -fno-rtti -Wa,--noexecstack
-else
-	COMMON_FLAGS_WARNINGS :=
-	GCC_FLAGS_WARNINGS :=
-	GXX_FLAGS_WARNINGS :=
-endif
+
+COMMON_FLAGS_WARNINGS :=
+GCC_FLAGS_WARNINGS :=
+GXX_FLAGS_WARNINGS :=
 
 # show option associated with warning (gcc >= 4.0.0)
 ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.0.0))

@@ -110,20 +110,16 @@ LOCAL_SHARED_LIBRARIES += \
 # Get path
 all_shared_libraries := \
 	$(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
-		$(info shlib=$(lib)) \
 		$(call module-get-staging-filename,$(lib)))
 all_static_libraries := \
 	$(foreach lib,$(LOCAL_STATIC_LIBRARIES), \
-		$(info statlib=$(lib)) \
 		$(call module-get-staging-filename,$(lib)))
 all_whole_static_libraries := \
 	$(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES), \
-		$(info whstaticlib=$(lib)) \
 		$(call module-get-staging-filename,$(lib)))
 
 all_external_libraries := \
 	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
-		$(info extlib=$(lib)) \
 		$(TARGET_OUT_BUILD)/$(lib)/$(lib).done)
 
 # all_libraries is used for the dependencies.

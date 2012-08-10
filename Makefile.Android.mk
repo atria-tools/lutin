@@ -45,7 +45,7 @@ java : all
 	# note : this change the lib name ...
 	cp ./out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj/usr/lib/$(PROJECT_PACKAGE).so libs/armeabi/lib$(PROJECT_PACKAGE).so
 	@echo  "    (ant) build java code"
-	PATH=$(PROJECT_SDK)/tools/:$(PROJECT_SDK)/platform-tools/:$(PATH) ant -Dsdk.dir=$(PROJECT_SDK) debug
+	PATH=$(PROJECT_SDK)/tools/:$(PROJECT_SDK)/platform-tools/:$(PATH) ant -Dsdk.dir=$(PROJECT_SDK) $(BUILD_DIRECTORY_MODE) V=1
 	@echo  "    (sh) Clear previous sources "
 	@rm -rf src jni/ewolAndroidAbstraction.cpp
 
@@ -56,14 +56,8 @@ install: java
 	@echo "------------------------------------------------------------------------"
 	@# $(PROJECT_SDK)/platform-tools/adb kill-server
 	@# install application
-	sudo $(PROJECT_SDK)/platform-tools/adb  install -r ./bin/$(PROJECT_NAME)-debug.apk
+	sudo $(PROJECT_SDK)/platform-tools/adb install -r ./bin/$(PROJECT_NAME)-$(BUILD_DIRECTORY_MODE).apk
 
-#clean:
-#	@echo "------------------------------------------------------------------------"
-#	@echo ' CLEANING : bin libs gen obj'
-#	@echo "------------------------------------------------------------------------"
-#	cd $(PROJECT_NDK) ; NDK_PROJECT_PATH=$(PROJECT_PATH) NDK_MODULE_PATH=$(PROJECT_MODULE) ./ndk-build clean
-#
 #localclean:
 #	@echo "------------------------------------------------------------------------"
 #	@echo ' Remove : bin libs gen obj'

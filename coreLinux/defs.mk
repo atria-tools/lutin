@@ -296,12 +296,11 @@ module-get-build-dir = \
 	$(TARGET_OUT_BUILD)/$1
 
 module-get-build-filename = \
-	$(info build of $1) \
-	$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME)
+	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME) )
 
 module-get-staging-filename = \
-	$(info staging of $1    ==> $(__modules.$1.MODULE_FILENAME)) \
-	$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME)
+	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) )
+
 
 ###############################################################################
 ## Generate autoconf.h file from config file.
