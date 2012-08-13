@@ -45,7 +45,7 @@ java : all
 	# note : this change the lib name ...
 	cp ./out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj/usr/lib/$(PROJECT_PACKAGE).so libs/armeabi/lib$(PROJECT_PACKAGE).so
 	@echo  "    (ant) build java code"
-	PATH=$(PROJECT_SDK)/tools/:$(PROJECT_SDK)/platform-tools/:$(PATH) ant -Dsdk.dir=$(PROJECT_SDK) $(BUILD_DIRECTORY_MODE) V=1
+	PATH=$(PROJECT_SDK)/tools/:$(PROJECT_SDK)/platform-tools/:$(PATH) ant -Dsdk.dir=$(PROJECT_SDK) $(BUILD_DIRECTORY_MODE)
 	@echo  "    (sh) Clear previous sources "
 	@rm -rf src jni/ewolAndroidAbstraction.cpp
 
