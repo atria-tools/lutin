@@ -54,8 +54,6 @@ ifeq ("$(TARGET_OS)","Windows")
 		TARGET_GLOBAL_LDFLAGS += -Wl,-Bstatic
 	endif
 	
-	i586-mingw32msvc-
-	
 else ifeq ("$(TARGET_OS)","Android")
 	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
 	                         -fpic -ffunction-sections -funwind-tables -fstack-protector \

@@ -44,8 +44,12 @@ else
 endif
 AR ?= $(CROSS)ar
 LD ?= $(CROSS)ld
+AS ?= $(CROSS)as
 NM ?= $(CROSS)nm
 STRIP ?= $(CROSS)strip
+RANLIB ?= $(CROSS)ranlib
+DLLTOOL ?= $(CROSS)dlltool
+OBJDUMP ?= $(CROSS)objdump
 
 # This is the default target. It must be the first declared target.
 all:
@@ -130,8 +134,27 @@ ifeq ("$(V)","1")
     $(info list packet=$(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk))
 endif
 
-# Get the list of all makefiles available and include them
-makefiles += $(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk)
+# Get the list of all makefiles available and include them this find the TARGET_OS.mk and the Generic.mk
+_moduleFolder  = $(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk)
+_moduleFolder += $(shell find $(USER_PACKAGES) -name Generic.mk)
+# only keep one folder for each makefile found.
+_tmpDirectory  = $(sort $(dir $(_moduleFolder)))
+# this section have all the makefile possible for a specific target, 
+# this isolate the good makefile for every folder where a makefile present
+# for each folder
+#    check if TARGET_OS.mk is present 
+#        add it
+#    otherwise
+#        add generic makefile
+$(foreach __makefile,$(_tmpDirectory), \
+    $(if $(wildcard $(__makefile)$(TARGET_OS).mk), \
+        $(eval makefiles += $(__makefile)$(TARGET_OS).mk) , \
+        $(eval makefiles += $(__makefile)Generic.mk) \
+    ) \
+)
+# import all the makefiles
+$(info makefiles="$(makefiles)")
+
 include $(makefiles)
 
 

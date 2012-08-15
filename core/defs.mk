@@ -408,6 +408,7 @@ define transform-o-to-static-lib
 $(call check-pwd-is-top-dir)
 @rm -f $@
 $(Q)$(AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
+$(Q)$(RANLIB) $@
 endef
 
 ###############################################################################
