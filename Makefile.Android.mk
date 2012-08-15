@@ -38,7 +38,7 @@ ANDROID_BOARD_ID = 14
 TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm/usr/include
 TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm
 
-include $(EWOL_FOLDER)/Build/coreLinux/main.mk
+include $(EWOL_FOLDER)/Build/core/main.mk
 
 java : all
 	@mkdir -p libs/armeabi/

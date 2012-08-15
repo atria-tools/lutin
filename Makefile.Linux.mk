@@ -1,7 +1,7 @@
 
 USER_PACKAGES += $(EWOL_FOLDER)/Sources/
 
-include $(EWOL_FOLDER)/Build/coreLinux/main.mk
+include $(EWOL_FOLDER)/Build/core/main.mk
 
 
 # http://alp.developpez.com/tutoriels/debian/creer-paquet/
