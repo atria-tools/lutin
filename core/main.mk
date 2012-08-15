@@ -118,9 +118,9 @@ else
 	BUILD_DIRECTORY_MODE := release
 endif
 
-TARGET_OUT_BUILD ?= $(shell pwd)/out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
-TARGET_OUT_STAGING ?= $(shell pwd)/out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
-TARGET_OUT_FINAL ?= $(shell pwd)/out_$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/bin
+TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
+TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
+TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/bin
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
@@ -152,9 +152,10 @@ $(foreach __makefile,$(_tmpDirectory), \
         $(eval makefiles += $(__makefile)Generic.mk) \
     ) \
 )
+ifeq ("$(V)","1")
+	$(info makefiles="$(makefiles)")
+endif
 # import all the makefiles
-$(info makefiles="$(makefiles)")
-
 include $(makefiles)
 
 
