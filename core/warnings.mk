@@ -7,11 +7,11 @@
 ###############################################################################
 
 COMMON_FLAGS_WARNINGS :=
-GCC_FLAGS_WARNINGS :=
-GXX_FLAGS_WARNINGS :=
+CC_FLAGS_WARNINGS :=
+CXX_FLAGS_WARNINGS :=
 
 # show option associated with warning (gcc >= 4.0.0)
-ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.0.0))
+ifneq (0,$(shell expr $(CC_VERSION) \>= 4.0.0))
 	COMMON_FLAGS_WARNINGS += -fdiagnostics-show-option
 endif
 
@@ -28,24 +28,24 @@ endif
 #COMMON_FLAGS_WARNINGS += -Winit-self
 
 # C specific
-#GCC_FLAGS_WARNINGS += -Wmissing-declarations
-#GCC_FLAGS_WARNINGS += -Wmissing-prototypes
-#GCC_FLAGS_WARNINGS += -Wjump-misses-init
+#CC_FLAGS_WARNINGS += -Wmissing-declarations
+#CC_FLAGS_WARNINGS += -Wmissing-prototypes
+#CC_FLAGS_WARNINGS += -Wjump-misses-init
 
 # c++ specific
-#GXX_FLAGS_WARNINGS += -Wctor-dtor-privacy
-#GXX_FLAGS_WARNINGS += -Wnon-virtual-dtor
-#GXX_FLAGS_WARNINGS += -Wreorder
-#GXX_FLAGS_WARNINGS += -Woverloaded-virtual
+#CXX_FLAGS_WARNINGS += -Wctor-dtor-privacy
+#CXX_FLAGS_WARNINGS += -Wnon-virtual-dtor
+#CXX_FLAGS_WARNINGS += -Wreorder
+#CXX_FLAGS_WARNINGS += -Woverloaded-virtual
 
 
 ifneq ("$(CLANG)","1")
 	# gcc >= 4.5.0 (too many false positives with previous versions)
-	ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.5.0))
+	ifneq (0,$(shell expr $(CC_VERSION) \>= 4.5.0))
 		COMMON_FLAGS_WARNINGS += -Wunreachable-code
 	endif
 	# gcc >= 4.5.2
-	ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.5.2))
+	ifneq (0,$(shell expr $(CC_VERSION) \>= 4.5.2))
 		COMMON_FLAGS_WARNINGS += -Wlogical-op
 	endif
 endif
@@ -56,12 +56,12 @@ ifeq ("$(W)","1")
 	COMMON_FLAGS_WARNINGS += -Wswitch-enum
 	COMMON_FLAGS_WARNINGS += -Wcast-qual
 	# gcc >= 4.4.0
-	ifneq (0,$(shell expr $(GCC_VERSION) \>= 4.4.0))
+	ifneq (0,$(shell expr $(CC_VERSION) \>= 4.4.0))
 		COMMON_FLAGS_WARNINGS += -Wframe-larger-than=1024
 	endif
 endif
 
 # Add common flags to specific flags
-GCC_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
-GXX_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
+CC_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
+CXX_FLAGS_WARNINGS += $(COMMON_FLAGS_WARNINGS)
 

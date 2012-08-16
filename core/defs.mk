@@ -337,9 +337,9 @@ define transform-h-to-gch
 @mkdir -p $(dir $@)
 @echo "Precompile: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
-$(Q)$(CCACHE) $(GXX) \
+$(Q)$(CCACHE) $(CXX) \
 	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
-	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
 	$(call path-from-top,$<)
@@ -353,10 +353,10 @@ define transform-cpp-to-o
 @mkdir -p $(dir $@)
 @echo "$(DISPLAY_ARM_MODE)C++: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
-$(Q)$(CCACHE) $(GXX) \
+$(Q)$(CCACHE) $(CXX) \
 	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	-c -MMD -MP -g -o $@ \
 	$(call path-from-top,$<)
@@ -370,10 +370,10 @@ define transform-c-to-o
 @echo "$(DISPLAY_ARM_MODE)C: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
-$(Q)$(CCACHE) $(GCC) \
+$(Q)$(CCACHE) $(CC) \
 	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -g -o $@ \
 	$(call path-from-top,$<)
@@ -387,10 +387,10 @@ define transform-s-to-o
 @ echo "ASM: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
-$(Q)$(CCACHE) $(GCC) \
+$(Q)$(CCACHE) $(CC) \
 	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -g -o $@ \
 	$(call path-from-top,$<)
@@ -419,7 +419,7 @@ define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 @echo "SharedLib: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
-$(Q)$(GXX) \
+$(Q)$(CXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-shared \
@@ -446,7 +446,7 @@ define transform-o-to-executable
 @mkdir -p $(dir $@)
 @echo "Executable: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
-$(Q)$(GXX) \
+$(Q)$(CXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \

@@ -53,7 +53,10 @@ ifeq ("$(TARGET_OS)","Windows")
 	ifeq ("$(STATIC)","1")
 		TARGET_GLOBAL_LDFLAGS += -Wl,-Bstatic
 	endif
-	
+	# remove CLANG if defined
+	ifeq ("$(CLANG)","1")
+        $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
+	endif
 else ifeq ("$(TARGET_OS)","Android")
 	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
 	                         -fpic -ffunction-sections -funwind-tables -fstack-protector \
@@ -61,6 +64,10 @@ else ifeq ("$(TARGET_OS)","Android")
 	                         -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 
 	TARGET_GLOBAL_CPPFLAGS += -fno-rtti -Wa,--noexecstack
 	TARGET_GLOBAL_LDFLAGS += 
+	# remove CLANG if defined ==> TODO : Support it later ...
+	ifeq ("$(CLANG)","1")
+        $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
+	endif
 endif
 
 # define the target OS type for the compilation system ...
@@ -98,7 +105,7 @@ endif
 
 # Architecture
 #ifndef TARGET_ARCH
-#  ifneq ("$(shell $(GCC) -dumpmachine | grep 64)","")
+#  ifneq ("$(shell $(CC) -dumpmachine | grep 64)","")
 #    TARGET_ARCH := AMD64
 #  else
 #    TARGET_ARCH := X86
@@ -113,28 +120,29 @@ endif
 #  TARGET_GLOBAL_CFLAGS += -m32
 #endif
 
-###############################################################################
-## Variables based on DEBUG/STATIC.
-###############################################################################
-
-#ifeq ("$(DEBUG)","0")
-#  TARGET_GLOBAL_CFLAGS += -O2 -g -DNDEBUG
-#  TARGET_OUT_INTERMEDIATES := $(TOP_DIR)/build_gcc$(DIR_SUFFIX)/release
-#  TARGET_OUT := $(TOP_DIR)/out_gcc$(DIR_SUFFIX)/release
-#else
-#  TARGET_GLOBAL_CFLAGS += -O0 -g -DDEBUG -D_DEBUG
-#  TARGET_OUT_INTERMEDIATES := $(TOP_DIR)/build_gcc$(DIR_SUFFIX)/debug
-#  TARGET_OUT := $(TOP_DIR)/out_gcc$(DIR_SUFFIX)/debug
-#endif
 
 ###############################################################################
-## Determine gcc path and version.
+## Determine CC path and version. and check if installed ...
 ###############################################################################
 
-GCC_PATH := $(shell which $(GCC))
+CC_PATH := $(shell which $(CC))
+
+ifeq ("$(CC_PATH)","")
+    ifeq ("$(TARGET_OS)","Windows")
+        $(error Compilator does not exist : $(CC) ==> if not installed ... "apt-get install mingw32")
+    else ifeq ("$(TARGET_OS)","Android")
+        $(error Compilator does not exist : $(CC) ==> add and define the android NDK "http://developer.android.com/tools/sdk/ndk/index.html")
+    else
+        ifneq ("$(CLANG)","1")
+            $(error Compilator does not exist : $(CC) ==> if not installed ... "apt-get install gcc g++")
+        else
+            $(error Compilator does not exist : $(CC) ==> if not installed ... "apt-get install clang")
+        endif
+    endif
+endif
 
 ifneq ("$(CLANG)","1")
-GCC_VERSION := $(shell $(GCC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
+CC_VERSION := $(shell $(CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
 else
-GCC_VERSION := $(shell $(GCC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]-[0-9]\).*/\1/")
+CC_VERSION := $(shell $(CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]-[0-9]\).*/\1/")
 endif

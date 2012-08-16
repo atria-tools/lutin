@@ -13,6 +13,9 @@
 # Make sure SHELL is correctly set
 SHELL := /bin/bash
 
+# This is the default target. It must be the first declared target.
+all:
+
 # Turns off suffix rules built into make
 .SUFFIXES:
 
@@ -28,31 +31,28 @@ ifeq ("$(V)","0")
 endif
 
 # Tools for host
-HOST_GCC ?= gcc
-HOST_GXX ?= g++
+HOST_CC ?= gcc
+HOST_CXX ?= g++
 HOST_AR ?= ar
 HOST_LD ?= ld
 HOST_STRIP ?= strip
 
 # Tools for target
 ifneq ("$(CLANG)","1")
-	GCC ?= $(CROSS)gcc
-	GXX ?= $(CROSS)g++
+	CC := $(CROSS)gcc
+	CXX := $(CROSS)g++
 else
-	GCC ?= $(CROSS)clang
-	GXX ?= $(CROSS)clang++
+	CC := $(CROSS)clang
+	CXX := $(CROSS)clang++
 endif
-AR ?= $(CROSS)ar
-LD ?= $(CROSS)ld
-AS ?= $(CROSS)as
-NM ?= $(CROSS)nm
-STRIP ?= $(CROSS)strip
-RANLIB ?= $(CROSS)ranlib
-DLLTOOL ?= $(CROSS)dlltool
-OBJDUMP ?= $(CROSS)objdump
+AR := $(CROSS)ar
+LD := $(CROSS)ld
+AS := $(CROSS)as
+NM := $(CROSS)nm
+STRIP := $(CROSS)strip
+RANLIB := $(CROSS)ranlib
+DLLTOOL := $(CROSS)dlltool
 
-# This is the default target. It must be the first declared target.
-all:
 
 # Target global variables
 TARGET_GLOBAL_C_INCLUDES ?=
@@ -119,20 +119,11 @@ else
 endif
 
 TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
-TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
-TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/bin
+TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
+TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/final
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
-
-#display the properties of the currend building folder ...
-ifeq ("$(V)","1")
-    $(info mydir="$(my-dir)")
-    $(info pwd="$(shell pwd)")
-    $(info TOP_DIR="$(TOP_DIR)")
-    $(info USER_PACKAGES="$(USER_PACKAGES)")
-    $(info list packet=$(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk))
-endif
 
 # Get the list of all makefiles available and include them this find the TARGET_OS.mk and the Generic.mk
 _moduleFolder  = $(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk)
@@ -213,6 +204,6 @@ $(info TARGET_ARCH: $(TARGET_ARCH))
 $(info TARGET_OUT_BUILD: $(TARGET_OUT_BUILD))
 $(info TARGET_OUT_STAGING: $(TARGET_OUT_STAGING))
 $(info TARGET_OUT_FINAL: $(TARGET_OUT_FINAL))
-$(info GCC_PATH: $(GCC_PATH))
-$(info GCC_VERSION: $(GCC_VERSION))
+$(info CC_PATH: $(CC_PATH))
+$(info CC_VERSION: $(CC_VERSION))
 $(info ----------------------------------------------------------------------)
