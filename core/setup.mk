@@ -14,6 +14,52 @@ ifneq ("$(words $(shell pwd))","1")
 endif
 
 ###############################################################################
+## Tools for target.
+###############################################################################
+
+ifneq ("$(CLANG)","1")
+	TARGET_CC := $(TARGET_CROSS)gcc
+	TARGET_CXX := $(TARGET_CROSS)g++
+else
+	TARGET_CC := $(TARGET_CROSS)clang
+	TARGET_CXX := $(TARGET_CROSS)clang++
+endif
+TARGET_AR := $(TARGET_CROSS)ar
+TARGET_LD := $(TARGET_CROSS)ld
+TARGET_NM := $(TARGET_CROSS)nm
+TARGET_STRIP := $(TARGET_CROSS)strip
+TARGET_STRIP := $(TARGET_CROSS)strip
+TARGET_RANLIB := $(TARGET_CROSS)ranlib
+TARGET_DLLTOOL := $(TARGET_CROSS)dlltool
+
+###############################################################################
+## Tools for host.
+###############################################################################
+HOST_GCC ?= gcc
+HOST_GXX ?= g++
+HOST_AR ?= ar
+HOST_LD ?= ld
+HOST_NM ?= nm
+HOST_STRIP ?= strip
+
+###############################################################################
+# Target global variables.
+###############################################################################
+TARGET_GLOBAL_C_INCLUDES ?=
+TARGET_GLOBAL_CFLAGS ?=
+TARGET_GLOBAL_CPPFLAGS ?=
+TARGET_GLOBAL_ARFLAGS ?= rcs
+TARGET_GLOBAL_LDFLAGS ?=
+TARGET_GLOBAL_LDFLAGS_SHARED ?=
+TARGET_GLOBAL_LDLIBS ?=
+TARGET_GLOBAL_LDLIBS_SHARED ?=
+TARGET_GLOBAL_CFLAGS_ARM ?=
+TARGET_GLOBAL_CFLAGS_THUMB ?=
+
+TARGET_PCH_FLAGS ?=
+TARGET_DEFAULT_ARM_MODE ?= THUMB
+
+###############################################################################
 ## Host/Target OS.
 ###############################################################################
 
@@ -36,11 +82,9 @@ endif
 # Exe/dll suffix under mingw
 TARGET_STATIC_LIB_SUFFIX := .a
 ifeq ("$(TARGET_OS)","Windows")
-	DIR_SUFFIX := _mingw32
 	TARGET_EXE_SUFFIX := .exe
 	TARGET_SHARED_LIB_SUFFIX := .dll
 else
-	DIR_SUFFIX :=
 	TARGET_EXE_SUFFIX :=
 	TARGET_SHARED_LIB_SUFFIX := .so
 endif
@@ -105,7 +149,7 @@ endif
 
 # Architecture
 #ifndef TARGET_ARCH
-#  ifneq ("$(shell $(CC) -dumpmachine | grep 64)","")
+#  ifneq ("$(shell $(TARGET_CC) -dumpmachine | grep 64)","")
 #    TARGET_ARCH := AMD64
 #  else
 #    TARGET_ARCH := X86
@@ -120,29 +164,33 @@ endif
 #  TARGET_GLOBAL_CFLAGS += -m32
 #endif
 
+TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/lib
+TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
+TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
+TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
 
 ###############################################################################
 ## Determine CC path and version. and check if installed ...
 ###############################################################################
 
-CC_PATH := $(shell which $(CC))
+TARGET_CC_PATH := $(shell which $(CC))
 
-ifeq ("$(CC_PATH)","")
+ifeq ("$(TARGET_CC_PATH)","")
     ifeq ("$(TARGET_OS)","Windows")
-        $(error Compilator does not exist : $(CC) ==> if not installed ... "apt-get install mingw32")
+        $(error Compilator does not exist : $(TARGET_CC) ==> if not installed ... "apt-get install mingw32")
     else ifeq ("$(TARGET_OS)","Android")
-        $(error Compilator does not exist : $(CC) ==> add and define the android NDK "http://developer.android.com/tools/sdk/ndk/index.html")
+        $(error Compilator does not exist : $(TARGET_CC) ==> add and define the android NDK "http://developer.android.com/tools/sdk/ndk/index.html")
     else
         ifneq ("$(CLANG)","1")
-            $(error Compilator does not exist : $(CC) ==> if not installed ... "apt-get install gcc g++")
+            $(error Compilator does not exist : $(TARGET_CC) ==> if not installed ... "apt-get install gcc g++")
         else
-            $(error Compilator does not exist : $(CC) ==> if not installed ... "apt-get install clang")
+            $(error Compilator does not exist : $(TARGET_CC) ==> if not installed ... "apt-get install clang")
         endif
     endif
 endif
 
 ifneq ("$(CLANG)","1")
-CC_VERSION := $(shell $(CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
+TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
 else
-CC_VERSION := $(shell $(CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]-[0-9]\).*/\1/")
+TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]-[0-9]\).*/\1/")
 endif

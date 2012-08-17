@@ -1,28 +1,13 @@
 ###############################################################################
-## @file rules.mk
+## @file binary-rules.mk
 ## @author Y.M. Morgan
 ## @date 2011/05/14
 ##
 ## Generate rules for building an executable or library.
 ###############################################################################
 
-# Make sure LOCAL_MODULE is defined and not empty
-LOCAL_MODULE := $(strip $(LOCAL_MODULE))
-ifeq ("$(LOCAL_MODULE)","")
-  $(error $(LOCAL_PATH): LOCAL_MODULE is not defined)
-endif
-
 # Intermediate/Build directory
 build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
-
-# Full path to build module
-LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
-
-# Full path to staging module
-LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
-
-# Assemble the list of targets to create PRIVATE_ variables for.
-LOCAL_TARGETS += $(LOCAL_BUILD_MODULE)
 
 # Prepend some directories in include list
 LOCAL_C_INCLUDES := $(build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
@@ -93,12 +78,12 @@ all_objects := \
 	$(cxx_objects) \
 	$(c_objects) \
 	$(s_objects) \
-	$(S_objects) \
+	$(S_objects)
 
 # Get all static libraries this module depends on
-LOCAL_STATIC_LIBRARIES := \
+LOCAL_STATIC_LIBRARIES += \
 	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),STATIC_LIBRARIES)
-LOCAL_WHOLE_STATIC_LIBRARIES := \
+LOCAL_WHOLE_STATIC_LIBRARIES += \
 	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),WHOLE_STATIC_LIBRARIES)
 
 # Also get shared libraries used by static libraries
@@ -117,7 +102,6 @@ all_static_libraries := \
 all_whole_static_libraries := \
 	$(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES), \
 		$(call module-get-staging-filename,$(lib)))
-
 all_external_libraries := \
 	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
 		$(TARGET_OUT_BUILD)/$(lib)/$(lib).done)
@@ -127,7 +111,7 @@ all_libraries := \
 	$(all_shared_libraries) \
 	$(all_static_libraries) \
 	$(all_whole_static_libraries) \
-	$(all_external_libraries) \
+	$(all_external_libraries)
 
 ###############################################################################
 ## Import of dependencies.
@@ -152,8 +136,6 @@ LOCAL_CPPFLAGS   := $(strip $(imported_CPPFLAGS) $(LOCAL_EXPORT_CPPFLAGS) $(LOCA
 # The imported/exported include directories are appended to their LOCAL_XXX value
 # (this allows the module to override them)
 LOCAL_C_INCLUDES := $(sort $(strip $(subst -I-I,-I,$(addprefix -I,$(LOCAL_C_INCLUDES) $(LOCAL_EXPORT_C_INCLUDES) $(imported_C_INCLUDES)))))
-#$(info LOCAL_C_INCLUDES=$(LOCAL_C_INCLUDES))
-#$(info -----)
 
 # Similarly, you want the imported/exported flags to appear _after_ the LOCAL_LDLIBS
 # due to the way Unix linkers work (depending libraries must appear before
@@ -179,6 +161,9 @@ all_prerequisites += $(all_autoconf)
 
 # User makefile is also a prerequisite
 all_prerequisites += $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+
+# External libraries are also prerequisites
+all_prerequisites += $(all_external_libraries)
 
 # Notify that we build with dependencies
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
@@ -217,32 +202,19 @@ $(s_objects): $(build_dir)/%.o: $(LOCAL_PATH)/%.s
 endif
 
 # S files
-# There are dependency files for asm code...
+# There is dependency files for asm code...
 ifneq ("$(strip $(S_objects))","")
 $(S_objects): $(build_dir)/%.o: $(LOCAL_PATH)/%.S
 	$(transform-s-to-o)
 -include $(S_objects:%.o=%.d)
 endif
 
-# clean- targets
-cleantarget := clean-$(LOCAL_MODULE)
-$(cleantarget) : PRIVATE_MODULE := $(LOCAL_MODULE)
-$(cleantarget) : PRIVATE_CLEAN_FILES := \
-	$(LOCAL_BUILD_MODULE) \
-	$(LOCAL_STAGING_MODULE) \
-	$(build_dir)
-$(cleantarget)::
-	@echo "Clean: $(PRIVATE_MODULE)"
-	$(Q)rm -rf $(PRIVATE_CLEAN_FILES)
+# Additionnal clean
+clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
+clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_DIRS += $(build_dir)
 
-## Provide a short-hand for building this module.
-.PHONY: $(LOCAL_MODULE)
+# Additional module dependencies
 $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE) $(LOCAL_STAGING_MODULE)
-
-# Make sure external libraries are built first
-# Do NOT force rebuild at each check (order prerequisite)
-# TODO : check why order prerequisite
-#$(all_objects): | $(external_libraries)
 
 # Make sure all prerequisites files are generated first
 ifneq ("$(all_prerequisites)","")
@@ -284,14 +256,10 @@ $(gch_file): $(LOCAL_PATH)/$(LOCAL_PRECOMPILED_FILE)
 	$(transform-h-to-gch)
 -include $(gch_file:%.gch=%.d)
 
-# Make sure external libraries are built first (order prerequisite)
-# TODO : check why order prerequisite
-#$(gch_file): | $(external_libraries)
-
 endif
 
 ###############################################################################
-# Rule-specific variable definitions.
+## Rule-specific variable definitions.
 ###############################################################################
 
 $(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
@@ -308,5 +276,4 @@ $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_EXTERNAL_LIBRARIES := $(all_external_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
-
 

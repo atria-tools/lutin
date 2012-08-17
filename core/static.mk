@@ -7,10 +7,13 @@
 ###############################################################################
 
 LOCAL_MODULE_CLASS := STATIC_LIBRARY
+
+ifeq ("$(LOCAL_DESTDIR)","")
 LOCAL_DESTDIR := usr/lib
+endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_STATIC_LIB_SUFFIX)
 endif
 
-$(call module-add,$(LOCAL_MODULE))
+$(local-add-module)

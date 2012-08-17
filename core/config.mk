@@ -11,10 +11,11 @@ CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/conf)
 QCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/qconf)
 
 # Directory where original configurations are stored
-CONFIG_ORIG_DIR := $(TOP_DIR)/config-ymm
+CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)
 
 # File where global configuration is stored
 CONFIG_GLOBAL_FILE := $(CONFIG_ORIG_DIR)/global.config
+-include $(CONFIG_GLOBAL_FILE)
 
 ###############################################################################
 ## Begin conf/qconf by copying configuration file to a temp .config file.

@@ -5,7 +5,7 @@ PROJECT_PACKAGE=$(PROJECT_NAME)package
 USER_PACKAGES += $(EWOL_FOLDER)/Sources/
 TARGET_OS = Android
 TARGET_ARCH = ARM
-CROSS = $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
+TARGET_CROSS = $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
 
 
 #Add the basic element abstraction of ewol lib

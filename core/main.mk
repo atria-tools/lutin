@@ -30,44 +30,6 @@ ifeq ("$(V)","0")
   Q := @
 endif
 
-# Tools for host
-HOST_CC ?= gcc
-HOST_CXX ?= g++
-HOST_AR ?= ar
-HOST_LD ?= ld
-HOST_STRIP ?= strip
-
-# Tools for target
-ifneq ("$(CLANG)","1")
-	CC := $(CROSS)gcc
-	CXX := $(CROSS)g++
-else
-	CC := $(CROSS)clang
-	CXX := $(CROSS)clang++
-endif
-AR := $(CROSS)ar
-LD := $(CROSS)ld
-AS := $(CROSS)as
-NM := $(CROSS)nm
-STRIP := $(CROSS)strip
-RANLIB := $(CROSS)ranlib
-DLLTOOL := $(CROSS)dlltool
-
-
-# Target global variables
-TARGET_GLOBAL_C_INCLUDES ?=
-TARGET_GLOBAL_CFLAGS ?=
-TARGET_GLOBAL_CPPFLAGS ?=
-TARGET_GLOBAL_RCFLAGS ?=
-TARGET_GLOBAL_ARFLAGS ?= rcs
-TARGET_GLOBAL_LDFLAGS ?=
-TARGET_GLOBAL_LDFLAGS_SHARED ?=
-TARGET_GLOBAL_LDLIBS ?=
-TARGET_GLOBAL_LDLIBS_SHARED ?=
-TARGET_PCH_FLAGS ?=
-TARGET_DEFAULT_ARM_MODE ?= THUMB
-TARGET_GLOBAL_CFLAGS_ARM ?=
-TARGET_GLOBAL_CFLAGS_THUMB ?=
 
 ###############################################################################
 ## The folowing 2 macros can NOT be put in defs.mk as it will be included
@@ -107,7 +69,8 @@ CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
 BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
 BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
 BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
-RULES := $(BUILD_SYSTEM)/rules.mk
+BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
+BUILD_RULES := $(BUILD_SYSTEM)/rules.mk
 
 ###############################################################################
 ## Makefile scan and includes.
@@ -144,7 +107,7 @@ $(foreach __makefile,$(_tmpDirectory), \
     ) \
 )
 ifeq ("$(V)","1")
-	$(info makefiles="$(makefiles)")
+    $(info makefiles="$(makefiles)")
 endif
 # import all the makefiles
 include $(makefiles)
@@ -155,9 +118,16 @@ include $(makefiles)
 ###############################################################################
 
 # Recompute all dependencies between modules
-$(call modules-compute-dependencies)
+$(call modules-compute-depends)
 
-# Now, really build the modules, the second pass allows to deal with exported values
+# Check dependencies
+$(call modules-check-depends)
+
+# Check variables of modules
+$(call modules-check-variables)
+
+# Now, really generate rules for modules.
+# This second pass allows to deal with exported values.
 $(foreach __mod,$(__modules), \
     $(eval LOCAL_MODULE := $(__mod)) \
     $(eval include $(BUILD_SYSTEM)/module.mk) \
@@ -182,17 +152,36 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 # Main rules.
 ###############################################################################
 
+# All modules
+ALL_MODULES := \
+	$(foreach __mod,$(__modules),$(__mod))
+
+# All module to actually build
+ALL_BUILD_MODULES := \
+	$(foreach __mod,$(__modules), \
+		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
+
+# TODO : Set ALL_BUILD_MODULES ==> find the end point module (SHARED/BINARY)
 .PHONY: all
-all: $(foreach __mod,$(__modules),$(__mod)) $(AUTOCONF_MERGE_FILE)
+all: $(ALL_MODULES) $(AUTOCONF_MERGE_FILE)
 
 .PHONY: clean
-clean: $(foreach __mod,$(__modules),clean-$(__mod))
+clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
 
 # Dump the module database for debuging the build system
 .PHONY: dump
 dump:
 	$(call modules-dump-database)
+
+# Dump the module database for debuging the build system
+.PHONY: dump-depends
+dump-depends:
+	$(call modules-dump-database-depends)
+
+# Dummy target to check internal variables
+.PHONY: check
+check:
 
 ###############################################################################
 # Display configuration.
@@ -204,6 +193,6 @@ $(info TARGET_ARCH: $(TARGET_ARCH))
 $(info TARGET_OUT_BUILD: $(TARGET_OUT_BUILD))
 $(info TARGET_OUT_STAGING: $(TARGET_OUT_STAGING))
 $(info TARGET_OUT_FINAL: $(TARGET_OUT_FINAL))
-$(info CC_PATH: $(CC_PATH))
-$(info CC_VERSION: $(CC_VERSION))
+$(info TARGET_CC_PATH: $(TARGET_CC_PATH))
+$(info TARGET_CC_VERSION: $(TARGET_CC_VERSION))
 $(info ----------------------------------------------------------------------)

@@ -1,19 +1,15 @@
 ###############################################################################
-## @file shared.mk
+## @file prebuilt.mk
 ## @author Y.M. Morgan
-## @date 2011/05/14
+## @date 2012/08/08
 ##
-## Build a shared library.
+## Register a prebuilt module.
 ###############################################################################
 
-LOCAL_MODULE_CLASS := SHARED_LIBRARY
-
-ifeq ("$(LOCAL_DESTDIR)","")
-LOCAL_DESTDIR := usr/lib
-endif
+LOCAL_MODULE_CLASS := PREBUILT
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
-LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_SHARED_LIB_SUFFIX)
+LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 endif
 
 $(local-add-module)
