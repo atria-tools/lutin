@@ -10,7 +10,7 @@ PLATFORM?=$(DEFAULT_PLATFORM)
 
 PROJECT_PATH=$(shell pwd)
 
-PROJECT_MODULE=$(PROJECT_PATH)/../
+PROJECT_MODULE=$(shell realpath $(PROJECT_PATH)/../)
 
 ifeq ($(PLATFORM), Linux)
     PROJECT_NDK?=$(realpath $(PROJECT_MODULE)/ewol/)

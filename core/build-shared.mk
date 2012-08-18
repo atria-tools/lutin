@@ -1,19 +1,20 @@
 ###############################################################################
-## @file static.mk
-## @author Y.M. Morgan
-## @date 2011/05/14
+## @file shared.mk
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project EWOL
 ##
-## Build a static library.
+## Register a shared library (can be build).
 ###############################################################################
 
-LOCAL_MODULE_CLASS := STATIC_LIBRARY
+LOCAL_MODULE_CLASS := SHARED_LIBRARY
 
 ifeq ("$(LOCAL_DESTDIR)","")
 LOCAL_DESTDIR := usr/lib
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
-LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_STATIC_LIB_SUFFIX)
+LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_SHARED_LIB_SUFFIX)
 endif
 
 $(local-add-module)

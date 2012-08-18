@@ -1,7 +1,8 @@
 ###############################################################################
 ## @file main.mk
-## @author Y.M. Morgan
-## @date 2011/05/14
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project EWOL
 ##
 ## Main Makefile.
 ###############################################################################
@@ -53,23 +54,22 @@ TOP_DIR := $(shell pwd)
 BUILD_SYSTEM := $(call my-dir)
 
 # Setup configuration
+include $(BUILD_SYSTEM)/setup-host.mk
+include $(BUILD_SYSTEM)/setup-target.mk
 include $(BUILD_SYSTEM)/setup.mk
-
 # Setup macros definitions
 include $(BUILD_SYSTEM)/defs.mk
-
 # Setup warnings flags
 include $(BUILD_SYSTEM)/warnings.mk
-
 # Load configuration
 include $(BUILD_SYSTEM)/config.mk
 
 # Names of makefiles that can be included by user Makefiles
 CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
-BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
-BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
-BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
-BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
+BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/build-static.mk
+BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/build-shared.mk
+BUILD_EXECUTABLE := $(BUILD_SYSTEM)/build-executable.mk
+BUILD_PREBUILT := $(BUILD_SYSTEM)/build-prebuilt.mk
 BUILD_RULES := $(BUILD_SYSTEM)/rules.mk
 
 ###############################################################################

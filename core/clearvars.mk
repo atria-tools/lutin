@@ -1,7 +1,8 @@
 ###############################################################################
 ## @file clearvars.mk
-## @author Y.M. Morgan
-## @date 2011/05/14
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project EWOL
 ##
 ## Clear out values of all variables used by rule templates.
 ###############################################################################

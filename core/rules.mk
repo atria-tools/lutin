@@ -1,7 +1,8 @@
 ###############################################################################
-## @file binary-rules.mk
-## @author Y.M. Morgan
-## @date 2011/05/14
+## @file rules.mk
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project EWOL
 ##
 ## Generate rules for building an executable or library.
 ###############################################################################
