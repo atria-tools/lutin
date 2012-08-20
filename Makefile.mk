@@ -15,7 +15,7 @@ PROJECT_MODULE=$(shell realpath $(PROJECT_PATH)/../)
 ifeq ($(PLATFORM), Linux)
     PROJECT_NDK?=$(realpath $(PROJECT_MODULE)/ewol/)
 else ifeq ($(PLATFORM), MacOs)
-    
+    TARGET_OS=MacOs
 else ifeq ($(PLATFORM), IOs)
     
 else ifeq ($(PLATFORM), Windows)
