@@ -426,23 +426,34 @@ module-get-all-dependencies = \
 
 # Recursively get dependency of a modules
 __modules-get-closure = \
-	$(eval __closure_deps := $(empty)) \
-	$(eval __closure_wq := $(strip $1)) \
-	$(eval __closure_field := $(strip $2)) \
-	$(if $(__closure_wq), $(call __modules-closure)) \
-	$(strip $(__closure_deps))
+		$(eval __closure_deps_uniq := $(empty)) \
+		$(eval __closure_deps_full := $(empty)) \
+		$(eval __closure_wq := $(strip $1)) \
+		$(eval __closure_field := $(strip $2)) \
+		$(if $(__closure_wq), $(call __modules-closure)) \
+		$(strip $(call __modules-closure-finish,$(filter-out $1,$(__closure_deps_full))))
 
 # Used internally by modules-get-all-dependencies. Note the tricky use of
 # conditional recursion to work around the fact that the GNU Make language does
 # not have any conditional looping construct like 'while'.
 __modules-closure = \
-	$(eval __closure_mod := $(call first,$(__closure_wq))) \
-	$(eval __closure_wq  := $(call rest,$(__closure_wq))) \
-	$(eval __closure_val := $(__modules.$(__closure_mod).$(__closure_field))) \
-	$(eval __closure_new := $(filter-out $(__closure_deps),$(__closure_val))) \
-	$(eval __closure_deps += $(__closure_new)) \
-	$(eval __closure_wq  := $(strip $(__closure_wq) $(__closure_new))) \
-	$(if $(__closure_wq),$(call __modules-closure))
+		$(eval __closure_mod := $(call first,$(__closure_wq))) \
+		$(eval __closure_wq  := $(call rest,$(__closure_wq))) \
+		$(eval __closure_val := $(__modules.$(__closure_mod).$(__closure_field))) \
+		$(eval __closure_new := $(filter-out $(__closure_deps_uniq),$(__closure_val))) \
+		$(eval __closure_deps_uniq += $(__closure_new)) \
+		$(eval __closure_deps_full += $(__closure_mod) $(__closure_val)) \
+		$(eval __closure_wq  := $(strip $(__closure_wq) $(__closure_new))) \
+		$(if $(__closure_wq),$(call __modules-closure))
+
+# Finish dependency list by removing duplicates (keeping the last occurence)
+__modules-closure-finish = $(strip \
+		$(if $1, \
+			$(eval __f := $(call first,$1)) \
+			$(eval __r := $(call rest,$1)) \
+			$(if $(filter $(__f),$(__r)),$(empty),$(__f)) \
+			$(call __modules-closure-finish,$(__r)) \
+		))
 
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
