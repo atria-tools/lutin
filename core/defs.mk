@@ -514,11 +514,12 @@ define transform-h-to-gch
 @echo "Precompile: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
+	-o $@ \
 	$(TARGET_GLOBAL_C_INCLUDES) \
 	$(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
-	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
+	$(TARGET_PCH_FLAGS) -MMD -MP \
 	$(call path-from-top,$<)
 endef
 
@@ -531,12 +532,13 @@ define transform-cpp-to-o
 @echo "$(DISPLAY_ARM_MODE)C++: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
+	-o $@ \
 	$(TARGET_GLOBAL_C_INCLUDES) \
 	$(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
-	-c -MMD -MP -g -o $@ \
+	-c -MMD -MP -g \
 	$(call path-from-top,$<)
 endef
 
@@ -549,12 +551,13 @@ define transform-c-to-o
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
+	-o $@ \
 	$(TARGET_GLOBAL_C_INCLUDES) \
 	$(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
-	-c -MMD -MP -g -o $@ \
+	-c -MMD -MP -g \
 	$(call path-from-top,$<)
 endef
 
@@ -567,12 +570,13 @@ define transform-s-to-o
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
+	-o $@ \
 	$(TARGET_GLOBAL_C_INCLUDES) \
 	$(PRIVATE_C_INCLUDES) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
-	-c -MMD -MP -g -o $@ \
+	-c -MMD -MP -g \
 	$(call path-from-top,$<)
 endef
 
@@ -600,6 +604,7 @@ define transform-o-to-shared-lib
 @echo "SharedLib: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
 $(Q)$(TARGET_CXX) \
+	-o $@ \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-shared \
@@ -613,7 +618,6 @@ $(Q)$(TARGET_CXX) \
 	-Wl,--as-needed \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
-	-o $@ \
 	$(PRIVATE_LDLIBS) \
 	$(TARGET_GLOBAL_LDLIBS_SHARED)
 endef
@@ -628,6 +632,7 @@ define transform-o-to-executable
 $(call check-pwd-is-top-dir)
 @# TODO : Set LD ...
 $(Q)$(TARGET_CXX) \
+	-o $@ \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
@@ -640,7 +645,6 @@ $(Q)$(TARGET_CXX) \
 	-Wl,--as-needed \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
-	-o $@ \
 	$(PRIVATE_LDLIBS) \
 	$(TARGET_GLOBAL_LDLIBS)
 endef

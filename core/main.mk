@@ -23,8 +23,12 @@ all:
 # Overridable settings
 V := 0
 W := 0
+# debug mode of the software
 DEBUG := 0
+# compilation done with Clang system instead of gcc
 CLANG := 0
+# for openGL : enable the open GL ES 2 or the Shader system for normal system
+SHADER := 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
@@ -80,10 +84,14 @@ ifeq ("$(DEBUG)","1")
 else
 	BUILD_DIRECTORY_MODE := release
 endif
-
-TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
-TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
-TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/final
+ifeq ("$(SHADER)","1")
+	BUILD_DIRECTORY_SHADER := ogl2
+else
+	BUILD_DIRECTORY_SHADER := ogl1
+endif
+TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/$(BUILD_DIRECTORY_SHADER)/obj
+TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/$(BUILD_DIRECTORY_SHADER)/staging
+TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/$(BUILD_DIRECTORY_SHADER)/final
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
