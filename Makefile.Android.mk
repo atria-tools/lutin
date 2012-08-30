@@ -46,7 +46,8 @@ final : all
 	@# copy android specific data :
 	@cp -r os-Android/* $(FINAL_FOLDER_ANT)/
 	@# copy user data
-	@cp -r share $(FINAL_FOLDER_ANT)/assets
+	@mkdir -p $(FINAL_FOLDER_ANT)/assets/
+	@cp -r share/* $(FINAL_FOLDER_ANT)/assets/
 	@mkdir -p $(FINAL_FOLDER_ANT)/libs/armeabi/
 	@# note : this change the lib name ...
 	@cp $(TARGET_OUT_STAGING)/usr/lib/$(PROJECT_PACKAGE).so $(FINAL_FOLDER_ANT)/libs/armeabi/lib$(PROJECT_PACKAGE).so
