@@ -143,13 +143,14 @@ LOCAL_C_INCLUDES := $(sort $(strip $(subst -I-I,-I,$(addprefix -I,$(LOCAL_C_INCL
 # dependees on final link command).
 LOCAL_LDLIBS     := $(strip $(LOCAL_LDLIBS) $(LOCAL_EXPORT_LDLIBS) $(imported_LDLIBS))
 
-# Get all autoconf files that we depend on, don't forget to add ourself
-all_autoconf := \
-	$(call module-get-listed-autoconf,$(all_depends)) \
-	$(call module-get-autoconf,$(LOCAL_MODULE))
+# Get autoconf files only if we depend oursef or dependent librairies does ...
+#TODO
+has_autoconf := $(AUTOCONF_FILE)
+#	$(call module-get-listed-autoconf,$(all_depends)) \
+#	$(call module-get-autoconf,$(LOCAL_MODULE))
 
 # Force their inclusion (space after -include and before comma is important)
-LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
+LOCAL_CFLAGS += $(addprefix -include ,$(has_autoconf))
 
 # List of all prerequisites (ours + dependencies)
 all_prerequisites := \
@@ -158,7 +159,7 @@ all_prerequisites := \
 	$(imported_PREREQUISITES)
 
 # All autoconf files are prerequisites
-all_prerequisites += $(all_autoconf)
+all_prerequisites += $(has_autoconf)
 
 # User makefile is also a prerequisite
 all_prerequisites += $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
@@ -220,19 +221,6 @@ $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE) $(LOCAL_STAGING_MODULE)
 # Make sure all prerequisites files are generated first
 ifneq ("$(all_prerequisites)","")
 $(all_objects): $(all_prerequisites)
-endif
-
-###############################################################################
-## autoconf.h file generation.
-###############################################################################
-
-autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
-ifneq ("$(autoconf_file)","")
-
-# autoconf.h file depends on module config
-$(autoconf_file): $(call __get_module-config,$(LOCAL_MODULE))
-	@$(call generate-autoconf-file,$<,$@)
-
 endif
 
 ###############################################################################

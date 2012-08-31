@@ -27,8 +27,6 @@ W := 0
 DEBUG := 0
 # compilation done with Clang system instead of gcc
 CLANG := 0
-# for openGL : enable the open GL ES 2 or the Shader system for normal system
-SHADER := 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
@@ -57,6 +55,12 @@ my-dir = $(call fullpath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 TOP_DIR := $(shell pwd)
 BUILD_SYSTEM := $(call my-dir)
 
+ifeq ("$(DEBUG)","1")
+	BUILD_DIRECTORY_MODE := debug
+else
+	BUILD_DIRECTORY_MODE := release
+endif
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup-host.mk
 include $(BUILD_SYSTEM)/setup-target.mk
@@ -79,19 +83,10 @@ BUILD_RULES := $(BUILD_SYSTEM)/rules.mk
 ###############################################################################
 ## Makefile scan and includes.
 ###############################################################################
-ifeq ("$(DEBUG)","1")
-	BUILD_DIRECTORY_MODE := debug
-else
-	BUILD_DIRECTORY_MODE := release
-endif
-ifeq ("$(SHADER)","1")
-	BUILD_DIRECTORY_SHADER := ogl2
-else
-	BUILD_DIRECTORY_SHADER := ogl1
-endif
-TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/$(BUILD_DIRECTORY_SHADER)/obj
-TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/$(BUILD_DIRECTORY_SHADER)/staging
-TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/$(BUILD_DIRECTORY_SHADER)/final
+
+TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
+TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
+TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/final
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
@@ -134,27 +129,25 @@ $(call modules-check-depends)
 # Check variables of modules
 $(call modules-check-variables)
 
+###############################################################################
+# Rule to merge autoconf.h files.
+###############################################################################
+
+# Concatenate all in one
+AUTOCONF_FILE := $(TARGET_OUT_BUILD)/autoconf.h
+$(AUTOCONF_FILE): $(CONFIG_GLOBAL_FILE)
+	@echo "Generating autoconf-merge.h"
+	@mkdir -p $(dir $@)
+	@rm -f $@
+	@$(call generate-autoconf-file,$^,$@)
+
+
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
 $(foreach __mod,$(__modules), \
     $(eval LOCAL_MODULE := $(__mod)) \
     $(eval include $(BUILD_SYSTEM)/module.mk) \
 )
-
-###############################################################################
-# Rule to merge autoconf.h files.
-###############################################################################
-
-# List of all available autoconf.h files
-__autoconf-list := $(foreach __mod,$(__modules),$(call module-get-autoconf,$(__mod)))
-
-# Concatenate all in one
-AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
-$(AUTOCONF_MERGE_FILE): $(__autoconf-list)
-	@echo "Generating autoconf-merge.h"
-	@mkdir -p $(dir $@)
-	@rm -f $@
-	@for f in $^; do cat $$f >> $@; done
 
 ###############################################################################
 # Main rules.
@@ -164,6 +157,8 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 ALL_MODULES := \
 	$(foreach __mod,$(__modules),$(__mod))
 
+#TODO check this ...
+
 # All module to actually build
 ALL_BUILD_MODULES := \
 	$(foreach __mod,$(__modules), \
@@ -171,7 +166,7 @@ ALL_BUILD_MODULES := \
 
 # TODO : Set ALL_BUILD_MODULES ==> find the end point module (SHARED/BINARY)
 .PHONY: all
-all: $(ALL_MODULES) $(AUTOCONF_MERGE_FILE)
+all: $(ALL_MODULES)
 
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))

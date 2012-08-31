@@ -11,12 +11,7 @@
 CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/conf)
 QCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/qconf)
 
-# Directory where original configurations are stored
-CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)
 
-# File where global configuration is stored
-CONFIG_GLOBAL_FILE := $(CONFIG_ORIG_DIR)/global.config
--include $(CONFIG_GLOBAL_FILE)
 
 ###############################################################################
 ## Begin conf/qconf by copying configuration file to a temp .config file.
@@ -47,11 +42,9 @@ __end-conf = \
 __exec-conf = (cd $$(dirname $${__tmpconf}) && $(CONF) $2 $1);
 __exec-qconf = (cd $$(dirname $${__tmpconf}) && $(QCONF) $2 $1);
 
-###############################################################################
-## Get the name of the configuration file of a module.
-## $1 : module name.
-###############################################################################
-__get_module-config = $(CONFIG_ORIG_DIR)/$1.config
+
+#TODO : REMOVED
+#__get_module-config = $(CONFIG_ORIG_DIR)/$1.config
 
 ###############################################################################
 ## Get the list of path to Config.in files of a module.
@@ -82,10 +75,10 @@ __end-diff = \
 	fi;
 
 ###############################################################################
-## Generate Config.in for global configuration.
+## Generate Config configuration for all librairies.
 ## $1 : destination file.
 ###############################################################################
-define __generate-config-in-global
+define __generate-config
 	rm -f $1; \
 	mkdir -p $(dir $1); \
 	touch $1; \
@@ -98,26 +91,20 @@ define __generate-config-in-global
 		echo "  help" >> $1; \
 		echo "    Build $(__mod)" >> $1; \
 	) \
-	echo "endmenu" >> $1;
-endef
-
-###############################################################################
-## Generate Config.in for one module.
-## $1 : destination file.
-## $2 : module name.
-## $3 : list of path to Config.in files.
-###############################################################################
-define __generate-config-in-module
-	rm -f $1; \
-	mkdir -p $(dir $1); \
-	touch $1; \
-	echo "menu $2" >> $1; \
-	$(if $(strip $3), \
-		$(foreach __f,$3, \
-			echo "source $(call fullpath,$(__f))" >> $1; \
-		) \
-	) \
-	echo "endmenu" >> $1;
+	echo "endmenu" >> $1; \
+	$(foreach __mod,$(__modules), \
+		$(eval __build := BUILD_$(call get-define,$(__mod))) \
+		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
+		if [ "$(__files)" != "" ]; then \
+			echo "if $(__build)" >> $1; \
+			echo "    menu $(__mod)" >> $1; \
+			$(foreach __f,$(__files), \
+				echo "        source $(call fullpath,$(__f))" >> $1; \
+			) \
+			echo "    endmenu" >> $1; \
+			echo "endif" >> $1; \
+		fi; \
+	)
 endef
 
 ###############################################################################
@@ -167,43 +154,46 @@ define __check-config
 endef
 
 ###############################################################################
-## Load configuration of a module.
+## Generate autoconf.h file from config file.
+## $1 : input config file.
+## $2 : output autoconf.h file.
+##
+## Remove CONFIG_ prefix.
+## Remove CONFIG_ in commented lines.
+## Put lines begining with '#' between '/*' '*/'.
+## Replace 'key=value' by '#define key value'.
+## Replace leading ' y' by ' 1'.
+## Remove leading and trailing quotes from string.
+## Replace '\"' by '"'.
 ###############################################################################
-
-# Do NOT check the config if a config is explicitely requested
-define __load-config-internal
-$(eval __config := $(call __get_module-config,$1))
--include $(__config)
-ifeq ("$(findstring config,$(MAKECMDGOALS))","")
-$(__config): __config-modules-check-$1
-endif
+define generate-autoconf-file
+	echo "Generating $(call path-from-top,$2) from $(call path-from-top,$1)"; \
+	mkdir -p $(dir $2); \
+	sed \
+		-e 's/^CONFIG_//' \
+		-e 's/^\# CONFIG_/\# /' \
+		-e 's/^\#\(.*\)/\/*\1 *\//' \
+		-e 's/\(.*\)=\(.*\)/\#define \1 \2/' \
+		-e 's/ y$$/ 1/' \
+		-e 's/\"\(.*\)\"/\1/' \
+		-e 's/\\\"/\"/g' \
+		$1 > $2;
 endef
-
-###############################################################################
-## Load configuration of a module.
-## Simply evaluate a call to simplify job of caller.
-###############################################################################
-load-config = $(eval $(call __load-config-internal,$(LOCAL_MODULE)))
 
 ###############################################################################
 ## Rules.
 ###############################################################################
-
-# Update everything
-.PHONY: config-update
-config-update: config-global-update config-modules-update
-
-# Check everything
-.PHONY: config-check
-config-check: config-global-check config-modules-check
+# File where global configuration is stored
+CONFIG_GLOBAL_FOLDER := $(shell pwd)/config
+CONFIG_GLOBAL_FILE := $(CONFIG_GLOBAL_FOLDER)/$(TARGET_OS)_$(BUILD_DIRECTORY_MODE).config
 
 # Display the global configuration
-.PHONY: config-global
-config-global:
+.PHONY: config
+config:
 	@( \
 		__tmpconfigin=$$(mktemp); \
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
-		$(call __generate-config-in-global,$${__tmpconfigin}) \
+		$(call __generate-config,$${__tmpconfigin}) \
 		$(call __begin-conf,$(__config)) \
 		$(call __exec-qconf,$${__tmpconfigin}) \
 		$(call __end-conf,$(__config)) \
@@ -211,122 +201,39 @@ config-global:
 	)
 
 # Update the global configuration by selecting new option at their default value
-.PHONY: config-global-update
-config-global-update:
+.PHONY: config-update
+config-update:
 	@( \
 		__tmpconfigin=$$(mktemp); \
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
-		$(call __generate-config-in-global,$${__tmpconfigin}) \
+		$(call __generate-config,$${__tmpconfigin}) \
 		$(call __update-config,$${__tmpconfigin},$(__config)) \
 		rm -f $${__tmpconfigin}; \
 	)
 
 # Check the global configuration
-.PHONY: config-global-check
-config-global-check:
+.PHONY: config-check
+config-check:
 	@( \
 		__tmpconfigin=$$(mktemp); \
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
-		$(call __generate-config-in-global,$${__tmpconfigin}) \
+		$(call __generate-config,$${__tmpconfigin}) \
 		$(call __check-config,$${__tmpconfigin},$(__config)) \
 		rm -f $${__tmpconfigin}; \
 	)
 	@echo "Global configuration is up to date";
 
-# Update all module configurations by selecting new option at their default value
-.PHONY: config-modules-update
-config-modules-update:
-	@( \
-		$(foreach __mod,$(__modules), \
-			$(eval __config := $(call __get_module-config,$(__mod))) \
-			$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
-			if [ "$(__files)" != "" ]; then \
-				__tmpconfigin=$$(mktemp); \
-				$(call __generate-config-in-module,$${__tmpconfigin},$(__mod),$(__files)) \
-				$(call __update-config,$${__tmpconfigin},$(__config)) \
-				rm -f $${__tmpconfigin}; \
-			fi; \
-		) \
-	)
+# create basic folder :
+$(shell mkdir -p $(CONFIG_GLOBAL_FOLDER))
+# check if config exist :
+# TODO ...
+-include $(CONFIG_GLOBAL_FILE)
 
-# Update a specific module configuration by selecting new option at their default value
-.PHONY: config-modules-update-%
-config-modules-update-%:
-	@( \
-		$(eval __mod := $*) \
-		$(eval __config := $(call __get_module-config,$(__mod))) \
-		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
-		if [ "$(__files)" != "" ]; then \
-			__tmpconfigin=$$(mktemp); \
-			$(call __generate-config-in-module,$${__tmpconfigin},$(__mod),$(__files)) \
-			$(call __update-config,$${__tmpconfigin},$(__config)) \
-			rm -f $${__tmpconfigin}; \
-		fi; \
-	)
+#automatic generation of the config file when not existed (default case):
+#.PHONY: $(CONFIG_GLOBAL_FILE)
+#$(CONFIG_GLOBAL_FILE): config-update
+#	echo "generating basic confing .. please restart"
 
-# Check if module configurations are OK
-.PHONY: config-modules-check
-config-modules-check: __config-modules-check
-	@echo "Modules configuration are up to date";
-
-# Internal version with no message
-.PHONY: __config-modules-check
-__config-modules-check:
-	@( \
-		$(call __begin-diff) \
-		$(foreach __mod,$(__modules), \
-			$(eval __config := $(call __get_module-config,$(__mod))) \
-			$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
-			if [ "$(__files)" != "" ]; then \
-				__tmpconfigin=$$(mktemp); \
-				$(call __generate-config-in-module,$${__tmpconfigin},$(__mod),$(__files)) \
-				$(call __check-config,$${__tmpconfigin},$(__config)) \
-				rm -f $${__tmpconfigin}; \
-			fi; \
-		) \
-		$(call __end-diff,1) \
-	)
-
-# Check if a specific module configuration is OK
-.PHONY: config-modules-check-%
-config-modules-check-%: __config-modules-check-%
-	$(eval __mod := $*)
-	@echo "Configuration of $(__mod) is up to date";
-
-# Internal version with no message
-.PHONY: __config-modules-check-%
-__config-modules-check-%:
-	@( \
-		$(call __begin-diff) \
-		$(eval __mod := $*) \
-		$(eval __config := $(call __get_module-config,$(__mod))) \
-		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
-		if [ "$(__files)" != "" ]; then \
-			__tmpconfigin=$$(mktemp); \
-			$(call __generate-config-in-module,$${__tmpconfigin},$(__mod),$(__files)) \
-			$(call __check-config,$${__tmpconfigin},$(__config)) \
-			rm -f $${__tmpconfigin}; \
-		fi; \
-		$(call __end-diff,1) \
-	)
-
-# Configure a module specifically
-.PHONY: config-modules-%
-config-modules-%:
-	@( \
-		$(eval __mod := $*) \
-		$(eval __config := $(call __get_module-config,$(__mod))) \
-		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
-		if [ "$(__files)" == "" ]; then \
-			echo "Nothing to configure for $(__mod)"; \
-		else \
-			__tmpconfigin=$$(mktemp); \
-			$(call __generate-config-in-module,$${__tmpconfigin},$(__mod),$(__files)) \
-			$(call __begin-conf,$(__config)) \
-			$(call __exec-qconf,$${__tmpconfigin}) \
-			$(call __end-conf,$(__config)) \
-			rm -f $${__tmpconfigin}; \
-			echo "Configuration of $(__mod) saved in $(__config)"; \
-		fi; \
-	)
+$(CONFIG_GLOBAL_FILE):
+	@#$(e rror "need to generate config : make ... config")
 

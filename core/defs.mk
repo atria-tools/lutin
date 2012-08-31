@@ -398,18 +398,6 @@ module-get-listed-export = \
         $(call module-get-export,$(__mod),$2) \
     ))
 
-# Return the autoconf.h file, if any, for module $1.
-# $1 : module name.
-module-get-autoconf = \
-	$(if $(__modules.$1.CONFIG_FILES),$(TARGET_OUT_BUILD)/$1/autoconf-$1.h)
-
-# Return the autoconf.h files, if any, for modules listed in $1.
-# $1 : list of module names.
-module-get-listed-autoconf = \
-    $(strip $(foreach __mod,$1, \
-        $(call module-get-autoconf,$(__mod)) \
-    ))
-
 ###############################################################################
 ## Dependency management
 ###############################################################################
@@ -467,34 +455,6 @@ module-get-build-filename = \
 
 module-get-staging-filename = \
 	$(if $(__modules.$1.MODULE_FILENAME), $(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) )
-
-
-###############################################################################
-## Generate autoconf.h file from config file.
-## $1 : input config file.
-## $2 : output autoconf.h file.
-##
-## Remove CONFIG_ prefix.
-## Remove CONFIG_ in commented lines.
-## Put lines begining with '#' between '/*' '*/'.
-## Replace 'key=value' by '#define key value'.
-## Replace leading ' y' by ' 1'.
-## Remove leading and trailing quotes from string.
-## Replace '\"' by '"'.
-###############################################################################
-define generate-autoconf-file
-	echo "Generating $(call path-from-top,$2) from $(call path-from-top,$1)"; \
-	mkdir -p $(dir $2); \
-	sed \
-		-e 's/^CONFIG_//' \
-		-e 's/^\# CONFIG_/\# /' \
-		-e 's/^\#\(.*\)/\/*\1 *\//' \
-		-e 's/\(.*\)=\(.*\)/\#define \1 \2/' \
-		-e 's/ y$$/ 1/' \
-		-e 's/\"\(.*\)\"/\1/' \
-		-e 's/\\\"/\"/g' \
-		$1 > $2;
-endef
 
 ###############################################################################
 ## Normalize a list of includes. It adds -I if needed.
