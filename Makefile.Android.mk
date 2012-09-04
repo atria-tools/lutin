@@ -6,21 +6,12 @@ TARGET_OS = Android
 TARGET_ARCH = ARM
 TARGET_CROSS = $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
 
-
-#Add the basic element abstraction of ewol lib
-$(shell cp $(EWOL_FOLDER)/Java/ewolAndroidAbstraction.cpp Sources/)
-$(shell sed -i "s|__PROJECT_VENDOR__|$(PROJECT_VENDOR)|" Sources/ewolAndroidAbstraction.cpp)
-$(shell sed -i "s|__PROJECT_NAME__|$(PROJECT_NAME)|" Sources/ewolAndroidAbstraction.cpp)
-$(shell sed -i "s|__PROJECT_PACKAGE__|$(PROJECT_PACKAGE)|" Sources/ewolAndroidAbstraction.cpp)
-
-
 ANDROID_BOARD_ID = 14
 TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm/usr/include
 TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm
 
 #generic makefile
 include $(EWOL_FOLDER)/Build/core/main.mk
-
 
 
 FINAL_FOLDER_ANT=$(TARGET_OUT_FINAL)/ant
