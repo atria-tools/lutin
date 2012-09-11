@@ -185,7 +185,7 @@ endef
 ###############################################################################
 # File where global configuration is stored
 CONFIG_GLOBAL_FOLDER := $(shell pwd)/config
-CONFIG_GLOBAL_FILE := $(CONFIG_GLOBAL_FOLDER)/$(TARGET_OS)_$(BUILD_DIRECTORY_MODE).config
+CONFIG_GLOBAL_FILE := $(CONFIG_GLOBAL_FOLDER)/$(TARGET_OS).config
 
 # Display the global configuration
 .PHONY: config
