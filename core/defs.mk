@@ -10,6 +10,12 @@
 ###############################################################################
 ## Some useful macros.
 ###############################################################################
+
+quote := "
+#"
+simplequote := '
+#'
+coma := ,
 empty :=
 space := $(empty) $(empty)
 space4 := $(space)$(space)$(space)$(space)
@@ -49,6 +55,18 @@ locase = $(shell echo $1 | tr [:upper:] [:lower:])
 # Replace '-' by '_' and convert to upper case.
 # $1 : text to convert.
 get-define = $(strip $(call upcase,$(call tr,$1,-,_)))
+
+# remove many special char of a string ...
+# Replace '-' by '_'
+# Replace ' ' by '_'
+# Replace '"' by ''
+# Replace ''' by ''
+# $1 : text to convert.
+convert-special-char = $(call locase,\
+                         $(subst $(quote),$(empty),\
+                           $(subst $(simplequote),$(empty),\
+                             $(subst -,_,\
+                               $(subst $(space),_,$1)))))
 
 # Remove quotes from string
 remove-quotes = $(strip $(subst ",,$1))
