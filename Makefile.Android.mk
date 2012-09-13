@@ -25,21 +25,21 @@ FINAL_FOLDER_JAVA_PROJECT=$(FINAL_FOLDER_JAVA)/src/$(CONFIG2___EWOL_APPL_ORGANIS
 FINAL_FILE_ABSTRACTION = $(FINAL_FOLDER_JAVA_PROJECT)/$(CONFIG2___EWOL_APPL_NAME__).java
 
 javaclean:
-	rm -rf $(FINAL_FOLDER_JAVA)/
-	@mkdir -p $(FINAL_FOLDER_JAVA_PROJECT)/
+	$(Q)rm -rf $(FINAL_FOLDER_JAVA)/
+	$(Q)mkdir -p $(FINAL_FOLDER_JAVA_PROJECT)/
 
 
 $(FINAL_FILE_ABSTRACTION) : $(EWOL_FOLDER)/Java/PROJECT_NAME.java $(CONFIG_GLOBAL_FILE)
-	@mkdir -p $(dir $@)
-	@cp $(EWOL_FOLDER)/Java/PROJECT_NAME.java $@
-	@sed -i "s|__PROJECT_ORG_TYPE__|$(CONFIG2___EWOL_APPL_ORGANISATION_TYPE__)|" $@
-	@sed -i "s|__PROJECT_VENDOR__|$(CONFIG2___EWOL_APPL_COMPAGNY__)|" $@
-	@sed -i "s|__PROJECT_NAME__|$(CONFIG2___EWOL_APPL_NAME__)|" $@
-	@sed -i "s|__PROJECT_PACKAGE__|$(CONFIG2___EWOL_APPL_NAME__)|" $(EWOL_TMP_PATH)/$@
+	$(Q)mkdir -p $(dir $@)
+	$(Q)cp $(EWOL_FOLDER)/Java/PROJECT_NAME.java $@
+	$(Q)sed -i "s|__PROJECT_ORG_TYPE__|$(CONFIG2___EWOL_APPL_ORGANISATION_TYPE__)|" $@
+	$(Q)sed -i "s|__PROJECT_VENDOR__|$(CONFIG2___EWOL_APPL_COMPAGNY__)|" $@
+	$(Q)sed -i "s|__PROJECT_NAME__|$(CONFIG2___EWOL_APPL_NAME__)|" $@
+	$(Q)sed -i "s|__PROJECT_PACKAGE__|$(CONFIG2___EWOL_APPL_NAME__)|" $@
 ifeq ("$(CONFIG___VIDEO__OPENGL_ES_2)","y")
-	@sed -i "s|__CONF_OGL_ES_V__|2|" $@
+	$(Q)sed -i "s|__CONF_OGL_ES_V__|2|" $@
 else
-	@sed -i "s|__CONF_OGL_ES_V__|1|" $@
+	$(Q)sed -i "s|__CONF_OGL_ES_V__|1|" $@
 endif
 	
 
@@ -123,32 +123,32 @@ endif
 	@echo  "</manifest>  " >> $@
 
 final : javaclean $(FINAL_FILE_ABSTRACTION) $(FINAL_FOLDER_JAVA)/AndroidManifest.xml
-	@mkdir -p $(FINAL_FOLDER_JAVA)/res/
+	$(Q)mkdir -p $(FINAL_FOLDER_JAVA)/res/
 	
 	@echo ".apk/assets/ <== assets"
-	@mkdir -p $(FINAL_FOLDER_JAVA)/data/assets/
-	@cp -r $(EWOL_FOLDER)/share/* $(FINAL_FOLDER_JAVA)/data/assets/
-	@cp -r share/* $(FINAL_FOLDER_JAVA)/data/assets/
+	$(Q)mkdir -p $(FINAL_FOLDER_JAVA)/data/assets/
+	$(Q)cp -r $(EWOL_FOLDER)/share/* $(FINAL_FOLDER_JAVA)/data/assets/
+	$(Q)cp -r share/* $(FINAL_FOLDER_JAVA)/data/assets/
 	
 	@echo ".apk/lib/armeabi/ <== *.so"
-	@mkdir -p $(FINAL_FOLDER_JAVA)/data/lib/armeabi/
-	@cp $(TARGET_OUT_STAGING)/usr/lib/$(CONFIG2___EWOL_APPL_NAME__).so $(FINAL_FOLDER_JAVA)/data/lib/armeabi/lib$(CONFIG2___EWOL_APPL_NAME__).so
+	$(Q)mkdir -p $(FINAL_FOLDER_JAVA)/data/lib/armeabi/
+	$(Q)cp $(TARGET_OUT_STAGING)/usr/lib/$(CONFIG2___EWOL_APPL_NAME__).so $(FINAL_FOLDER_JAVA)/data/lib/armeabi/lib$(CONFIG2___EWOL_APPL_NAME__).so
 	
 	@# Doc :
 	@# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 	
 	@echo "R.java <== Resources files"
-	@$(PROJECT_SDK)/platform-tools/aapt p -f \
+	$(Q)$(PROJECT_SDK)/platform-tools/aapt p -f \
 	     -M $(FINAL_FOLDER_JAVA)/AndroidManifest.xml \
 	     -F $(FINAL_FOLDER_JAVA)/resources.res \
 	     -I $(PROJECT_SDK)/platforms/android-15/android.jar\
 	     -S $(FINAL_FOLDER_JAVA)/res/ \
 	     -J $(FINAL_FOLDER_JAVA)/src
 	
-	@mkdir -p $(FINAL_FOLDER_JAVA)/build/classes/
+	$(Q)mkdir -p $(FINAL_FOLDER_JAVA)/build/classes/
 	@echo ".class <== .java"
 	@# more information with : -Xlint
-	@javac \
+	$(Q)javac \
 	    -d $(FINAL_FOLDER_JAVA)/build/classes \
 	    -classpath $(PROJECT_SDK)/platforms/android-15/android.jar \
 	    $(FINAL_FILE_ABSTRACTION) \
@@ -159,13 +159,13 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(FINAL_FOLDER_JAVA)/AndroidManifest
 	    $(FINAL_FOLDER_JAVA)/src/R.java
 	
 	@echo ".dex <== .class"
-	@$(PROJECT_SDK)/platform-tools/dx \
+	$(Q)$(PROJECT_SDK)/platform-tools/dx \
 	    --dex --no-strict \
 	    --output=$(FINAL_FOLDER_JAVA)/build/$(CONFIG2___EWOL_APPL_NAME__).dex \
 	    $(FINAL_FOLDER_JAVA)/build/classes/
 	
 	@echo ".apk <== .dex, assets, .so, res"
-	@$(PROJECT_SDK)/tools/apkbuilder \
+	$(Q)$(PROJECT_SDK)/tools/apkbuilder \
 	    $(FINAL_FOLDER_JAVA)/build/$(CONFIG2___EWOL_APPL_NAME__)-unalligned.apk \
 	    -u \
 	    -z $(FINAL_FOLDER_JAVA)/resources.res \
@@ -177,7 +177,7 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(FINAL_FOLDER_JAVA)/AndroidManifest
 	
 	@# keytool is situated in $(JAVA_HOME)/bin ...
 	$(if $(wildcard ./$(CONFIG2___EWOL_APPL_NAME__)-$(BUILD_DIRECTORY_MODE).jks),$(empty), \
-		@echo "./$(CONFIG2___EWOL_APPL_NAME__).jks <== dynamic key (NOTE : It might ask some question to generate the key for android)" ; \
+		$(Q)echo "./$(CONFIG2___EWOL_APPL_NAME__).jks <== dynamic key (NOTE : It might ask some question to generate the key for android)" ; \
 		keytool -genkeypair -v \
 		    -keystore ./$(CONFIG2___EWOL_APPL_NAME__)-$(BUILD_DIRECTORY_MODE).jks \
 		    -storepass Pass$(CONFIG2___EWOL_APPL_NAME__) \
@@ -212,7 +212,7 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(FINAL_FOLDER_JAVA)/AndroidManifest
 	@echo "Pass$(CONFIG2___EWOL_APPL_NAME__)" > tmpPass.boo
 	@echo "PassK$(CONFIG2___EWOL_APPL_NAME__)" >> tmpPass.boo
 	@# verbose mode : -verbose
-	@jarsigner \
+	$(Q)jarsigner \
 	    -sigalg MD5withRSA \
 	    -digestalg SHA1 \
 	    -keystore ./$(CONFIG2___EWOL_APPL_NAME__)-$(BUILD_DIRECTORY_MODE).jks \
@@ -220,10 +220,10 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(FINAL_FOLDER_JAVA)/AndroidManifest
 	    alias$(CONFIG2___EWOL_APPL_NAME__) \
 	    < tmpPass.boo
 	
-	@rm tmpPass.boo
+	$(Q)rm tmpPass.boo
 	@echo "apk(aligned) <== apk"
 	@# verbose mode : -v
-	@zipalign 4 \
+	$(Q)zipalign 4 \
 	    $(FINAL_FOLDER_JAVA)/build/$(CONFIG2___EWOL_APPL_NAME__)-unalligned.apk \
 	    $(FINAL_FOLDER_JAVA)/$(CONFIG2___EWOL_APPL_NAME__).apk
 

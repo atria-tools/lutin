@@ -166,7 +166,7 @@ ALL_BUILD_MODULES := \
 
 # TODO : Set ALL_BUILD_MODULES ==> find the end point module (SHARED/BINARY)
 .PHONY: all
-all: $(ALL_MODULES)
+all: $(ALL_BUILD_MODULES)
 
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
