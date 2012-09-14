@@ -11,11 +11,11 @@ TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-$(ANDRO
 #generic makefile
 include $(EWOL_FOLDER)/Build/core/main.mk
 
-CONFIG2___EWOL_APPL_ORGANISATION_TYPE__ := $(call convert-special-char,$(CONFIG___EWOL_APPL_ORGANISATION_TYPE__))
+CONFIG2___EWOL_APPL_ORGANISATION_TYPE__ := $(subst _,$(empty),$(call convert-special-char,$(CONFIG___EWOL_APPL_ORGANISATION_TYPE__)))
 
-CONFIG2___EWOL_APPL_COMPAGNY__ := $(call convert-special-char,$(CONFIG___EWOL_APPL_COMPAGNY__))
+CONFIG2___EWOL_APPL_COMPAGNY__ := $(subst _,$(empty),$(call convert-special-char,$(CONFIG___EWOL_APPL_COMPAGNY__)))
 
-CONFIG2___EWOL_APPL_NAME__ := $(call convert-special-char,$(CONFIG___EWOL_APPL_NAME__))
+CONFIG2___EWOL_APPL_NAME__ := $(subst _,$(empty),$(call convert-special-char,$(CONFIG___EWOL_APPL_NAME__)))
 
 CONFIG2___EWOL_ANDROID_ICON__ := $(subst $(quote),$(empty),$(CONFIG___EWOL_ANDROID_ICON__))
 
@@ -56,10 +56,8 @@ $(FINAL_FOLDER_JAVA)/AndroidManifest.xml : $(CONFIG_GLOBAL_FILE)
 	@echo  "          android:versionCode=\"1\" " >> $@
 	@echo  "          android:versionName=\"$(APPL_VERSION)\"> " >> $@
 ifeq ("$(CONFIG___VIDEO__OPENGL_ES_2)","y")
-	@echo  "    <!-- Use openGl ES 2 --> " >> $@
 	@echo  "    <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />" >> $@
 endif
-	@echo  "    <!-- This is the platform API where NativeActivity was introduced. --> " >> $@
 	@echo  "    <uses-sdk android:minSdkVersion=\"$(CONFIG___EWOL_ANDROID_MINIMUM_SDK_VERSION__)\" /> " >> $@
 	@echo  "	" >> $@
 	@echo  "	<application android:label=\"$(CONFIG___EWOL_APPL_NAME__)\" " >> $@
