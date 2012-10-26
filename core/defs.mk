@@ -516,6 +516,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
+	-D__EWOL_APPL_NAME__="$(CONFIG___EWOL_APPL_NAME__)" \
 	-c -MMD -MP -g \
 	$(call path-from-top,$<)
 endef
@@ -535,6 +536,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
+	-D__EWOL_APPL_NAME__="$(CONFIG___EWOL_APPL_NAME__)" \
 	-c -MMD -MP -g \
 	$(call path-from-top,$<)
 endef
@@ -555,6 +557,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -g \
+	-D__EWOL_APPL_NAME__="$(CONFIG___EWOL_APPL_NAME__)" \
 	$(call path-from-top,$<)
 endef
 
@@ -626,12 +629,6 @@ $(Q)$(TARGET_CXX) \
 	$(PRIVATE_LDLIBS) \
 	$(TARGET_GLOBAL_LDLIBS)
 endef
-
-#	--start-group \
-#	$(PRIVATE_ALL_STATIC_LIBRARIES) \
-#	$(PRIVATE_ALL_SHARED_LIBRARIES) \
-#	--end-group \
-#	-o $@ \
 
 ###############################################################################
 ## Commands for copying files.

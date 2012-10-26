@@ -12,7 +12,6 @@ CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/conf)
 QCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/qconf)
 
 
-
 ###############################################################################
 ## Begin conf/qconf by copying configuration file to a temp .config file.
 ## $1 : configuration file.
