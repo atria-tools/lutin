@@ -99,10 +99,10 @@ all_shared_libraries := \
 		$(call module-get-staging-filename,$(lib)))
 all_static_libraries := \
 	$(foreach lib,$(LOCAL_STATIC_LIBRARIES), \
-		$(call module-get-staging-filename,$(lib)))
+		$(call module-get-build-filename,$(lib)))
 all_whole_static_libraries := \
 	$(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES), \
-		$(call module-get-staging-filename,$(lib)))
+		$(call module-get-build-filename,$(lib)))
 all_external_libraries := \
 	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
 		$(TARGET_OUT_BUILD)/$(lib)/$(lib).done)

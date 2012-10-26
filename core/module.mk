@@ -68,9 +68,6 @@ include $(BUILD_RULES)
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
 
-# TODO : the .a file does not arrive in the staging element ==> they micht stay in the obj folder
-copy_to_staging := 1
-
 endif
 
 ###############################################################################
