@@ -1,4 +1,6 @@
 
+APPL_DATA_FOLDER=/usr/share/$(PROJECT_NAME)
+
 # include generic makefile :
 include $(EWOL_FOLDER)/Build/core/main.mk
 

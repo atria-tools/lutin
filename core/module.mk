@@ -68,6 +68,8 @@ include $(BUILD_RULES)
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
 
+copy_to_staging := 1
+
 endif
 
 ###############################################################################
@@ -125,16 +127,18 @@ all_copy_files :=
 $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __src := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
-	$(eval __dst := $(addprefix $(TARGET_OUT_STAGING)/,$(word 2,$(__pair2)))) \
-	$(eval all_copy_files += $(__dst)) \
-	$(eval $(call copy-one-file,$(__src),$(__dst))) \
+	$(eval __dst := $(TARGET_OUT_STAGING)/usr/share/$(PROJECT_NAME)/$(word 2,$(__pair2))) \
+	$(foreach __file_src,$(__src), \
+		$(eval all_copy_files += $(__dst)) \
+		$(eval $(call copy-one-file,$(__file_src),$(__dst))) \
+	) \
 )
 
 # Generate a rule to copy all files
 $(foreach __pair,$(LOCAL_COPY_FOLDERS), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __folder_src  := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
-	$(eval __folder_dest := $(addprefix $(TARGET_OUT_STAGING)/,$(word 2,$(__pair2)))) \
+	$(eval __folder_dest := $(TARGET_OUT_STAGING)/usr/share/$(PROJECT_NAME)/$(word 2,$(__pair2))) \
 	$(eval __list_file_src := $(wildcard $(__folder_src))) \
 	$(foreach __file_src,$(__list_file_src), \
 		$(eval __file_dest := $(__folder_dest)/$(notdir $(__file_src))) \

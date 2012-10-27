@@ -33,6 +33,8 @@ ifeq ("$(V)","0")
   Q := @
 endif
 
+CONFIG___EWOL_APPL_NAME__:="$(PROJECT_NAME)"
+
 
 ###############################################################################
 ## The folowing 2 macros can NOT be put in defs.mk as it will be included
@@ -86,6 +88,7 @@ BUILD_RULES := $(BUILD_SYSTEM)/rules.mk
 
 TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
 TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
+TARGET_OUT_STAGING_DATA ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
 TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/final
 
 # Makefile with the list of all makefiles available and include them
@@ -163,6 +166,8 @@ ALL_MODULES := \
 ALL_BUILD_MODULES := \
 	$(foreach __mod,$(__modules), \
 		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
+
+$(info ALL_BUILD_MODULES=$(ALL_BUILD_MODULES))
 
 # TODO : Set ALL_BUILD_MODULES ==> find the end point module (SHARED/BINARY)
 .PHONY: all
