@@ -23,9 +23,6 @@ final: all
 	@echo ------------------------------------------------------------------------
 	@echo 'Create Folders ...'
 	@mkdir -p $(FINAL_FOLDER_DEBIAN)
-	@mkdir -p $(FINAL_FOLDER_BIN)
-	@mkdir -p $(FINAL_FOLDER_SHARED_DOC)
-	@mkdir -p $(FINAL_FOLDER_SHARED_DATA)
 	# Create the control file
 	@echo "Package: "$(PROJECT_NAME) > $(FINAL_FILE_CONTROL)
 	@echo "Version: "$(FINAL_VERSION_TAG_SHORT) >> $(FINAL_FILE_CONTROL)
@@ -43,14 +40,13 @@ final: all
 	# Enable Execution in script
 	@chmod 755 $(FINAL_FILE_POST_RM)*
 	@#chmod 755 $(PROJECT_NAME)/DEBIAN/pre*
-	# copy licence and information : 
+	@# copy licence and information : 
 	@cp -f os-Linux/README $(FINAL_FOLDER_SHARED_DOC)/README
 	@cp -f licence.txt $(FINAL_FOLDER_SHARED_DOC)/copyright
 	@cp -f changelog $(FINAL_FOLDER_SHARED_DOC)/changelog
-	@cp -f $(TARGET_OUT_STAGING)/usr/bin/* $(FINAL_FOLDER_BIN)
-	$(if $(wildcard $(TARGET_OUT_STAGING)/usr/lib/*.so), cp -f $(TARGET_OUT_STAGING)/usr/lib/*.so $(FINAL_FOLDER_LIB))
-	$(if $(wildcard ./share/*), cp -rf share/* $(FINAL_FOLDER_SHARED_DATA))
-	@echo pachage <== $(TARGET_OUT_FINAL)/$(PROJECT_NAME).deb
+	@# copy all the staging
+	@cp -rf $(TARGET_OUT_STAGING)/* $(TARGET_OUT_FINAL)/$(PROJECT_NAME)/
+	@echo pachage : $(TARGET_OUT_FINAL)/$(PROJECT_NAME).deb
 	@cd $(TARGET_OUT_FINAL)/; dpkg-deb --build $(PROJECT_NAME)
 
 install: final
