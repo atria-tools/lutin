@@ -46,33 +46,39 @@ you can have some other :
 
 
 define include folder:
+
 	# inside module
 	LOCAL_C_INCLUDES := $(LOCAL_PATH)/monPath/
 	# outside module >> automaticly added to LOCAL_C_INCLUDES
 	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/mon/path/export
 
 define c compilation flags : CFLAGS
+
 	# inside module
 	LOCAL_CFLAGS := -DEXEMPLE_TAG="\"SuperPlop\""
 	# outside module
 	LOCAL_EXPORT_CFLAGS := -DEXEMPLE_EXTERN_DEFINE
 
 define linker flags:
+
 	# local
 	LOCAL_LDLIBS := -lm
 	# expoerted
 	LOCAL_EXPORT_LDLIBS := -lm
 
 define dependency between librairies (note : automaticly include sub dependence of adependence
+
 	LOCAL_LIBRARIES := etk tinyxml
 
 copy files and folder :
+
 	# use the makefile folder as reference and output is in the application data directory
 	# copy secyfy file in the destination : folder/SRC.xxx:folderPLOP/folder/dst.yyy
 	LOCAL_COPY_FILES := ../share/Font/freefont/FreeSerif.ttf:Font/freefont/FreeSerif.ttf
 	# copy multiple file in a folder : (wildcard search) : folder/src*.txt:dstFolder
 	LOCAL_COPY_FOLDERS := ../share/*.xml:/
 	# note : the destination name is not needed ...
+
 
 License (DSB like)
 ==================
