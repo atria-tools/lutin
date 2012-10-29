@@ -1,5 +1,5 @@
 build
-====
+=====
 
 `build` this is not a name ... but it is a FREE software tool.
 
@@ -80,8 +80,13 @@ copy files and folder :
 	# note : the destination name is not needed ...
 
 
-License (DSB like)
-==================
+Copyright (c)
+=============
+
+2011, Edouard DUPIN
+
+License (DSB)
+=============
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
