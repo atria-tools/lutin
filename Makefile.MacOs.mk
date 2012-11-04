@@ -1,9 +1,26 @@
 
+
+
+# Setup macros definitions
+include $(EWOL_FOLDER)/Build/core/defs.mk
+
+# include generic makefile :
+include $(EWOL_FOLDER)/Build/core/check-project-variable.mk
+
+
+
 # for MAcOSX we need to FORCE CLANG
 CLANG:=1
 # ewemple of a cross compiler :
 # http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 # http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
+
+
+TARGET_OUT_FOLDER_BINARY   := MacOS
+TARGET_OUT_FOLDER_LIBRAIRY := lib
+TARGET_OUT_FOLDER_DATA     := Resources
+TARGET_OUT_FOLDER_DOC      := doc
+TARGET_OUT_PREFIX_LIBRAIRY := 
 
 
 # include generic makefile :

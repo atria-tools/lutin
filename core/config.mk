@@ -88,20 +88,19 @@ define __generate-config
 		echo "  bool 'Build $(__mod)'" >> $1; \
 		echo "  default y" >> $1; \
 		echo "  help" >> $1; \
-		echo "    Build $(__mod)" >> $1; \
+		echo "    Force build of module $(__mod)" >> $1; \
+		echo "    or copy data in the staging area (.a too)" >> $1; \
 	) \
 	echo "endmenu" >> $1; \
 	$(foreach __mod,$(__modules), \
 		$(eval __build := BUILD_$(call get-define,$(__mod))) \
 		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
 		if [ "$(__files)" != "" ]; then \
-			echo "if $(__build)" >> $1; \
-			echo "    menu $(__mod)" >> $1; \
+			echo "menu $(__mod)" >> $1; \
 			$(foreach __f,$(__files), \
-				echo "        source $(call fullpath,$(__f))" >> $1; \
+				echo "    source $(call fullpath,$(__f))" >> $1; \
 			) \
-			echo "    endmenu" >> $1; \
-			echo "endif" >> $1; \
+			echo "endmenu" >> $1; \
 		fi; \
 	)
 endef

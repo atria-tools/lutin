@@ -33,8 +33,6 @@ ifeq ("$(V)","0")
   Q := @
 endif
 
-CONFIG___EWOL_APPL_NAME__:="$(PROJECT_NAME)"
-
 
 ###############################################################################
 ## The folowing 2 macros can NOT be put in defs.mk as it will be included
@@ -67,8 +65,6 @@ endif
 include $(BUILD_SYSTEM)/setup-host.mk
 include $(BUILD_SYSTEM)/setup-target.mk
 include $(BUILD_SYSTEM)/setup.mk
-# Setup macros definitions
-include $(BUILD_SYSTEM)/defs.mk
 # Setup warnings flags
 include $(BUILD_SYSTEM)/warnings.mk
 # Load configuration
@@ -82,14 +78,18 @@ BUILD_EXECUTABLE := $(BUILD_SYSTEM)/build-executable.mk
 BUILD_PREBUILT := $(BUILD_SYSTEM)/build-prebuilt.mk
 BUILD_RULES := $(BUILD_SYSTEM)/rules.mk
 
+
+
 ###############################################################################
 ## Makefile scan and includes.
 ###############################################################################
 
 TARGET_OUT_BUILD ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/obj
 TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
-TARGET_OUT_STAGING_DATA ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/staging
 TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/final
+
+
+
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
