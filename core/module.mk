@@ -128,9 +128,12 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __src := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
 	$(eval __dst := $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DATA)/$(word 2,$(__pair2))) \
-	$(foreach __file_src,$(__src), \
+	$(if $(__src), \
+		$(info copy: $(LOCAL_MODULE) <==             file named: $(word 1,$(__pair2)) ) \
 		$(eval all_copy_files += $(__dst)) \
-		$(eval $(call copy-one-file,$(__file_src),$(__dst))) \
+		$(eval $(call copy-one-file,$(__src),$(__dst)) )\
+		, \
+		$(info copy: $(LOCAL_MODULE) <== warning: no file named: $(word 1,$(__pair2)) ) \
 	) \
 )
 
@@ -140,11 +143,16 @@ $(foreach __pair,$(LOCAL_COPY_FOLDERS), \
 	$(eval __folder_src  := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
 	$(eval __folder_dest := $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DATA)/$(word 2,$(__pair2))) \
 	$(eval __list_file_src := $(wildcard $(__folder_src))) \
-	$(foreach __file_src,$(__list_file_src), \
-		$(eval __file_dest := $(__folder_dest)/$(notdir $(__file_src))) \
-		$(eval all_copy_files += $(__file_dest)) \
-		$(eval $(call copy-one-file,$(__file_src),$(__file_dest))) \
-	) \
+	$(if $(__list_file_src), \
+		$(info copy: $(LOCAL_MODULE) <==             file named: $(word 1,$(__pair2)) ) \
+		$(foreach __file_src,$(__list_file_src), \
+			$(eval __file_dest := $(__folder_dest)/$(notdir $(__file_src))) \
+			$(eval all_copy_files += $(__file_dest)) \
+			$(eval $(call copy-one-file,$(__file_src),$(__file_dest))) \
+		) \
+		, \
+		$(info copy: $(LOCAL_MODULE) <== warning: no file named: $(word 1,$(__pair2)) ) \
+	)\
 )
 
 # Add files to be copied as pre-requisites
