@@ -186,6 +186,7 @@ modules-LOCALS += MODULE_CLASS
 # src : source (relative to module path)
 # dst : destination (relative to staging dir)
 modules-LOCALS += COPY_FILES
+modules-LOCALS += COPY_FOLDERS
 
 # Other variables used internally
 modules-LOCALS += BUILD_MODULE

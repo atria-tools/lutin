@@ -129,7 +129,6 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __src := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
 	$(eval __dst := $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DATA)/$(word 2,$(__pair2))) \
 	$(if $(__src), \
-		$(info copy: $(LOCAL_MODULE) <==             file named: $(word 1,$(__pair2)) ) \
 		$(eval all_copy_files += $(__dst)) \
 		$(eval $(call copy-one-file,$(__src),$(__dst)) )\
 		, \
@@ -144,7 +143,6 @@ $(foreach __pair,$(LOCAL_COPY_FOLDERS), \
 	$(eval __folder_dest := $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DATA)/$(word 2,$(__pair2))) \
 	$(eval __list_file_src := $(wildcard $(__folder_src))) \
 	$(if $(__list_file_src), \
-		$(info copy: $(LOCAL_MODULE) <==             file named: $(word 1,$(__pair2)) ) \
 		$(foreach __file_src,$(__list_file_src), \
 			$(eval __file_dest := $(__folder_dest)/$(notdir $(__file_src))) \
 			$(eval all_copy_files += $(__file_dest)) \
