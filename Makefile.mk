@@ -1,4 +1,7 @@
 
+# get the local dir in a good form :
+BUILD_SYSTEM := $(shell readlink -m -n $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
+
 ###############################################################################
 ### Platform specificity :                                                  ###
 ###############################################################################
@@ -27,6 +30,4 @@ else
     $(error you must specify a corect platform : make PLATFORM=[$(SUPPORTED_PLATFORM)])
 endif
 
-EWOL_FOLDER?=$(realpath $(PROJECT_MODULE)/ewol)
-
-include $(EWOL_FOLDER)/Build/Makefile.$(PLATFORM).mk
+include $(BUILD_SYSTEM)/Makefile.$(PLATFORM).mk

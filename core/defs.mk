@@ -8,7 +8,7 @@
 ###############################################################################
 
 ###############################################################################
-## Some useful macros.
+## Some generic define
 ###############################################################################
 
 quote := "
@@ -21,6 +21,24 @@ space := $(empty) $(empty)
 space4 := $(space)$(space)$(space)$(space)
 true := T
 false :=
+
+###############################################################################
+## The folowing 2 macros can NOT be put in defs.mk as it will be included
+## only after.
+###############################################################################
+
+# Get full path.
+# $1 : path to extend.
+fullpath = $(shell readlink -m -n $1)
+
+# Figure out where we are
+# It returns the full path without trailing '/'
+my-dir = $(call fullpath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
+
+###############################################################################
+## Some useful macros.
+###############################################################################
+
 
 # Return negation of argument.
 # $1 : input boolean argument.

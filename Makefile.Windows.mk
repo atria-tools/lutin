@@ -1,10 +1,10 @@
 
 
 # Setup macros definitions
-include $(EWOL_FOLDER)/Build/core/defs.mk
+include $(BUILD_SYSTEM)/core/defs.mk
 
 # include generic makefile :
-include $(EWOL_FOLDER)/Build/core/check-project-variable.mk
+include $(BUILD_SYSTEM)/core/check-project-variable.mk
 
 
 # defien the target OS of this system
@@ -18,7 +18,7 @@ TARGET_OUT_FOLDER_DATA     := data
 TARGET_OUT_FOLDER_DOC      := doc
 TARGET_OUT_PREFIX_LIBRAIRY := 
 
-include $(EWOL_FOLDER)/Build/core/main.mk
+include $(BUILD_SYSTEM)/core/main.mk
 
 
 final: all

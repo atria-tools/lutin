@@ -1,10 +1,10 @@
 
 
 # Setup macros definitions
-include $(EWOL_FOLDER)/Build/core/defs.mk
+include $(BUILD_SYSTEM)/core/defs.mk
 
 # include generic makefile :
-include $(EWOL_FOLDER)/Build/core/check-project-variable.mk
+include $(BUILD_SYSTEM)/core/check-project-variable.mk
 
 
 TARGET_OUT_FOLDER_BINARY   := $(PROJECT_NAME2)/usr/bin
@@ -15,7 +15,7 @@ TARGET_OUT_PREFIX_LIBRAIRY :=
 
 
 # include generic makefile :
-include $(EWOL_FOLDER)/Build/core/main.mk
+include $(BUILD_SYSTEM)/core/main.mk
 
 
 TARGET_OUT_FOLDER_DEBIAN=$(TARGET_OUT_STAGING)/$(PROJECT_NAME2)/DEBIAN

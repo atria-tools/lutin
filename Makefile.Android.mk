@@ -2,10 +2,10 @@
 
 
 # Setup macros definitions
-include $(EWOL_FOLDER)/Build/core/defs.mk
+include $(BUILD_SYSTEM)/core/defs.mk
 
 # include generic makefile :
-include $(EWOL_FOLDER)/Build/core/check-project-variable.mk
+include $(BUILD_SYSTEM)/core/check-project-variable.mk
 
 
 TARGET_OS = Android
@@ -24,7 +24,7 @@ TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)
 TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm
 
 #generic makefile
-include $(EWOL_FOLDER)/Build/core/main.mk
+include $(BUILD_SYSTEM)/core/main.mk
 
 FINAL_FOLDER_JAVA_PROJECT=$(TARGET_OUT_STAGING)/src/$(PROJECT_COMPAGNY_TYPE)/$(PROJECT_COMPAGNY_NAME2)/$(PROJECT_NAME2)
 
