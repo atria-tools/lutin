@@ -165,7 +165,7 @@ endef
 ## Replace '\"' by '"'.
 ###############################################################################
 define generate-autoconf-file
-	echo "Generating $(call path-from-top,$2) from $(call path-from-top,$1)"; \
+	echo "conf: $(call path-from-top,$2) <== $(call path-from-top,$1)"; \
 	mkdir -p $(dir $2); \
 	sed \
 		-e 's/^CONFIG_//' \

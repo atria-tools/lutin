@@ -75,16 +75,16 @@ TARGET_OUT_STAGING ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/stag
 TARGET_OUT_FINAL ?= $(shell pwd)/out/$(TARGET_OS)/$(BUILD_DIRECTORY_MODE)/final
 
 
-
-
-# Makefile with the list of all makefiles available and include them
-SCAN_TARGET := scan
-
+# Note : Yhis permit to create a recursive search of all the .mk existed ==> but speed is really slow in Windows
+ifeq ("$(USE_RECURSIVE_FIND)","1")
 # Get the list of all makefiles available and include them this find the TARGET_OS.mk and the Generic.mk
 _moduleFolder  = $(shell find $(USER_PACKAGES) -name $(TARGET_OS).mk)
 _moduleFolder += $(shell find $(USER_PACKAGES) -name Generic.mk)
 # only keep one folder for each makefile found.
 _tmpDirectory  = $(sort $(dir $(_moduleFolder)))
+else
+_tmpDirectory := $(sort $(USER_PACKAGES))
+endif
 # this section have all the makefile possible for a specific target, 
 # this isolate the good makefile for every folder where a makefile present
 # for each folder
@@ -93,9 +93,12 @@ _tmpDirectory  = $(sort $(dir $(_moduleFolder)))
 #    otherwise
 #        add generic makefile
 $(foreach __makefile,$(_tmpDirectory), \
-    $(if $(wildcard $(__makefile)$(TARGET_OS).mk), \
-        $(eval makefiles += $(__makefile)$(TARGET_OS).mk) , \
-        $(eval makefiles += $(__makefile)Generic.mk) \
+    $(if $(wildcard $(__makefile)/$(TARGET_OS).mk), \
+        $(eval makefiles += $(__makefile)/$(TARGET_OS).mk) \
+    , \
+        $(if $(wildcard $(__makefile)/Generic.mk), \
+            $(eval makefiles += $(__makefile)/Generic.mk) \
+         ) \
     ) \
 )
 ifeq ("$(V)","1")
@@ -125,7 +128,6 @@ $(call modules-check-variables)
 # Concatenate all in one
 AUTOCONF_FILE := $(TARGET_OUT_BUILD)/autoconf.h
 $(AUTOCONF_FILE): $(CONFIG_GLOBAL_FILE)
-	@echo "Generating autoconf-merge.h"
 	@mkdir -p $(dir $@)
 	@rm -f $@
 	@$(call generate-autoconf-file,$^,$@)
@@ -153,7 +155,9 @@ ALL_BUILD_MODULES := \
 	$(foreach __mod,$(__modules), \
 		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
-$(info ALL_BUILD_MODULES=$(ALL_BUILD_MODULES))
+ifeq ("$(V)","1")
+	$(info ALL_BUILD_MODULES=$(ALL_BUILD_MODULES))
+endif
 
 # TODO : Set ALL_BUILD_MODULES ==> find the end point module (SHARED/BINARY)
 .PHONY: all
