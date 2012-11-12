@@ -31,9 +31,9 @@ FINAL_FOLDER_JAVA_PROJECT=$(TARGET_OUT_STAGING)/src/$(PROJECT_COMPAGNY_TYPE)/$(P
 FINAL_FILE_ABSTRACTION = $(FINAL_FOLDER_JAVA_PROJECT)/$(PROJECT_NAME2).java
 
 
-$(FINAL_FILE_ABSTRACTION) : $(EWOL_FOLDER)/Java/PROJECT_NAME.java $(CONFIG_GLOBAL_FILE)
+$(FINAL_FILE_ABSTRACTION) : $(EWOL_FOLDER)/sources/android/PROJECT_NAME.java $(CONFIG_GLOBAL_FILE)
 	$(Q)mkdir -p $(dir $@)
-	$(Q)cp $(EWOL_FOLDER)/Java/PROJECT_NAME.java $@
+	$(Q)cp $(EWOL_FOLDER)/sources/android/PROJECT_NAME.java $@
 	$(Q)sed -i "s|__PROJECT_ORG_TYPE__|$(PROJECT_COMPAGNY_TYPE)|" $@
 	$(Q)sed -i "s|__PROJECT_VENDOR__|$(PROJECT_COMPAGNY_NAME2)|" $@
 	$(Q)sed -i "s|__PROJECT_NAME__|$(PROJECT_NAME2)|" $@
@@ -147,10 +147,10 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	    -d $(TARGET_OUT_STAGING)/build/classes \
 	    -classpath $(PROJECT_SDK)/platforms/android-15/android.jar \
 	    $(FINAL_FILE_ABSTRACTION) \
-	    $(EWOL_FOLDER)/Java/src/org/ewol/interfaceJNI.java \
-	    $(EWOL_FOLDER)/Java/src/org/ewol/interfaceOpenGL.java \
-	    $(EWOL_FOLDER)/Java/src/org/ewol/interfaceSurfaceView.java \
-	    $(EWOL_FOLDER)/Java/src/org/ewol/interfaceAudio.java \
+	    $(EWOL_FOLDER)/sources/android/src/org/ewol/interfaceJNI.java \
+	    $(EWOL_FOLDER)/sources/android/src/org/ewol/interfaceOpenGL.java \
+	    $(EWOL_FOLDER)/sources/android/src/org/ewol/interfaceSurfaceView.java \
+	    $(EWOL_FOLDER)/sources/android/src/org/ewol/interfaceAudio.java \
 	    $(TARGET_OUT_STAGING)/src/R.java
 	
 	@echo ".dex <== .class"
