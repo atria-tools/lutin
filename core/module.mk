@@ -118,7 +118,7 @@ endif
 ## Files to copy.
 ###############################################################################
 
-ifneq ("$(LOCAL_COPY_FILES)","")
+ifneq ("$(LOCAL_COPY_FILES)$(LOCAL_COPY_FOLDERS)","")
 
 # List of all destination files
 all_copy_files :=
