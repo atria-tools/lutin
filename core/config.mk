@@ -8,12 +8,12 @@
 ###############################################################################
 
 # Tools (absolute path)
-CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/conf)
-QCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/qconf)
+CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/../tools/conf)
+MCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/../tools/mconf)
 
 
 ###############################################################################
-## Begin conf/qconf by copying configuration file to a temp .config file.
+## Begin conf/mconf by copying configuration file to a temp .config file.
 ## $1 : configuration file.
 ###############################################################################
 __begin-conf = \
@@ -24,7 +24,7 @@ __begin-conf = \
 	fi;
 
 ###############################################################################
-## End conf/qconf by copying temp .config file to configuration file.
+## End conf/mconf by copying temp .config file to configuration file.
 ## $1 : configuration file.
 ###############################################################################
 __end-conf = \
@@ -34,12 +34,12 @@ __end-conf = \
 	rm -rf $${__tmpconfdir};
 
 ###############################################################################
-## Exceute qconf/conf.
+## Exceute mconf/conf.
 ## $1 : Config.in file.
 ## $2 : options.
 ###############################################################################
 __exec-conf = (cd $$(dirname $${__tmpconf}) && $(CONF) $2 $1);
-__exec-qconf = (cd $$(dirname $${__tmpconf}) && $(QCONF) $2 $1);
+__exec-mconf = (cd $$(dirname $${__tmpconf}) && $(MCONF) $2 $1);
 
 
 #TODO : REMOVED
@@ -156,8 +156,6 @@ endef
 ## $1 : input config file.
 ## $2 : output autoconf.h file.
 ##
-## Remove CONFIG_ prefix.
-## Remove CONFIG_ in commented lines.
 ## Put lines begining with '#' between '/*' '*/'.
 ## Replace 'key=value' by '#define key value'.
 ## Replace leading ' y' by ' 1'.
@@ -168,8 +166,6 @@ define generate-autoconf-file
 	echo "conf: $(call path-from-top,$2) <== $(call path-from-top,$1)"; \
 	mkdir -p $(dir $2); \
 	sed \
-		-e 's/^CONFIG_//' \
-		-e 's/^\# CONFIG_/\# /' \
 		-e 's/^\#\(.*\)/\/*\1 *\//' \
 		-e 's/\(.*\)=\(.*\)/\#define \1 \2/' \
 		-e 's/ y$$/ 1/' \
@@ -192,7 +188,7 @@ config:
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
 		$(call __generate-config,$${__tmpconfigin}) \
 		$(call __begin-conf,$(__config)) \
-		$(call __exec-qconf,$${__tmpconfigin}) \
+		$(call __exec-mconf,$${__tmpconfigin}) \
 		$(call __end-conf,$(__config)) \
 		rm -f $${__tmpconfigin}; \
 	)
@@ -226,11 +222,6 @@ $(shell mkdir -p $(CONFIG_GLOBAL_FOLDER))
 # TODO ...
 -include $(CONFIG_GLOBAL_FILE)
 
-#automatic generation of the config file when not existed (default case):
-#.PHONY: $(CONFIG_GLOBAL_FILE)
-#$(CONFIG_GLOBAL_FILE): config-update
-#	echo "generating basic confing .. please restart"
-
 $(CONFIG_GLOBAL_FILE):
-	@#$(e rror "need to generate config : make ... config")
+	@$(error "need to generate config : make ... config")
 

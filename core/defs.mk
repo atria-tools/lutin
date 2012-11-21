@@ -278,7 +278,7 @@ is-module-registered = \
 ## $1 : module to check.
 ###############################################################################
 is-module-in-build-config = \
-	$(if $(CONFIG_BUILD_$(call get-define,$1)),$(true))
+	$(if $(BUILD_$(call get-define,$1)),$(true))
 
 
 ###############################################################################

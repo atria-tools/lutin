@@ -38,12 +38,7 @@ $(FINAL_FILE_ABSTRACTION) : $(EWOL_FOLDER)/sources/android/PROJECT_NAME.java $(C
 	$(Q)sed -i "s|__PROJECT_VENDOR__|$(PROJECT_COMPAGNY_NAME2)|" $@
 	$(Q)sed -i "s|__PROJECT_NAME__|$(PROJECT_NAME2)|" $@
 	$(Q)sed -i "s|__PROJECT_PACKAGE__|$(PROJECT_NAME2)|" $@
-ifeq ("$(CONFIG___VIDEO__OPENGL_ES_2)","y")
 	$(Q)sed -i "s|__CONF_OGL_ES_V__|2|" $@
-else
-	$(Q)sed -i "s|__CONF_OGL_ES_V__|1|" $@
-endif
-	
 
 APPL_VERSION:=$(shell git describe --tags)
 # --abbrev=0)
@@ -59,16 +54,14 @@ $(TARGET_OUT_STAGING)/AndroidManifest.xml : $(CONFIG_GLOBAL_FILE) $(TARGET_OUT_S
 	@echo  "          package=\"$(PROJECT_COMPAGNY_TYPE).$(PROJECT_COMPAGNY_NAME2).$(PROJECT_NAME2)\" " >> $@
 	@echo  "          android:versionCode=\"1\" " >> $@
 	@echo  "          android:versionName=\"$(APPL_VERSION)\"> " >> $@
-ifeq ("$(CONFIG___VIDEO__OPENGL_ES_2)","y")
 	@echo  "    <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />" >> $@
-endif
-	@echo  "    <uses-sdk android:minSdkVersion=\"$(CONFIG___EWOL_ANDROID_MINIMUM_SDK_VERSION__)\" /> " >> $@
+	@echo  "    <uses-sdk android:minSdkVersion=\"$(__EWOL_ANDROID_MINIMUM_SDK_VERSION__)\" /> " >> $@
 	@echo  "	" >> $@
 	@echo  "	<application android:label=\"$(PROJECT_NAME)\" " >> $@
 	@echo  "	             android:icon=\"@drawable/icon\" " >> $@
 	@echo  "	             > " >> $@
 	@echo  "		<activity android:name=\".$(PROJECT_NAME2)\" " >> $@
-	@echo  "		          android:label=\"$(CONFIG___EWOL_APPL_BASIC_TITLE__)\" " >> $@
+	@echo  "		          android:label=\"$(__EWOL_APPL_BASIC_TITLE__)\" " >> $@
 	@echo  "		          android:icon=\"@drawable/icon\" " >> $@
 	@echo  "		          android:configChanges=\"orientation\"> " >> $@
 	@echo  "			<intent-filter> " >> $@
@@ -77,43 +70,43 @@ endif
 	@echo  "			</intent-filter> " >> $@
 	@echo  "		</activity> " >> $@
 	@echo  "	</application> " >> $@
-ifeq ("$(CONFIG___ANDROID_PERMISSION__WRITE_EXTERNAL_STORAGE__)","y")
+ifeq ("$(__ANDROID_PERMISSION__WRITE_EXTERNAL_STORAGE__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__CAMERA__)","y")
+ifeq ("$(__ANDROID_PERMISSION__CAMERA__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.CAMERA\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__INTERNET__)","y")
+ifeq ("$(__ANDROID_PERMISSION__INTERNET__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.INTERNET\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__MODIFY_AUDIO_SETTINGS__)","y")
+ifeq ("$(__ANDROID_PERMISSION__MODIFY_AUDIO_SETTINGS__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.MODIFY_AUDIO_SETTINGS\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__READ_CALENDAR__)","y")
+ifeq ("$(__ANDROID_PERMISSION__READ_CALENDAR__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.READ_CALENDAR\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__READ_CONTACTS__)","y")
+ifeq ("$(__ANDROID_PERMISSION__READ_CONTACTS__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.READ_CONTACTS\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__READ_FRAME_BUFFER__)","y")
+ifeq ("$(__ANDROID_PERMISSION__READ_FRAME_BUFFER__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.READ_FRAME_BUFFER\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__READ_PROFILE__)","y")
+ifeq ("$(__ANDROID_PERMISSION__READ_PROFILE__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.READ_PROFILE\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__RECORD_AUDIO__)","y")
+ifeq ("$(__ANDROID_PERMISSION__RECORD_AUDIO__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.RECORD_AUDIO\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__SET_ORIENTATION__)","y")
+ifeq ("$(__ANDROID_PERMISSION__SET_ORIENTATION__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.SET_ORIENTATION\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__VIBRATE__)","y")
+ifeq ("$(__ANDROID_PERMISSION__VIBRATE__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.VIBRATE\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__ACCESS_COARSE_LOCATION__)","y")
+ifeq ("$(__ANDROID_PERMISSION__ACCESS_COARSE_LOCATION__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" /> " >> $@
 endif
-ifeq ("$(CONFIG___ANDROID_PERMISSION__ACCESS_FINE_LOCATION__)","y")
+ifeq ("$(__ANDROID_PERMISSION__ACCESS_FINE_LOCATION__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" /> " >> $@
 endif
 	@echo  "</manifest>  " >> $@
