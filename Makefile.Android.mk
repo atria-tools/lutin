@@ -218,6 +218,7 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	@# copy file in the final stage :
 	$(Q)mkdir -p $(TARGET_OUT_FINAL)/
 	$(Q)cp $(TARGET_OUT_STAGING)/$(PROJECT_NAME2).apk $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk
+	@echo "Generated out : $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk"
 
 
 
