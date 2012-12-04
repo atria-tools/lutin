@@ -45,15 +45,15 @@ final: all
 	@echo "Description: "$(PROJECT_DESCRIPTION) >> $(FINAL_FILE_CONTROL)
 	@echo "" >> $(FINAL_FILE_CONTROL)
 	# Create the PostRm
-	@echo "#!/bin/bash" > $(FINAL_FILE_POST_RM)
-	@echo "rm ~/."$(PROJECT_NAME) >> $(FINAL_FILE_POST_RM)
-	@echo "" >> $(FINAL_FILE_POST_RM)
+	@#echo "#!/bin/bash" > $(FINAL_FILE_POST_RM)
+	@#echo "rm -r ~/.local/"$(PROJECT_NAME) >> $(FINAL_FILE_POST_RM)
+	@#echo "" >> $(FINAL_FILE_POST_RM)
 	# Enable Execution in script
-	@chmod 755 $(FINAL_FILE_POST_RM)*
+	@#chmod 755 $(FINAL_FILE_POST_RM)*
 	@#chmod 755 $(PROJECT_NAME)/DEBIAN/pre*
 	@# copy licence and information : 
 	@cp -f os-Linux/README $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DOC)/README
-	@cp -f licence.txt $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DOC)/copyright
+	@cp -f license.txt $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DOC)/copyright
 	@cp -f changelog $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DOC)/changelog
 	@echo pachage : $(TARGET_OUT_STAGING)/$(PROJECT_NAME).deb
 	@cd $(TARGET_OUT_STAGING)/; dpkg-deb --build $(PROJECT_NAME)
