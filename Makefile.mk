@@ -24,8 +24,8 @@ else ifeq ($(PLATFORM), IOs)
 else ifeq ($(PLATFORM), Windows)
     
 else ifeq ($(PLATFORM), Android)
-    PROJECT_NDK:=$(PROJECT_MODULE)/android/ndk/
-    PROJECT_SDK:=$(PROJECT_MODULE)/android/sdk/
+    PROJECT_NDK:=$(PROJECT_PATH)/../android/ndk/
+    PROJECT_SDK:=$(PROJECT_PATH)/../android/sdk/
 else
     $(error you must specify a corect platform : make PLATFORM=[$(SUPPORTED_PLATFORM)])
 endif

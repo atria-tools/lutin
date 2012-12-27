@@ -7,6 +7,7 @@ include $(BUILD_SYSTEM)/core/defs.mk
 # include generic makefile :
 include $(BUILD_SYSTEM)/core/check-project-variable.mk
 
+PROJECT_NDK?=..
 
 TARGET_OS = Android
 TARGET_ARCH = ARM
@@ -201,8 +202,6 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	@echo "PassK$(PROJECT_NAME2)" >> tmpPass.boo
 	@# verbose mode : -verbose
 	$(Q)jarsigner \
-	    -sigalg MD5withRSA \
-	    -digestalg SHA1 \
 	    -keystore ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks \
 	    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
 	    alias$(PROJECT_NAME2) \
