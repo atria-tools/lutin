@@ -197,7 +197,8 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	
 	@# keytool is situated in $(JAVA_HOME)/bin ...
 	@echo "apk(Signed) <== apk"
-	@#generate the pass file :
+ifeq ("$(DEBUG)","1")
+	@#generate the pass file (debug mode does not request to have a complicated key) :
 	@echo "Pass$(PROJECT_NAME2)" > tmpPass.boo
 	@echo "PassK$(PROJECT_NAME2)" >> tmpPass.boo
 	@# verbose mode : -verbose
@@ -205,9 +206,17 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	    -keystore ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks \
 	    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
 	    alias$(PROJECT_NAME2) \
-	    < tmpPass.boo
-	
+	    < tmpPass.boo \
+	    2> /dev/null
 	$(Q)rm tmpPass.boo
+else
+	@# sign the application request loggin and password : 
+	$(Q)jarsigner \
+	    -keystore ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks \
+	    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
+	    alias$(PROJECT_NAME2)
+endif
+	
 	@echo "apk(aligned) <== apk"
 	$(Q)rm -f $(TARGET_OUT_STAGING)/$(PROJECT_NAME2).apk
 	@# verbose mode : -v
@@ -216,8 +225,8 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	    $(TARGET_OUT_STAGING)/$(PROJECT_NAME2).apk
 	@# copy file in the final stage :
 	$(Q)mkdir -p $(TARGET_OUT_FINAL)/
-	$(Q)cp $(TARGET_OUT_STAGING)/$(PROJECT_NAME2).apk $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk
 	@echo "Generated out : $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk"
+	$(Q)cp $(TARGET_OUT_STAGING)/$(PROJECT_NAME2).apk $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk
 
 
 
@@ -225,17 +234,13 @@ install:
 	@echo ------------------------------------------------------------------------
 	@echo Install : $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk
 	@echo ------------------------------------------------------------------------
-	@# $(PROJECT_SDK)/platform-tools/adb kill-server
-	@# install application
 	$(Q)sudo $(PROJECT_SDK)/platform-tools/adb install -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk
 
 uninstall:
 	@echo ------------------------------------------------------------------------
-	@echo UnInstall : $(TARGET_OUT_FINAL)/$(PROJECT_NAME2).apk
+	@echo UnInstall : $(PROJECT_NAME2)
 	@echo ------------------------------------------------------------------------
-	@echo  ... TODO ...
-	
-
+	$(Q)sudo $(PROJECT_SDK)/platform-tools/adb uninstall $(PROJECT_NAME2)
 
 log:
 	@echo ------------------------------------------------------------------------
@@ -243,3 +248,8 @@ log:
 	@echo ------------------------------------------------------------------------
 	$(Q)sudo $(PROJECT_SDK)/platform-tools/adb shell logcat
 
+shell:
+	@echo ------------------------------------------------------------------------
+	@echo Run android shell
+	@echo ------------------------------------------------------------------------
+	sudo $(PROJECT_SDK)/platform-tools/adb shell

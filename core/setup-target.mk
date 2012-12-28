@@ -95,7 +95,8 @@ endif
 # define the target OS type for the compilation system ...
 TARGET_GLOBAL_CFLAGS += -D__TARGET_OS__$(TARGET_OS)
 # basic define of the build time :
-TARGET_GLOBAL_CFLAGS += -DBUILD_TIME="\"$(shell date)\"" \
+TARGET_GLOBAL_CFLAGS += -DBUILD_TIME="\"$(shell date +%Y-%m-%d_%T)\""
+
 
 ifeq ($(DEBUG),1)
 	TARGET_GLOBAL_CFLAGS += -DDEBUG_LEVEL=3
