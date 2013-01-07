@@ -156,7 +156,7 @@ ALL_BUILD_MODULES := \
 		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
 ifeq ("$(V)","1")
-	$(info ALL_BUILD_MODULES=$(ALL_BUILD_MODULES))
+$(info ALL_BUILD_MODULES=$(ALL_BUILD_MODULES))
 endif
 
 # TODO : Set ALL_BUILD_MODULES ==> find the end point module (SHARED/BINARY)
