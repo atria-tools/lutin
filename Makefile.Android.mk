@@ -12,6 +12,7 @@ PROJECT_NDK?=..
 TARGET_OS = Android
 TARGET_ARCH = ARM
 TARGET_CROSS = $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
+TARGET_CROSS_CLANG = $(PROJECT_NDK)/toolchains/llvm-3.1/prebuilt/linux-x86/bin/
 
 TARGET_OUT_FOLDER_BINARY   := ERROR_NOTHING_MUST_BE_SET_HERE
 TARGET_OUT_FOLDER_LIBRAIRY := data/lib/armeabi
@@ -19,10 +20,18 @@ TARGET_OUT_FOLDER_DATA     := data/assets
 TARGET_OUT_FOLDER_DOC      := doc
 TARGET_OUT_PREFIX_LIBRAIRY := lib
 
+#local get the gcc version : 
 
+TMPP_CC_VERSION := $(shell $(TARGET_CROSS)gcc --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
 ANDROID_BOARD_ID = 14
 TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm/usr/include
+#TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl/stlport/stlport/
+TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl/system/include/
+#TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl/gnu-libstdc++/$(TMPP_CC_VERSION)/include/
+#TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl/gnu-libstdc++/$(TMPP_CC_VERSION)/libs/armeabi/include/
+
 TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm
+#TARGET_GLOBAL_LDLIBS_SHARED += -L$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm/usr/lib/
 
 #generic makefile
 include $(BUILD_SYSTEM)/core/main.mk
@@ -62,7 +71,11 @@ $(TARGET_OUT_STAGING)/AndroidManifest.xml : $(CONFIG_GLOBAL_FILE) $(TARGET_OUT_S
 	@echo  "	             android:icon=\"@drawable/icon\" " >> $@
 	@echo  "	             > " >> $@
 	@echo  "		<activity android:name=\".$(PROJECT_NAME2)\" " >> $@
+ifeq ("$(DEBUG)","1")
+	@echo  "		          android:label=\"$(__EWOL_APPL_BASIC_TITLE__)-debug\" " >> $@
+else
 	@echo  "		          android:label=\"$(__EWOL_APPL_BASIC_TITLE__)\" " >> $@
+endif
 	@echo  "		          android:icon=\"@drawable/icon\" " >> $@
 	@echo  "		          android:configChanges=\"orientation\"> " >> $@
 	@echo  "			<intent-filter> " >> $@
@@ -163,18 +176,34 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	
 	@# doc :
 	@# http://developer.android.com/tools/publishing/app-signing.html
-	
+ifeq ("$(DEBUG)","1")
+	@# To create the debug Key ==> for all ...
+	@#keytool -genkeypair -v -keystore $(BUILD_SYSTEM)/AndroidDebugKey.jks -storepass Pass__AndroidDebugKey -alias alias__AndroidDebugKey -keypass PassKey__AndroidDebugKey -keyalg RSA -validity 36500
+	@# use default common generic debug key:
+	@# generate the pass file (debug mode does not request to have a complicated key) :
+	@echo "Pass__AndroidDebugKey" > tmpPass.boo
+	@echo "PassKey__AndroidDebugKey" >> tmpPass.boo
+	@# verbose mode : -verbose
+	$(Q)jarsigner \
+	    -keystore $(BUILD_SYSTEM)/AndroidDebugKey.jks \
+	    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
+	    alias__AndroidDebugKey \
+	    < tmpPass.boo \
+	    2> /dev/null
+	$(Q)rm tmpPass.boo
+else
 	@# keytool is situated in $(JAVA_HOME)/bin ...
-	$(if $(wildcard ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks),$(empty), \
-		$(Q)echo "./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks <== dynamic key (NOTE : It might ask some question to generate the key for android)" ; \
-		keytool -genkeypair -v \
-		    -keystore ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks \
-		    -storepass Pass$(PROJECT_NAME2) \
-		    -alias alias$(PROJECT_NAME2) \
-		    -keypass PassK$(PROJECT_NAME2) \
+	$(if $(wildcard ./config/AndroidKey_$(PROJECT_NAME2).jks),$(empty), \
+		#TODO : call the user the pass and the loggin he want ...
+		$(Q)echo "./config/$(PROJECT_NAME2).jks <== dynamic key (NOTE : It might ask some question to generate the key for android)" ; \
+		$(Q)keytool -genkeypair -v \
+		    -keystore ./config/$(PROJECT_NAME2).jks \
+		    -alias alias_$(PROJECT_NAME2) \
 		    -keyalg RSA \
 		    -validity 365 \
 	)
+	@# note we can add : -storepass Pass$(PROJECT_NAME2)
+	@# note we can add : -keypass PassK$(PROJECT_NAME2)
 	
 	@# Question poser a ce moment, les automatiser ...
 	@# Quels sont vos prénom et nom ?
@@ -197,24 +226,11 @@ final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifes
 	
 	@# keytool is situated in $(JAVA_HOME)/bin ...
 	@echo "apk(Signed) <== apk"
-ifeq ("$(DEBUG)","1")
-	@#generate the pass file (debug mode does not request to have a complicated key) :
-	@echo "Pass$(PROJECT_NAME2)" > tmpPass.boo
-	@echo "PassK$(PROJECT_NAME2)" >> tmpPass.boo
-	@# verbose mode : -verbose
-	$(Q)jarsigner \
-	    -keystore ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks \
-	    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
-	    alias$(PROJECT_NAME2) \
-	    < tmpPass.boo \
-	    2> /dev/null
-	$(Q)rm tmpPass.boo
-else
 	@# sign the application request loggin and password : 
 	$(Q)jarsigner \
-	    -keystore ./$(PROJECT_NAME2)-$(BUILD_DIRECTORY_MODE).jks \
+	    -keystore ./config/AndroidKey_$(PROJECT_NAME2).jks \
 	    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
-	    alias$(PROJECT_NAME2)
+	    alias_$(PROJECT_NAME2)
 endif
 	
 	@echo "apk(aligned) <== apk"

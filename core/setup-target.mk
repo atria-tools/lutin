@@ -16,8 +16,8 @@ ifneq ("$(CLANG)","1")
 	TARGET_CC := $(TARGET_CROSS)gcc
 	TARGET_CXX := $(TARGET_CROSS)g++
 else
-	TARGET_CC := $(TARGET_CROSS)clang
-	TARGET_CXX := $(TARGET_CROSS)clang++
+	TARGET_CC := $(TARGET_CROSS_CLANG)clang
+	TARGET_CXX := $(TARGET_CROSS_CLANG)clang++
 endif
 TARGET_AR := $(TARGET_CROSS)ar
 TARGET_LD := $(TARGET_CROSS)ld
@@ -73,16 +73,36 @@ ifeq ("$(TARGET_OS)","Windows")
         $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
 	endif
 else ifeq ("$(TARGET_OS)","Android")
-	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ \
-	                         -fpic -ffunction-sections -funwind-tables -fstack-protector \
-	                         -Wno-psabi -march=armv5te -mtune=xscale -msoft-float -fno-exceptions -mthumb \
-	                         -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 
-	TARGET_GLOBAL_CPPFLAGS += -fno-rtti -Wa,--noexecstack
-	TARGET_GLOBAL_LDFLAGS += 
-	# remove CLANG if defined ==> TODO : Support it later ...
+	# -----------------------
+	# -- arm V5 (classicle) :
+	# -----------------------
+	#ifeq ("$(CLANG)","1")
+	#	TARGET_GLOBAL_CFLAGS += -march=arm
+	#else
+	#	TARGET_GLOBAL_CFLAGS += -march=armv5te -msoft-float -mthumb
+	#endif
+	#TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
+	# -----------------------
+	# -- arm V7 (Neon) :
+	# -----------------------
 	ifeq ("$(CLANG)","1")
-        $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
+		TARGET_GLOBAL_CFLAGS += -march=armv7
+	else
+		TARGET_GLOBAL_CFLAGS += -mfloat-abi=softfp -mfpu=neon
 	endif
+	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_7__ -D__ARM_NEON__
+	# -----------------------
+	# -- Common flags :
+	# -----------------------
+	TARGET_GLOBAL_CFLAGS +=  -fpic -ffunction-sections -funwind-tables -fstack-protector \
+	                         -Wno-psabi -mtune=xscale -fno-exceptions \
+	                         -fomit-frame-pointer -fno-strict-aliasing
+	ifneq ("$(CLANG)","1")
+		TARGET_GLOBAL_CFLAGS += -finline-limit=64 
+	endif
+	TARGET_GLOBAL_CPPFLAGS += -fno-rtti -Wa,--noexecstack
+	
+	TARGET_GLOBAL_LDFLAGS += 
 else ifeq ("$(TARGET_OS)","Linux")
 	
 else ifeq ("$(TARGET_OS)","MacOs")
