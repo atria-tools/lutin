@@ -13,10 +13,10 @@ PLATFORM?=$(DEFAULT_PLATFORM)
 
 PROJECT_PATH=$(shell pwd)
 
-PROJECT_MODULE=$(shell realpath $(PROJECT_PATH)/../)
+PROJECT_MODULE=$(shell readlink -m -n $(PROJECT_PATH)/../)
 
 ifeq ($(PLATFORM), Linux)
-    PROJECT_NDK?=$(realpath $(PROJECT_MODULE)/ewol/)
+    PROJECT_NDK?=$(shell readlink -m -n $$(PROJECT_MODULE)/ewol/)
 else ifeq ($(PLATFORM), MacOs)
     TARGET_OS=MacOs
 else ifeq ($(PLATFORM), IOs)
@@ -24,8 +24,8 @@ else ifeq ($(PLATFORM), IOs)
 else ifeq ($(PLATFORM), Windows)
     
 else ifeq ($(PLATFORM), Android)
-    PROJECT_NDK:=$(PROJECT_PATH)/../android/ndk/
-    PROJECT_SDK:=$(PROJECT_PATH)/../android/sdk/
+    PROJECT_NDK:=$(shell readlink -m -n $(PROJECT_PATH)/../android/ndk/)
+    PROJECT_SDK:=$(shell readlink -m -n $(PROJECT_PATH)/../android/sdk/)
 else
     $(error you must specify a corect platform : make PLATFORM=[$(SUPPORTED_PLATFORM)])
 endif
