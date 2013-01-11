@@ -23,7 +23,8 @@ TARGET_OUT_FOLDER_DEBIAN=$(TARGET_OUT_STAGING)/$(PROJECT_NAME2)/DEBIAN
 FINAL_FILE_CONTROL=$(TARGET_OUT_FOLDER_DEBIAN)/control
 FINAL_FILE_POST_RM=$(TARGET_OUT_FOLDER_DEBIAN)/postrm
 
-FINAL_VERSION_TAG_SHORT=$(shell git describe --tags --abbrev=0)
+FINAL_VERSION_TAG_SHORT=$(shell cat tag)
+#FINAL_VERSION_TAG_SHORT=$(shell git describe --tags --abbrev=0)
 
 
 # http://alp.developpez.com/tutoriels/debian/creer-paquet/
@@ -45,11 +46,12 @@ final: all
 	@echo "Description: "$(PROJECT_DESCRIPTION) >> $(FINAL_FILE_CONTROL)
 	@echo "" >> $(FINAL_FILE_CONTROL)
 	# Create the PostRm
-	@#echo "#!/bin/bash" > $(FINAL_FILE_POST_RM)
+	@echo "#!/bin/bash" > $(FINAL_FILE_POST_RM)
+	@echo "touch ~/."$(PROJECT_NAME) >> $(FINAL_FILE_POST_RM)
 	@#echo "rm -r ~/.local/"$(PROJECT_NAME) >> $(FINAL_FILE_POST_RM)
-	@#echo "" >> $(FINAL_FILE_POST_RM)
+	@echo "" >> $(FINAL_FILE_POST_RM)
 	# Enable Execution in script
-	@#chmod 755 $(FINAL_FILE_POST_RM)*
+	@chmod 755 $(FINAL_FILE_POST_RM)*
 	@#chmod 755 $(PROJECT_NAME)/DEBIAN/pre*
 	@# copy licence and information : 
 	@cp -f os-Linux/README $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DOC)/README
