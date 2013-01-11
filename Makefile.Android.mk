@@ -9,10 +9,11 @@ include $(BUILD_SYSTEM)/core/check-project-variable.mk
 
 PROJECT_NDK?=..
 
-TARGET_OS = Android
-TARGET_ARCH = ARM
-TARGET_CROSS = $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
-TARGET_CROSS_CLANG = $(PROJECT_NDK)/toolchains/llvm-3.1/prebuilt/linux-x86/bin/
+TARGET_OS := Android
+#TARGET_ARCH := ARM
+TARGET_ARCH := ARMv7
+TARGET_CROSS := $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
+TARGET_CROSS_CLANG := $(PROJECT_NDK)/toolchains/llvm-3.1/prebuilt/linux-x86/bin/
 
 TARGET_OUT_FOLDER_BINARY   := ERROR_NOTHING_MUST_BE_SET_HERE
 TARGET_OUT_FOLDER_LIBRAIRY := data/lib/armeabi

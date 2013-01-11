@@ -73,24 +73,29 @@ ifeq ("$(TARGET_OS)","Windows")
         $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
 	endif
 else ifeq ("$(TARGET_OS)","Android")
-	# -----------------------
-	# -- arm V5 (classicle) :
-	# -----------------------
-	#ifeq ("$(CLANG)","1")
-	#	TARGET_GLOBAL_CFLAGS += -march=arm
-	#else
-	#	TARGET_GLOBAL_CFLAGS += -march=armv5te -msoft-float -mthumb
-	#endif
-	#TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
-	# -----------------------
-	# -- arm V7 (Neon) :
-	# -----------------------
-	ifeq ("$(CLANG)","1")
-		TARGET_GLOBAL_CFLAGS += -march=armv7
+	ifeq ("$(TARGET_ARCH)","ARM")
+		# -----------------------
+		# -- arm V5 (classicle) :
+		# -----------------------
+		ifeq ("$(CLANG)","1")
+			TARGET_GLOBAL_CFLAGS += -march=arm
+		else
+			TARGET_GLOBAL_CFLAGS += -march=armv5te -msoft-float -mthumb
+		endif
+		TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
 	else
-		TARGET_GLOBAL_CFLAGS += -mfloat-abi=softfp -mfpu=neon
+		# -----------------------
+		# -- arm V7 (Neon) :
+		# -----------------------
+		ifeq ("$(CLANG)","1")
+			TARGET_GLOBAL_CFLAGS += -march=armv7
+		else
+			TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
+			#TARGET_GLOBAL_CFLAGS += -march=armv7-a -mtune=cortex-a8 -mfpu=neon -ftree-vectorize -mfloat-abi=softfp
+			TARGET_GLOBAL_LDFLAGS += -mfpu=neon -mfloat-abi=softfp
+		endif
+		TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_7__ -D__ARM_NEON__
 	endif
-	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_7__ -D__ARM_NEON__
 	# -----------------------
 	# -- Common flags :
 	# -----------------------
@@ -102,7 +107,7 @@ else ifeq ("$(TARGET_OS)","Android")
 	endif
 	TARGET_GLOBAL_CPPFLAGS += -fno-rtti -Wa,--noexecstack
 	
-	TARGET_GLOBAL_LDFLAGS += 
+	
 else ifeq ("$(TARGET_OS)","Linux")
 	
 else ifeq ("$(TARGET_OS)","MacOs")
