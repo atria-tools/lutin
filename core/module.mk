@@ -20,7 +20,9 @@ LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 
 # Assemble the list of targets to create PRIVATE_ variables for.
-LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) clean-$(LOCAL_MODULE)
+LOCAL_TARGETS := \
+	$(LOCAL_BUILD_MODULE) \
+	clean-$(LOCAL_MODULE)
 
 # Add external libraries used by static libraries
 LOCAL_EXTERNAL_LIBRARIES += \

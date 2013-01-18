@@ -8,12 +8,12 @@
 ###############################################################################
 
 # Tools (absolute path)
-CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/../tools/conf)
-MCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/../tools/mconf)
+CONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/../kconfig/bin-linux-x86/conf)
+QCONF := KCONFIG_NOTIMESTAMP=1 $(call fullpath,$(BUILD_SYSTEM)/../kconfig/bin-linux-x86/qconf)
 
 
 ###############################################################################
-## Begin conf/mconf by copying configuration file to a temp .config file.
+## Begin conf/qconf by copying configuration file to a temp .config file.
 ## $1 : configuration file.
 ###############################################################################
 __begin-conf = \
@@ -24,7 +24,7 @@ __begin-conf = \
 	fi;
 
 ###############################################################################
-## End conf/mconf by copying temp .config file to configuration file.
+## End conf/qconf by copying temp .config file to configuration file.
 ## $1 : configuration file.
 ###############################################################################
 __end-conf = \
@@ -34,12 +34,12 @@ __end-conf = \
 	rm -rf $${__tmpconfdir};
 
 ###############################################################################
-## Exceute mconf/conf.
+## Exceute qconf/conf.
 ## $1 : Config.in file.
 ## $2 : options.
 ###############################################################################
 __exec-conf = (cd $$(dirname $${__tmpconf}) && $(CONF) $2 $1);
-__exec-mconf = (cd $$(dirname $${__tmpconf}) && $(MCONF) $2 $1);
+__exec-qconf = (cd $$(dirname $${__tmpconf}) && $(QCONF) $2 $1);
 
 
 #TODO : REMOVED
@@ -166,6 +166,8 @@ define generate-autoconf-file
 	echo "conf: $(call path-from-top,$2) <== $(call path-from-top,$1)"; \
 	mkdir -p $(dir $2); \
 	sed \
+		-e 's/^CONFIG_//' \
+		-e 's/^\# CONFIG_/\# /' \
 		-e 's/^\#\(.*\)/\/*\1 *\//' \
 		-e 's/\(.*\)=\(.*\)/\#define \1 \2/' \
 		-e 's/ y$$/ 1/' \
@@ -183,12 +185,13 @@ CONFIG_GLOBAL_FILE := $(CONFIG_GLOBAL_FOLDER)/$(TARGET_OS).config
 # Display the global configuration
 .PHONY: config
 config:
+	@echo "Call config : $(CONFIG_GLOBAL_FILE)"
 	@( \
 		__tmpconfigin=$$(mktemp); \
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
 		$(call __generate-config,$${__tmpconfigin}) \
 		$(call __begin-conf,$(__config)) \
-		$(call __exec-mconf,$${__tmpconfigin}) \
+		$(call __exec-qconf,$${__tmpconfigin}) \
 		$(call __end-conf,$(__config)) \
 		rm -f $${__tmpconfigin}; \
 	)
@@ -196,6 +199,7 @@ config:
 # Update the global configuration by selecting new option at their default value
 .PHONY: config-update
 config-update:
+	@echo "Configuration updating : $(CONFIG_GLOBAL_FILE)";
 	@( \
 		__tmpconfigin=$$(mktemp); \
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
@@ -214,7 +218,7 @@ config-check:
 		$(call __check-config,$${__tmpconfigin},$(__config)) \
 		rm -f $${__tmpconfigin}; \
 	)
-	@echo "Global configuration is up to date";
+	@echo "Configuration is up to date : $(CONFIG_GLOBAL_FILE)";
 
 # create basic folder :
 $(shell mkdir -p $(CONFIG_GLOBAL_FOLDER))

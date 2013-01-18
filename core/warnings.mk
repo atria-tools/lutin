@@ -16,6 +16,10 @@ ifneq (0,$(shell expr $(TARGET_CC_VERSION) \>= 4.0.0))
 	COMMON_FLAGS_WARNINGS += -fdiagnostics-show-option
 endif
 
+###############################################################################
+## Common flags.
+###############################################################################
+
 ###COMMON_FLAGS_WARNINGS += -Wall
 #COMMON_FLAGS_WARNINGS += -Wextra
 ###COMMON_FLAGS_WARNINGS += -Wno-unused -Wno-unused-parameter -Wunused-value -Wunused-variable -Wunused-label

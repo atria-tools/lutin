@@ -11,14 +11,23 @@
 ## Some generic define
 ###############################################################################
 
+# Empty variable and space (useful for pretty prinf of messages)
 quote := "
 #"
 simplequote := '
 #'
-coma := ,
 empty :=
 space := $(empty) $(empty)
 space4 := $(space)$(space)$(space)$(space)
+
+# Other special characters definition (useful to avoid parsing error in functions)
+dollar = $$
+comma = ,
+colon = :
+left-paren = (
+right-paren = )
+
+# True/False values. Any non-empty test is considered as True
 true := T
 false :=
 
@@ -45,16 +54,16 @@ my-dir = $(call fullpath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 not = $(if $1,$(false),$(true))
 
 # Return the first element of a list.
-# $ 1 : input list.
+# $1 : input list.
 first = $(firstword $1)
 
 # Return the list with the first element removed.
-# $ 1 : input list.
+# $1 : input list.
 rest = $(wordlist 2,$(words $1),$1)
 
 # Get a path relative to top directory.
 # $1 : full path to convert.
-path-from-top = $(patsubst $(TOP_DIR)%,.%,$1)
+path-from-top = $(patsubst $(TOP_DIR)/%,%,$1)
 
 # Translate characters.
 # $1 : text to convert.
@@ -94,6 +103,16 @@ remove-quotes = $(strip $(subst ",,$1))
 check-pwd-is-top-dir = \
 	$(if $(patsubst $(TOP_DIR)%,%,$(shell pwd)), \
 		$(error Not at the top directory))
+
+# Determine if a path is absolute.
+# It simply checks if the path starts with a '/'
+# $1 : path to check.
+is-path-absolute = $(strip $(call not,$(patsubst /%,,$1)))
+
+# Determine if a path is a directory. This check does not look in the
+# filesystem, it just checks if the path ends with a '/'.
+# $1 : path to check.
+is-path-dir = $(strip $(call not,$(patsubst %/,,$1)))
 
 # Compare 2 strings for equality.
 # $1 : first string.
@@ -140,7 +159,7 @@ modules-LOCALS += SRC_FILES
 modules-LOCALS += STATIC_LIBRARIES
 
 # Static libraries that you want to include as a whole in your module
-# To generate a .so for ex
+# To generate a '.so' from a '.a' for ex
 # Names of modules in the build system, without path/prefix/suffix
 modules-LOCALS += WHOLE_STATIC_LIBRARIES
 
@@ -278,7 +297,7 @@ is-module-registered = \
 ## $1 : module to check.
 ###############################################################################
 is-module-in-build-config = \
-	$(if $(BUILD_$(call get-define,$1)),$(true))
+	$(if $(CONFIG_BUILD_$(call get-define,$1)),$(true))
 
 
 ###############################################################################
@@ -660,7 +679,7 @@ define do-copy-file
 $(Q)cp -fp $< $@
 endef
 
-# Define a rule to copy a file.  For use via $(eval).
+# Define a rule to copy a file. For use via $(eval).
 # $(1) : source file
 # $(2) : destination file
 define copy-one-file

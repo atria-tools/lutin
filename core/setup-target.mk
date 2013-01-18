@@ -73,6 +73,7 @@ ifeq ("$(TARGET_OS)","Windows")
         $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
 	endif
 else ifeq ("$(TARGET_OS)","Android")
+	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
 	ifeq ("$(TARGET_ARCH)","ARM")
 		# -----------------------
 		# -- arm V5 (classicle) :
@@ -80,9 +81,8 @@ else ifeq ("$(TARGET_OS)","Android")
 		ifeq ("$(CLANG)","1")
 			TARGET_GLOBAL_CFLAGS += -march=arm
 		else
-			TARGET_GLOBAL_CFLAGS += -march=armv5te -msoft-float -mthumb
+			TARGET_GLOBAL_CFLAGS += -march=armv5te -msoft-float
 		endif
-		TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
 	else
 		# -----------------------
 		# -- arm V7 (Neon) :
@@ -90,12 +90,15 @@ else ifeq ("$(TARGET_OS)","Android")
 		ifeq ("$(CLANG)","1")
 			TARGET_GLOBAL_CFLAGS += -march=armv7
 		else
+			#TARGET_GLOBAL_CFLAGS += -march=armv7-a -mtune=cortex-a8
 			TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
 			#TARGET_GLOBAL_CFLAGS += -march=armv7-a -mtune=cortex-a8 -mfpu=neon -ftree-vectorize -mfloat-abi=softfp
 			TARGET_GLOBAL_LDFLAGS += -mfpu=neon -mfloat-abi=softfp
 		endif
 		TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_7__ -D__ARM_NEON__
 	endif
+	# the -mthumb must be set for all the android produc, some ot the not work coretly without this one ... (all android code is generated with this flags)
+	TARGET_GLOBAL_CFLAGS += -mthumb
 	# -----------------------
 	# -- Common flags :
 	# -----------------------
