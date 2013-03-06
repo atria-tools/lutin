@@ -122,11 +122,11 @@ ifeq ("$(CONFIG___ANDROID_PERMISSION__ACCESS_FINE_LOCATION__)","y")
 	@echo  "	<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" /> " >> $@
 endif
 	@echo  "</manifest>  " >> $@
-
+	
 
 javaclean:
 	$(Q)mkdir -p $(FINAL_FOLDER_JAVA_PROJECT)/
-
+	
 
 
 final : javaclean $(FINAL_FILE_ABSTRACTION) $(TARGET_OUT_STAGING)/AndroidManifest.xml
@@ -191,8 +191,8 @@ ifeq ("$(DEBUG)","1")
 	$(Q)rm tmpPass.boo
 else
 	@# keytool is situated in $(JAVA_HOME)/bin ...
+	@#TODO : call the user the pass and the loggin he want ...
 	$(if $(wildcard ./config/AndroidKey_$(PROJECT_NAME2).jks),$(empty), \
-		#TODO : call the user the pass and the loggin he want ...
 		$(Q)echo "./config/$(PROJECT_NAME2).jks <== dynamic key (NOTE : It might ask some question to generate the key for android)" ; \
 		$(Q)keytool -genkeypair -v \
 		    -keystore ./config/$(PROJECT_NAME2).jks \
