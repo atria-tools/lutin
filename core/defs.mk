@@ -38,7 +38,11 @@ false :=
 
 # Get full path.
 # $1 : path to extend.
-fullpath = $(shell readlink -m -n $1)
+ifneq ("HOST_HAS_READLINK","true")
+fullpath = $1
+else
+fullpath = $(shell readlink -n $1)
+endif
 
 # Figure out where we are
 # It returns the full path without trailing '/'

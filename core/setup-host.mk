@@ -45,9 +45,17 @@ ifneq ("$(shell echo $$OSTYPE | grep msys)","")
 	HOST_OS := Windows
 	HOST_EXE_SUFFIX := .exe
 	HOST_SHARED_LIB_SUFFIX := .dll
+	HOST_HAS_READLINK := true
 else
-	HOST_OS := Linux
+	ifneq ("$(shell echo $$OSTYPE | grep darwin)","")
+		HOST_OS := MacOs
+		HOST_SHARED_LIB_SUFFIX := .dylib
+		HOST_HAS_READLINK := false
+	else
+		HOST_OS := Linux
+		HOST_SHARED_LIB_SUFFIX := .so
+		HOST_HAS_READLINK := true
+	endif
 	HOST_EXE_SUFFIX :=
-	HOST_SHARED_LIB_SUFFIX := .so
 endif
 

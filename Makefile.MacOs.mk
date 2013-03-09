@@ -11,6 +11,7 @@ include $(BUILD_SYSTEM)/core/check-project-variable.mk
 
 # for MAcOSX we need to FORCE CLANG
 CLANG:=1
+$(info =============>CLANG=$(CLANG))
 # ewemple of a cross compiler :
 # http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 # http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
