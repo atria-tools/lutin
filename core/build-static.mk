@@ -1,10 +1,8 @@
 ###############################################################################
-## @file static.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Register a static library (can be build).
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 LOCAL_MODULE_CLASS := STATIC_LIBRARY

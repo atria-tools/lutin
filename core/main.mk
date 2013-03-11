@@ -1,51 +1,11 @@
 ###############################################################################
-## @file main.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Main Makefile.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
-###############################################################################
-## General setup.
-###############################################################################
 
-# Make sure SHELL is correctly set
-SHELL := /bin/bash
-
-# This is the default target. It must be the first declared target.
-all:
-
-# Turns off suffix rules built into make
-.SUFFIXES:
-
-# Overridable settings
-V := 0
-W := 0
-# debug mode of the software
-DEBUG := 0
-# compilation done with Clang system instead of gcc
-CLANG := 0
-
-# Quiet command if V is 0
-ifeq ("$(V)","0")
-  Q := @
-endif
-
-###############################################################################
-## Build system setup.
-###############################################################################
-
-# Directories (full path)
-TOP_DIR := $(shell pwd)
-BUILD_SYSTEM := $(BUILD_SYSTEM)/core
-
-ifeq ("$(DEBUG)","1")
-	BUILD_DIRECTORY_MODE := debug
-else
-	BUILD_DIRECTORY_MODE := release
-endif
 
 # Setup configuration
 include $(BUILD_SYSTEM)/setup-host.mk

@@ -1,16 +1,11 @@
 ###############################################################################
-## @file setup-host.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
-# check if the user does not decide to force an other HOST_OS
-ifneq ("$(HOST_OS)","")
-	$(error User must not define $(HOST_OS))
-endif
-
-###############################################################################
+##############################################################################
 ## Tools for host.
 ###############################################################################
 
@@ -41,21 +36,20 @@ HOST_GLOBAL_LDLIBS ?=
 HOST_GLOBAL_LDLIBS_SHARED ?=
 
 # Host OS
-ifneq ("$(shell echo $$OSTYPE | grep msys)","")
-	HOST_OS := Windows
+ifeq ("$(HOST_OS)","Windows")
 	HOST_EXE_SUFFIX := .exe
 	HOST_SHARED_LIB_SUFFIX := .dll
-	HOST_HAS_READLINK := true
-else
-	ifneq ("$(shell echo $$OSTYPE | grep darwin)","")
-		HOST_OS := MacOs
-		HOST_SHARED_LIB_SUFFIX := .dylib
-		HOST_HAS_READLINK := false
-	else
-		HOST_OS := Linux
-		HOST_SHARED_LIB_SUFFIX := .so
-		HOST_HAS_READLINK := true
-	endif
+else ifeq ("$(HOST_OS)","MacOs")
 	HOST_EXE_SUFFIX :=
+	HOST_SHARED_LIB_SUFFIX := .dylib
+else ifeq ("$(HOST_OS)","IOs")
+	$(error HOST_OS=$(HOST_OS) ==> not supported for compilation ... )
+else ifeq ("$(HOST_OS)","Linux")
+	HOST_EXE_SUFFIX :=
+	HOST_SHARED_LIB_SUFFIX := .so
+else ifeq ("$(HOST_OS)","Android")
+	$(error HOST_OS=$(HOST_OS) ==> not supported for compilation ... )
+else
+	$(error HOST_OS=$(HOST_OS) ==> Unknow OS for compilation ... )
 endif
 

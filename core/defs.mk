@@ -1,10 +1,8 @@
 ###############################################################################
-## @file defs.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## This file contains macros used by other makefiles.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 ###############################################################################
@@ -38,10 +36,10 @@ false :=
 
 # Get full path.
 # $1 : path to extend.
-ifneq ("HOST_HAS_READLINK","true")
+ifneq ("$(HOST_HAS_READLINK)","true")
 fullpath = $1
 else
-fullpath = $(shell readlink -n $1)
+fullpath = $(shell readlink -m -n $1)
 endif
 
 # Figure out where we are

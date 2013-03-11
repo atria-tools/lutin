@@ -1,10 +1,8 @@
 ###############################################################################
-## @file executable.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Register an executable (can be build).
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 LOCAL_MODULE_CLASS := EXECUTABLE

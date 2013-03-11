@@ -1,10 +1,8 @@
 ###############################################################################
-## @file rules.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Generate rules for building an executable or library.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 # Intermediate/Build directory

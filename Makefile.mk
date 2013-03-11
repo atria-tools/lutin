@@ -1,35 +1,83 @@
+###############################################################################
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project standard Build system
+## @copyright BSDv3
+###############################################################################
 
-# get the local dir in a good form :
+###############################################################################
+## General setup.
+###############################################################################
+
+# Make sure SHELL is correctly set
+SHELL := /bin/bash
+
+# This is the default target. It must be the first declared target.
+all:
+
+# Turns off suffix rules built into make
+.SUFFIXES:
+
+# Quiet command if V is 0
+ifneq ("$(V)","1")
+  Q := @
+endif
+
+###############################################################################
+## Basic PATHS.
+###############################################################################
+
+# Directories (full path)
+TOP_DIR := $(shell pwd)
 #BUILD_SYSTEM := $(shell readlink -m -n $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
-BUILD_SYSTEM := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+BUILD_SYSTEM_BASE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+BUILD_SYSTEM := $(BUILD_SYSTEM_BASE)/core
+
+###############################################################################
+## Basic configurations.
+###############################################################################
+
+# Determine the Host-Os type :
+include $(BUILD_SYSTEM)/setup-host-define-type.mk
+
+# Setup macros definitions :
+include $(BUILD_SYSTEM)/defs.mk
+
+# include generic makefile :
+include $(BUILD_SYSTEM)/check-project-variable.mk
 
 ###############################################################################
 ### Platform specificity :                                                  ###
 ###############################################################################
 SUPPORTED_PLATFORM=Linux Windows MacOs IOs Android
-DEFAULT_PLATFORM=Linux
+# By default we build for the current platform
+DEFAULT_PLATFORM=$(HOST_OS)
 
 # default platform can be overridden
 PLATFORM?=$(DEFAULT_PLATFORM)
 
 PROJECT_PATH=$(shell pwd)
 
-PROJECT_MODULE=$(shell readlink -n $(PROJECT_PATH)/../)
+PROJECT_MODULE=$(call fullpath,$(PROJECT_PATH)/../)
 
-ifeq ($(PLATFORM), Linux)
-    PROJECT_NDK?=$(shell readlink -n $$(PROJECT_MODULE)/ewol/)
-else ifeq ($(PLATFORM), MacOs)
-    TARGET_OS=MacOs
-    PROJECT_NDK?=$$(PROJECT_MODULE)/ewol/
-else ifeq ($(PLATFORM), IOs)
-    
-else ifeq ($(PLATFORM), Windows)
-    
-else ifeq ($(PLATFORM), Android)
-    PROJECT_NDK:=$(shell readlink -n $(PROJECT_PATH)/../android/ndk/)
-    PROJECT_SDK:=$(shell readlink -n $(PROJECT_PATH)/../android/sdk/)
-else
+ifeq ($(filter $(PLATFORM), $(SUPPORTED_PLATFORM)), )
     $(error you must specify a corect platform : make PLATFORM=[$(SUPPORTED_PLATFORM)])
 endif
 
-include $(BUILD_SYSTEM)/Makefile.$(PLATFORM).mk
+# define the target OS of this system
+TARGET_OS:=$(PLATFORM)
+
+
+
+###############################################################################
+## Build system setup.
+###############################################################################
+
+ifeq ("$(DEBUG)","1")
+	BUILD_DIRECTORY_MODE := debug
+else
+	BUILD_DIRECTORY_MODE := release
+endif
+
+
+include $(BUILD_SYSTEM_BASE)/Makefile.$(PLATFORM).mk

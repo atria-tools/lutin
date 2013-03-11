@@ -1,10 +1,8 @@
 ###############################################################################
-## @file config.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Configuration management.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 # Tools (absolute path)

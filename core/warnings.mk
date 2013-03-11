@@ -1,10 +1,8 @@
 ###############################################################################
-## @file warnings.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Setup warning flags.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 COMMON_FLAGS_WARNINGS :=

@@ -1,10 +1,8 @@
 ###############################################################################
-## @file shared.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Register a shared library (can be build).
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 LOCAL_MODULE_CLASS := SHARED_LIBRARY

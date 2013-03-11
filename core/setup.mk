@@ -1,10 +1,9 @@
 ###############################################################################
-## @file setup.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
-
 ###############################################################################
 ## Make sure that there are no spaces in the absolute path; the build system
 ## can't deal with them.

@@ -1,10 +1,8 @@
 ###############################################################################
-## @file clearvars.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Clear out values of all variables used by rule templates.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 # Do NOT clear LOCAL_PATH, it is set BEFORE including this makefile

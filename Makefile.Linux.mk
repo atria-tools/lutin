@@ -1,11 +1,9 @@
-
-
-# Setup macros definitions
-include $(BUILD_SYSTEM)/core/defs.mk
-
-# include generic makefile :
-include $(BUILD_SYSTEM)/core/check-project-variable.mk
-
+###############################################################################
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project standard Build system
+## @copyright BSDv3
+###############################################################################
 
 TARGET_OUT_FOLDER_BINARY   := $(PROJECT_NAME2)/usr/bin
 TARGET_OUT_FOLDER_LIBRAIRY := $(PROJECT_NAME2)/usr/lib
@@ -15,7 +13,7 @@ TARGET_OUT_PREFIX_LIBRAIRY :=
 
 
 # include generic makefile :
-include $(BUILD_SYSTEM)/core/main.mk
+include $(BUILD_SYSTEM)/main.mk
 
 
 TARGET_OUT_FOLDER_DEBIAN=$(TARGET_OUT_STAGING)/$(PROJECT_NAME2)/DEBIAN

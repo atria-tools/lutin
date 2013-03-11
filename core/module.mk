@@ -1,10 +1,8 @@
 ###############################################################################
-## @file module.mk
 ## @author Edouard DUPIN
 ## @date 17-08-2012
-## @project EWOL
-##
-## Build a module.
+## @project standard Build system
+## @copyright BSDv3
 ###############################################################################
 
 # Bring back all LOCAL_XXX variables defined by LOCAL_MODULE

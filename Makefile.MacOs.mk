@@ -1,13 +1,9 @@
-
-
-
-# Setup macros definitions
-include $(BUILD_SYSTEM)/core/defs.mk
-
-# include generic makefile :
-include $(BUILD_SYSTEM)/core/check-project-variable.mk
-
-
+###############################################################################
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project standard Build system
+## @copyright BSDv3
+###############################################################################
 
 # for MAcOSX we need to FORCE CLANG
 CLANG:=1
@@ -25,7 +21,7 @@ TARGET_OUT_PREFIX_LIBRAIRY :=
 
 
 # include generic makefile :
-include $(BUILD_SYSTEM)/core/main.mk
+include $(BUILD_SYSTEM)/main.mk
 
 
 FINAL_FOLDER=         $(TARGET_OUT_FINAL)/$(PROJECT_NAME).app/Contents

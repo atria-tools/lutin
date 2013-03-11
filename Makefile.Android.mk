@@ -1,15 +1,20 @@
+###############################################################################
+## @author Edouard DUPIN
+## @date 17-08-2012
+## @project standard Build system
+## @copyright BSDv3
+###############################################################################
 
+# Define SDK and NDK folder for Android compilation tools and packager tools :
+ifeq ("$(PROJECT_NDK)","")
+    PROJECT_NDK:=$(call fullpath,$(PROJECT_PATH)/../android/ndk/)
+    $(info Auto define android NDK project to : $(PROJECT_NDK))
+endif
+ifeq ("$(PROJECT_NDK)","")
+    PROJECT_SDK:=$(call fullpath,$(PROJECT_PATH)/../android/sdk/)
+    $(info Auto define Android SDK project to : $(PROJECT_SDK))
+endif
 
-
-# Setup macros definitions
-include $(BUILD_SYSTEM)/core/defs.mk
-
-# include generic makefile :
-include $(BUILD_SYSTEM)/core/check-project-variable.mk
-
-PROJECT_NDK?=..
-
-TARGET_OS := Android
 #TARGET_ARCH := ARM
 TARGET_ARCH := ARMv7
 TARGET_CROSS := $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
