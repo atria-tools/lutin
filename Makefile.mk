@@ -47,7 +47,13 @@ include $(BUILD_SYSTEM)/defs.mk
 include $(BUILD_SYSTEM)/check-project-variable.mk
 
 ###############################################################################
-### Platform specificity :                                                  ###
+## Platform specificity :
+##     - Linux 
+##     - Windows
+##     - MacOs
+##     - IOs
+##     - Android
+##     - ... 
 ###############################################################################
 SUPPORTED_PLATFORM=Linux Windows MacOs IOs Android
 # By default we build for the current platform
@@ -61,7 +67,10 @@ PROJECT_PATH=$(shell pwd)
 PROJECT_MODULE=$(call fullpath,$(PROJECT_PATH)/../)
 
 ifeq ($(filter $(PLATFORM), $(SUPPORTED_PLATFORM)), )
-    $(error you must specify a corect platform : make PLATFORM=[$(SUPPORTED_PLATFORM)])
+    OTHER_BORAD=true
+    ifeq ("$(shell ls ./Makefile.$(PLATFORM).mk)","")
+        $(error you must specify a corect platform : make PLATFORM=[$(SUPPORTED_PLATFORM) ...])
+    endif
 endif
 
 # define the target OS of this system
@@ -79,5 +88,8 @@ else
 	BUILD_DIRECTORY_MODE := release
 endif
 
-
-include $(BUILD_SYSTEM_BASE)/Makefile.$(PLATFORM).mk
+ifeq ("$(OTHER_BORAD)","true")
+    include ./Makefile.$(PLATFORM).mk
+else
+    include $(BUILD_SYSTEM_BASE)/Makefile.$(PLATFORM).mk
+endif
