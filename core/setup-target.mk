@@ -42,21 +42,6 @@ TARGET_GLOBAL_CFLAGS_THUMB ?=
 TARGET_PCH_FLAGS ?=
 TARGET_DEFAULT_ARM_MODE ?= THUMB
 
-# Target OS : default to HOST_OS unless set
-ifndef TARGET_OS
-	TARGET_OS := $(HOST_OS)
-endif
-
-# Exe/dll suffix under mingw
-TARGET_STATIC_LIB_SUFFIX := .a
-ifeq ("$(TARGET_OS)","Windows")
-	TARGET_EXE_SUFFIX := .exe
-	TARGET_SHARED_LIB_SUFFIX := .dll
-else
-	TARGET_EXE_SUFFIX :=
-	TARGET_SHARED_LIB_SUFFIX := .so
-endif
-
 ifeq ("$(TARGET_OS)","Windows")
 	# may be overridden in make command line
 	STATIC := 1
@@ -67,7 +52,7 @@ ifeq ("$(TARGET_OS)","Windows")
 	endif
 	# remove CLANG if defined
 	ifeq ("$(CLANG)","1")
-        $(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
+		$(error CLANG is not supported on $(TARGET_OS) platform ==> disable it)
 	endif
 else ifeq ("$(TARGET_OS)","Android")
 	TARGET_GLOBAL_CFLAGS += -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__
@@ -112,6 +97,44 @@ else ifeq ("$(TARGET_OS)","Linux")
 	
 else ifeq ("$(TARGET_OS)","MacOs")
 	
+else ifeq ("$(TARGET_OS)","IOs")
+	
+endif
+
+
+TARGET_STATIC_LIB_SUFFIX := .a
+ifeq ("$(TARGET_OS)","Windows")
+	TARGET_EXE_SUFFIX := .exe
+	TARGET_SHARED_LIB_SUFFIX := .dll
+	TARGET_OUT_FOLDER_BINARY   := 
+	TARGET_OUT_FOLDER_LIBRAIRY := lib
+	TARGET_OUT_FOLDER_DATA     := data
+	TARGET_OUT_FOLDER_DOC      := doc
+	TARGET_OUT_PREFIX_LIBRAIRY := 
+else ifeq ("$(TARGET_OS)","Android")
+	TARGET_EXE_SUFFIX :=
+	TARGET_SHARED_LIB_SUFFIX := .so
+	TARGET_OUT_FOLDER_BINARY   := ERROR_NOTHING_MUST_BE_SET_HERE
+	TARGET_OUT_FOLDER_LIBRAIRY := data/lib/armeabi
+	TARGET_OUT_FOLDER_DATA     := data/assets
+	TARGET_OUT_FOLDER_DOC      := doc
+	TARGET_OUT_PREFIX_LIBRAIRY := lib
+else ifeq ("$(TARGET_OS)","Linux")
+	TARGET_EXE_SUFFIX :=
+	TARGET_SHARED_LIB_SUFFIX := .so
+	TARGET_OUT_FOLDER_BINARY   := $(PROJECT_NAME2)/usr/bin
+	TARGET_OUT_FOLDER_LIBRAIRY := $(PROJECT_NAME2)/usr/lib
+	TARGET_OUT_FOLDER_DATA     := $(PROJECT_NAME2)/usr/share/$(PROJECT_NAME2)
+	TARGET_OUT_FOLDER_DOC      := $(PROJECT_NAME2)/usr/share/doc
+	TARGET_OUT_PREFIX_LIBRAIRY := 
+else ifeq ("$(TARGET_OS)","MacOs")
+	TARGET_EXE_SUFFIX :=
+	TARGET_SHARED_LIB_SUFFIX := .dylib
+	TARGET_OUT_FOLDER_BINARY   := MacOS
+	TARGET_OUT_FOLDER_LIBRAIRY := lib
+	TARGET_OUT_FOLDER_DATA     := Resources
+	TARGET_OUT_FOLDER_DOC      := doc
+	TARGET_OUT_PREFIX_LIBRAIRY := 
 else ifeq ("$(TARGET_OS)","IOs")
 	
 endif

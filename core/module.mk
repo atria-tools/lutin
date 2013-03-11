@@ -15,8 +15,11 @@ copy_to_staging := 0
 LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 
 # Full path to staging module
+ifeq ("$(LOCAL_MODULE_CLASS)","STATIC_LIBRARY")
+LOCAL_STAGING_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
+else
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
-
+endif
 # Assemble the list of targets to create PRIVATE_ variables for.
 LOCAL_TARGETS := \
 	$(LOCAL_BUILD_MODULE) \
@@ -68,7 +71,7 @@ include $(BUILD_RULES)
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
 
-copy_to_staging := 1
+copy_to_staging := 0
 
 endif
 
@@ -130,7 +133,7 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __dst := $(TARGET_OUT_STAGING)/$(TARGET_OUT_FOLDER_DATA)/$(word 2,$(__pair2))) \
 	$(if $(__src), \
 		$(eval all_copy_files += $(__dst)) \
-		$(eval $(call copy-one-file,$(__src),$(__dst)) )\
+		$(eval $(call copy-one-file,$(call fullpath,$(__src)),$(__dst)) )\
 		, \
 		$(info copy: $(LOCAL_MODULE) <== warning: no file named: $(word 1,$(__pair2)) ) \
 	) \
@@ -146,7 +149,7 @@ $(foreach __pair,$(LOCAL_COPY_FOLDERS), \
 		$(foreach __file_src,$(__list_file_src), \
 			$(eval __file_dest := $(__folder_dest)/$(notdir $(__file_src))) \
 			$(eval all_copy_files += $(__file_dest)) \
-			$(eval $(call copy-one-file,$(__file_src),$(__file_dest))) \
+			$(eval $(call copy-one-file,$(call fullpath,$(__file_src)),$(__file_dest))) \
 		) \
 		, \
 		$(info copy: $(LOCAL_MODULE) <== warning: no file named: $(word 1,$(__pair2)) ) \

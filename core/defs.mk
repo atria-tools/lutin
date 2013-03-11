@@ -644,14 +644,26 @@ $(Q)$(TARGET_CXX) \
 endef
 
 ###############################################################################
-## Commands for running gcc to link an executable.
+## Commands for stripping an executable. (dependeing of the debug mode requested)
 ###############################################################################
 
+# strip the current output file in not debug mode ==> smallest binary
+ifneq ("$(DEBUG)","1")
+define strip-executable
+$(Q)$(TARGET_STRIP) $@
+endef
+else
+define strip-executable
+endef
+endif
+
+###############################################################################
+## Commands for running gcc to link an executable.
+###############################################################################
 define transform-o-to-executable
 @mkdir -p $(dir $@)
 @echo "Executable: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
-@# TODO : Set LD ...
 $(Q)$(TARGET_CXX) \
 	-o $@ \
 	$(TARGET_GLOBAL_LDFLAGS) \
@@ -668,6 +680,7 @@ $(Q)$(TARGET_CXX) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	$(PRIVATE_LDLIBS) \
 	$(TARGET_GLOBAL_LDLIBS)
+$(call strip-executable)
 endef
 
 ###############################################################################

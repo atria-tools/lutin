@@ -5,11 +5,7 @@
 ## @copyright BSDv3
 ###############################################################################
 
-TARGET_OUT_FOLDER_BINARY   := $(PROJECT_NAME2)/usr/bin
-TARGET_OUT_FOLDER_LIBRAIRY := $(PROJECT_NAME2)/usr/lib
-TARGET_OUT_FOLDER_DATA     := $(PROJECT_NAME2)/usr/share/$(PROJECT_NAME2)
-TARGET_OUT_FOLDER_DOC      := $(PROJECT_NAME2)/usr/share/doc
-TARGET_OUT_PREFIX_LIBRAIRY := 
+
 
 
 # include generic makefile :

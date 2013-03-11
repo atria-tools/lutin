@@ -20,11 +20,6 @@ TARGET_ARCH := ARMv7
 TARGET_CROSS := $(PROJECT_NDK)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-
 TARGET_CROSS_CLANG := $(PROJECT_NDK)/toolchains/llvm-3.1/prebuilt/linux-x86/bin/
 
-TARGET_OUT_FOLDER_BINARY   := ERROR_NOTHING_MUST_BE_SET_HERE
-TARGET_OUT_FOLDER_LIBRAIRY := data/lib/armeabi
-TARGET_OUT_FOLDER_DATA     := data/assets
-TARGET_OUT_FOLDER_DOC      := doc
-TARGET_OUT_PREFIX_LIBRAIRY := lib
 
 #local get the gcc version : 
 
@@ -36,7 +31,7 @@ TARGET_GLOBAL_C_INCLUDES+=-I$(PROJECT_NDK)/sources/cxx-stl/system/include/
 TARGET_GLOBAL_LDLIBS_SHARED = --sysroot=$(PROJECT_NDK)/platforms/android-$(ANDROID_BOARD_ID)/arch-arm
 
 #generic makefile
-include $(BUILD_SYSTEM)/core/main.mk
+include $(BUILD_SYSTEM)/main.mk
 
 FINAL_FOLDER_JAVA_PROJECT=$(TARGET_OUT_STAGING)/src/$(PROJECT_COMPAGNY_TYPE)/$(PROJECT_COMPAGNY_NAME2)/$(PROJECT_NAME2)
 

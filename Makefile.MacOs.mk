@@ -13,13 +13,6 @@ $(info =============>CLANG=$(CLANG))
 # http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
 
 
-TARGET_OUT_FOLDER_BINARY   := MacOS
-TARGET_OUT_FOLDER_LIBRAIRY := lib
-TARGET_OUT_FOLDER_DATA     := Resources
-TARGET_OUT_FOLDER_DOC      := doc
-TARGET_OUT_PREFIX_LIBRAIRY := 
-
-
 # include generic makefile :
 include $(BUILD_SYSTEM)/main.mk
 

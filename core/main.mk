@@ -145,6 +145,7 @@ check:
 # Display configuration.
 ###############################################################################
 $(info ----------------------------------------------------------------------)
+$(info PLATFORM: $(PLATFORM))
 $(info HOST_OS: $(HOST_OS))
 $(info TARGET_OS: $(TARGET_OS))
 $(info TARGET_ARCH: $(TARGET_ARCH))

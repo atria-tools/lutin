@@ -225,5 +225,5 @@ $(shell mkdir -p $(CONFIG_GLOBAL_FOLDER))
 -include $(CONFIG_GLOBAL_FILE)
 
 $(CONFIG_GLOBAL_FILE):
-	@$(error "need to generate config : make PLATFORM=$(PLATFORM) config")
+	@$(warning "need to generate config : make PLATFORM=$(PLATFORM) config")
 
