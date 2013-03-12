@@ -6,11 +6,11 @@
 ###############################################################################
 
 # Define SDK and NDK folder for Android compilation tools and packager tools :
-ifeq ("$(PROJECT_NDK)","")
+ifndef PROJECT_NDK
     PROJECT_NDK:=$(call fullpath,$(PROJECT_PATH)/../android/ndk/)
     $(info Auto define android NDK project to : $(PROJECT_NDK))
 endif
-ifeq ("$(PROJECT_NDK)","")
+ifndef PROJECT_SDK
     PROJECT_SDK:=$(call fullpath,$(PROJECT_PATH)/../android/sdk/)
     $(info Auto define Android SDK project to : $(PROJECT_SDK))
 endif
