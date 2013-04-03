@@ -542,6 +542,48 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 endef
 
 ###############################################################################
+## Commands for running gcc to compile a m++ file.
+###############################################################################
+
+define transform-mm-to-o
+@mkdir -p $(dir $@)
+@echo "$(DISPLAY_ARM_MODE)m++: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
+$(call check-pwd-is-top-dir)
+$(Q)$(CCACHE) $(TARGET_CXX) \
+	-o $@ \
+	$(TARGET_GLOBAL_C_INCLUDES) \
+	$(PRIVATE_C_INCLUDES) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
+	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
+	-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
+	-c -MMD -MP -g \
+	-fgnu-runtime \
+	$(call path-from-top,$<)
+endef
+
+###############################################################################
+## Commands for running gcc to compile a m file.
+###############################################################################
+
+define transform-m-to-o
+@mkdir -p $(dir $@)
+@echo "$(DISPLAY_ARM_MODE)m++: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
+$(call check-pwd-is-top-dir)
+$(Q)$(CCACHE) $(TARGET_CC) \
+	-o $@ \
+	$(TARGET_GLOBAL_C_INCLUDES) \
+	$(PRIVATE_C_INCLUDES) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
+	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
+	-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
+	-c -MMD -MP -g \
+	-fgnu-runtime \
+	$(call path-from-top,$<)
+endef
+
+###############################################################################
 ## Commands for running gcc to compile a C++ file.
 ###############################################################################
 
@@ -667,15 +709,9 @@ $(call check-pwd-is-top-dir)
 $(Q)$(TARGET_CXX) \
 	-o $@ \
 	$(TARGET_GLOBAL_LDFLAGS) \
-	-Wl,-Map -Wl,$(basename $@).map \
-	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
-	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib \
+	-Wl,-map -Wl,$(basename $@).map \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
-	-Wl,--whole-archive \
-	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
-	-Wl,--no-whole-archive \
-	-Wl,--as-needed \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	$(PRIVATE_LDLIBS) \

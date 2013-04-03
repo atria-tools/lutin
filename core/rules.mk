@@ -57,6 +57,12 @@ endif
 ## List of sources, objects and libraries.
 ###############################################################################
 
+mm_sources := $(filter %.mm,$(LOCAL_SRC_FILES))
+mm_objects := $(addprefix $(build_dir)/,$(mm_sources:.mm=.o))
+
+m_sources := $(filter %.m,$(LOCAL_SRC_FILES))
+m_objects := $(addprefix $(build_dir)/,$(m_sources:.m=.o))
+
 cpp_sources := $(filter %.cpp,$(LOCAL_SRC_FILES))
 cpp_objects := $(addprefix $(build_dir)/,$(cpp_sources:.cpp=.o))
 
@@ -73,6 +79,8 @@ S_sources := $(filter %.S,$(LOCAL_SRC_FILES))
 S_objects := $(addprefix $(build_dir)/,$(S_sources:.S=.o))
 
 all_objects := \
+	$(mm_objects) \
+	$(m_objects) \
 	$(cpp_objects) \
 	$(cxx_objects) \
 	$(c_objects) \
@@ -172,6 +180,20 @@ LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 ###############################################################################
 ## Actual rules.
 ###############################################################################
+
+# mm files
+ifneq ("$(strip $(mm_objects))","")
+$(mm_objects): $(build_dir)/%.o: $(LOCAL_PATH)/%.mm
+	$(transform-mm-to-o)
+-include $(mm_objects:%.o=%.d)
+endif
+
+# m files
+ifneq ("$(strip $(m_objects))","")
+$(m_objects): $(build_dir)/%.o: $(LOCAL_PATH)/%.m
+	$(transform-m-to-o)
+-include $(m_objects:%.o=%.d)
+endif
 
 # cpp files
 ifneq ("$(strip $(cpp_objects))","")
