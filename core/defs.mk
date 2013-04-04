@@ -702,9 +702,10 @@ endif
 ###############################################################################
 ## Commands for running gcc to link an executable.
 ###############################################################################
+ifeq ("$(TARGET_OS)","MacOs")
 define transform-o-to-executable
 @mkdir -p $(dir $@)
-@echo "Executable: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
+@echo "Executable (mac): $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
 $(Q)$(TARGET_CXX) \
 	-o $@ \
@@ -718,7 +719,30 @@ $(Q)$(TARGET_CXX) \
 	$(TARGET_GLOBAL_LDLIBS)
 $(call strip-executable)
 endef
-
+else
+define transform-o-to-executable
+@mkdir -p $(dir $@)
+@echo "Executable: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
+$(call check-pwd-is-top-dir)
+$(Q)$(TARGET_CXX) \
+	-o $@ \
+	$(TARGET_GLOBAL_LDFLAGS) \
+	-Wl,-Map -Wl,$(basename $@).map \
+	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
+	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib \
+	$(PRIVATE_LDFLAGS) \
+	$(PRIVATE_ALL_OBJECTS) \
+	-Wl,--whole-archive \
+	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
+	-Wl,--no-whole-archive \
+	-Wl,--as-needed \
+	$(PRIVATE_ALL_STATIC_LIBRARIES) \
+	$(PRIVATE_ALL_SHARED_LIBRARIES) \
+	$(PRIVATE_LDLIBS) \
+	$(TARGET_GLOBAL_LDLIBS)
+$(call strip-executable)
+endef
+endif
 ###############################################################################
 ## Commands for copying files.
 ###############################################################################
