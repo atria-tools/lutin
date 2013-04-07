@@ -558,7 +558,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
 	-c -MMD -MP -g \
-	-fgnu-runtime \
+	-x objective-c \
 	$(call path-from-top,$<)
 endef
 
@@ -568,7 +568,7 @@ endef
 
 define transform-m-to-o
 @mkdir -p $(dir $@)
-@echo "$(DISPLAY_ARM_MODE)m++: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
+@echo "$(DISPLAY_ARM_MODE)m: $(PRIVATE_MODULE) <== $(call path-from-top,$<)"
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CC) \
 	-o $@ \
@@ -579,7 +579,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
 	-c -MMD -MP -g \
-	-fgnu-runtime \
+	-x objective-c \
 	$(call path-from-top,$<)
 endef
 
@@ -702,7 +702,7 @@ endif
 ###############################################################################
 ## Commands for running gcc to link an executable.
 ###############################################################################
-ifeq ("$(TARGET_OS)","MacOs")
+ifneq ("$(TARGET_OS)","MacOs")
 define transform-o-to-executable
 @mkdir -p $(dir $@)
 @echo "Executable (mac): $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
