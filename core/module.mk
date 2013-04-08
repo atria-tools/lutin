@@ -97,10 +97,13 @@ endif
 ifeq ("$(LOCAL_MODULE_CLASS)","EXECUTABLE")
 
 include $(BUILD_RULES)
-
+ifeq ("$(TARGET_OS)","MacOs")
+$(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
+	$(transform-o-to-executable-mac)
+else
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 	$(transform-o-to-executable)
-
+endif
 copy_to_staging := 1
 
 endif
@@ -117,6 +120,22 @@ $(LOCAL_BUILD_MODULE):
 
 endif
 
+
+###############################################################################
+## Package Generation.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","PACKAGE")
+
+include $(BUILD_RULES)
+
+$(LOCAL_BUILD_MODULE)-pkg: $(LOCAL_BUILD_MODULE)
+	$(transform-staging-to-package)
+
+copy_to_staging := 1
+
+
+endif
 ###############################################################################
 ## Files to copy.
 ###############################################################################

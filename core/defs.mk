@@ -702,8 +702,7 @@ endif
 ###############################################################################
 ## Commands for running gcc to link an executable.
 ###############################################################################
-ifneq ("$(TARGET_OS)","MacOs")
-define transform-o-to-executable
+define transform-o-to-executable-mac
 @mkdir -p $(dir $@)
 @echo "Executable (mac): $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
 $(call check-pwd-is-top-dir)
@@ -719,7 +718,7 @@ $(Q)$(TARGET_CXX) \
 	$(TARGET_GLOBAL_LDLIBS)
 $(call strip-executable)
 endef
-else
+
 define transform-o-to-executable
 @mkdir -p $(dir $@)
 @echo "Executable: $(PRIVATE_MODULE) ==> $(call path-from-top,$@)"
@@ -742,7 +741,7 @@ $(Q)$(TARGET_CXX) \
 	$(TARGET_GLOBAL_LDLIBS)
 $(call strip-executable)
 endef
-endif
+
 ###############################################################################
 ## Commands for copying files.
 ###############################################################################

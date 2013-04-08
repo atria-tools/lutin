@@ -9,6 +9,9 @@
 ## General setup.
 ###############################################################################
 
+# show for windows : http://benjamin.smedbergs.us/pymake/
+
+
 # Make sure SHELL is correctly set
 SHELL := /bin/bash
 
