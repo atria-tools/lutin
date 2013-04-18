@@ -6,10 +6,16 @@ import inspect
 import fnmatch
 sys.path.append(os.path.dirname(__file__) + "/corePython/" )
 import debug
+
+countArgToPreventVerboseError = len(sys.argv)
 # preparse the argument to get the erbose element for debug mode
 for argument in sys.argv:
 	if argument == "verbose":
 		debug.SetLevel(5)
+		countArgToPreventVerboseError -= 1
+	elif argument == "color":
+		debug.EnableColor()
+		countArgToPreventVerboseError -= 1
 
 # now import other standard module
 import module
@@ -39,12 +45,14 @@ def HelpDisplay():
 	print "	ex: " + sys.argv[0] + " all board=Android all board=Windows all help"
 	exit(0)
 
+
+
 """
 	Run everything that is needed in the system
 """
 def Start():
 	# parse all argument
-	if len(sys.argv)==1:
+	if countArgToPreventVerboseError==1:
 		#by default we build all binary for the current board
 		buildList.Build("all")
 	else:
@@ -58,6 +66,9 @@ def Start():
 			elif argument == "dump":
 				module.Dump()
 			elif argument == "verbose":
+				# nothing to do ...
+				None
+			elif argument == "color":
 				# nothing to do ...
 				None
 			else:

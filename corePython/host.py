@@ -3,7 +3,6 @@ import platform
 import debug
 
 # print os.name # ==> 'posix'
-
 if platform.system() == "Linux":
 	OS = "Linux"
 elif platform.system() == "Windows":
