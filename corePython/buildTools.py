@@ -26,6 +26,13 @@ def CreateDirectoryOfFile(file):
 		os.makedirs(folder)
 
 
+def RemoveFolderAndSubFolder(path):
+	if os.path.isdir(path):
+		debug.verbose("remove folder : '" + path + "'")
+		shutil.rmtree(path)
+
+
+
 def ListToStr(list):
 	if type(list) == type(str()):
 		return list + " "

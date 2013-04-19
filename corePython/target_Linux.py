@@ -8,7 +8,7 @@ class Target:
 	def __init__(self):
 		self.name='Linux'
 		debug.info("create board target : "+self.name);
-		if 1==environement.GetClangMode():
+		if "clang"==environement.GetClangMode():
 			self.cc='clang'
 			self.xx='clang++'
 		else:
@@ -34,7 +34,7 @@ class Target:
 		self.global_libs_ld=''
 		self.global_libs_ld_shared=''
 		
-		self.suffix_dependence='.o'
+		self.suffix_dependence='.d'
 		self.suffix_obj='.o'
 		self.suffix_lib_static='.a'
 		self.suffix_lib_dynamic='.so'
@@ -64,30 +64,36 @@ class Target:
 			1 : destination file
 			2 : dependence files module (*.d)
 	"""
-	def GenerateFile(self,moduleName,basePath,file,type):
+	def GenerateFile(self,binaryName,moduleName,basePath,file,type):
 		list=[]
 		if (type=="bin"):
 			list.append(file)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_staging + self.folder_bin + "/" + moduleName + self.suffix_binary)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/" + moduleName + self.suffix_dependence)
+			list.append(self.GetStagingFolder(binaryName) + self.folder_bin + "/" + moduleName + self.suffix_binary)
+			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
 		elif (type=="obj"):
 			list.append(basePath + "/" + file)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/" + file + self.suffix_obj)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/" + file + self.suffix_dependence)
+			list.append(self.GetBuildFolder(moduleName) + file + self.suffix_obj)
+			list.append(self.GetBuildFolder(moduleName) + file + self.suffix_dependence)
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_staging + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/" + moduleName + self.suffix_dependence)
+			list.append(self.GetStagingFolder(binaryName) + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
+			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
 		elif (type=="lib-static"):
 			list.append(file)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/" + moduleName + self.suffix_lib_static)
-			list.append(buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/" + moduleName + self.suffix_dependence)
+			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_lib_static)
+			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
 		else:
 			debug.error("unknow type : " + type)
 		return list
 	
-	def GetStagingFolder(self, moduleName):
-		return buildTools.GetRunFolder() + self.folder_out + self.folder_staging + self.folder_data + "/" + moduleName
+	def GetStagingFolder(self, binaryName):
+		return buildTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + "/"
+	
+	def GetStagingFolderData(self, binaryName):
+		return self.GetStagingFolder(binaryName) + self.folder_data + "/"
+	
+	def GetBuildFolder(self, moduleName):
+		return buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/"
 	
 	def IsModuleBuild(self,module):
 		for mod in self.buildDone:

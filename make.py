@@ -4,20 +4,77 @@ import sys
 import os
 import inspect
 import fnmatch
-sys.path.append(os.path.dirname(__file__) + "/corePython/" )
+if __name__ == "__main__":
+	sys.path.append(os.path.dirname(__file__) + "/corePython/" )
+
 import debug
+import environement
 
-countArgToPreventVerboseError = len(sys.argv)
+
+"""
+	Display the help of this makefile
+"""
+def usage():
+	print "usage:"
+	print "	" + sys.argv[0] + " [options] [cible/properties] ..."
+	print "		[help] display this help"
+	print "	[option] : keep the last set"
+	print "		[-h/--help]             Display this help and break"
+	print "		[-v?/--verbose=?]       Display makefile debug level (verbose) default =2"
+	print "		[-c/--color]            Display makefile output in color"
+	print "		[-f/--force]            Force the rebuild without checking the dependency"
+	print "	[properties] : keep in the sequency of the cible"
+	print "		[-p=.../--platform=...] (Android/Linux/MacOs/Windows) Select a platform (by default the platform is the computer that compile this"
+	print "		[-t/--tool]             (clang/gcc) Compile with clang or Gcc mode (by default gcc will be used)"
+	print "		[-m=.../--mode=...]     (debug/release) Compile in release or debug mode (default release)"
+	print "	[cible] : generate in order set"
+	print "		[dump]                  Dump all the module dependency and properties"
+	print "		[all]                   Build all (only for the current selected board) (bynary and packages)"
+	print "		[clean]                 Clean all (same as previous)"
+	print "		...                     You can add 'module name' with at end : -clean to clean only this element"
+	print "	ex: " + sys.argv[0] + " all board=Android all board=Windows all help"
+	exit(0)
+
 # preparse the argument to get the erbose element for debug mode
-for argument in sys.argv:
-	if argument == "verbose":
-		debug.SetLevel(5)
-		countArgToPreventVerboseError -= 1
-	elif argument == "color":
-		debug.EnableColor()
-		countArgToPreventVerboseError -= 1
+def parseGenericArg(argument,active):
+	if argument == "-h" or argument == "--help":
+		#display help
+		usage()
+		return True
+	elif argument[:2] == "-v":
+		if active==True:
+			if len(argument)==2:
+				debug.SetLevel(5)
+			else:
+				debug.SetLevel(int(argument[2:]))
+		return True
+	elif argument[:9] == "--verbose":
+		if active==True:
+			if len(argument)==9:
+				debug.SetLevel(5)
+			else:
+				if argument[:10] == "--verbose=":
+					debug.SetLevel(int(argument[10:]))
+				else:
+					debug.SetLevel(int(argument[9:]))
+		return True
+	elif argument == "-c" or argument == "--color":
+		if active==True:
+			debug.EnableColor()
+		return True
+	elif argument == "-f" or argument == "--force":
+		if active==True:
+			environement.SetForceMode(True)
+		return True
+	return False
 
-# now import other standard module
+# parse default unique argument:
+if __name__ == "__main__":
+	sys.path.append(os.path.dirname(__file__) + "/corePython/" )
+	for argument in sys.argv:
+		parseGenericArg(argument, True)
+
+# now import other standard module (must be done here and not before ...
 import module
 import host
 import buildTools
@@ -25,55 +82,52 @@ import host
 import buildList
 
 
-"""
-	Display the help of this makefile
-"""
-def HelpDisplay():
-	print "usage:"
-	print "	" + sys.argv[0] + " [help] [dump] [all] [clean] [board=...] [clang/gcc] [debug/release] [check] [verbose] [color]"
-	print "		[help] display this help"
-	print "		[dump] dump all the module dependency"
-	print "		[all] build all (only for the current selected board)"
-	print "		[clean] clean all (same as previous)"
-	print "		[board=...] select a board (by default the board is the computer that compile this"
-	print "		[clang/gcc] Compile with clang or Gcc mode (by default gcc will be used)"
-	print "		[debug/release] compile in release or debug mode (default release)"
-	print "		[check] Check if all dependency are resolved"
-	print "		[verbose] display makefile debug"
-	print "		[color] display makefile output in color"
-	print "		you can add 'module name' with at end : -clean to clean only this element"
-	print "	ex: " + sys.argv[0] + " all board=Android all board=Windows all help"
-	exit(0)
-
-
 
 """
 	Run everything that is needed in the system
 """
 def Start():
+	actionDone=False
 	# parse all argument
-	if countArgToPreventVerboseError==1:
-		#by default we build all binary for the current board
-		buildList.Build("all")
-	else:
-		for argument in sys.argv[1:]:
-			if argument == "help":
-				#display help
-				HelpDisplay()
-			elif argument == "all":
-				#build all the board
-				buildList.Build("all")
-			elif argument == "dump":
-				module.Dump()
-			elif argument == "verbose":
-				# nothing to do ...
-				None
-			elif argument == "color":
-				# nothing to do ...
-				None
+	for argument in sys.argv[1:]:
+		if True==parseGenericArg(argument, False):
+			None # nothing to do ...
+		elif argument == "dump":
+			module.Dump()
+			actionDone=True
+		elif argument[:11] == "--platform=" or argument[:3] == "-p=":
+			tmpArg=""
+			if argument[:3] == "-p=":
+				tmpArg=argument[3:]
 			else:
-				buildList.Build(argument)
-	
+				tmpArg=argument[11:]
+			# TODO ...
+		elif argument[:7] == "--mode=" or argument[:3] == "-m=":
+			tmpArg=""
+			if argument[:3] == "-m=":
+				tmpArg=argument[3:]
+			else:
+				tmpArg=argument[11:]
+			if "debug"==tmpArg:
+				environement.SetDebugMode(1)
+			elif "release"==tmpArg:
+				environement.SetDebugMode(0)
+			else:
+				debug.error("not understand build mode : '" + val + "' can be [debug/release]")
+				environement.SetDebugMode(0)
+		elif argument[:7] == "--tool=" or argument[:3] == "-t=":
+			tmpArg=""
+			if argument[:3] == "-t=":
+				tmpArg=argument[3:]
+			else:
+				tmpArg=argument[11:]
+			environement.SetCompileMode(tmpArg)
+		else:
+			buildList.Build(argument)
+			actionDone=True
+	# if no action done : we do "all" ...
+	if actionDone==False:
+		buildList.Build("all")
 
 """
 	When the user use with make.py we initialise ourself

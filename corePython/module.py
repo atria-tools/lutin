@@ -9,10 +9,12 @@ import buildTools
 import debug
 import buildList
 import heritage
+import dependency
 
 def RunCommand(cmdLine):
 	debug.debug(cmdLine)
 	ret = os.system(cmdLine)
+	# TODO : Use "subprocess" instead ==> permit to pipline the renderings ...
 	if ret != 0:
 		#print "result val = " + str(ret)
 		debug.error("can not compile file ... ")
@@ -64,7 +66,8 @@ class module:
 		## end of basic INIT ...
 		if moduleType == 'BINARY' \
 				or moduleType == 'LIBRARY' \
-				or moduleType == 'PACKAGE':
+				or moduleType == 'PACKAGE' \
+				or moduleType == 'PREBUILD':
 			self.type=moduleType
 		else :
 			debug.error('for module "%s"' %moduleName)
@@ -78,7 +81,7 @@ class module:
 	###############################################################################
 	## Commands for running gcc to compile a m++ file.
 	###############################################################################
-	def Compile_mm_to_o(self, file, target, depancy):
+	def Compile_mm_to_o(self, file, binary, target, depancy):
 		# TODO : Check depedency ...
 		buildTools.CreateDirectoryOfFile(dst)
 		debug.printElement("m++", self.name, "<==", file)
@@ -99,7 +102,7 @@ class module:
 	###############################################################################
 	## Commands for running gcc to compile a m file.
 	###############################################################################
-	def Compile_m_to_o(self, file, target, depancy):
+	def Compile_m_to_o(self, file, binary, target, depancy):
 		# TODO : Check depedency ...
 		buildTools.CreateDirectoryOfFile(dst)
 		debug.printElement("m", self.name, "<==", file)
@@ -121,12 +124,11 @@ class module:
 	###############################################################################
 	## Commands for running gcc to compile a C++ file.
 	###############################################################################
-	def Compile_xx_to_o(self, file, target, depancy):
-		tmpList = target.GenerateFile(self.name,self.originFolder,file,"obj")
-		# TODO : Check depedency ...
-		if os.path.exists(tmpList[1]):
-			if os.path.getmtime(tmpList[1]) > os.path.getmtime(tmpList[0]):
-				return tmpList[1]
+	def Compile_xx_to_o(self, file, binary, target, depancy):
+		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"obj")
+		# check the dependency for this file :
+		if False==dependency.NeedReBuild(tmpList[1], tmpList[0], tmpList[2]):
+			return tmpList[1]
 		buildTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("c++", self.name, "<==", file)
 		cmdLine=buildTools.ListToStr([
@@ -160,13 +162,11 @@ class module:
 	###############################################################################
 	## Commands for running gcc to compile a C file.
 	###############################################################################
-	
-	def Compile_cc_to_o(self, file, target, depancy):
-		tmpList = target.GenerateFile(self.name,self.originFolder,file,"obj")
-		# TODO : Check depedency ...
-		if os.path.exists(tmpList[1]):
-			if os.path.getmtime(tmpList[1]) > os.path.getmtime(tmpList[0]):
-				return tmpList[1]
+	def Compile_cc_to_o(self, file, binary, target, depancy):
+		tmpList = target.GenerateFile(binary,self.name,self.originFolder,file,"obj")
+		# check the dependency for this file :
+		if False==dependency.NeedReBuild(tmpList[1], tmpList[0], tmpList[2]):
+			return tmpList[1]
 		buildTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("c", self.name, "<==", file)
 		cmdLine=buildTools.ListToStr([
@@ -199,10 +199,12 @@ class module:
 	###############################################################################
 	## Commands for running ar.
 	###############################################################################
-	
-	def Link_to_a(self, file, target, depancy):
-		tmpList = target.GenerateFile(self.name,self.originFolder,file,"lib-static")
-		# TODO : Check depedency ...
+	def Link_to_a(self, file, binary, target, depancy):
+		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-static")
+		# check the dependency for this file :
+		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
+				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
+			return tmpList[1]
 		buildTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("StaticLib", self.name, "==>", tmpList[1])
 		# explicitly remove the destination to prevent error ...
@@ -228,10 +230,12 @@ class module:
 	###############################################################################
 	## Commands for running gcc to link a shared library.
 	###############################################################################
-	
-	def Link_to_so(self, file, target, depancy):
-		tmpList = target.GenerateFile(self.name,self.originFolder,file,"lib-shared")
-		# TODO : Check depedency ...
+	def Link_to_so(self, file, binary, target, depancy):
+		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-shared")
+		# check the dependency for this file :
+		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
+				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
+			return tmpList[1]
 		buildTools.CreateDirectoryOfFile(tmpList[1])
 		debug.error("SharedLib")# + self.name + " ==> " + dst)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
@@ -258,9 +262,12 @@ class module:
 	###############################################################################
 	## Commands for running gcc to link an executable.
 	###############################################################################
-	def Link_to_bin(self, file, target, depancy):
-		tmpList = target.GenerateFile(self.name,self.originFolder,file,"bin")
-		# TODO : Check depedency ...
+	def Link_to_bin(self, file, binary, target, depancy):
+		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"bin")
+		# check the dependency for this file :
+		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
+				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
+			return tmpList[1]
 		buildTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("Executable", self.name, "==>", tmpList[1])
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
@@ -296,8 +303,8 @@ class module:
 	###############################################################################
 	## Commands for copying files
 	###############################################################################
-	def files_to_staging(self, target, binaryName):
-		baseFolder = target.GetStagingFolder(binaryName)
+	def files_to_staging(self, binaryName, target):
+		baseFolder = target.GetStagingFolderData(binaryName)
 		for element in self.files:
 			debug.verbose("Might copy file : " + element[0] + " ==> " + element[1])
 			buildTools.CopyFile(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
@@ -305,22 +312,31 @@ class module:
 	###############################################################################
 	## Commands for copying files
 	###############################################################################
-	def folders_to_staging(self, target, binaryName):
-		baseFolder = target.GetStagingFolder(binaryName)
+	def folders_to_staging(self, binaryName, target):
+		baseFolder = target.GetStagingFolderData(binaryName)
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
 			buildTools.CopyAnything(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
 	
 	# call here to build the module
-	def Build(self, target):
+	def Build(self, binaryName, target):
 		# ckeck if not previously build
 		if target.IsModuleBuild(self.name)==True:
 			return self.localHeritage
+		
+		if binaryName==None \
+				and self.type=='BINARY':
+			# this is the endpoint binary ...
+			binaryName = self.name
+		else :
+			# TODO : Set it better ...
+			None
+		
 		# build dependency befor
 		listSubFileNeededToBuild = []
 		subHeritage = heritage.heritage(None)
 		for dep in self.depends:
-			inherit = Build(dep, target)
+			inherit = Build(dep, binaryName, target)
 			# add at the heritage list :
 			subHeritage.AddSub(inherit)
 		
@@ -329,22 +345,27 @@ class module:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
 			if fileExt == "c" or fileExt == "C":
-				resFile = self.Compile_cc_to_o(file, target, subHeritage)
+				resFile = self.Compile_cc_to_o(file, binaryName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
 			elif fileExt == "cpp" or fileExt == "CPP" or fileExt == "cxx" or fileExt == "CXX" or fileExt == "xx" or fileExt == "XX":
-				resFile = self.Compile_xx_to_o(file, target, subHeritage)
+				resFile = self.Compile_xx_to_o(file, binaryName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
 		# generate end point:
-		if self.type=='LIBRARY':
-			resFile = self.Link_to_a(listSubFileNeededToBuild, target, subHeritage)
+		if self.type=='PREBUILD':
+			# nothing to add ==> just dependence
+			None
+		elif self.type=='LIBRARY':
+			resFile = self.Link_to_a(listSubFileNeededToBuild, binaryName, target, subHeritage)
 			self.localHeritage.AddSources(resFile)
-		else:
-			resFile = self.Link_to_bin(listSubFileNeededToBuild, target, subHeritage)
+		elif self.type=='BINARY':
+			resFile = self.Link_to_bin(listSubFileNeededToBuild, binaryName, target, subHeritage)
 			# generate tree for this special binary
 			self.BuildTree(target, self.name)
-		
+		else:
+			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
+			
 		self.localHeritage.AddSub(subHeritage)
 		# return local dependency ...
 		return self.localHeritage
@@ -358,19 +379,30 @@ class module:
 		for dep in self.depends:
 			inherit = BuildTree(dep, target, binaryName)
 		# add all the elements
-		self.files_to_staging(target, binaryName)
-		self.folders_to_staging(target, binaryName)
+		self.files_to_staging(binaryName, target)
+		self.folders_to_staging(binaryName, target)
 	
 	
 	# call here to Clean the module
 	def Clean(self, target):
-		for file in self.src:
-			debug.error("TODO  " + self.name + " <- (X) " + file);
-	
-	def CleanTree(self, target, binaryName):
-		for file in self.src:
-			debug.error("TODO  " + self.name + " <- (X) " + file);
-	
+		if self.type=='PREBUILD':
+			# nothing to add ==> just dependence
+			None
+		elif self.type=='LIBRARY':
+			# remove folder of the lib ... for this targer
+			folderBuild = target.GetBuildFolder(self.name)
+			debug.info("remove folder : '" + folderBuild + "'")
+			buildTools.RemoveFolderAndSubFolder(folderBuild)
+		elif self.type=='BINARY':
+			# remove folder of the lib ... for this targer
+			folderBuild = target.GetBuildFolder(self.name)
+			debug.info("remove folder : '" + folderBuild + "'")
+			buildTools.RemoveFolderAndSubFolder(folderBuild)
+			folderStaging = target.GetStagingFolder(self.name)
+			debug.info("remove folder : '" + folderStaging + "'")
+			buildTools.RemoveFolderAndSubFolder(folderStaging)
+		else:
+			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
 	def AppendToInternalList(self, listout, list):
 		if type(list) == type(str()):
@@ -494,10 +526,10 @@ def Dump():
 
 
 # return inherit packages ...
-def Build(name,target):
+def Build(name, binName, target):
 	for module in moduleList:
 		if module.name == name:
-			return module.Build(target)
+			return module.Build(binName, target)
 	debug.error("request to build an un-existant module name : '" + name + "'")
 
 def BuildTree(name,target,binName):
@@ -512,6 +544,7 @@ def Clean(name,target):
 	for module in moduleList:
 		if module.name == name:
 			module.Clean(target)
+			return
 	debug.error("request to clean an un-existant module name : '" + name + "'")
 
 

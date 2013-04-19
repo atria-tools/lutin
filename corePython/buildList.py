@@ -23,7 +23,7 @@ def Build(name):
 		for elem in availlable:
 			if elem[1] == "Module":
 				if elem[2] == "bin":
-					module.Build(elem[0], GetCurrentTarget())
+					module.Build(elem[0], None, GetCurrentTarget())
 			else:
 				debug.error("TODO ... Build package '" + elem[0] + "'")
 	elif name == "clean":
@@ -55,7 +55,7 @@ def Build(name):
 				if elem[0] == name:
 					if elem[1] == "Module":
 						debug.info("Build module '" + name + "'")
-						module.Build(name, GetCurrentTarget())
+						module.Build(name, None, GetCurrentTarget())
 					else:
 						debug.info("Build package '" + name + "'")
 						debug.error("TODO ... Build package '" + cleanName + "'")
