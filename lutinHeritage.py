@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import sys
-import buildTools
-import debug
+import lutinDebug as debug
 
 
 

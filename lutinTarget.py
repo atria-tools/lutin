@@ -1,14 +1,14 @@
 #!/usr/bin/python
-import debug
+import lutinDebug as debug
 import datetime
-import buildTools
-import environement
+import lutinTools
+import lutinModule
 
 class Target:
-	def __init__(self):
-		self.name='Linux'
+	def __init__(self, name, typeCompilator, debugMode):
+		self.name=name
 		debug.info("create board target : "+self.name);
-		if "clang"==environement.GetClangMode():
+		if "clang"==typeCompilator:
 			self.cc='clang'
 			self.xx='clang++'
 		else:
@@ -43,7 +43,7 @@ class Target:
 		
 		self.folder_arch="/" + self.name
 		
-		if 1==environement.GetDebugMode():
+		if "debug"==debugMode:
 			self.buildMode = "debug"
 		else:
 			self.buildMode = "release"
@@ -57,6 +57,7 @@ class Target:
 		self.folder_doc="/usr/share/doc"
 		self.buildDone=[]
 		self.buildTreeDone=[]
+		self.moduleList=[]
 	
 	"""
 		return a list of 3 elements :
@@ -87,13 +88,13 @@ class Target:
 		return list
 	
 	def GetStagingFolder(self, binaryName):
-		return buildTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + "/"
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + "/"
 	
 	def GetStagingFolderData(self, binaryName):
 		return self.GetStagingFolder(binaryName) + self.folder_data + "/"
 	
 	def GetBuildFolder(self, moduleName):
-		return buildTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/"
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/"
 	
 	def IsModuleBuild(self,module):
 		for mod in self.buildDone:
@@ -109,11 +110,92 @@ class Target:
 		self.buildTreeDone.append(module)
 		return False
 	
+	def AddModule(self, newModule):
+		debug.debug("Import nodule for Taget : " + newModule.name)
+		self.moduleList.append(newModule)
+	
+	
+	# return inherit packages ...
+	"""
+	def Build(self, name, packagesName):
+		for module in self.moduleList:
+			if module.name == name:
+				return module.Build(self, packagesName)
+		debug.error("request to build an un-existant module name : '" + name + "'")
+	"""
+	
+	def BuildTree(self, name, packagesName):
+		for module in self.moduleList:
+			if module.name == name:
+				module.BuildTree(self, packagesName)
+				return
+		debug.error("request to build tree on un-existant module name : '" + name + "'")
+	
+	def Clean(self, name):
+		for module in self.moduleList:
+			if module.name == name:
+				module.Clean(self)
+				return
+		debug.error("request to clean an un-existant module name : '" + name + "'")
+	
+	def LoadIfNeeded(self, name):
+		for elem in self.moduleList:
+			if elem.name == name:
+				return
+		lutinModule.LoadModule(self, name)
+	
+	def LoadAll(self):
+		listOfAllTheModule = lutinModule.ListAllModule()
+		for modName in listOfAllTheModule:
+			self.LoadIfNeeded(modName)
+	
+	def Build(self, name, packagesName=None):
+		if name == "dump":
+			debug.info("dump all")
+			self.LoadAll()
+			print 'Dump all module properties'
+			for mod in self.moduleList:
+				mod.Display(self)
+		elif name == "all":
+			debug.info("Build all")
+			self.LoadAll()
+			for mod in self.moduleList:
+				if mod.type == 'BINARY':
+					mod.Build(self, None)
+		elif name == "clean":
+			debug.info("Clean all")
+			self.LoadAll()
+			for mod in self.moduleList:
+				mod.Clean(self)
+		else:
+			myLen = len(name)
+			if name[myLen-5:] == "-dump":
+				tmpName = name[:myLen-5]
+				self.LoadIfNeeded(tmpName)
+				# clean requested
+				for mod in self.moduleList:
+					if mod.name == tmpName:
+						debug.info("dump module '" + tmpName + "'")
+						mod.Display(self)
+						return
+				debug.error("not know module name : '" + cleanName + "' to clean it")
+			elif name[myLen-6:] == "-clean":
+				cleanName = name[:myLen-6]
+				self.LoadIfNeeded(cleanName)
+				# clean requested
+				for mod in self.moduleList:
+					if mod.name == cleanName:
+						debug.info("Clean module '" + cleanName + "'")
+						mod.Clean(self)
+						return
+				debug.error("not know module name : '" + cleanName + "' to clean it")
+			else:
+				# Build requested
+				self.LoadIfNeeded(name)
+				for mod in self.moduleList:
+					if mod.name == name:
+						debug.info("Build module '" + name + "'")
+						return mod.Build(self, None)
+				debug.error("not know module name : '" + name + "' to build it")
 	
 
-"""
-TARGET_GLOBAL_LDFLAGS = "-L$(TARGET_OUT_STAGING)/lib
-TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
-TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
-TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
-"""

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import os
-import debug
-import environement
+import lutinDebug as debug
+import lutinEnv as environement
 
 
 def NeedReBuild(dst, src, dependFile):

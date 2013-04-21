@@ -3,13 +3,13 @@ import sys
 import os
 import inspect
 import fnmatch
-import module
-import host
-import buildTools
-import debug
-import buildList
-import heritage
-import dependency
+import lutinModule as module
+import lutinHost as host
+import lutinTools
+import lutinDebug as debug
+import lutinList as buildList
+import lutinHeritage as heritage
+import lutinDepend as dependency
 
 def RunCommand(cmdLine):
 	debug.debug(cmdLine)
@@ -74,7 +74,7 @@ class module:
 			debug.error('    ==> error : "%s" ' %moduleType)
 			raise 'Input value error'
 		self.originFile = file;
-		self.originFolder = buildTools.GetCurrentPath(self.originFile)
+		self.originFolder = lutinTools.GetCurrentPath(self.originFile)
 		self.name=moduleName
 		self.localHeritage = heritage.heritage(self)
 	
@@ -83,7 +83,7 @@ class module:
 	###############################################################################
 	def Compile_mm_to_o(self, file, binary, target, depancy):
 		# TODO : Check depedency ...
-		buildTools.CreateDirectoryOfFile(dst)
+		lutinTools.CreateDirectoryOfFile(dst)
 		debug.printElement("m++", self.name, "<==", file)
 		"""
 		cmdLine= $(TARGET_CXX) \
@@ -104,7 +104,7 @@ class module:
 	###############################################################################
 	def Compile_m_to_o(self, file, binary, target, depancy):
 		# TODO : Check depedency ...
-		buildTools.CreateDirectoryOfFile(dst)
+		lutinTools.CreateDirectoryOfFile(dst)
 		debug.printElement("m", self.name, "<==", file)
 		"""
 		$(TARGET_CC) \
@@ -129,14 +129,14 @@ class module:
 		# check the dependency for this file :
 		if False==dependency.NeedReBuild(tmpList[1], tmpList[0], tmpList[2]):
 			return tmpList[1]
-		buildTools.CreateDirectoryOfFile(tmpList[1])
+		lutinTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("c++", self.name, "<==", file)
-		cmdLine=buildTools.ListToStr([
+		cmdLine=lutinTools.ListToStr([
 			target.xx,
 			"-o", tmpList[1] ,
-			buildTools.AddPrefix("-I",self.export_path),
-			buildTools.AddPrefix("-I",self.local_path),
-			buildTools.AddPrefix("-I",depancy.path),
+			lutinTools.AddPrefix("-I",self.export_path),
+			lutinTools.AddPrefix("-I",self.local_path),
+			lutinTools.AddPrefix("-I",depancy.path),
 			target.global_flags_cc,
 			target.global_flags_xx,
 			depancy.flags_cc,
@@ -167,14 +167,14 @@ class module:
 		# check the dependency for this file :
 		if False==dependency.NeedReBuild(tmpList[1], tmpList[0], tmpList[2]):
 			return tmpList[1]
-		buildTools.CreateDirectoryOfFile(tmpList[1])
+		lutinTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("c", self.name, "<==", file)
-		cmdLine=buildTools.ListToStr([
+		cmdLine=lutinTools.ListToStr([
 			target.cc,
 			"-o", tmpList[1],
-			buildTools.AddPrefix("-I",self.export_path),
-			buildTools.AddPrefix("-I",self.local_path),
-			buildTools.AddPrefix("-I",depancy.path),
+			lutinTools.AddPrefix("-I",self.export_path),
+			lutinTools.AddPrefix("-I",self.local_path),
+			lutinTools.AddPrefix("-I",depancy.path),
 			target.global_flags_cc,
 			depancy.flags_cc,
 			self.flags_cc,
@@ -205,13 +205,13 @@ class module:
 		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
 				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
 			return tmpList[1]
-		buildTools.CreateDirectoryOfFile(tmpList[1])
+		lutinTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("StaticLib", self.name, "==>", tmpList[1])
 		# explicitly remove the destination to prevent error ...
 		if os.path.exists(tmpList[1]) and os.path.isfile(tmpList[1]):
 			os.remove(tmpList[1])
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
-		cmdLine=buildTools.ListToStr([
+		cmdLine=lutinTools.ListToStr([
 			target.ar,
 			target.global_flags_ar,
 			self.flags_ar,
@@ -220,7 +220,7 @@ class module:
 			depancy.src])
 		RunCommand(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
-		cmdLine=buildTools.ListToStr([
+		cmdLine=lutinTools.ListToStr([
 			target.ranlib,
 			tmpList[1] ])
 		RunCommand(cmdLine)
@@ -236,7 +236,7 @@ class module:
 		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
 				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
 			return tmpList[1]
-		buildTools.CreateDirectoryOfFile(tmpList[1])
+		lutinTools.CreateDirectoryOfFile(tmpList[1])
 		debug.error("SharedLib")# + self.name + " ==> " + dst)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
 		"""$(Q)$(TARGET_CXX) \
@@ -268,10 +268,10 @@ class module:
 		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
 				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
 			return tmpList[1]
-		buildTools.CreateDirectoryOfFile(tmpList[1])
+		lutinTools.CreateDirectoryOfFile(tmpList[1])
 		debug.printElement("Executable", self.name, "==>", tmpList[1])
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
-		cmdLine=buildTools.ListToStr([
+		cmdLine=lutinTools.ListToStr([
 			target.xx,
 			"-o", tmpList[1],
 			tmpList[0],
@@ -307,7 +307,7 @@ class module:
 		baseFolder = target.GetStagingFolderData(binaryName)
 		for element in self.files:
 			debug.verbose("Might copy file : " + element[0] + " ==> " + element[1])
-			buildTools.CopyFile(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
+			lutinTools.CopyFile(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
 	
 	###############################################################################
 	## Commands for copying files
@@ -316,18 +316,18 @@ class module:
 		baseFolder = target.GetStagingFolderData(binaryName)
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
-			buildTools.CopyAnything(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
+			lutinTools.CopyAnything(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
 	
 	# call here to build the module
-	def Build(self, binaryName, target):
+	def Build(self, target, packageName):
 		# ckeck if not previously build
 		if target.IsModuleBuild(self.name)==True:
 			return self.localHeritage
 		
-		if binaryName==None \
+		if packageName==None \
 				and self.type=='BINARY':
 			# this is the endpoint binary ...
-			binaryName = self.name
+			packageName = self.name
 		else :
 			# TODO : Set it better ...
 			None
@@ -336,7 +336,7 @@ class module:
 		listSubFileNeededToBuild = []
 		subHeritage = heritage.heritage(None)
 		for dep in self.depends:
-			inherit = Build(dep, binaryName, target)
+			inherit = target.Build(dep, packageName)
 			# add at the heritage list :
 			subHeritage.AddSub(inherit)
 		
@@ -345,10 +345,10 @@ class module:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
 			if fileExt == "c" or fileExt == "C":
-				resFile = self.Compile_cc_to_o(file, binaryName, target, subHeritage)
+				resFile = self.Compile_cc_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
 			elif fileExt == "cpp" or fileExt == "CPP" or fileExt == "cxx" or fileExt == "CXX" or fileExt == "xx" or fileExt == "XX":
-				resFile = self.Compile_xx_to_o(file, binaryName, target, subHeritage)
+				resFile = self.Compile_xx_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
@@ -357,10 +357,10 @@ class module:
 			# nothing to add ==> just dependence
 			None
 		elif self.type=='LIBRARY':
-			resFile = self.Link_to_a(listSubFileNeededToBuild, binaryName, target, subHeritage)
+			resFile = self.Link_to_a(listSubFileNeededToBuild, packageName, target, subHeritage)
 			self.localHeritage.AddSources(resFile)
 		elif self.type=='BINARY':
-			resFile = self.Link_to_bin(listSubFileNeededToBuild, binaryName, target, subHeritage)
+			resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
 			# generate tree for this special binary
 			self.BuildTree(target, self.name)
 		else:
@@ -371,16 +371,16 @@ class module:
 		return self.localHeritage
 	
 	# call here to build the module
-	def BuildTree(self, target, binaryName):
+	def BuildTree(self, target, packageName):
 		# ckeck if not previously build
 		if target.IsModuleBuildTree(self.name)==True:
 			return
 		#build tree of all submodules
 		for dep in self.depends:
-			inherit = BuildTree(dep, target, binaryName)
+			inherit = target.BuildTree(dep, packageName)
 		# add all the elements
-		self.files_to_staging(binaryName, target)
-		self.folders_to_staging(binaryName, target)
+		self.files_to_staging(packageName, target)
+		self.folders_to_staging(packageName, target)
 	
 	
 	# call here to Clean the module
@@ -392,15 +392,15 @@ class module:
 			# remove folder of the lib ... for this targer
 			folderBuild = target.GetBuildFolder(self.name)
 			debug.info("remove folder : '" + folderBuild + "'")
-			buildTools.RemoveFolderAndSubFolder(folderBuild)
+			lutinTools.RemoveFolderAndSubFolder(folderBuild)
 		elif self.type=='BINARY':
 			# remove folder of the lib ... for this targer
 			folderBuild = target.GetBuildFolder(self.name)
 			debug.info("remove folder : '" + folderBuild + "'")
-			buildTools.RemoveFolderAndSubFolder(folderBuild)
+			lutinTools.RemoveFolderAndSubFolder(folderBuild)
 			folderStaging = target.GetStagingFolder(self.name)
 			debug.info("remove folder : '" + folderStaging + "'")
-			buildTools.RemoveFolderAndSubFolder(folderStaging)
+			lutinTools.RemoveFolderAndSubFolder(folderStaging)
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
@@ -470,7 +470,7 @@ class module:
 			for elem in list:
 				print '            %s' %elem
 	
-	def Display(self):
+	def Display(self, target):
 		print '-----------------------------------------------'
 		print ' package : "%s"' %self.name
 		print '-----------------------------------------------'
@@ -496,77 +496,39 @@ class module:
 		self.PrintList('local_path',self.local_path)
 
 
-# the list of all module is named : moduleList
-moduleList = []
 
-"""
-	
-"""
-def AddModule(newModule):
-	global moduleList
-	for tmpMod in moduleList:
-		if (tmpMod.name == newModule.name):
-			debug.error("try to insert a secont time the same module name : " + newModule.name)
-			return
-	moduleList.append(newModule)
-	# with "all" we just build the bianties and packages
-	buildList.AddModule(newModule.name, newModule.type)
-
-"""
-	
-"""
-def Dump():
-	print 'Dump all module properties'
-	if 'moduleList' in globals():
-		for mod in moduleList:
-			mod.Display()
-	else:
-		print ' ==> no module added ...'
-
-
-
-# return inherit packages ...
-def Build(name, binName, target):
-	for module in moduleList:
-		if module.name == name:
-			return module.Build(binName, target)
-	debug.error("request to build an un-existant module name : '" + name + "'")
-
-def BuildTree(name,target,binName):
-	for module in moduleList:
-		if module.name == name:
-			module.BuildTree(target,binName)
-			return
-	debug.error("request to build tree on un-existant module name : '" + name + "'")
-
-
-def Clean(name,target):
-	for module in moduleList:
-		if module.name == name:
-			module.Clean(target)
-			return
-	debug.error("request to clean an un-existant module name : '" + name + "'")
-
-
-
-
+moduleList=[]
 
 def ImportPath(path):
+	global moduleList
 	matches = []
 	debug.debug('Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, 'Makefile_*.py')
+		tmpList = fnmatch.filter(filenames, 'lutin_*.py')
 		# Import the module :
 		for filename in tmpList:
 			debug.debug('    Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			moduleName = filename.replace('.py', '')
-			debug.debug('try load : %s' %moduleName)
-			__import__(moduleName)
-			# note : Better to do a module system ==> proper ...
+			moduleName = moduleName.replace('lutin_', '')
+			debug.debug("integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
+			moduleList.append([moduleName,os.path.join(root, filename)])
 
+def LoadModule(target, name):
+	global moduleList
+	for mod in moduleList:
+		if mod[0]==name:
+			sys.path.append(os.path.dirname(mod[1]))
+			theModule = __import__("lutin_" + name)
+			tmpElement = theModule.Create(target)
+			target.AddModule(tmpElement)
 
-
+def ListAllModule():
+	global moduleList
+	tmpListName = []
+	for mod in moduleList:
+		tmpListName.append(mod[0])
+	return tmpListName
 
 

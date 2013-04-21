@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import debug
+import lutinDebug as debug
 
 debugMode=0
 

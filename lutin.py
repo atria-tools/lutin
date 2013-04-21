@@ -4,11 +4,8 @@ import sys
 import os
 import inspect
 import fnmatch
-if __name__ == "__main__":
-	sys.path.append(os.path.dirname(__file__) + "/corePython/" )
-
-import debug
-import environement
+import lutinDebug as debug
+import lutinEnv
 
 
 """
@@ -64,7 +61,7 @@ def parseGenericArg(argument,active):
 		return True
 	elif argument == "-f" or argument == "--force":
 		if active==True:
-			environement.SetForceMode(True)
+			lutinEnv.SetForceMode(True)
 		return True
 	return False
 
@@ -75,26 +72,25 @@ if __name__ == "__main__":
 		parseGenericArg(argument, True)
 
 # now import other standard module (must be done here and not before ...
-import module
-import host
-import buildTools
-import host
-import buildList
+import lutinModule as module
+import lutinHost as host
+import lutinTools
+import lutinHost as host
+import lutinList as buildList
 
+import lutinTargetLinux
 
 
 """
 	Run everything that is needed in the system
 """
 def Start():
+	target = lutinTargetLinux.TargetLinux("gcc", "debug")
 	actionDone=False
 	# parse all argument
 	for argument in sys.argv[1:]:
 		if True==parseGenericArg(argument, False):
 			None # nothing to do ...
-		elif argument == "dump":
-			module.Dump()
-			actionDone=True
 		elif argument[:11] == "--platform=" or argument[:3] == "-p=":
 			tmpArg=""
 			if argument[:3] == "-p=":
@@ -109,34 +105,34 @@ def Start():
 			else:
 				tmpArg=argument[11:]
 			if "debug"==tmpArg:
-				environement.SetDebugMode(1)
+				lutinEnv.SetDebugMode(1)
 			elif "release"==tmpArg:
-				environement.SetDebugMode(0)
+				lutinEnv.SetDebugMode(0)
 			else:
 				debug.error("not understand build mode : '" + val + "' can be [debug/release]")
-				environement.SetDebugMode(0)
+				lutinEnv.SetDebugMode(0)
 		elif argument[:7] == "--tool=" or argument[:3] == "-t=":
 			tmpArg=""
 			if argument[:3] == "-t=":
 				tmpArg=argument[3:]
 			else:
 				tmpArg=argument[11:]
-			environement.SetCompileMode(tmpArg)
+			lutinEnv.SetCompileMode(tmpArg)
 		else:
-			buildList.Build(argument)
+			target.Build(argument)
 			actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
-		buildList.Build("all")
+		target.Build("all")
 
 """
 	When the user use with make.py we initialise ourself
 """
 if __name__ == '__main__':
 	debug.verbose("Use Make as a make stadard")
-	sys.path.append(buildTools.GetRunFolder())
-	debug.verbose(" try to impoert module 'Makefile.py'")
-	__import__("Makefile")
+	sys.path.append(lutinTools.GetRunFolder())
+	debug.verbose(" try to impoert module 'lutinBase.py'")
+	__import__("lutinBase")
 	Start()
 
 

@@ -2,7 +2,7 @@
 import os
 import shutil
 import errno
-import debug
+import lutinDebug as debug
 import fnmatch
 
 

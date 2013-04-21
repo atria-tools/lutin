@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import platform
-import debug
+import lutinDebug as debug
 
 # print os.name # ==> 'posix'
 if platform.system() == "Linux":
