@@ -1,35 +1,6 @@
 #!/usr/bin/python
 import lutinDebug as debug
 
-debugMode=0
-
-def SetDebugMode(val):
-	global debugMode
-	if val==1:
-		debugMode = 1
-	else:
-		debugMode = 0
-
-def GetDebugMode():
-	global debugMode
-	return debugMode
-
-CompileMode="gcc"
-
-def SetCompileMode(val):
-	global CompileMode
-	if val=="clang":
-		CompileMode = val
-	if val=="gcc":
-		CompileMode = val
-	else:
-		debug.error("not understand compiling tool mode : '" + val + "' can be [gcc/clang]")
-		CompileMode = "gcc"
-
-def GetClangMode():
-	global CompileMode
-	return CompileMode
-
 forceMode=False
 
 def SetForceMode(val):

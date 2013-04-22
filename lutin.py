@@ -6,7 +6,7 @@ import inspect
 import fnmatch
 import lutinDebug as debug
 import lutinEnv
-
+import lutinModule
 
 """
 	Display the help of this makefile
@@ -16,19 +16,38 @@ def usage():
 	print "	" + sys.argv[0] + " [options] [cible/properties] ..."
 	print "		[help] display this help"
 	print "	[option] : keep the last set"
-	print "		[-h/--help]             Display this help and break"
-	print "		[-v?/--verbose=?]       Display makefile debug level (verbose) default =2"
-	print "		[-c/--color]            Display makefile output in color"
-	print "		[-f/--force]            Force the rebuild without checking the dependency"
+	print "		-h / --help"
+	print "			Display this help and break"
+	print "		-v / -v? / --verbose=?"
+	print "			Display makefile debug level (verbose) default =2"
+	print "				0 : None"
+	print "				1 : error"
+	print "				2 : warning"
+	print "				3 : info"
+	print "				4 : debug"
+	print "				5 : verbose"
+	print "		-c / --color"
+	print "			Display makefile output in color"
+	print "		-f / --force"
+	print "			Force the rebuild without checking the dependency"
 	print "	[properties] : keep in the sequency of the cible"
-	print "		[-p=.../--platform=...] (Android/Linux/MacOs/Windows) Select a platform (by default the platform is the computer that compile this"
-	print "		[-t/--tool]             (clang/gcc) Compile with clang or Gcc mode (by default gcc will be used)"
-	print "		[-m=.../--mode=...]     (debug/release) Compile in release or debug mode (default release)"
+	print "		-t=... / --target=..."
+	print "			(Android/Linux/MacOs/Windows) Select a target (by default the platform is the computer that compile this"
+	print "		-C= / --compilator="
+	print "			(clang/gcc) Compile with clang or Gcc mode (by default gcc will be used)"
+	print "		-m=... / --mode=..."
+	print "			(debug/release) Compile in release or debug mode (default release)"
 	print "	[cible] : generate in order set"
-	print "		[dump]                  Dump all the module dependency and properties"
-	print "		[all]                   Build all (only for the current selected board) (bynary and packages)"
-	print "		[clean]                 Clean all (same as previous)"
-	print "		...                     You can add 'module name' with at end : -clean to clean only this element"
+	print "		all"
+	print "			Build all (only for the current selected board) (bynary and packages)"
+	print "		clean"
+	print "			Clean all (same as previous)"
+	print "		dump"
+	print "			Dump all the module dependency and properties"
+	listOfAllModule = lutinModule.ListAllModuleWithDesc()
+	for mod in listOfAllModule:
+		print "		" + mod[0] + " / " + mod[0] + "-clean / " + mod[0] + "-dump"
+		print "			" + mod[1]
 	print "	ex: " + sys.argv[0] + " all board=Android all board=Windows all help"
 	exit(0)
 
@@ -36,7 +55,8 @@ def usage():
 def parseGenericArg(argument,active):
 	if argument == "-h" or argument == "--help":
 		#display help
-		usage()
+		if active==False:
+			usage()
 		return True
 	elif argument[:2] == "-v":
 		if active==True:
@@ -72,57 +92,82 @@ if __name__ == "__main__":
 		parseGenericArg(argument, True)
 
 # now import other standard module (must be done here and not before ...
-import lutinModule as module
-import lutinHost as host
+import lutinTarget
+import lutinHost
 import lutinTools
-import lutinHost as host
-import lutinList as buildList
-
-import lutinTargetLinux
-
 
 """
 	Run everything that is needed in the system
 """
 def Start():
-	target = lutinTargetLinux.TargetLinux("gcc", "debug")
+	#available target : Linux / MacOs / Windows / Android ...
+	targetName=lutinHost.OS
+	#compilation base
+	compilator="gcc"
+	# build mode
+	mode="release"
+	# load the default target :
+	target = None
 	actionDone=False
 	# parse all argument
 	for argument in sys.argv[1:]:
 		if True==parseGenericArg(argument, False):
 			None # nothing to do ...
-		elif argument[:11] == "--platform=" or argument[:3] == "-p=":
+		elif argument[:13] == "--compilator=" or argument[:3] == "-C=":
 			tmpArg=""
 			if argument[:3] == "-p=":
 				tmpArg=argument[3:]
 			else:
-				tmpArg=argument[11:]
-			# TODO ...
+				tmpArg=argument[13:]
+			# check input ...
+			if tmpArg=="gcc" or tmpArg=="clang":
+				if compilator!=tmpArg:
+					debug.debug("change compilator ==> " + tmpArg)
+					compilator=tmpArg
+					#remove previous target
+					target = None
+			else:
+				debug.error("Set --compilator/-C: '" + tmpArg + "' but only availlable : [gcc/clang]")
+		elif argument[:9] == "--target=" or argument[:3] == "-t=":
+			tmpArg=""
+			if argument[:3] == "-t=":
+				tmpArg=argument[3:]
+			else:
+				tmpArg=argument[9:]
+			# No check input ==> this will be verify automaticly chen the target will be loaded
+			if targetName!=tmpArg:
+				debug.debug("change target ==> " + tmpArg + " & reset mode : gcc&release")
+				targetName=tmpArg
+				#reset properties by defauult:
+				compilator="gcc"
+				mode="release"
+				#remove previous target
+				target = None
 		elif argument[:7] == "--mode=" or argument[:3] == "-m=":
 			tmpArg=""
 			if argument[:3] == "-m=":
 				tmpArg=argument[3:]
 			else:
 				tmpArg=argument[11:]
-			if "debug"==tmpArg:
-				lutinEnv.SetDebugMode(1)
-			elif "release"==tmpArg:
-				lutinEnv.SetDebugMode(0)
+			if "debug"==tmpArg or "release"==tmpArg:
+				if mode!=tmpArg:
+					debug.debug("change mode ==> " + tmpArg)
+					mode = tmpArg
+					#remove previous target
+					target = None
 			else:
-				debug.error("not understand build mode : '" + val + "' can be [debug/release]")
-				lutinEnv.SetDebugMode(0)
-		elif argument[:7] == "--tool=" or argument[:3] == "-t=":
-			tmpArg=""
-			if argument[:3] == "-t=":
-				tmpArg=argument[3:]
-			else:
-				tmpArg=argument[11:]
-			lutinEnv.SetCompileMode(tmpArg)
+				debug.error("Set --mode/-m: '" + tmpArg + "' but only availlable : [debug/release]")
 		else:
+			#load the target if needed :
+			if target == None:
+				target = lutinTarget.TargetLoad(targetName, compilator, mode)
 			target.Build(argument)
 			actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
+		#load the target if needed :
+		if target == None:
+			target = lutinTarget.TargetLoad(targetName, compilator, mode)
 		target.Build("all")
 
 """

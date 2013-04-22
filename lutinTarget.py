@@ -5,34 +5,38 @@ import lutinTools
 import lutinModule
 
 class Target:
-	def __init__(self, name, typeCompilator, debugMode):
+	def __init__(self, name, typeCompilator, debugMode, arch, cross):
+		self.arch = arch
+		self.cross = cross
 		self.name=name
 		debug.info("create board target : "+self.name);
 		if "clang"==typeCompilator:
-			self.cc='clang'
-			self.xx='clang++'
+			self.cc=self.cross + "clang"
+			self.xx=self.cross + "clang++"
 		else:
-			self.cc='gcc'
-			self.xx='g++'
-		self.ar='ar'
-		self.ld='ld'
-		self.nm='nm'
-		self.strip='strip'
-		self.ranlib='ranlib'
-		self.dlltool='dlltool'
+			self.cc=self.cross + "gcc"
+			self.xx=self.cross + "g++"
+		self.ar=self.cross + "ar"
+		self.ld=self.cross + "ld"
+		self.nm=self.cross + "nm"
+		self.strip=self.cross + "strip"
+		self.ranlib=self.cross + "ranlib"
+		self.dlltool=self.cross + "dlltool"
 		###############################################################################
 		# Target global variables.
 		###############################################################################
-		self.global_include_cc=''
-		self.global_flags_cc=['-D__TARGET_OS__Linux', "-DBUILD_TIME=\"\\\""+str(datetime.datetime.now())+"\\\"\""]
-		self.global_flags_xx=''
-		self.global_flags_mm=''
-		self.global_flags_m=''
-		self.global_flags_ar='rcs'
-		self.global_flags_ld=''
-		self.global_flags_ld_shared=''
-		self.global_libs_ld=''
-		self.global_libs_ld_shared=''
+		self.global_include_cc=[]
+		self.global_flags_cc=['-D__TARGET_OS__'+self.name, "-DBUILD_TIME=\"\\\""+str(datetime.datetime.now())+"\\\"\""]
+		self.global_flags_xx=[]
+		self.global_flags_mm=[]
+		self.global_flags_m=[]
+		self.global_flags_ar=['rcs']
+		self.global_flags_ld=[]
+		self.global_flags_ld_shared=[]
+		self.global_libs_ld=[]
+		self.global_libs_ld_shared=[]
+		
+		self.global_sysroot=""
 		
 		self.suffix_dependence='.d'
 		self.suffix_obj='.o'
@@ -86,6 +90,9 @@ class Target:
 		else:
 			debug.error("unknow type : " + type)
 		return list
+	
+	def GetFinalFolder(self):
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_final + "/"
 	
 	def GetStagingFolder(self, binaryName):
 		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + "/"
@@ -160,7 +167,8 @@ class Target:
 			debug.info("Build all")
 			self.LoadAll()
 			for mod in self.moduleList:
-				if mod.type == 'BINARY':
+				if    mod.type == "BINARY" \
+				   or mod.type == "PACKAGE":
 					mod.Build(self, None)
 		elif name == "clean":
 			debug.info("Clean all")
@@ -199,3 +207,12 @@ class Target:
 				debug.error("not know module name : '" + name + "' to build it")
 	
 
+__startTargetName="lutinTarget"
+
+def TargetLoad(targetName, compilator, mode):
+	theTarget = __import__(__startTargetName + targetName)
+	#try:
+	tmpTarget = theTarget.Target(compilator, mode)
+	return tmpTarget
+	#except:
+	#	debug.error("Can not create the Target : '" + targetName + "'")

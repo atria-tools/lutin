@@ -16,8 +16,10 @@ def RunCommand(cmdLine):
 	ret = os.system(cmdLine)
 	# TODO : Use "subprocess" instead ==> permit to pipline the renderings ...
 	if ret != 0:
-		#print "result val = " + str(ret)
-		debug.error("can not compile file ... ")
+		if ret == 2:
+			debug.error("can not compile file ... [keyboard interrrupt]")
+		else:
+			debug.error("can not compile file ... ret : " + str(ret))
 """
 	
 """
@@ -77,6 +79,16 @@ class module:
 		self.originFolder = lutinTools.GetCurrentPath(self.originFile)
 		self.name=moduleName
 		self.localHeritage = heritage.heritage(self)
+		
+		self.packageProp = { "COMPAGNY_TYPE" : set(""),
+		                     "COMPAGNY_NAME" : set(""),
+		                     "MAINTAINER" : set([]),
+		                     "ICON" : set(""),
+		                     "SECTION" : set([]),
+		                     "PRIORITY" : set(""),
+		                     "DESCRIPTION" : set(""),
+		                     "VERSION" : set("0.0.0")}
+		
 	
 	###############################################################################
 	## Commands for running gcc to compile a m++ file.
@@ -134,6 +146,7 @@ class module:
 		cmdLine=lutinTools.ListToStr([
 			target.xx,
 			"-o", tmpList[1] ,
+			target.global_include_cc,
 			lutinTools.AddPrefix("-I",self.export_path),
 			lutinTools.AddPrefix("-I",self.local_path),
 			lutinTools.AddPrefix("-I",depancy.path),
@@ -172,6 +185,7 @@ class module:
 		cmdLine=lutinTools.ListToStr([
 			target.cc,
 			"-o", tmpList[1],
+			target.global_include_cc,
 			lutinTools.AddPrefix("-I",self.export_path),
 			lutinTools.AddPrefix("-I",self.local_path),
 			lutinTools.AddPrefix("-I",depancy.path),
@@ -237,10 +251,23 @@ class module:
 				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
 			return tmpList[1]
 		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.error("SharedLib")# + self.name + " ==> " + dst)
+		debug.printElement("SharedLib", self.name, "==>", tmpList[1])
+		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
+		cmdLine=lutinTools.ListToStr([
+			target.xx,
+			"-o", tmpList[1],
+			target.global_sysroot,
+			"-shared",
+			tmpList[0],
+			depancy.src,
+			self.flags_ld,
+			depancy.flags_ld,
+			target.global_flags_ld])
+		RunCommand(cmdLine)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
 		"""$(Q)$(TARGET_CXX) \
 			-o $@ \
+			target.global_sysroot,
 			$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 			-Wl,-Map -Wl,$(basename $@).map \
 			-shared \
@@ -274,6 +301,7 @@ class module:
 		cmdLine=lutinTools.ListToStr([
 			target.xx,
 			"-o", tmpList[1],
+			target.global_sysroot,
 			tmpList[0],
 			depancy.src,
 			self.flags_ld,
@@ -324,8 +352,9 @@ class module:
 		if target.IsModuleBuild(self.name)==True:
 			return self.localHeritage
 		
-		if packageName==None \
-				and self.type=='BINARY':
+		if     packageName==None \
+		   and (    self.type=="BINARY" \
+		         or self.type=="PACKAGE" ) :
 			# this is the endpoint binary ...
 			packageName = self.name
 		else :
@@ -363,6 +392,15 @@ class module:
 			resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
 			# generate tree for this special binary
 			self.BuildTree(target, self.name)
+		elif self.type=="PACKAGE":
+			if target.name=="Android":
+				resFile = self.Link_to_so(listSubFileNeededToBuild, packageName, target, subHeritage)
+			else:
+				resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
+			# generate tree for this special binary
+			self.BuildTree(target, self.name)
+			# generate the package with his properties ...
+			target.MakePackage(self.name, self.packageProp)
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			
@@ -393,7 +431,8 @@ class module:
 			folderBuild = target.GetBuildFolder(self.name)
 			debug.info("remove folder : '" + folderBuild + "'")
 			lutinTools.RemoveFolderAndSubFolder(folderBuild)
-		elif self.type=='BINARY':
+		elif    self.type=='BINARY' \
+		     or self.type=='PACKAGE':
 			# remove folder of the lib ... for this targer
 			folderBuild = target.GetBuildFolder(self.name)
 			debug.info("remove folder : '" + folderBuild + "'")
@@ -494,24 +533,83 @@ class module:
 		self.PrintList('export_flags_m',self.export_flags_m)
 		self.PrintList('export_flags_mm',self.export_flags_mm)
 		self.PrintList('local_path',self.local_path)
+	
+	def pkgSet(self, variable, value):
+		if "COMPAGNY_TYPE" == variable:
+			#	com : Commercial
+			#	net : Network??
+			#	org : Organisation
+			#	gov : Governement
+			#	mil : Military
+			#	edu : Education
+			#	pri : Private
+			#	museum : ...
+			if     "com" != value \
+			   and "net" != value \
+			   and "org" != value \
+			   and "gov" != value \
+			   and "mil" != value \
+			   and "edu" != value \
+			   and "pri" != value \
+			   and "museum" != value:
+				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
+			else:
+				self.packageProp[variable] = value
+		elif "COMPAGNY_NAME" == variable:
+			self.packageProp[variable] = value
+		elif "ICON" == variable:
+			self.packageProp[variable] = value
+		elif "MAINTAINER" == variable:
+			self.packageProp[variable] = value
+		elif "SECTION" == variable:
+			# project section : (must be separate by coma
+			#    refer to : http://packages.debian.org/sid/
+			#        admin cli-mono comm database debian-installer
+			#        debug doc editors electronics devel embedded
+			#        fonts games gnome gnu-r gnustep graphics
+			#        hamradio haskell httpd interpreters java
+			#        kde kernel libdevel libs lisp localization
+			#        mail math misc net news ocaml oldlibs otherosfs
+			#        perl php python ruby science shells sound tex
+			#        text utils vcs video virtual web x11 xfce zope ...
+			self.packageProp[variable] = value
+		elif "PRIORITY" == variable:
+			#list = ["required","important","standard","optional","extra"]
+			#if isinstance(value, list):
+			if     "required" != value \
+			   and "important" != value \
+			   and "standard" != value \
+			   and "optional" != value \
+			   and "extra" != value:
+				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
+			else:
+				self.packageProp[variable] = value
+		elif "DESCRIPTION" == variable:
+			self.packageProp[variable] = value
+		elif "VERSION" == variable:
+			self.packageProp[variable] = value
+		else:
+			debug.error("not know pak element : '" + variable + "'")
+	
 
 
 
 moduleList=[]
+__startModuleName="lutin_"
 
 def ImportPath(path):
 	global moduleList
 	matches = []
 	debug.debug('Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, 'lutin_*.py')
+		tmpList = fnmatch.filter(filenames, __startModuleName + "*.py")
 		# Import the module :
 		for filename in tmpList:
 			debug.debug('    Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			moduleName = filename.replace('.py', '')
-			moduleName = moduleName.replace('lutin_', '')
+			moduleName = moduleName.replace(__startModuleName, '')
 			debug.debug("integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
 			moduleList.append([moduleName,os.path.join(root, filename)])
 
@@ -520,9 +618,12 @@ def LoadModule(target, name):
 	for mod in moduleList:
 		if mod[0]==name:
 			sys.path.append(os.path.dirname(mod[1]))
-			theModule = __import__("lutin_" + name)
+			theModule = __import__(__startModuleName + name)
+			#try:
 			tmpElement = theModule.Create(target)
 			target.AddModule(tmpElement)
+			#except:
+			#	debug.error(" no function 'Create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
 
 def ListAllModule():
 	global moduleList
@@ -530,5 +631,19 @@ def ListAllModule():
 	for mod in moduleList:
 		tmpListName.append(mod[0])
 	return tmpListName
+
+def ListAllModuleWithDesc():
+	global moduleList
+	tmpList = []
+	for mod in moduleList:
+		sys.path.append(os.path.dirname(mod[1]))
+		theModule = __import__("lutin_" + mod[0])
+		try:
+			tmpdesc = theModule.GetDesc()
+			AddModule(tmpElement)
+			tmpList.append([mod[0], tmpdesc])
+		except:
+			tmpList.append([mod[0], "no description"])
+	return tmpList
 
 
