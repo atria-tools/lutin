@@ -41,19 +41,21 @@ def NeedReBuild(dst, src, dependFile):
 	for curLine in file.readlines():
 		# normal file : end with : ": \\n"
 		curLine = curLine[:len(curLine)-1]
+		# removing last \ ...
+		if curLine[len(curLine)-1:] == '\\' :
+			curLine = curLine[len(curLine)-1:]
+		# remove white space : 
+		curLine = curLine.strip()
+		
 		testFile=""
-		if curLine[len(curLine)-3:] == ': \\' \
-				or curLine[len(curLine)-2:] == ': ' \
-				or curLine[len(curLine)-1:] == ':':
+		if curLine[len(curLine)-1:] == ':':
 			debug.verbose("				Line (no check (already done) : '" + curLine + "'");
-		elif curLine[len(curLine)-2:] == ' \\':
-			testFile = curLine[1:len(curLine)-2]
-			debug.verbose("				Line (might check1) : '" + testFile + "'");
-		elif len(curLine) == 0:
+		elif    len(curLine) == 0 \
+		     or curLine == '\\':
 			debug.verbose("				Line (Not parsed) : '" + curLine + "'");
 		else:
-			testFile = curLine[1:]
-			debug.verbose("				Line (might check2) : '" + testFile + "'");
+			testFile = curLine
+			debug.verbose("				Line (might check) : '" + testFile + "'");
 		# really check files:
 		if testFile!="":
 			debug.verbose("					==> test");

@@ -31,6 +31,9 @@ def RemoveFolderAndSubFolder(path):
 		debug.verbose("remove folder : '" + path + "'")
 		shutil.rmtree(path)
 
+def RemoveFile(path):
+	if os.path.isfile(path):
+		os.remove(path)
 
 
 def ListToStr(list):
@@ -57,9 +60,12 @@ def AddPrefix(prefix,list):
 				result.append(prefix+elem)
 			return result
 
-def CopyFile(src, dst):
+def CopyFile(src, dst, force=False):
+	if os.path.exists(src)==False:
+		debug.error("Request a copy a file that does not existed : '" + src + "'")
 	if os.path.exists(dst):
-		if os.path.getmtime(dst) > os.path.getmtime(src):
+		if     force==False \
+		   and os.path.getmtime(dst) > os.path.getmtime(src):
 			return
 	debug.printElement("copy file", src, "==>", dst)
 	CreateDirectoryOfFile(dst)

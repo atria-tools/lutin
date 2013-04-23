@@ -43,7 +43,8 @@ class Target(lutinTarget.Target):
 		tmpFile.write("Maintainer: " + self.generateListSeparateComa(pkgProperties["MAINTAINER"]) + "\n")
 		tmpFile.write("Description: " + pkgProperties["DESCRIPTION"] + "\n")
 		tmpFile.write("\n")
-		tmpFile.closed
+		tmpFile.flush()
+		tmpFile.close()
 		## Create the PostRm
 		tmpFile = open(finalFilepostRm, 'w')
 		tmpFile.write("#!/bin/bash\n")
@@ -51,7 +52,8 @@ class Target(lutinTarget.Target):
 		if pkgName != "":
 			tmpFile.write("rm -r ~/.local/" + pkgName + "\n")
 		tmpFile.write("\n")
-		tmpFile.closed
+		tmpFile.flush()
+		tmpFile.close()
 		## Enable Execution in script
 		os.chmod(finalFilepostRm, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
 		# copy licence and information : 
@@ -61,16 +63,16 @@ class Target(lutinTarget.Target):
 		debug.debug("pachage : " + self.GetStagingFolder(pkgName) + "/" + pkgName + ".deb")
 		os.system("cd " + self.GetStagingFolder(pkgName) + " ; dpkg-deb --build " + pkgName)
 		lutinTools.CreateDirectoryOfFile(self.GetFinalFolder())
-		lutinTools.CopyFile(self.GetStagingFolder(pkgName) + "/" + pkgName + ".deb", self.GetFinalFolder() + "/" + pkgName + ".deb")
+		lutinTools.CopyFile(self.GetStagingFolder(pkgName) + "/" + pkgName + self.suffix_package, self.GetFinalFolder() + "/" + pkgName + self.suffix_package)
 	
 	def InstallPackage(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME).deb
+		os.system("sudo dpkg -i " + self.GetFinalFolder() + "/" + pkgName + self.suffix_package)
 	
-	def InstallPackage(self, pkgName):
+	def UnInstallPackage(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME).deb
+		os.system("sudo dpkg -r " + self.GetFinalFolder() + "/" + pkgName + self.suffix_package)

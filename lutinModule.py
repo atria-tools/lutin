@@ -82,12 +82,16 @@ class module:
 		
 		self.packageProp = { "COMPAGNY_TYPE" : set(""),
 		                     "COMPAGNY_NAME" : set(""),
+		                     "COMPAGNY_NAME2" : set(""),
 		                     "MAINTAINER" : set([]),
 		                     "ICON" : set(""),
 		                     "SECTION" : set([]),
 		                     "PRIORITY" : set(""),
 		                     "DESCRIPTION" : set(""),
-		                     "VERSION" : set("0.0.0")}
+		                     "VERSION" : set("0.0.0"),
+		                     "NAME" : set("no-name"), # name of the application
+		                     "RIGHT" : []
+		                    }
 		
 	
 	###############################################################################
@@ -557,6 +561,11 @@ class module:
 				self.packageProp[variable] = value
 		elif "COMPAGNY_NAME" == variable:
 			self.packageProp[variable] = value
+			val2 = value.lower()
+			val2 = val2.replace(' ', '')
+			val2 = val2.replace('-', '')
+			val2 = val2.replace('_', '')
+			self.packageProp["COMPAGNY_NAME2"] = val2
 		elif "ICON" == variable:
 			self.packageProp[variable] = value
 		elif "MAINTAINER" == variable:
@@ -588,9 +597,14 @@ class module:
 			self.packageProp[variable] = value
 		elif "VERSION" == variable:
 			self.packageProp[variable] = value
+		elif "NAME" == variable:
+			self.packageProp[variable] = value
 		else:
 			debug.error("not know pak element : '" + variable + "'")
 	
+	def pkgAddRight(self, value):
+		self.packageProp["RIGHT"].append(value)
+		
 
 
 
@@ -621,7 +635,10 @@ def LoadModule(target, name):
 			theModule = __import__(__startModuleName + name)
 			#try:
 			tmpElement = theModule.Create(target)
-			target.AddModule(tmpElement)
+			if (tmpElement == None) :
+				debug.debug("Request load module '" + name + "' not define for this platform")
+			else:
+				target.AddModule(tmpElement)
 			#except:
 			#	debug.error(" no function 'Create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
 

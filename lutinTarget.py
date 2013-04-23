@@ -26,7 +26,7 @@ class Target:
 		# Target global variables.
 		###############################################################################
 		self.global_include_cc=[]
-		self.global_flags_cc=['-D__TARGET_OS__'+self.name, "-DBUILD_TIME=\"\\\""+str(datetime.datetime.now())+"\\\"\""]
+		self.global_flags_cc=['-D__TARGET_OS__'+self.name]
 		self.global_flags_xx=[]
 		self.global_flags_mm=[]
 		self.global_flags_m=[]
@@ -62,6 +62,10 @@ class Target:
 		self.buildDone=[]
 		self.buildTreeDone=[]
 		self.moduleList=[]
+	
+	# TODO : Remove this hack ... ==> really bad ... but usefull
+	def SetEwolFolder(self, folder):
+		self.folder_ewol = folder
 	
 	"""
 		return a list of 3 elements :
@@ -177,7 +181,17 @@ class Target:
 				mod.Clean(self)
 		else:
 			myLen = len(name)
-			if name[myLen-5:] == "-dump":
+			if name[myLen-8:] == "-install":
+				tmpName = name[:myLen-8]
+				self.Build(tmpName + "-build")
+				self.InstallPackage(tmpName)
+			elif name[myLen-10:] == "-uninstall":
+				tmpName = name[:myLen-10]
+				self.UnInstallPackage(tmpName)
+			elif name[myLen-4:] == "-log":
+				tmpName = name[:myLen-4]
+				self.Log(tmpName)
+			elif name[myLen-5:] == "-dump":
 				tmpName = name[:myLen-5]
 				self.LoadIfNeeded(tmpName)
 				# clean requested
@@ -198,13 +212,16 @@ class Target:
 						return
 				debug.error("not know module name : '" + cleanName + "' to clean it")
 			else:
+				tmpName = name
+				if name[myLen-6:] == "-build":
+					tmpName = name[:myLen-6]
 				# Build requested
-				self.LoadIfNeeded(name)
+				self.LoadIfNeeded(tmpName)
 				for mod in self.moduleList:
-					if mod.name == name:
-						debug.info("Build module '" + name + "'")
+					if mod.name == tmpName:
+						debug.info("Build module '" + tmpName + "'")
 						return mod.Build(self, None)
-				debug.error("not know module name : '" + name + "' to build it")
+				debug.error("not know module name : '" + tmpName + "' to build it")
 	
 
 __startTargetName="lutinTarget"
