@@ -4,11 +4,12 @@ import lutinDebug as debug
 import lutinEnv as environement
 
 
-def NeedReBuild(dst, src, dependFile):
+def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 	debug.verbose("Resuest check of dependency of :")
 	debug.verbose("		dst='" + dst + "'")
 	debug.verbose("		str='" + src + "'")
 	debug.verbose("		dept='" + dependFile + "'")
+	debug.verbose("		cmd='" + file_cmd + "'")
 	# if force mode selected ==> just force rebuild ...
 	if environement.GetForceMode():
 		debug.verbose("			==> must rebuild (force mode)")
@@ -22,19 +23,35 @@ def NeedReBuild(dst, src, dependFile):
 	if os.path.getmtime(src) > os.path.getmtime(dst):
 		debug.verbose("			==> must rebuild (source time greater)")
 		return True
-	# now we need to parse the file to find all the dependency file
-	#	file is done like
-	#		file : \
-	#		 dep1 \
-	#		 dep2
-	#		
-	#		dep2 : \
-	#		 dep4
-	#
 	
 	if False==os.path.exists(dependFile):
 		debug.verbose("			==> must rebuild (no depending file)")
 		return True
+	
+	if ""!=file_cmd:
+		if False==os.path.exists(file_cmd):
+			debug.verbose("			==> must rebuild (no commandLine file)")
+			file2 = open(file_cmd, "w")
+			file2.write(cmdLine)
+			file2.flush()
+			file2.close()
+			return True
+		# check if the 2 cmdline are similar :
+		file2 = open(file_cmd, "r")
+		firstAndUniqueLine = file2.read()
+		if firstAndUniqueLine != cmdLine:
+			debug.verbose("			==> must rebuild (cmdLines are not identical)")
+			debug.verbose("				==> '" + cmdLine + "'")
+			debug.verbose("				==> '" + firstAndUniqueLine + "'")
+			file2.close()
+			file2 = open(file_cmd, "w")
+			file2.write(cmdLine)
+			file2.flush()
+			file2.close()
+			return True
+		# the cmdfile is correct ...
+		file2.close()
+	
 	
 	debug.verbose("			start parsing dependency file : '" + dependFile + "'")
 	file = open(dependFile, "r")
@@ -61,10 +78,14 @@ def NeedReBuild(dst, src, dependFile):
 			debug.verbose("					==> test");
 			if False==os.path.exists(testFile):
 				debug.warning("			==> must rebuild (a dependency file does not exist)")
+				file.close()
 				return True
 			if os.path.getmtime(testFile) > os.path.getmtime(dst):
 				debug.warning("			==> must rebuild (a dependency file time is newer)")
+				file.close()
 				return True
+	# close the current file :
+	file.close()
 	
 	debug.verbose("			==> Not rebuild (all dependency is OK)")
 	return False

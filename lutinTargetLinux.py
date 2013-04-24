@@ -26,7 +26,7 @@ class Target(lutinTarget.Target):
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		self.GetStagingFolder(pkgName)
-		targetOutFolderDebian=self.GetStagingFolder(pkgName) + "/" + pkgName + "/DEBIAN/"
+		targetOutFolderDebian=self.GetStagingFolder(pkgName) + "/DEBIAN/"
 		finalFileControl = targetOutFolderDebian + "control"
 		finalFilepostRm = targetOutFolderDebian + "postrm"
 		# create the folders :
@@ -50,20 +50,21 @@ class Target(lutinTarget.Target):
 		tmpFile.write("#!/bin/bash\n")
 		tmpFile.write("touch ~/." + pkgName + "\n")
 		if pkgName != "":
-			tmpFile.write("rm -r ~/.local/" + pkgName + "\n")
+			tmpFile.write("touch ~/.local/share/" + pkgName + "\n")
+			tmpFile.write("rm -r ~/.local/share/" + pkgName + "\n")
 		tmpFile.write("\n")
 		tmpFile.flush()
 		tmpFile.close()
 		## Enable Execution in script
 		os.chmod(finalFilepostRm, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
 		# copy licence and information : 
-		lutinTools.CopyFile("os-Linux/README", self.GetStagingFolder(pkgName) + "/usr/share/doc/README")
-		lutinTools.CopyFile("license.txt", self.GetStagingFolder(pkgName) + "/usr/share/doc/copyright")
-		lutinTools.CopyFile("changelog", self.GetStagingFolder(pkgName) + "/usr/share/doc/changelog")
+		lutinTools.CopyFile("os-Linux/README", self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/README")
+		lutinTools.CopyFile("license.txt", self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/copyright")
+		lutinTools.CopyFile("changelog", self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/changelog")
 		debug.debug("pachage : " + self.GetStagingFolder(pkgName) + "/" + pkgName + ".deb")
-		os.system("cd " + self.GetStagingFolder(pkgName) + " ; dpkg-deb --build " + pkgName)
+		os.system("cd " + self.GetStagingFolder("") + " ; dpkg-deb --build " + pkgName)
 		lutinTools.CreateDirectoryOfFile(self.GetFinalFolder())
-		lutinTools.CopyFile(self.GetStagingFolder(pkgName) + "/" + pkgName + self.suffix_package, self.GetFinalFolder() + "/" + pkgName + self.suffix_package)
+		lutinTools.CopyFile(self.GetStagingFolder("") + "/" + pkgName + self.suffix_package, self.GetFinalFolder() + "/" + pkgName + self.suffix_package)
 	
 	def InstallPackage(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")

@@ -38,6 +38,7 @@ class Target:
 		
 		self.global_sysroot=""
 		
+		self.suffix_cmdLine='.cmd'
 		self.suffix_dependence='.d'
 		self.suffix_obj='.o'
 		self.suffix_lib_static='.a'
@@ -67,6 +68,14 @@ class Target:
 	def SetEwolFolder(self, folder):
 		self.folder_ewol = folder
 	
+	
+	def fileGenerateObject(self,binaryName,moduleName,basePath,file):
+		list=[]
+		list.append(basePath + "/" + file)
+		list.append(self.GetBuildFolder(moduleName) + file + self.suffix_obj)
+		list.append(self.GetBuildFolder(moduleName) + file + self.suffix_dependence)
+		list.append(self.GetBuildFolder(moduleName) + file + self.suffix_cmdLine)
+		return list
 	"""
 		return a list of 3 elements :
 			0 : sources files (can be a list)
@@ -79,10 +88,6 @@ class Target:
 			list.append(file)
 			list.append(self.GetStagingFolder(binaryName) + self.folder_bin + "/" + moduleName + self.suffix_binary)
 			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
-		elif (type=="obj"):
-			list.append(basePath + "/" + file)
-			list.append(self.GetBuildFolder(moduleName) + file + self.suffix_obj)
-			list.append(self.GetBuildFolder(moduleName) + file + self.suffix_dependence)
 		elif (type=="lib-shared"):
 			list.append(file)
 			list.append(self.GetStagingFolder(binaryName) + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
@@ -102,7 +107,7 @@ class Target:
 		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + "/"
 	
 	def GetStagingFolderData(self, binaryName):
-		return self.GetStagingFolder(binaryName) + self.folder_data + "/"
+		return self.GetStagingFolder(binaryName) + self.folder_data + "/" + binaryName + "/"
 	
 	def GetBuildFolder(self, moduleName):
 		return lutinTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/"

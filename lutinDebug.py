@@ -1,5 +1,7 @@
 #!/usr/bin/python
-
+import os
+import thread
+import lutinMultiprocess
 debugLevel=3
 debugColor=False
 
@@ -53,7 +55,10 @@ def warning(input):
 def error(input):
 	if debugLevel >= 1:
 		print color_red + "[ERROR] " + input + color_default
+	lutinMultiprocess.ErrorOccured()
+	thread.interrupt_main()
 	exit(-1)
+	#os_exit(-1)
 	#raise "error happend"
 
 def printElement(type, lib, dir, name):

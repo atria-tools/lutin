@@ -28,13 +28,19 @@ class heritage:
 			self.flags_mm=module.export_flags_mm
 			self.path=module.export_path
 	
+	def AppendAndCheck(self, listout, newElement):
+		for element in listout:
+			if element==newElement:
+				return
+		listout.append(newElement)
+	
 	def AppendToInternalList(self, listout, list):
 		if type(list) == type(str()):
-			listout.append(list)
+			self.AppendAndCheck(listout, list)
 		else:
 			# mulyiple imput in the list ...
 			for elem in list:
-				listout.append(elem)
+				self.AppendAndCheck(listout, elem)
 	
 	def AddFlag_LD(self, list):
 		self.AppendToInternalList(self.flags_ld, list)

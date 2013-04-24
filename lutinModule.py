@@ -10,6 +10,7 @@ import lutinDebug as debug
 import lutinList as buildList
 import lutinHeritage as heritage
 import lutinDepend as dependency
+import lutinMultiprocess
 
 def RunCommand(cmdLine):
 	debug.debug(cmdLine)
@@ -94,6 +95,7 @@ class module:
 		                    }
 		
 	
+	
 	###############################################################################
 	## Commands for running gcc to compile a m++ file.
 	###############################################################################
@@ -141,15 +143,11 @@ class module:
 	## Commands for running gcc to compile a C++ file.
 	###############################################################################
 	def Compile_xx_to_o(self, file, binary, target, depancy):
-		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"obj")
-		# check the dependency for this file :
-		if False==dependency.NeedReBuild(tmpList[1], tmpList[0], tmpList[2]):
-			return tmpList[1]
-		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.printElement("c++", self.name, "<==", file)
+		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+		# create the command line befor requesting start:
 		cmdLine=lutinTools.ListToStr([
 			target.xx,
-			"-o", tmpList[1] ,
+			"-o", file_dst ,
 			target.global_include_cc,
 			lutinTools.AddPrefix("-I",self.export_path),
 			lutinTools.AddPrefix("-I",self.local_path),
@@ -158,37 +156,30 @@ class module:
 			target.global_flags_xx,
 			depancy.flags_cc,
 			depancy.flags_xx,
+			self.flags_xx,
 			self.flags_cc,
+			self.export_flags_xx,
+			self.export_flags_cc,
 			" -c -MMD -MP -g ",
-			tmpList[0]])
-		RunCommand(cmdLine)
-		"""
-		$(TARGET_CXX) \
-		-o $@ \
-		$(TARGET_GLOBAL_C_INCLUDES) \
-		$(PRIVATE_C_INCLUDES) \
-		$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-		$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
-		$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
-		-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
-		-c -MMD -MP -g \
-		$(call path-from-top,$<)
-		"""
-		return tmpList[1]
+			file_src])
+		# check the dependency for this file :
+		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+			return file_dst
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		comment = ["c++", self.name, "<==", file]
+		#process element
+		lutinMultiprocess.RunInPool(cmdLine, comment)
+		return file_dst
 	
 	###############################################################################
 	## Commands for running gcc to compile a C file.
 	###############################################################################
 	def Compile_cc_to_o(self, file, binary, target, depancy):
-		tmpList = target.GenerateFile(binary,self.name,self.originFolder,file,"obj")
-		# check the dependency for this file :
-		if False==dependency.NeedReBuild(tmpList[1], tmpList[0], tmpList[2]):
-			return tmpList[1]
-		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.printElement("c", self.name, "<==", file)
+		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+		# create the command line befor requesting start:
 		cmdLine=lutinTools.ListToStr([
 			target.cc,
-			"-o", tmpList[1],
+			"-o", file_dst,
 			target.global_include_cc,
 			lutinTools.AddPrefix("-I",self.export_path),
 			lutinTools.AddPrefix("-I",self.local_path),
@@ -196,22 +187,18 @@ class module:
 			target.global_flags_cc,
 			depancy.flags_cc,
 			self.flags_cc,
+			self.export_flags_cc,
 			" -c -MMD -MP -g ",
-			tmpList[0]])
-		RunCommand(cmdLine)
-		"""
-		$(TARGET_CC) \
-		-o $@ \
-		$(TARGET_GLOBAL_C_INCLUDES) \
-		$(PRIVATE_C_INCLUDES) \
-		$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-		$(TARGET_GLOBAL_CFLAGS) $(CC_FLAGS_WARNINGS) \
-		$(PRIVATE_CFLAGS) \
-		-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
-		-c -MMD -MP -g \
-		$(call path-from-top,$<)
-		"""
-		return tmpList[1]
+			file_src])
+		
+		# check the dependency for this file :
+		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+			return file_dst
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		comment = ["c", self.name, "<==", file]
+		# process element
+		lutinMultiprocess.RunInPool(cmdLine, comment)
+		return file_dst
 	
 	
 	###############################################################################
@@ -385,6 +372,9 @@ class module:
 				listSubFileNeededToBuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
+		# when multiprocess availlable, we need to synchronize here ...
+		lutinMultiprocess.PoolSynchrosize()
+		
 		# generate end point:
 		if self.type=='PREBUILD':
 			# nothing to add ==> just dependence
@@ -447,13 +437,20 @@ class module:
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
+	def AppendAndCheck(self, listout, newElement):
+		for element in listout:
+			if element==newElement:
+				return
+		listout.append(newElement)
+		listout.sort()
+	
 	def AppendToInternalList(self, listout, list):
 		if type(list) == type(str()):
-			listout.append(list)
+			self.AppendAndCheck(listout, list)
 		else:
 			# mulyiple imput in the list ...
 			for elem in list:
-				listout.append(elem)
+				self.AppendAndCheck(listout, elem)
 	
 	def AddModuleDepend(self, list):
 		self.AppendToInternalList(self.depends, list)
