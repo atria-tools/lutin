@@ -7,6 +7,7 @@ import fnmatch
 import lutinDebug as debug
 import lutinEnv
 import lutinModule
+import lutinMultiprocess
 
 """
 	Display the help of this makefile
@@ -30,6 +31,8 @@ def usage():
 	print "			Display makefile output in color"
 	print "		-f / --force"
 	print "			Force the rebuild without checking the dependency"
+	print "		-j= / --jobs"
+	print "			Specifies the number of jobs (commands) to run simultaneously."
 	print "	[properties] : keep in the sequency of the cible"
 	print "		-t=... / --target=..."
 	print "			(Android/Linux/MacOs/Windows) Select a target (by default the platform is the computer that compile this"
@@ -53,33 +56,55 @@ def usage():
 
 # preparse the argument to get the erbose element for debug mode
 def parseGenericArg(argument,active):
-	if argument == "-h" or argument == "--help":
+	if    argument == "-h" \
+	   or argument == "--help":
 		#display help
 		if active==False:
 			usage()
 		return True
-	elif argument[:2] == "-v":
+	elif    argument[:3] == "-j=" \
+	     or argument[:2] == "-j" \
+	     or argument[:7] == "--jobs=":
 		if active==True:
-			if len(argument)==2:
-				debug.SetLevel(5)
-			else:
-				debug.SetLevel(int(argument[2:]))
-		return True
-	elif argument[:9] == "--verbose":
-		if active==True:
-			if len(argument)==9:
-				debug.SetLevel(5)
-			else:
-				if argument[:10] == "--verbose=":
-					debug.SetLevel(int(argument[10:]))
+			val = "1"
+			if argument[:3] == "-j=":
+				val = argument[3:]
+			elif argument[:2] == "-j":
+				if len(argument) == 2:
+					val = "1"
 				else:
-					debug.SetLevel(int(argument[9:]))
+					val = argument[2:]
+			else:
+				val = argument[7:]
+			lutinMultiprocess.SetCoreNumber(int(val))
 		return True
-	elif argument == "-c" or argument == "--color":
+	elif    argument[:3] == "-v=" \
+	     or argument[:2] == "-v" \
+	     or argument[:10] == "--verbose=" \
+	     or argument[:9] == "--verbose":
+		if active==True:
+			val = "5"
+			if argument[:3] == "-v=":
+				val = argument[3:]
+			elif argument[:2] == "-v":
+				if len(argument) == 2:
+					val = "5"
+				else:
+					val = argument[2:]
+			else:
+				if len(argument) == 9:
+					val = "5"
+				else:
+					val = argument[10:]
+			debug.SetLevel(int(val))
+		return True
+	elif    argument == "-c" \
+	     or argument == "--color":
 		if active==True:
 			debug.EnableColor()
 		return True
-	elif argument == "-f" or argument == "--force":
+	elif    argument == "-f" \
+	     or argument == "--force":
 		if active==True:
 			lutinEnv.SetForceMode(True)
 		return True
@@ -169,6 +194,8 @@ def Start():
 		if target == None:
 			target = lutinTarget.TargetLoad(targetName, compilator, mode)
 		target.Build("all")
+	# stop all started threads 
+	lutinMultiprocess.UnInit()
 
 """
 	When the user use with make.py we initialise ourself

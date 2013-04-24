@@ -168,7 +168,7 @@ class module:
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		comment = ["c++", self.name, "<==", file]
 		#process element
-		lutinMultiprocess.RunInPool(cmdLine, comment)
+		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
 		return file_dst
 	
 	###############################################################################
@@ -197,7 +197,7 @@ class module:
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		comment = ["c", self.name, "<==", file]
 		# process element
-		lutinMultiprocess.RunInPool(cmdLine, comment)
+		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
 		return file_dst
 	
 	

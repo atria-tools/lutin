@@ -2,6 +2,8 @@
 import os
 import thread
 import lutinMultiprocess
+import threading
+
 debugLevel=3
 debugColor=False
 
@@ -12,6 +14,9 @@ color_yellow = ""
 color_blue   = ""
 color_purple = ""
 color_cyan   = ""
+
+
+debugLock = threading.Lock()
 
 def SetLevel(id):
 	global debugLevel
@@ -37,24 +42,44 @@ def EnableColor():
 	color_cyan   = "\033[36m"
 
 def verbose(input):
+	global debugLock
+	global debugLevel
 	if debugLevel >= 5:
-		print color_blue + input + color_default
+		debugLock.acquire()
+		print(color_blue + input + color_default)
+		debugLock.release()
 
 def debug(input):
+	global debugLock
+	global debugLevel
 	if debugLevel >= 4:
-		print color_green + input + color_default
+		debugLock.acquire()
+		print(color_green + input + color_default)
+		debugLock.release()
 
 def info(input):
+	global debugLock
+	global debugLevel
 	if debugLevel >= 3:
-		print input + color_default
+		debugLock.acquire()
+		print(input + color_default)
+		debugLock.release()
 
 def warning(input):
+	global debugLock
+	global debugLevel
 	if debugLevel >= 2:
-		print color_purple + "[WARNING] " + input + color_default
+		debugLock.acquire()
+		print(color_purple + "[WARNING] " + input + color_default)
+		debugLock.release()
 
 def error(input):
+	global debugLock
+	global debugLevel
 	if debugLevel >= 1:
-		print color_red + "[ERROR] " + input + color_default
+		debugLock.acquire()
+		print(color_red + "[ERROR] " + input + color_default)
+		debugLock.release()
 	lutinMultiprocess.ErrorOccured()
 	thread.interrupt_main()
 	exit(-1)
@@ -62,5 +87,11 @@ def error(input):
 	#raise "error happend"
 
 def printElement(type, lib, dir, name):
+	global debugLock
+	global debugLevel
 	if debugLevel >= 3:
-		print color_cyan + type + color_default + " : " + color_yellow + lib + color_default + " " + dir + " " + color_blue + name + color_default
+		debugLock.acquire()
+		print(color_cyan + type + color_default + " : " + color_yellow + lib + color_default + " " + dir + " " + color_blue + name + color_default)
+		debugLock.release()
+
+
