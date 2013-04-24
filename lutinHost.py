@@ -8,7 +8,7 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
 	OS = "Windows"
 elif platform.system() == "Darwin":
-	OS = "Windows"
+	OS = "MacOs"
 else:
 	debug.error("Unknow the Host OS ... '" + platform.system() + "'")
 

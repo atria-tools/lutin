@@ -11,7 +11,7 @@ class Target(lutinTarget.Target):
 		
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
-		lutinTarget.Target.__init__(self, "Windows", typeCompilator, debugMode, "", cross)
+		lutinTarget.Target.__init__(self, "MacOs", typeCompilator, debugMode, "", cross)
 		
 		self.folder_bin="/MacOS"
 		self.folder_lib="/lib"
@@ -19,13 +19,16 @@ class Target(lutinTarget.Target):
 		self.folder_doc="/doc"
 		
 		self.suffix_lib_static='.a'
-		self.suffix_lib_dynamic='.dll'
-		self.suffix_binary='.exe'
+		self.suffix_lib_dynamic='.dylib'
+		self.suffix_binary=''
 		self.suffix_package=''
 		
 	
 	def GetStagingFolder(self, binaryName):
 		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/Contents/"
+	
+	def GetStagingFolderData(self, binaryName):
+		return self.GetStagingFolder(binaryName) + self.folder_data + "/"
 	
 	def MakePackage(self, pkgName, pkgProperties):
 		debug.debug("------------------------------------------------------------------------")

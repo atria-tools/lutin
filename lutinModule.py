@@ -7,7 +7,6 @@ import lutinModule as module
 import lutinHost as host
 import lutinTools
 import lutinDebug as debug
-import lutinList as buildList
 import lutinHeritage as heritage
 import lutinDepend as dependency
 import lutinMultiprocess
@@ -100,44 +99,67 @@ class module:
 	## Commands for running gcc to compile a m++ file.
 	###############################################################################
 	def Compile_mm_to_o(self, file, binary, target, depancy):
-		# TODO : Check depedency ...
-		lutinTools.CreateDirectoryOfFile(dst)
-		debug.printElement("m++", self.name, "<==", file)
-		"""
-		cmdLine= $(TARGET_CXX) \
-			-o " + dst + " \
-			$(TARGET_GLOBAL_C_INCLUDES) \
-			$(PRIVATE_C_INCLUDES) \
-			$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-			$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
-			$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
-			"-c -MMD -MP -g" 
-			"-x objective-c" +
-			src
-		"""
-		return tmpList[1]
+		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+		# create the command line befor requesting start:
+		cmdLine=lutinTools.ListToStr([
+			target.xx,
+			"-o", file_dst ,
+			target.global_include_cc,
+			lutinTools.AddPrefix("-I",self.export_path),
+			lutinTools.AddPrefix("-I",self.local_path),
+			lutinTools.AddPrefix("-I",depancy.path),
+			target.global_flags_cc,
+			target.global_flags_mm,
+			depancy.flags_cc,
+			depancy.flags_mm,
+			self.flags_mm,
+			self.flags_cc,
+			self.export_flags_mm,
+			self.export_flags_cc,
+			"-c -MMD -MP -g",
+			"-x objective-c",
+			file_src])
+		# check the dependency for this file :
+		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+			return file_dst
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		comment = ["m++", self.name, "<==", file]
+		#process element
+		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
+		return file_dst
 	
 	###############################################################################
 	## Commands for running gcc to compile a m file.
 	###############################################################################
 	def Compile_m_to_o(self, file, binary, target, depancy):
-		# TODO : Check depedency ...
-		lutinTools.CreateDirectoryOfFile(dst)
-		debug.printElement("m", self.name, "<==", file)
-		"""
-		$(TARGET_CC) \
-			-o $@ \
-			$(TARGET_GLOBAL_C_INCLUDES) \
-			$(PRIVATE_C_INCLUDES) \
-			$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
-			$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(CXX_FLAGS_WARNINGS) \
-			$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
-			-D__EWOL_APPL_NAME__="$(PROJECT_NAME2)" \
-			-c -MMD -MP -g \
-			-x objective-c \
-			$(call path-from-top,$<)
-		"""
-		return tmpList[1]
+		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+		# create the command line befor requesting start:
+		cmdLine=lutinTools.ListToStr([
+			target.cc,
+			"-o", file_dst ,
+			target.global_include_cc,
+			lutinTools.AddPrefix("-I",self.export_path),
+			lutinTools.AddPrefix("-I",self.local_path),
+			lutinTools.AddPrefix("-I",depancy.path),
+			target.global_flags_cc,
+			target.global_flags_m,
+			depancy.flags_cc,
+			depancy.flags_m,
+			self.flags_m,
+			self.flags_cc,
+			self.export_flags_m,
+			self.export_flags_cc,
+			"-c -MMD -MP -g",
+			"-x objective-c",
+			file_src])
+		# check the dependency for this file :
+		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+			return file_dst
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		comment = ["m", self.name, "<==", file]
+		#process element
+		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
+		return file_dst
 	
 	###############################################################################
 	## Commands for running gcc to compile a C++ file.
@@ -369,6 +391,9 @@ class module:
 				listSubFileNeededToBuild.append(resFile)
 			elif fileExt == "cpp" or fileExt == "CPP" or fileExt == "cxx" or fileExt == "CXX" or fileExt == "xx" or fileExt == "XX":
 				resFile = self.Compile_xx_to_o(file, packageName, target, subHeritage)
+				listSubFileNeededToBuild.append(resFile)
+			elif fileExt == "mm" or fileExt == "MM":
+				resFile = self.Compile_mm_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)

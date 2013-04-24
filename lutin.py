@@ -140,7 +140,7 @@ def Start():
 			None # nothing to do ...
 		elif argument[:13] == "--compilator=" or argument[:3] == "-C=":
 			tmpArg=""
-			if argument[:3] == "-p=":
+			if argument[:3] == "-C=":
 				tmpArg=argument[3:]
 			else:
 				tmpArg=argument[13:]
