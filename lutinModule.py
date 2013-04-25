@@ -277,6 +277,12 @@ class module:
 			depancy.flags_ld,
 			target.global_flags_ld])
 		RunCommand(cmdLine)
+		if "release"==target.buildMode:
+			debug.printElement("SharedLib(strip)", self.name, "", "")
+			cmdLine=lutinTools.ListToStr([
+				target.strip,
+				tmpList[1]])
+			RunCommand(cmdLine)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
 		"""$(Q)$(TARGET_CXX) \
 			-o $@ \
@@ -321,6 +327,13 @@ class module:
 			depancy.flags_ld,
 			target.global_flags_ld])
 		RunCommand(cmdLine)
+		if "release"==target.buildMode:
+			debug.printElement("Executable(strip)", self.name, "", "")
+			cmdLine=lutinTools.ListToStr([
+				target.strip,
+				tmpList[1]])
+			RunCommand(cmdLine)
+		
 		"""
 		$(TARGET_CXX) \
 			-o $@ \
@@ -339,7 +352,7 @@ class module:
 			$(PRIVATE_LDLIBS) \
 			$(TARGET_GLOBAL_LDLIBS)
 		"""
-		#$(call strip-executable)
+		#$(call strip-		)
 	
 	###############################################################################
 	## Commands for copying files

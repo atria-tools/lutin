@@ -31,10 +31,6 @@ def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 	if ""!=file_cmd:
 		if False==os.path.exists(file_cmd):
 			debug.verbose("			==> must rebuild (no commandLine file)")
-			file2 = open(file_cmd, "w")
-			file2.write(cmdLine)
-			file2.flush()
-			file2.close()
 			return True
 		# check if the 2 cmdline are similar :
 		file2 = open(file_cmd, "r")
@@ -43,10 +39,6 @@ def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 			debug.verbose("			==> must rebuild (cmdLines are not identical)")
 			debug.verbose("				==> '" + cmdLine + "'")
 			debug.verbose("				==> '" + firstAndUniqueLine + "'")
-			file2.close()
-			file2 = open(file_cmd, "w")
-			file2.write(cmdLine)
-			file2.flush()
 			file2.close()
 			return True
 		# the cmdfile is correct ...
@@ -60,9 +52,11 @@ def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 		curLine = curLine[:len(curLine)-1]
 		# removing last \ ...
 		if curLine[len(curLine)-1:] == '\\' :
-			curLine = curLine[len(curLine)-1:]
+			curLine = curLine[:len(curLine)-1]
 		# remove white space : 
+		#debug.verbose("				Line (read) : '" + curLine + "'");
 		curLine = curLine.strip()
+		#debug.verbose("				Line (strip) : '" + curLine + "'");
 		
 		testFile=""
 		if curLine[len(curLine)-1:] == ':':
@@ -77,11 +71,11 @@ def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 		if testFile!="":
 			debug.verbose("					==> test");
 			if False==os.path.exists(testFile):
-				debug.warning("			==> must rebuild (a dependency file does not exist)")
+				debug.verbose("			==> must rebuild (a dependency file does not exist)")
 				file.close()
 				return True
 			if os.path.getmtime(testFile) > os.path.getmtime(dst):
-				debug.warning("			==> must rebuild (a dependency file time is newer)")
+				debug.verbose("			==> must rebuild (a dependency file time is newer)")
 				file.close()
 				return True
 	# close the current file :

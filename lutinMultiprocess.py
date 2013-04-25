@@ -7,6 +7,17 @@ import Queue
 import os
 import subprocess
 
+queueLock = threading.Lock()
+workQueue = Queue.Queue()
+currentThreadWorking = 0
+threads = []
+
+exitFlag = False # resuest stop of the thread
+isInit = False # the thread are initialized
+errorOccured = False # a thread have an error
+processorAvaillable = 1 # number of CPU core availlable
+
+
 def RunCommand(cmdLine, storeCmdLine=""):
 	debug.debug(cmdLine)
 	retcode = -1
@@ -15,22 +26,26 @@ def RunCommand(cmdLine, storeCmdLine=""):
 	except OSError as e:
 		print >>sys.stderr, "Execution failed:", e
 	
+	if retcode != 0:
+		global errorOccured
+		errorOccured = True
+		global exitFlag
+		exitFlag = True
+		if retcode == 2:
+			debug.error("can not compile file ... [keyboard interrrupt]")
+		else:
+			debug.error("can not compile file ... ret : " + str(retcode))
+		return
 	
-	# write cmd line only after to prvent errors ...
+	# write cmd line only after to prevent errors ...
 	if storeCmdLine!="":
 		file2 = open(storeCmdLine, "w")
 		file2.write(cmdLine)
 		file2.flush()
 		file2.close()
-	# TODO : Use "subprocess" instead ==> permit to pipline the renderings ...
 	
-	if retcode != 0:
-		if retcode == 2:
-			debug.error("can not compile file ... [keyboard interrrupt]")
-		else:
-			debug.error("can not compile file ... ret : " + str(retcode))
 
-exitFlag = False
+
 
 class myThread(threading.Thread):
 	def __init__(self, threadID, lock, queue):
@@ -71,13 +86,6 @@ class myThread(threading.Thread):
 		# kill requested ...
 		debug.verbose("Exiting " + self.name)
 
-queueLock = threading.Lock()
-workQueue = Queue.Queue()
-currentThreadWorking = 0
-threads = []
-
-isInit = False
-processorAvaillable = 1
 
 def ErrorOccured():
 	global exitFlag
@@ -135,18 +143,26 @@ def RunInPool(cmdLine, comment, storeCmdLine=""):
 	
 
 def PoolSynchrosize():
+	global errorOccured
 	if processorAvaillable <= 1:
 		#in this case : nothing to synchronise
 		return
 	
 	debug.verbose("wait queue process ended\n")
 	# Wait for queue to empty
-	while not workQueue.empty():
+	while not workQueue.empty() \
+	      and False==errorOccured:
 		time.sleep(0.2)
 		pass
 	# Wait all thread have ended their current process
-	while currentThreadWorking != 0:
+	while currentThreadWorking != 0 \
+	      and False==errorOccured:
 		time.sleep(0.2)
 		pass
-	debug.verbose("queue is empty")
+	if False==errorOccured:
+		debug.verbose("queue is empty")
+	else:
+		debug.debug("Thread return with error ... ==> stop all the pool")
+		UnInit()
+		debug.error("Pool error occured ...")
 	
