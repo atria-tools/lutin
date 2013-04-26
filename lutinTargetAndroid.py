@@ -228,7 +228,7 @@ class Target(lutinTarget.Target):
 			tmpFile.close()
 			# verbose mode : -verbose
 			cmdLine = "jarsigner " \
-			    + "-keystore " + lutinTools.GetCurrentPath(__file__) + "/core/AndroidDebugKey.jks " \
+			    + "-keystore " + lutinTools.GetCurrentPath(__file__) + "/AndroidDebugKey.jks " \
 			    + self.GetStagingFolder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey " \
 			    + " < tmpPass.boo"

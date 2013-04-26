@@ -1,84 +1,26 @@
 build
 =====
 
-`build` this is not a name ... but it is a FREE software tool.
+`lutin` is a generic package maker is a FREE software tool.
 
 Instructions
 ============
 
-this is a makefile chain to generate the binary, shared lib and static lib independently of the OS
-
-Create a makefile for all librairies
-====================================
-
-the makefile must be set directly in the root folder of the lib and named :
-  * Generic.mk ==> if it was no special platform difined
-  * Linux.mk ==> only for linux
-  * Windows.mk ==> only for windows
-  * Android.mk ==> only for android
-  * Mac.mk ==> only for mac
-  * Ios.mk ==> only for ios
-
-==> if the platform specific file was not found, the system search the Generic.mk file
+This is a tool to generate the binary, shared library, static library and package independently of the OS
+This tool can generate package for Linux, MacOs, Android
 
 
-a minimal makefile for static lib :
+Create a lutin module
+=====================
 
-	# requested for all makefile
-	LOCAL_PATH := $(call my-dir)
-	# remove previous variable of a module (remove all LOCAL_*** variable)
-	include $(CLEAR_VARS)
-	# librairie or program name
-	LOCAL_MODULE    := exemple
-	# list of sources files
-	LOCAL_SRC_FILES := plop.cpp plop2.c
-	# request the type of generation
-	include $(BUILD_STATIC_LIBRARY)
+Set the lutin module maker with the name :
+	lutin_xxxxx.py
+	xxx : represent the name of the module/binary/package and must be lower case and no special characters
 
-you can have some other :
-
-	# prebuild librairie ==> no comilation needed
-	include $(BUILD_PREBUILT)
-	# binary file generation (automatic add .exe at the end when windows binary)
-	include $(BUILD_EXECUTABLE)
-	# shared librairie (automatic .so or .dll when needed)
-	include $(BUILD_SHARED_LIBRARY)
-
-
-define include folder:
-
-	# inside module
-	LOCAL_C_INCLUDES := $(LOCAL_PATH)/monPath/
-	# outside module >> automaticly added to LOCAL_C_INCLUDES
-	LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/mon/path/export
-
-define c compilation flags : CFLAGS
-
-	# inside module
-	LOCAL_CFLAGS := -DEXEMPLE_TAG="\"SuperPlop\""
-	# outside module
-	LOCAL_EXPORT_CFLAGS := -DEXEMPLE_EXTERN_DEFINE
-
-define linker flags:
-
-	# local
-	LOCAL_LDLIBS := -lm
-	# expoerted
-	LOCAL_EXPORT_LDLIBS := -lm
-
-define dependency between librairies (note : automaticly include sub dependence of adependence
-
-	LOCAL_LIBRARIES := etk tinyxml
-
-copy files and folder :
-
-	# use the makefile folder as reference and output is in the application data directory
-	# copy secyfy file in the destination : folder/SRC.xxx:folderPLOP/folder/dst.yyy
-	LOCAL_COPY_FILES := ../share/Font/freefont/FreeSerif.ttf:Font/freefont/FreeSerif.ttf
-	# copy multiple file in a folder : (wildcard search) : folder/src*.txt:dstFolder
-	LOCAL_COPY_FOLDERS := ../share/*.xml:/
-	# note : the destination name is not needed ...
-
+you can see exemple for some type in :
+	ewol : library
+	edn : package
+	glew : prebuild
 
 Copyright (c)
 =============
