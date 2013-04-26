@@ -185,48 +185,36 @@ class Target:
 			for mod in self.moduleList:
 				mod.Clean(self)
 		else:
-			myLen = len(name)
-			if name[myLen-8:] == "-install":
-				tmpName = name[:myLen-8]
-				self.Build(tmpName + "-build")
-				self.InstallPackage(tmpName)
-			elif name[myLen-10:] == "-uninstall":
-				tmpName = name[:myLen-10]
-				self.UnInstallPackage(tmpName)
-			elif name[myLen-4:] == "-log":
-				tmpName = name[:myLen-4]
-				self.Log(tmpName)
-			elif name[myLen-5:] == "-dump":
-				tmpName = name[:myLen-5]
-				self.LoadIfNeeded(tmpName)
-				# clean requested
-				for mod in self.moduleList:
-					if mod.name == tmpName:
-						debug.info("dump module '" + tmpName + "'")
-						mod.Display(self)
-						return
-				debug.error("not know module name : '" + cleanName + "' to clean it")
-			elif name[myLen-6:] == "-clean":
-				cleanName = name[:myLen-6]
-				self.LoadIfNeeded(cleanName)
-				# clean requested
-				for mod in self.moduleList:
-					if mod.name == cleanName:
-						debug.info("Clean module '" + cleanName + "'")
-						mod.Clean(self)
-						return
-				debug.error("not know module name : '" + cleanName + "' to clean it")
+			# get the action an the module ....
+			gettedElement = name.split("-")
+			moduleName = gettedElement[0]
+			if len(gettedElement)>=2:
+				actionName = gettedElement[1]
+			else :
+				actionName = "build"
+			debug.verbose("requested : " + moduleName + "-" + actionName)
+			if actionName == "install":
+				self.Build(moduleName + "-build")
+				self.InstallPackage(moduleName)
+			elif actionName == "uninstall":
+				self.UnInstallPackage(moduleName)
+			elif actionName == "log":
+				self.Log(moduleName)
 			else:
-				tmpName = name
-				if name[myLen-6:] == "-build":
-					tmpName = name[:myLen-6]
-				# Build requested
-				self.LoadIfNeeded(tmpName)
+				self.LoadIfNeeded(moduleName)
+				# clean requested
 				for mod in self.moduleList:
-					if mod.name == tmpName:
-						debug.info("Build module '" + tmpName + "'")
-						return mod.Build(self, None)
-				debug.error("not know module name : '" + tmpName + "' to build it")
+					if mod.name == moduleName:
+						if actionName == "dump":
+							debug.info("dump module '" + moduleName + "'")
+							return mod.Display(self)
+						elif actionName == "clean":
+							debug.info("clean module '" + moduleName + "'")
+							return mod.Clean(self)
+						elif actionName == "build":
+							debug.info("build module '" + moduleName + "'")
+							return mod.Build(self, None)
+				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
 
 __startTargetName="lutinTarget"

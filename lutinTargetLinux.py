@@ -23,7 +23,7 @@ class Target(lutinTarget.Target):
 	def MakePackage(self, pkgName, pkgProperties):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + pkgName + "'")
+		debug.info("Generate package '" + pkgName + "' v"+pkgProperties["VERSION"])
 		debug.debug("------------------------------------------------------------------------")
 		self.GetStagingFolder(pkgName)
 		targetOutFolderDebian=self.GetStagingFolder(pkgName) + "/DEBIAN/"
