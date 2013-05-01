@@ -4,10 +4,20 @@ import lutinTarget
 import lutinTools
 import os
 import stat
+import lutinHost
+import sys
 
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode):
-		cross = "i586-mingw32msvc-"
+		# on windows board the basic path is not correct 
+		# TODO : get external PATH for the minGW path
+		# TODO : Set the cyngwin path ...
+		if lutinHost.OS == "Windows":
+			cross = "c:\\MinGW\\bin\\"
+			sys.path.append("c:\\MinGW\\bin" )
+			os.environ['PATH'] += ";c:\\MinGW\\bin\\"
+		else:
+			cross = "i586-mingw32msvc-"
 		
 		if typeCompilator!="gcc":
 			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")

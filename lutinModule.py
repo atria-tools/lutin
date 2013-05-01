@@ -475,20 +475,21 @@ class module:
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
-	def AppendAndCheck(self, listout, newElement):
+	def AppendAndCheck(self, listout, newElement, order):
 		for element in listout:
 			if element==newElement:
 				return
 		listout.append(newElement)
-		listout.sort()
+		if True==order:
+			listout.sort()
 	
-	def AppendToInternalList(self, listout, list):
+	def AppendToInternalList(self, listout, list, order=False):
 		if type(list) == type(str()):
-			self.AppendAndCheck(listout, list)
+			self.AppendAndCheck(listout, list, order)
 		else:
 			# mulyiple imput in the list ...
 			for elem in list:
-				self.AppendAndCheck(listout, elem)
+				self.AppendAndCheck(listout, elem, order)
 	
 	def AddModuleDepend(self, list):
 		self.AppendToInternalList(self.depends, list)
@@ -534,7 +535,7 @@ class module:
 		self.AppendToInternalList(self.flags_s, list)
 	
 	def AddSrcFile(self, list):
-		self.AppendToInternalList(self.src, list)
+		self.AppendToInternalList(self.src, list, True)
 	
 	def CopyFile(self, src, dst):
 		self.files.append([src,dst])
