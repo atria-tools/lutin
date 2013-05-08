@@ -17,7 +17,7 @@ def RunCommand(cmdLine):
 
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode):
+	def __init__(self, typeCompilator, debugMode, generatePackage):
 		
 		self.folder_ndk = os.getenv('PROJECT_NDK', lutinTools.GetRunFolder() + "/../android/ndk/")
 		self.folder_sdk = os.getenv('PROJECT_SDK', lutinTools.GetRunFolder() + "/../android/sdk/")
@@ -27,7 +27,7 @@ class Target(lutinTarget.Target):
 		if typeCompilator!="gcc":
 			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
 		
-		lutinTarget.Target.__init__(self, "Android", "gcc", debugMode, arch, cross)
+		lutinTarget.Target.__init__(self, "Android", "gcc", debugMode, generatePackage, arch, cross)
 		
 		
 		self.folder_bin="/mustNotCreateBinary"

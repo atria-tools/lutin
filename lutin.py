@@ -40,6 +40,8 @@ def usage():
 	print "			(clang/gcc) Compile with clang or Gcc mode (by default gcc will be used)"
 	print "		-m=... / --mode=..."
 	print "			(debug/release) Compile in release or debug mode (default release)"
+	print "		-p / --package"
+	print "			disable the package generation (usefull when just compile for test on linux ...)"
 	print "	[cible] : generate in order set"
 	print "		all"
 	print "			Build all (only for the current selected board) (bynary and packages)"
@@ -131,6 +133,8 @@ def Start():
 	compilator="gcc"
 	# build mode
 	mode="release"
+	# package generationMode
+	generatePackage=True
 	# load the default target :
 	target = None
 	actionDone=False
@@ -138,14 +142,19 @@ def Start():
 	for argument in sys.argv[1:]:
 		if True==parseGenericArg(argument, False):
 			None # nothing to do ...
-		elif argument[:13] == "--compilator=" or argument[:3] == "-C=":
+		elif    argument == "--package" \
+		     or argument == "-p":
+			generatePackage=False
+		elif    argument[:13] == "--compilator=" \
+		     or argument[:3] == "-C=":
 			tmpArg=""
 			if argument[:3] == "-C=":
 				tmpArg=argument[3:]
 			else:
 				tmpArg=argument[13:]
 			# check input ...
-			if tmpArg=="gcc" or tmpArg=="clang":
+			if    tmpArg=="gcc" \
+			   or tmpArg=="clang":
 				if compilator!=tmpArg:
 					debug.debug("change compilator ==> " + tmpArg)
 					compilator=tmpArg
@@ -153,7 +162,8 @@ def Start():
 					target = None
 			else:
 				debug.error("Set --compilator/-C: '" + tmpArg + "' but only availlable : [gcc/clang]")
-		elif argument[:9] == "--target=" or argument[:3] == "-t=":
+		elif    argument[:9] == "--target=" \
+		     or argument[:3] == "-t=":
 			tmpArg=""
 			if argument[:3] == "-t=":
 				tmpArg=argument[3:]
@@ -166,9 +176,11 @@ def Start():
 				#reset properties by defauult:
 				compilator="gcc"
 				mode="release"
+				generatePackage=True
 				#remove previous target
 				target = None
-		elif argument[:7] == "--mode=" or argument[:3] == "-m=":
+		elif    argument[:7] == "--mode=" \
+		     or argument[:3] == "-m=":
 			tmpArg=""
 			if argument[:3] == "-m=":
 				tmpArg=argument[3:]
@@ -185,14 +197,14 @@ def Start():
 		else:
 			#load the target if needed :
 			if target == None:
-				target = lutinTarget.TargetLoad(targetName, compilator, mode)
+				target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
 			target.Build(argument)
 			actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
 		#load the target if needed :
 		if target == None:
-			target = lutinTarget.TargetLoad(targetName, compilator, mode)
+			target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
 		target.Build("all")
 	# stop all started threads 
 	lutinMultiprocess.UnInit()

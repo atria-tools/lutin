@@ -431,8 +431,9 @@ class module:
 				resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
 			# generate tree for this special binary
 			self.BuildTree(target, self.name)
-			# generate the package with his properties ...
-			target.MakePackage(self.name, self.packageProp)
+			if target.endGeneratePackage==True:
+				# generate the package with his properties ...
+				target.MakePackage(self.name, self.packageProp)
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			
@@ -492,7 +493,7 @@ class module:
 				self.AppendAndCheck(listout, elem, order)
 	
 	def AddModuleDepend(self, list):
-		self.AppendToInternalList(self.depends, list)
+		self.AppendToInternalList(self.depends, list, True)
 	
 	def AddExportPath(self, list):
 		self.AppendToInternalList(self.export_path, list)

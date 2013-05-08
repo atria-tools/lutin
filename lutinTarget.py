@@ -5,10 +5,11 @@ import lutinTools
 import lutinModule
 
 class Target:
-	def __init__(self, name, typeCompilator, debugMode, arch, cross):
+	def __init__(self, name, typeCompilator, debugMode, generatePackage, arch, cross):
 		self.arch = arch
 		self.cross = cross
 		self.name=name
+		self.endGeneratePackage = generatePackage
 		debug.info("create board target : "+self.name);
 		if "clang"==typeCompilator:
 			self.cc=self.cross + "clang"
@@ -219,10 +220,10 @@ class Target:
 
 __startTargetName="lutinTarget"
 
-def TargetLoad(targetName, compilator, mode):
+def TargetLoad(targetName, compilator, mode, generatePackage):
 	theTarget = __import__(__startTargetName + targetName)
 	#try:
-	tmpTarget = theTarget.Target(compilator, mode)
+	tmpTarget = theTarget.Target(compilator, mode, generatePackage)
 	return tmpTarget
 	#except:
 	#	debug.error("Can not create the Target : '" + targetName + "'")

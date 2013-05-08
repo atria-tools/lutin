@@ -6,8 +6,8 @@ import os
 import stat
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode):
-		lutinTarget.Target.__init__(self, "Linux", typeCompilator, debugMode, "", "")
+	def __init__(self, typeCompilator, debugMode, generatePackage):
+		lutinTarget.Target.__init__(self, "Linux", typeCompilator, debugMode, generatePackage, "", "")
 	
 	def generateListSeparateComa(self, list):
 		result = ""

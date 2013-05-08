@@ -8,7 +8,7 @@ import lutinHost
 import sys
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode):
+	def __init__(self, typeCompilator, debugMode, generatePackage):
 		# on windows board the basic path is not correct 
 		# TODO : get external PATH for the minGW path
 		# TODO : Set the cyngwin path ...
@@ -22,7 +22,7 @@ class Target(lutinTarget.Target):
 		if typeCompilator!="gcc":
 			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
 		
-		lutinTarget.Target.__init__(self, "Windows", typeCompilator, debugMode, "", cross)
+		lutinTarget.Target.__init__(self, "Windows", typeCompilator, debugMode, generatePackage, "", cross)
 		
 		self.folder_bin=""
 		self.folder_lib="/lib"

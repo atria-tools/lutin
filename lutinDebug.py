@@ -73,7 +73,7 @@ def warning(input):
 		print(color_purple + "[WARNING] " + input + color_default)
 		debugLock.release()
 
-def error(input):
+def error(input, threadID=-1):
 	global debugLock
 	global debugLevel
 	if debugLevel >= 1:
@@ -81,7 +81,8 @@ def error(input):
 		print(color_red + "[ERROR] " + input + color_default)
 		debugLock.release()
 	lutinMultiprocess.ErrorOccured()
-	thread.interrupt_main()
+	if threadID != -1:
+		thread.interrupt_main()
 	exit(-1)
 	#os_exit(-1)
 	#raise "error happend"

@@ -6,12 +6,12 @@ import os
 import stat
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode):
+	def __init__(self, typeCompilator, debugMode, generatePackage):
 		cross = ""
 		
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
-		lutinTarget.Target.__init__(self, "MacOs", typeCompilator, debugMode, "", cross)
+		lutinTarget.Target.__init__(self, "MacOs", typeCompilator, debugMode, generatePackage, "", cross)
 		
 		self.folder_bin="/MacOS"
 		self.folder_lib="/lib"
