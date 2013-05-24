@@ -8,41 +8,31 @@ import lutinDebug as debug
 import lutinEnv
 import lutinModule
 import lutinMultiprocess
+import lutinArg
+
+mylutinArg = lutinArg.lutinArg()
+mylutinArg.Add(lutinArg.argDefine("h", "help", desc="display this help"))
+mylutinArg.AddSection("option", "Can be set one time in all case")
+mylutinArg.Add(lutinArg.argDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"]], desc="Display makefile debug level (verbose) default =2"))
+mylutinArg.Add(lutinArg.argDefine("c", "color", desc="Display makefile output in color"))
+mylutinArg.Add(lutinArg.argDefine("f", "force", desc="Force the rebuild without checking the dependency"))
+mylutinArg.Add(lutinArg.argDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
+
+mylutinArg.AddSection("properties", "keep in the sequency of the cible")
+mylutinArg.Add(lutinArg.argDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
+mylutinArg.Add(lutinArg.argDefine("C", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
+mylutinArg.Add(lutinArg.argDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
+mylutinArg.Add(lutinArg.argDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
+
+mylutinArg.AddSection("cible", "generate in order set")
+localArgument = mylutinArg.Parse()
 
 """
 	Display the help of this makefile
 """
 def usage():
-	print "usage:"
-	print "	" + sys.argv[0] + " [options] [cible/properties] ..."
-	print "		[help] display this help"
-	print "	[option] : keep the last set"
-	print "		-h / --help"
-	print "			Display this help and break"
-	print "		-v / -v? / --verbose=?"
-	print "			Display makefile debug level (verbose) default =2"
-	print "				0 : None"
-	print "				1 : error"
-	print "				2 : warning"
-	print "				3 : info"
-	print "				4 : debug"
-	print "				5 : verbose"
-	print "		-c / --color"
-	print "			Display makefile output in color"
-	print "		-f / --force"
-	print "			Force the rebuild without checking the dependency"
-	print "		-j= / --jobs"
-	print "			Specifies the number of jobs (commands) to run simultaneously."
-	print "	[properties] : keep in the sequency of the cible"
-	print "		-t=... / --target=..."
-	print "			(Android/Linux/MacOs/Windows) Select a target (by default the platform is the computer that compile this"
-	print "		-C= / --compilator="
-	print "			(clang/gcc) Compile with clang or Gcc mode (by default gcc will be used)"
-	print "		-m=... / --mode=..."
-	print "			(debug/release) Compile in release or debug mode (default release)"
-	print "		-p / --package"
-	print "			disable the package generation (usefull when just compile for test on linux ...)"
-	print "	[cible] : generate in order set"
+	# generic argument displayed : 
+	mylutinArg.Display()
 	print "		all"
 	print "			Build all (only for the current selected board) (bynary and packages)"
 	print "		clean"
@@ -58,55 +48,24 @@ def usage():
 
 # preparse the argument to get the erbose element for debug mode
 def parseGenericArg(argument,active):
-	if    argument == "-h" \
-	   or argument == "--help":
+	if argument.GetOptionName() == "help":
 		#display help
 		if active==False:
 			usage()
 		return True
-	elif    argument[:3] == "-j=" \
-	     or argument[:2] == "-j" \
-	     or argument[:7] == "--jobs=":
+	elif argument.GetOptionName()=="jobs":
 		if active==True:
-			val = "1"
-			if argument[:3] == "-j=":
-				val = argument[3:]
-			elif argument[:2] == "-j":
-				if len(argument) == 2:
-					val = "1"
-				else:
-					val = argument[2:]
-			else:
-				val = argument[7:]
-			lutinMultiprocess.SetCoreNumber(int(val))
+			lutinMultiprocess.SetCoreNumber(int(argument.GetArg()))
 		return True
-	elif    argument[:3] == "-v=" \
-	     or argument[:2] == "-v" \
-	     or argument[:10] == "--verbose=" \
-	     or argument[:9] == "--verbose":
+	elif argument.GetOptionName() == "verbose":
 		if active==True:
-			val = "5"
-			if argument[:3] == "-v=":
-				val = argument[3:]
-			elif argument[:2] == "-v":
-				if len(argument) == 2:
-					val = "5"
-				else:
-					val = argument[2:]
-			else:
-				if len(argument) == 9:
-					val = "5"
-				else:
-					val = argument[10:]
-			debug.SetLevel(int(val))
+			debug.SetLevel(int(argument.GetArg()))
 		return True
-	elif    argument == "-c" \
-	     or argument == "--color":
+	elif argument.GetOptionName() == "color":
 		if active==True:
 			debug.EnableColor()
 		return True
-	elif    argument == "-f" \
-	     or argument == "--force":
+	elif argument.GetOptionName() == "force":
 		if active==True:
 			lutinEnv.SetForceMode(True)
 		return True
@@ -114,8 +73,7 @@ def parseGenericArg(argument,active):
 
 # parse default unique argument:
 if __name__ == "__main__":
-	sys.path.append(os.path.dirname(__file__) + "/corePython/" )
-	for argument in sys.argv:
+	for argument in localArgument:
 		parseGenericArg(argument, True)
 
 # now import other standard module (must be done here and not before ...
@@ -139,66 +97,39 @@ def Start():
 	target = None
 	actionDone=False
 	# parse all argument
-	for argument in sys.argv[1:]:
+	for argument in localArgument:
 		if True==parseGenericArg(argument, False):
 			None # nothing to do ...
-		elif    argument == "--package" \
-		     or argument == "-p":
+		elif argument.GetOptionName() == "package":
 			generatePackage=False
-		elif    argument[:13] == "--compilator=" \
-		     or argument[:3] == "-C=":
-			tmpArg=""
-			if argument[:3] == "-C=":
-				tmpArg=argument[3:]
-			else:
-				tmpArg=argument[13:]
-			# check input ...
-			if    tmpArg=="gcc" \
-			   or tmpArg=="clang":
-				if compilator!=tmpArg:
-					debug.debug("change compilator ==> " + tmpArg)
-					compilator=tmpArg
-					#remove previous target
-					target = None
-			else:
-				debug.error("Set --compilator/-C: '" + tmpArg + "' but only availlable : [gcc/clang]")
-		elif    argument[:9] == "--target=" \
-		     or argument[:3] == "-t=":
-			tmpArg=""
-			if argument[:3] == "-t=":
-				tmpArg=argument[3:]
-			else:
-				tmpArg=argument[9:]
+		elif argument.GetOptionName() == "compilator":
+			if compilator!=argument.GetArg():
+				debug.debug("change compilator ==> " + argument.GetArg())
+				compilator=argument.GetArg()
+				#remove previous target
+				target = None
+		elif argument.GetOptionName() == "target":
 			# No check input ==> this will be verify automaticly chen the target will be loaded
-			if targetName!=tmpArg:
-				debug.debug("change target ==> " + tmpArg + " & reset mode : gcc&release")
-				targetName=tmpArg
+			if targetName!=argument.GetArg():
+				targetName=argument.GetArg()
+				debug.debug("change target ==> " + targetName + " & reset mode : gcc&release")
 				#reset properties by defauult:
 				compilator="gcc"
 				mode="release"
 				generatePackage=True
 				#remove previous target
 				target = None
-		elif    argument[:7] == "--mode=" \
-		     or argument[:3] == "-m=":
-			tmpArg=""
-			if argument[:3] == "-m=":
-				tmpArg=argument[3:]
-			else:
-				tmpArg=argument[11:]
-			if "debug"==tmpArg or "release"==tmpArg:
-				if mode!=tmpArg:
-					debug.debug("change mode ==> " + tmpArg)
-					mode = tmpArg
-					#remove previous target
-					target = None
-			else:
-				debug.error("Set --mode/-m: '" + tmpArg + "' but only availlable : [debug/release]")
+		elif argument.GetOptionName() == "mode":
+			if mode!=argument.GetArg():
+				mode = argument.GetArg()
+				debug.debug("change mode ==> " + mode)
+				#remove previous target
+				target = None
 		else:
 			#load the target if needed :
 			if target == None:
 				target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
-			target.Build(argument)
+			target.Build(argument.GetOptionName())
 			actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
