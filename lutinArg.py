@@ -15,9 +15,11 @@ class argElement:
 	
 	def Display(self):
 		if len(self.m_arg)==0:
-			debug.info("element : " + self.m_option)
+			debug.info("option : " + self.m_option)
+		elif len(self.m_option)==0:
+			debug.info("element :       " + self.m_arg)
 		else:
-			debug.info("element : " + self.m_option + ":" + self.m_arg)
+			debug.info("option : " + self.m_option + ":" + self.m_arg)
 
 
 class argDefine:
@@ -229,7 +231,7 @@ class lutinArg:
 			if argumentFound==False:
 				#unknow element ... ==> just add in the list ...
 				debug.verbose("unknow argument : " + argument)
-				listArgument.append(argElement(argument, ""))
+				listArgument.append(argElement("", argument))
 			
 		#for argument in listArgument:
 		#	argument.Display()

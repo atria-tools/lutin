@@ -126,11 +126,15 @@ def Start():
 				#remove previous target
 				target = None
 		else:
-			#load the target if needed :
-			if target == None:
-				target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
-			target.Build(argument.GetOptionName())
-			actionDone=True
+			if argument.GetOptionName() != "":
+				debug.warning("Can not understand argument : '" + argument.GetOptionName() + "'")
+				usage()
+			else:
+				#load the target if needed :
+				if target == None:
+					target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
+				target.Build(argument.GetArg())
+				actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
 		#load the target if needed :
