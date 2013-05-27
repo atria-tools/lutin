@@ -55,6 +55,12 @@ class Target(lutinTarget.Target):
 		tmpFile.write("\n\n")
 		tmpFile.flush()
 		tmpFile.close()
+		infoFile=self.GetStagingFolder(pkgName) + "/PkgInfo"
+		# Create the info file
+		tmpFile = open(infoFile, 'w')
+		tmpFile.write("APPL?????")
+		tmpFile.flush()
+		tmpFile.close()
 		
 		# Must create the tarball of the application 
 		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
