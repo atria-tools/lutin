@@ -117,7 +117,7 @@ class module:
 			self.export_flags_mm,
 			self.export_flags_cc,
 			"-c -MMD -MP -g",
-			"-x objective-c",
+			"-x objective-c++",
 			file_src])
 		# check the dependency for this file :
 		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
