@@ -104,13 +104,13 @@ class Target(lutinTarget.Target):
 		#FINAL_FILE_ABSTRACTION
 		self.file_finalAbstraction = self.folder_javaProject + "/" + pkgName + ".java"
 		
-		lutinTools.CopyFile(self.folder_ewol + "/sources/android/PROJECT_NAME.java", self.file_finalAbstraction, True)
+		#lutinTools.CopyFile(self.folder_ewol + "/sources/android/PROJECT_NAME.java", self.file_finalAbstraction, True)
 		
-		os.system("sed -i \"s|__PROJECT_ORG_TYPE__|"+pkgProperties["COMPAGNY_TYPE"]+"|\" " + self.file_finalAbstraction)
-		os.system("sed -i \"s|__PROJECT_VENDOR__|"+pkgProperties["COMPAGNY_NAME2"]+"|\" " + self.file_finalAbstraction)
-		os.system("sed -i \"s|__PROJECT_NAME__|" + pkgName + "|\" "+ self.file_finalAbstraction)
-		os.system("sed -i \"s|__PROJECT_PACKAGE__|" + pkgName + "|\" " + self.file_finalAbstraction)
-		os.system("sed -i \"s|__CONF_OGL_ES_V__|2|\" " + self.file_finalAbstraction)
+		#os.system("sed -i \"s|__PROJECT_ORG_TYPE__|"+pkgProperties["COMPAGNY_TYPE"]+"|\" " + self.file_finalAbstraction)
+		#os.system("sed -i \"s|__PROJECT_VENDOR__|"+pkgProperties["COMPAGNY_NAME2"]+"|\" " + self.file_finalAbstraction)
+		#os.system("sed -i \"s|__PROJECT_NAME__|" + pkgName + "|\" "+ self.file_finalAbstraction)
+		#os.system("sed -i \"s|__PROJECT_PACKAGE__|" + pkgName + "|\" " + self.file_finalAbstraction)
+		#os.system("sed -i \"s|__CONF_OGL_ES_V__|2|\" " + self.file_finalAbstraction)
 		
 		lutinTools.CopyFile(pkgProperties["ICON"], self.GetStagingFolder(pkgName) + "/res/drawable/icon.png", True)
 		
@@ -191,10 +191,12 @@ class Target(lutinTarget.Target):
 		          + "-d " + self.GetStagingFolder(pkgName) + "/build/classes " \
 		          + "-classpath " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar " \
 		          + self.file_finalAbstraction + " "\
-		          + self.folder_ewol + "/sources/android/src/org/ewol/interfaceJNI.java " \
-		          + self.folder_ewol + "/sources/android/src/org/ewol/interfaceOpenGL.java " \
-		          + self.folder_ewol + "/sources/android/src/org/ewol/interfaceSurfaceView.java " \
-		          + self.folder_ewol + "/sources/android/src/org/ewol/interfaceAudio.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolAudioTask.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolCallback.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolConstants.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/Ewol.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolRendererGL.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolSurfaceViewGL.java " \
 		          + self.GetStagingFolder(pkgName) + "/src/R.java "
 		RunCommand(cmdLine)
 		
