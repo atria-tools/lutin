@@ -64,6 +64,29 @@ class Target:
 		self.buildDone=[]
 		self.buildTreeDone=[]
 		self.moduleList=[]
+		# output staging files list :
+		self.listFinalFile=[]
+		
+	
+	def AddFileStaging(self, inputFile, outputFile):
+		for source, dst in self.listFinalFile:
+			if dst == outputFile :
+				debug.verbose("already added : " + outputFile)
+				return
+		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
+		self.listFinalFile.append([inputFile,outputFile])
+	
+	def copyToStaging(self, binaryName):
+		baseFolder = self.GetStagingFolderData(binaryName)
+		for source, dst in self.listFinalFile:
+			debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
+			lutinTools.CopyFile(source, baseFolder+"/"+dst)
+	
+	
+	def CleanModuleTree(self):
+		self.buildTreeDone = []
+		self.listFinalFile = []
+	
 	
 	# TODO : Remove this hack ... ==> really bad ... but usefull
 	def SetEwolFolder(self, folder):

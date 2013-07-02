@@ -84,3 +84,17 @@ def CopyAnything(src, dst):
 			#for cycleFile in filenames:
 			#debug.info("Might copy : '" + tmpPath+cycleFile + "' ==> '" + dst + "'")
 			CopyFile(tmpPath+"/"+cycleFile,dst+"/"+cycleFile)
+
+
+def CopyAnythingTarget(target, src, dst):
+	tmpPath = os.path.dirname(os.path.realpath(src))
+	tmpRule = os.path.basename(src)
+	for root, dirnames, filenames in os.walk(tmpPath):
+		tmpList = filenames
+		if len(tmpRule)>0:
+			tmpList = fnmatch.filter(filenames, tmpRule)
+		# Import the module :
+		for cycleFile in tmpList:
+			#for cycleFile in filenames:
+			#debug.info("Might copy : '" + tmpPath+cycleFile + "' ==> '" + dst + "'")
+			target.AddFileStaging(tmpPath+"/"+cycleFile,dst+"/"+cycleFile)

@@ -284,25 +284,6 @@ class module:
 				tmpList[1]])
 			RunCommand(cmdLine)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
-		"""$(Q)$(TARGET_CXX) \
-			-o $@ \
-			target.global_sysroot,
-			$(TARGET_GLOBAL_LDFLAGS_SHARED) \
-			-Wl,-Map -Wl,$(basename $@).map \
-			-shared \
-			-Wl,-soname -Wl,$(notdir $@) \
-			-Wl,--no-undefined \
-			$(PRIVATE_LDFLAGS) \
-			$(PRIVATE_ALL_OBJECTS) \
-			-Wl,--whole-archive \
-			$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
-			-Wl,--no-whole-archive \
-			-Wl,--as-needed \
-			$(PRIVATE_ALL_STATIC_LIBRARIES) \
-			$(PRIVATE_ALL_SHARED_LIBRARIES) \
-			$(PRIVATE_LDLIBS) \
-			$(TARGET_GLOBAL_LDLIBS_SHARED)
-		"""
 	
 	
 	###############################################################################
@@ -334,43 +315,22 @@ class module:
 				tmpList[1]])
 			RunCommand(cmdLine)
 		
-		"""
-		$(TARGET_CXX) \
-			-o $@ \
-			$(TARGET_GLOBAL_LDFLAGS) \
-			-Wl,-Map -Wl,$(basename $@).map \
-			-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
-			-Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib \
-			$(PRIVATE_LDFLAGS) \
-			$(PRIVATE_ALL_OBJECTS) \
-			-Wl,--whole-archive \
-			$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
-			-Wl,--no-whole-archive \
-			-Wl,--as-needed \
-			$(PRIVATE_ALL_STATIC_LIBRARIES) \
-			$(PRIVATE_ALL_SHARED_LIBRARIES) \
-			$(PRIVATE_LDLIBS) \
-			$(TARGET_GLOBAL_LDLIBS)
-		"""
-		#$(call strip-		)
 	
 	###############################################################################
 	## Commands for copying files
 	###############################################################################
 	def files_to_staging(self, binaryName, target):
-		baseFolder = target.GetStagingFolderData(binaryName)
 		for element in self.files:
 			debug.verbose("Might copy file : " + element[0] + " ==> " + element[1])
-			lutinTools.CopyFile(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
+			target.AddFileStaging(self.originFolder+"/"+element[0], element[1])
 	
 	###############################################################################
 	## Commands for copying files
 	###############################################################################
 	def folders_to_staging(self, binaryName, target):
-		baseFolder = target.GetStagingFolderData(binaryName)
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
-			lutinTools.CopyAnything(self.originFolder+"/"+element[0], baseFolder+"/"+element[1])
+			lutinTools.CopyAnythingTarget(target, self.originFolder+"/"+element[0],element[1])
 	
 	# call here to build the module
 	def Build(self, target, packageName):
@@ -423,14 +383,18 @@ class module:
 		elif self.type=='BINARY':
 			resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
 			# generate tree for this special binary
+			target.CleanModuleTree()
 			self.BuildTree(target, self.name)
+			target.copyToStaging(self.name)
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
 				resFile = self.Link_to_so(listSubFileNeededToBuild, packageName, target, subHeritage)
 			else:
 				resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
+			target.CleanModuleTree()
 			# generate tree for this special binary
 			self.BuildTree(target, self.name)
+			target.copyToStaging(self.name)
 			if target.endGeneratePackage==True:
 				# generate the package with his properties ...
 				target.MakePackage(self.name, self.packageProp)
@@ -446,12 +410,13 @@ class module:
 		# ckeck if not previously build
 		if target.IsModuleBuildTree(self.name)==True:
 			return
+		debug.verbose("build tree of " + self.name)
+		# add all the elements (first added only one keep ==> permit to everload sublib element)
+		self.files_to_staging(packageName, target)
+		self.folders_to_staging(packageName, target)
 		#build tree of all submodules
 		for dep in self.depends:
 			inherit = target.BuildTree(dep, packageName)
-		# add all the elements
-		self.files_to_staging(packageName, target)
-		self.folders_to_staging(packageName, target)
 	
 	
 	# call here to Clean the module
