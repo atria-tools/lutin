@@ -257,14 +257,16 @@ class module:
 	###############################################################################
 	## Commands for running gcc to link a shared library.
 	###############################################################################
-	def Link_to_so(self, file, binary, target, depancy):
-		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-shared")
+	def Link_to_so(self, file, binary, target, depancy, libName=""):
+		if libName=="":
+			libName = self.name
+		tmpList = target.GenerateFile(binary, libName,self.originFolder,file,"lib-shared")
 		# check the dependency for this file :
 		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
 				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
 			return tmpList[1]
 		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.printElement("SharedLib", self.name, "==>", tmpList[1])
+		debug.printElement("SharedLib", libName, "==>", tmpList[1])
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
 		cmdLine=lutinTools.ListToStr([
 			target.xx,
@@ -278,7 +280,7 @@ class module:
 			target.global_flags_ld])
 		RunCommand(cmdLine)
 		if "release"==target.buildMode:
-			debug.printElement("SharedLib(strip)", self.name, "", "")
+			debug.printElement("SharedLib(strip)", libName, "", "")
 			cmdLine=lutinTools.ListToStr([
 				target.strip,
 				tmpList[1]])
@@ -388,7 +390,8 @@ class module:
 			target.copyToStaging(self.name)
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
-				resFile = self.Link_to_so(listSubFileNeededToBuild, packageName, target, subHeritage)
+				# special case for android wrapper :
+				resFile = self.Link_to_so(listSubFileNeededToBuild, packageName, target, subHeritage, "libewol")
 			else:
 				resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
 			target.CleanModuleTree()

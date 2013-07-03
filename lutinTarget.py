@@ -125,16 +125,16 @@ class Target:
 		return list
 	
 	def GetFinalFolder(self):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_final + "/"
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_final
 	
 	def GetStagingFolder(self, binaryName):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + "/"
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName
 	
 	def GetStagingFolderData(self, binaryName):
-		return self.GetStagingFolder(binaryName) + self.folder_data + "/" + binaryName + "/"
+		return self.GetStagingFolder(binaryName) + self.folder_data + "/" + binaryName
 	
 	def GetBuildFolder(self, moduleName):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName + "/"
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName
 	
 	def IsModuleBuild(self,module):
 		for mod in self.buildDone:
@@ -200,9 +200,13 @@ class Target:
 			debug.info("Build all")
 			self.LoadAll()
 			for mod in self.moduleList:
-				if    mod.type == "BINARY" \
-				   or mod.type == "PACKAGE":
-					mod.Build(self, None)
+				if self.name=="Android":
+					if mod.type == "PACKAGE":
+						mod.Build(self, None)
+				else:
+					if    mod.type == "BINARY" \
+					   or mod.type == "PACKAGE":
+						mod.Build(self, None)
 		elif name == "clean":
 			debug.info("Clean all")
 			self.LoadAll()

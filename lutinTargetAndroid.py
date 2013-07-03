@@ -19,8 +19,8 @@ def RunCommand(cmdLine):
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
 		
-		self.folder_ndk = os.getenv('PROJECT_NDK', lutinTools.GetRunFolder() + "/../android/ndk/")
-		self.folder_sdk = os.getenv('PROJECT_SDK', lutinTools.GetRunFolder() + "/../android/sdk/")
+		self.folder_ndk = os.getenv('PROJECT_NDK', lutinTools.GetRunFolder() + "/../android/ndk")
+		self.folder_sdk = os.getenv('PROJECT_SDK', lutinTools.GetRunFolder() + "/../android/sdk")
 		arch = "ARMv7"
 		cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-"
 		
@@ -174,6 +174,7 @@ class Target(lutinTarget.Target):
 		# Doc :
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.printElement("pkg", "R.java", "<==", "Resources files")
+		lutinTools.CreateDirectoryOfFile(self.GetStagingFolder(pkgName) + "/src/noFile")
 		cmdLine = self.folder_sdk + "/platform-tools/aapt p -f " \
 		          + "-M " + self.GetStagingFolder(pkgName) + "/AndroidManifest.xml " \
 		          + "-F " + self.GetStagingFolder(pkgName) + "/resources.res " \
@@ -187,10 +188,10 @@ class Target(lutinTarget.Target):
 		lutinTools.CreateDirectoryOfFile(self.GetStagingFolder(pkgName) + "/build/classes/noFile")
 		debug.printElement("pkg", "*.class", "<==", "*.java")
 		# more information with : -Xlint
+		#          + self.file_finalAbstraction + " "\ # this generate ex: out/Android/debug/staging/tethys/src/com/edouarddupin/tethys/edn.java
 		cmdLine = "javac " \
 		          + "-d " + self.GetStagingFolder(pkgName) + "/build/classes " \
 		          + "-classpath " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar " \
-		          + self.file_finalAbstraction + " "\
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolAudioTask.java " \
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolCallback.java " \
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolConstants.java " \
