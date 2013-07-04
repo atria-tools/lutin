@@ -96,9 +96,9 @@ class Target:
 	def fileGenerateObject(self,binaryName,moduleName,basePath,file):
 		list=[]
 		list.append(basePath + "/" + file)
-		list.append(self.GetBuildFolder(moduleName) + file + self.suffix_obj)
-		list.append(self.GetBuildFolder(moduleName) + file + self.suffix_dependence)
-		list.append(self.GetBuildFolder(moduleName) + file + self.suffix_cmdLine)
+		list.append(self.GetBuildFolder(moduleName) + "/" + file + self.suffix_obj)
+		list.append(self.GetBuildFolder(moduleName) + "/" + file + self.suffix_dependence)
+		list.append(self.GetBuildFolder(moduleName) + "/" + file + self.suffix_cmdLine)
 		return list
 	"""
 		return a list of 3 elements :
@@ -110,16 +110,16 @@ class Target:
 		list=[]
 		if (type=="bin"):
 			list.append(file)
-			list.append(self.GetStagingFolder(binaryName) + self.folder_bin + "/" + moduleName + self.suffix_binary)
-			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
+			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
+			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(self.GetStagingFolder(binaryName) + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
-			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
+			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
+			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
 		elif (type=="lib-static"):
 			list.append(file)
-			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_lib_static)
-			list.append(self.GetBuildFolder(moduleName) + moduleName + self.suffix_dependence)
+			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_lib_static)
+			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
 		else:
 			debug.error("unknow type : " + type)
 		return list
@@ -240,7 +240,7 @@ class Target:
 							debug.info("clean module '" + moduleName + "'")
 							return mod.Clean(self)
 						elif actionName == "build":
-							debug.info("build module '" + moduleName + "'")
+							debug.debug("build module '" + moduleName + "'")
 							return mod.Build(self, None)
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	

@@ -243,8 +243,8 @@ class module:
 			target.global_flags_ar,
 			self.flags_ar,
 			tmpList[1],
-			tmpList[0],
-			depancy.src])
+			tmpList[0]])#,
+			#depancy.src])
 		RunCommand(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
 		cmdLine=lutinTools.ListToStr([
