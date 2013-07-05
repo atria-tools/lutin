@@ -86,7 +86,7 @@ def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 
 
 
-def NeedRePackage(dst, srcList, mustHaveSrc):
+def NeedRePackage(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
 	debug.verbose("Resuest check of dependency of :")
 	debug.verbose("		dst='" + dst + "'")
 	debug.verbose("		src()=")
@@ -113,6 +113,22 @@ def NeedRePackage(dst, srcList, mustHaveSrc):
 		if os.path.getmtime(src) > os.path.getmtime(dst):
 			debug.verbose("			==> must re-package (source time greater) : '" + src + "'")
 			return True
+	
+	if ""!=file_cmd:
+		if False==os.path.exists(file_cmd):
+			debug.verbose("			==> must rebuild (no commandLine file)")
+			return True
+		# check if the 2 cmdline are similar :
+		file2 = open(file_cmd, "r")
+		firstAndUniqueLine = file2.read()
+		if firstAndUniqueLine != cmdLine:
+			debug.verbose("			==> must rebuild (cmdLines are not identical)")
+			debug.verbose("				==> '" + cmdLine + "'")
+			debug.verbose("				==> '" + firstAndUniqueLine + "'")
+			file2.close()
+			return True
+		# the cmdfile is correct ...
+		file2.close()
 	
 	debug.verbose("			==> Not re-package (all dependency is OK)")
 	return False

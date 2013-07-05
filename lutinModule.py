@@ -227,31 +227,32 @@ class module:
 	## Commands for running ar.
 	###############################################################################
 	def Link_to_a(self, file, binary, target, depancy):
-		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-static")
-		# check the dependency for this file :
-		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
-				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
-			return tmpList[1]
-		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.printElement("StaticLib", self.name, "==>", tmpList[1])
-		# explicitly remove the destination to prevent error ...
-		if os.path.exists(tmpList[1]) and os.path.isfile(tmpList[1]):
-			os.remove(tmpList[1])
+		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-static")
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
 		cmdLine=lutinTools.ListToStr([
 			target.ar,
 			target.global_flags_ar,
 			self.flags_ar,
-			tmpList[1],
-			tmpList[0]])#,
+			file_dst,
+			file_src])#,
 			#depancy.src])
+		
+		# check the dependency for this file :
+		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
+				and False==dependency.NeedRePackage(file_dst, depancy.src, Falsefile_cmd, cmdLine):
+			return file_dst
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		debug.printElement("StaticLib", self.name, "==>", file_dst)
+		# explicitly remove the destination to prevent error ...
+		if os.path.exists(file_dst) and os.path.isfile(file_dst):
+			os.remove(file_dst)
 		RunCommand(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
 		cmdLine=lutinTools.ListToStr([
 			target.ranlib,
-			tmpList[1] ])
+			file_dst ])
 		RunCommand(cmdLine)
-		return tmpList[1]
+		return file_dst
 	
 	
 	###############################################################################

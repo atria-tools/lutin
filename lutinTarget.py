@@ -120,6 +120,7 @@ class Target:
 			list.append(file)
 			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_lib_static)
 			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
+			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_cmdLine)
 		else:
 			debug.error("unknow type : " + type)
 		return list
