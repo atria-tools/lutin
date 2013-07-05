@@ -6,6 +6,7 @@ import time
 import Queue
 import os
 import subprocess
+import lutinTools
 
 queueLock = threading.Lock()
 workQueue = Queue.Queue()
@@ -16,6 +17,17 @@ exitFlag = False # resuest stop of the thread
 isInit = False # the thread are initialized
 errorOccured = False # a thread have an error
 processorAvaillable = 1 # number of CPU core availlable
+
+def StoreCommand(cmdLine, file):
+	# write cmd line only after to prevent errors ...
+	if file!="":
+		# Create directory:
+		lutinTools.CreateDirectoryOfFile(file)
+		# Store the command Line:
+		file2 = open(file, "w")
+		file2.write(cmdLine)
+		file2.flush()
+		file2.close()
 
 
 def RunCommand(cmdLine, storeCmdLine=""):
@@ -38,11 +50,7 @@ def RunCommand(cmdLine, storeCmdLine=""):
 		return
 	
 	# write cmd line only after to prevent errors ...
-	if storeCmdLine!="":
-		file2 = open(storeCmdLine, "w")
-		file2.write(cmdLine)
-		file2.flush()
-		file2.close()
+	StoreCommand(cmdLine, storeCmdLine)
 	
 
 

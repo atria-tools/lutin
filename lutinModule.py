@@ -239,7 +239,7 @@ class module:
 		
 		# check the dependency for this file :
 		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
-				and False==dependency.NeedRePackage(file_dst, depancy.src, Falsefile_cmd, cmdLine):
+				and False==dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine):
 			return file_dst
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		debug.printElement("StaticLib", self.name, "==>", file_dst)
@@ -248,10 +248,12 @@ class module:
 			os.remove(file_dst)
 		RunCommand(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
-		cmdLine=lutinTools.ListToStr([
+		cmdLineRanLib=lutinTools.ListToStr([
 			target.ranlib,
 			file_dst ])
-		RunCommand(cmdLine)
+		RunCommand(cmdLineRanLib)
+		# write cmd line only after to prevent errors ...
+		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		return file_dst
 	
 	
@@ -261,31 +263,34 @@ class module:
 	def Link_to_so(self, file, binary, target, depancy, libName=""):
 		if libName=="":
 			libName = self.name
-		tmpList = target.GenerateFile(binary, libName,self.originFolder,file,"lib-shared")
-		# check the dependency for this file :
-		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
-				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
-			return tmpList[1]
-		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.printElement("SharedLib", libName, "==>", tmpList[1])
-		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
+		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, libName,self.originFolder,file,"lib-shared")
+		#create command Line
 		cmdLine=lutinTools.ListToStr([
 			target.xx,
-			"-o", tmpList[1],
+			"-o", file_dst,
 			target.global_sysroot,
 			"-shared",
-			tmpList[0],
+			file_src,
 			depancy.src,
 			self.flags_ld,
 			depancy.flags_ld,
 			target.global_flags_ld])
+		
+		# check the dependency for this file :
+		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
+				and False==dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine):
+			return tmpList[1]
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		debug.printElement("SharedLib", libName, "==>", file_dst)
 		RunCommand(cmdLine)
 		if "release"==target.buildMode:
 			debug.printElement("SharedLib(strip)", libName, "", "")
-			cmdLine=lutinTools.ListToStr([
+			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
-				tmpList[1]])
-			RunCommand(cmdLine)
+				file_dst])
+			RunCommand(cmdLineStrip)
+		# write cmd line only after to prevent errors ...
+		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
 	
 	
@@ -293,30 +298,33 @@ class module:
 	## Commands for running gcc to link an executable.
 	###############################################################################
 	def Link_to_bin(self, file, binary, target, depancy):
-		tmpList = target.GenerateFile(binary, self.name,self.originFolder,file,"bin")
-		# check the dependency for this file :
-		if False==dependency.NeedRePackage(tmpList[1], tmpList[0], True) \
-				and False==dependency.NeedRePackage(tmpList[1], depancy.src, False):
-			return tmpList[1]
-		lutinTools.CreateDirectoryOfFile(tmpList[1])
-		debug.printElement("Executable", self.name, "==>", tmpList[1])
-		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
+		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, self.name,self.originFolder,file,"bin")
+		#create comdLine : 
 		cmdLine=lutinTools.ListToStr([
 			target.xx,
-			"-o", tmpList[1],
+			"-o", file_dst,
 			target.global_sysroot,
-			tmpList[0],
+			file_src,
 			depancy.src,
 			self.flags_ld,
 			depancy.flags_ld,
 			target.global_flags_ld])
+		# check the dependency for this file :
+		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
+				and False==dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine):
+			return file_dst
+		lutinTools.CreateDirectoryOfFile(file_dst)
+		debug.printElement("Executable", self.name, "==>", file_dst)
+		
 		RunCommand(cmdLine)
 		if "release"==target.buildMode:
 			debug.printElement("Executable(strip)", self.name, "", "")
-			cmdLine=lutinTools.ListToStr([
+			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
-				tmpList[1]])
-			RunCommand(cmdLine)
+				file_dst])
+			RunCommand(cmdLineStrip)
+		# write cmd line only after to prevent errors ...
+		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		
 	
 	###############################################################################

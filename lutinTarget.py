@@ -112,10 +112,12 @@ class Target:
 			list.append(file)
 			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
 			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
+			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_cmdLine)
 		elif (type=="lib-shared"):
 			list.append(file)
 			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
 			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
+			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_cmdLine)
 		elif (type=="lib-static"):
 			list.append(file)
 			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_lib_static)
