@@ -11,15 +11,6 @@ import lutinHeritage as heritage
 import lutinDepend as dependency
 import lutinMultiprocess
 
-def RunCommand(cmdLine):
-	debug.debug(cmdLine)
-	ret = os.system(cmdLine)
-	# TODO : Use "subprocess" instead ==> permit to pipline the renderings ...
-	if ret != 0:
-		if ret == 2:
-			debug.error("can not compile file ... [keyboard interrrupt]")
-		else:
-			debug.error("can not compile file ... ret : " + str(ret))
 """
 	
 """
@@ -246,12 +237,12 @@ class module:
 		# explicitly remove the destination to prevent error ...
 		if os.path.exists(file_dst) and os.path.isfile(file_dst):
 			os.remove(file_dst)
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
 		cmdLineRanLib=lutinTools.ListToStr([
 			target.ranlib,
 			file_dst ])
-		RunCommand(cmdLineRanLib)
+		lutinMultiprocess.RunCommand(cmdLineRanLib)
 		# write cmd line only after to prevent errors ...
 		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		return file_dst
@@ -282,7 +273,7 @@ class module:
 			return tmpList[1]
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		debug.printElement("SharedLib", libName, "==>", file_dst)
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		if "release"==target.buildMode:
 			debug.printElement("SharedLib(strip)", libName, "", "")
 			cmdLineStrip=lutinTools.ListToStr([
@@ -316,13 +307,13 @@ class module:
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		debug.printElement("Executable", self.name, "==>", file_dst)
 		
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		if "release"==target.buildMode:
 			debug.printElement("Executable(strip)", self.name, "", "")
 			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
 				file_dst])
-			RunCommand(cmdLineStrip)
+			lutinMultiprocess.RunCommand(cmdLineStrip)
 		# write cmd line only after to prevent errors ...
 		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		
@@ -370,13 +361,20 @@ class module:
 		for file in self.src:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
-			if fileExt == "c" or fileExt == "C":
+			if    fileExt == "c" \
+			   or fileExt == "C":
 				resFile = self.Compile_cc_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
-			elif fileExt == "cpp" or fileExt == "CPP" or fileExt == "cxx" or fileExt == "CXX" or fileExt == "xx" or fileExt == "XX":
+			elif    fileExt == "cpp" \
+			     or fileExt == "CPP" \
+			     or fileExt == "cxx" \
+			     or fileExt == "CXX" \
+			     or fileExt == "xx" \
+			     or fileExt == "XX":
 				resFile = self.Compile_xx_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
-			elif fileExt == "mm" or fileExt == "MM":
+			elif    fileExt == "mm"
+			     or fileExt == "MM":
 				resFile = self.Compile_mm_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
 			else:

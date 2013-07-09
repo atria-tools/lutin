@@ -7,6 +7,7 @@ import Queue
 import os
 import subprocess
 import lutinTools
+import lutinEnv
 
 queueLock = threading.Lock()
 workQueue = Queue.Queue()
@@ -31,8 +32,7 @@ def StoreCommand(cmdLine, file):
 
 
 def RunCommand(cmdLine, storeCmdLine=""):
-	debug.debug(cmdLine)
-	retcode = -1
+	debug.debug(lutinEnv.PrintPretty(cmdLine))
 	try:
 		retcode = subprocess.call(cmdLine, shell=True)
 	except OSError as e:

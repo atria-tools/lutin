@@ -16,6 +16,7 @@ mylutinArg.AddSection("option", "Can be set one time in all case")
 mylutinArg.Add(lutinArg.argDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"]], desc="Display makefile debug level (verbose) default =2"))
 mylutinArg.Add(lutinArg.argDefine("c", "color", desc="Display makefile output in color"))
 mylutinArg.Add(lutinArg.argDefine("f", "force", desc="Force the rebuild without checking the dependency"))
+mylutinArg.Add(lutinArg.argDefine("P", "pretty", desc="print the debug has pretty display"))
 mylutinArg.Add(lutinArg.argDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
 
 mylutinArg.AddSection("properties", "keep in the sequency of the cible")
@@ -46,7 +47,7 @@ def usage():
 	print "	ex: " + sys.argv[0] + " all board=Android all board=Windows all help"
 	exit(0)
 
-# preparse the argument to get the erbose element for debug mode
+# preparse the argument to get the verbose element for debug mode
 def parseGenericArg(argument,active):
 	if argument.GetOptionName() == "help":
 		#display help
@@ -68,6 +69,10 @@ def parseGenericArg(argument,active):
 	elif argument.GetOptionName() == "force":
 		if active==True:
 			lutinEnv.SetForceMode(True)
+		return True
+	elif argument.GetOptionName() == "pretty":
+		if active==True:
+			lutinEnv.SetPrintPrettyMode(True)
 		return True
 	return False
 
