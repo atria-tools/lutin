@@ -373,7 +373,7 @@ class module:
 			     or fileExt == "XX":
 				resFile = self.Compile_xx_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
-			elif    fileExt == "mm"
+			elif    fileExt == "mm" \
 			     or fileExt == "MM":
 				resFile = self.Compile_mm_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededToBuild.append(resFile)
