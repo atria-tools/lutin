@@ -33,7 +33,10 @@ class Target(lutinTarget.Target):
 		self.suffix_lib_dynamic='.dll'
 		self.suffix_binary='.exe'
 		self.suffix_package=''
-		
+	
+	
+	def GetStagingFolderData(self, binaryName):
+		return self.GetStagingFolder(binaryName) + self.folder_data
 	
 	def MakePackage(self, pkgName, pkgProperties):
 		debug.debug("------------------------------------------------------------------------")
