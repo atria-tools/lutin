@@ -201,6 +201,7 @@ class Target(lutinTarget.Target):
 		          + self.folder_ewol + "/sources/android/src/org/ewol/Ewol.java " \
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolRendererGL.java " \
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolSurfaceViewGL.java " \
+		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolActivity.java " \
 		          + self.GetStagingFolder(pkgName) + "/src/R.java "
 		RunCommand(cmdLine)
 		
