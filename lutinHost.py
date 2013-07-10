@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import platform
+import sys
 import lutinDebug as debug
 
 # print os.name # ==> 'posix'
@@ -14,3 +15,6 @@ else:
 
 debug.debug(" host.OS = " + OS)
 
+
+OS64BITS = sys.maxsize > 2**32
+OS32BITS = OS64BITS==False

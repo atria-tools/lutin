@@ -3,6 +3,7 @@
 import lutinDebug as debug
 import lutinTarget
 import lutinTools
+import lutinHost
 import os
 
 def RunCommand(cmdLine):
@@ -22,8 +23,10 @@ class Target(lutinTarget.Target):
 		self.folder_ndk = os.getenv('PROJECT_NDK', lutinTools.GetRunFolder() + "/../android/ndk")
 		self.folder_sdk = os.getenv('PROJECT_SDK', lutinTools.GetRunFolder() + "/../android/sdk")
 		arch = "ARMv7"
-		cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-"
-		
+		if lutinHost.OS64BITS==True:
+			cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86_64/bin/arm-linux-androideabi-"
+		else:
+			cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-"
 		if typeCompilator!="gcc":
 			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
 		
@@ -175,7 +178,7 @@ class Target(lutinTarget.Target):
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.printElement("pkg", "R.java", "<==", "Resources files")
 		lutinTools.CreateDirectoryOfFile(self.GetStagingFolder(pkgName) + "/src/noFile")
-		cmdLine = self.folder_sdk + "/platform-tools/aapt p -f " \
+		cmdLine = self.folder_sdk + "/build-tools/17.0.0/aapt p -f " \
 		          + "-M " + self.GetStagingFolder(pkgName) + "/AndroidManifest.xml " \
 		          + "-F " + self.GetStagingFolder(pkgName) + "/resources.res " \
 		          + "-I " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
