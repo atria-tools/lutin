@@ -279,7 +279,7 @@ class module:
 			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
 				file_dst])
-			RunCommand(cmdLineStrip)
+			lutinMultiprocess.RunCommand(cmdLineStrip)
 		# write cmd line only after to prevent errors ...
 		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])

@@ -44,7 +44,7 @@ def usage():
 	for mod in listOfAllModule:
 		print "		" + mod[0] + " / " + mod[0] + "-clean / " + mod[0] + "-dump"
 		print "			" + mod[1]
-	print "	ex: " + sys.argv[0] + " all board=Android all board=Windows all help"
+	print "	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all"
 	exit(0)
 
 # preparse the argument to get the verbose element for debug mode

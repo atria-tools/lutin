@@ -10,7 +10,9 @@ class Target:
 		self.cross = cross
 		self.name=name
 		self.endGeneratePackage = generatePackage
-		debug.info("create board target : "+self.name);
+		debug.info("=================================");
+		debug.info("== Target='"+self.name +"'");
+		debug.info("=================================");
 		if "clang"==typeCompilator:
 			self.cc=self.cross + "clang"
 			self.xx=self.cross + "clang++"
