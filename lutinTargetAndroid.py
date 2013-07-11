@@ -196,19 +196,24 @@ class Target(lutinTarget.Target):
 		lutinMultiprocess.RunCommand(cmdLine)
 		
 		debug.printElement("pkg", ".dex", "<==", "*.class")
-		cmdLine = self.folder_sdk + "/platform-tools/dx " \
+		cmdLine = self.folder_sdk + "/build-tools/17.0.0/dx " \
 		          + "--dex --no-strict " \
 		          + "--output=" + self.GetStagingFolder(pkgName) + "/build/" + pkgName + ".dex " \
 		          + self.GetStagingFolder(pkgName) + "/build/classes/ "
 		lutinMultiprocess.RunCommand(cmdLine)
 		
 		debug.printElement("pkg", ".apk", "<==", ".dex, assets, .so, res")
-		cmdLine = self.folder_sdk + "/tools/apkbuilder " \
-		    + self.GetStagingFolder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
-		    + "-u " \
-		    + "-z " + self.GetStagingFolder(pkgName) + "/resources.res " \
-		    + "-f " + self.GetStagingFolder(pkgName) + "/build/" + pkgName + ".dex " \
-		    + "-rf " + self.GetStagingFolder(pkgName) + "/data "
+		#builderDebug="-agentlib:jdwp=transport=dt_socket,server=y,address=8050,suspend=y "
+		builderDebug=""
+		cmdLine =   "java -Xmx128M " \
+		          + "-classpath " + self.folder_sdk + "/tools/lib/sdklib.jar " \
+		          + builderDebug \
+		          + "com.android.sdklib.build.ApkBuilderMain " \
+		          + self.GetStagingFolder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
+		          + "-u " \
+		          + "-z " + self.GetStagingFolder(pkgName) + "/resources.res " \
+		          + "-f " + self.GetStagingFolder(pkgName) + "/build/" + pkgName + ".dex " \
+		          + "-rf " + self.GetStagingFolder(pkgName) + "/data "
 		lutinMultiprocess.RunCommand(cmdLine)
 		
 		# doc :
@@ -223,6 +228,7 @@ class Target(lutinTarget.Target):
 			tmpFile.write("PassKey__AndroidDebugKey\n")
 			tmpFile.flush()
 			tmpFile.close()
+			debug.printElement("pkg", ".apk(signed debug)", "<==", ".apk (not signed)")
 			# verbose mode : -verbose
 			cmdLine = "jarsigner " \
 			    + "-keystore " + lutinTools.GetCurrentPath(__file__) + "/AndroidDebugKey.jks " \
@@ -273,7 +279,7 @@ class Target(lutinTarget.Target):
 			#    alias_$(PROJECT_NAME2)
 			debug.warning("TODO ...")
 		
-		debug.printElement("pkg", ".apk(aligned)", "<==", ".apk")
+		debug.printElement("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
 		lutinTools.RemoveFile(self.GetStagingFolder(pkgName) + "/" + pkgName + ".apk")
 		# verbose mode : -v
 		cmdLine = self.folder_sdk + "/tools/zipalign 4 " \
