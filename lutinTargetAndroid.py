@@ -4,18 +4,8 @@ import lutinDebug as debug
 import lutinTarget
 import lutinTools
 import lutinHost
+import lutinMultiprocess
 import os
-
-def RunCommand(cmdLine):
-	debug.debug(cmdLine)
-	ret = os.system(cmdLine)
-	# TODO : Use "subprocess" instead ==> permit to pipline the renderings ...
-	if ret != 0:
-		if ret == 2:
-			debug.error("can not execute cmdLine ... [keyboard interrrupt]")
-		else:
-			debug.error("can not execute cmdLine ... ret : " + str(ret))
-
 
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
@@ -184,7 +174,7 @@ class Target(lutinTarget.Target):
 		          + "-I " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
 		          + "-S " + self.GetStagingFolder(pkgName) + "/res/ " \
 		          + "-J " + self.GetStagingFolder(pkgName) + "/src "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		#aapt  package -f -M ${manifest.file} -F ${packaged.resource.file} -I ${path.to.android-jar.library} 
 		#      -S ${android-resource-directory} [-m -J ${folder.to.output.the.R.java}]
 		
@@ -203,14 +193,14 @@ class Target(lutinTarget.Target):
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolSurfaceViewGL.java " \
 		          + self.folder_ewol + "/sources/android/src/org/ewol/EwolActivity.java " \
 		          + self.GetStagingFolder(pkgName) + "/src/R.java "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		
 		debug.printElement("pkg", ".dex", "<==", "*.class")
 		cmdLine = self.folder_sdk + "/platform-tools/dx " \
 		          + "--dex --no-strict " \
 		          + "--output=" + self.GetStagingFolder(pkgName) + "/build/" + pkgName + ".dex " \
 		          + self.GetStagingFolder(pkgName) + "/build/classes/ "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		
 		debug.printElement("pkg", ".apk", "<==", ".dex, assets, .so, res")
 		cmdLine = self.folder_sdk + "/tools/apkbuilder " \
@@ -219,7 +209,7 @@ class Target(lutinTarget.Target):
 		    + "-z " + self.GetStagingFolder(pkgName) + "/resources.res " \
 		    + "-f " + self.GetStagingFolder(pkgName) + "/build/" + pkgName + ".dex " \
 		    + "-rf " + self.GetStagingFolder(pkgName) + "/data "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		
 		# doc :
 		# http://developer.android.com/tools/publishing/app-signing.html
@@ -239,7 +229,7 @@ class Target(lutinTarget.Target):
 			    + self.GetStagingFolder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey " \
 			    + " < tmpPass.boo"
-			RunCommand(cmdLine)
+			lutinMultiprocess.RunCommand(cmdLine)
 			print("")
 		else:
 			# keytool is situated in $(JAVA_HOME)/bin ...
@@ -289,7 +279,7 @@ class Target(lutinTarget.Target):
 		cmdLine = self.folder_sdk + "/tools/zipalign 4 " \
 		          + self.GetStagingFolder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
 		          + self.GetStagingFolder(pkgName) + "/" + pkgName + ".apk "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 		
 		# copy file in the final stage :
 		lutinTools.CopyFile(self.GetStagingFolder(pkgName) + "/" + pkgName + ".apk",
@@ -302,20 +292,20 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		cmdLine = self.folder_sdk + "/platform-tools/adb install -r " \
 		          + self.GetStagingFolder(pkgName) + "/" + pkgName + ".apk "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 	
 	def UnInstallPackage(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgName
-		RunCommand(cmdLine)
+		RlutinMultiprocess.unCommand(cmdLine)
 	
 	def Log(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("logcat of android board")
 		debug.debug("------------------------------------------------------------------------")
 		cmdLine = self.folder_sdk + "/platform-tools/adb shell logcat "
-		RunCommand(cmdLine)
+		lutinMultiprocess.RunCommand(cmdLine)
 
 
