@@ -83,6 +83,9 @@ class Target(lutinTarget.Target):
 				return True
 		return False
 	
+	def GetStagingFolderData(self, binaryName):
+		return self.GetStagingFolder(binaryName) + self.folder_data
+	
 	def MakePackage(self, pkgName, pkgProperties):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debug.debug("------------------------------------------------------------------------")
@@ -97,13 +100,28 @@ class Target(lutinTarget.Target):
 		#FINAL_FILE_ABSTRACTION
 		self.file_finalAbstraction = self.folder_javaProject + "/" + pkgName + ".java"
 		
-		lutinTools.CopyFile(self.folder_ewol + "/sources/android/PROJECT_NAME.java", self.file_finalAbstraction, True)
+		debug.printElement("pkg", "absractionFile", "<==", "dynamic file")
+		# Create folder :
+		lutinTools.CreateDirectoryOfFile(self.file_finalAbstraction)
+		# Create file :
+		tmpFile = open(self.file_finalAbstraction, 'w')
+		tmpFile.write( "/**\n")
+		tmpFile.write( " * @author Edouard DUPIN, Kevin BILLONNEAU\n")
+		tmpFile.write( " * @copyright 2011, Edouard DUPIN, all right reserved\n")
+		tmpFile.write( " * @license BSD v3 (see license file)\n")
+		tmpFile.write( " * @note This file is autogenerate ==> see documantation to generate your own\n")
+		tmpFile.write( " */\n")
+		tmpFile.write( "package "+pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgName + ";\n")
+		tmpFile.write( "import org.ewol.EwolActivity;\n")
+		tmpFile.write( "public class " + pkgName + " extends EwolActivity {\n")
+		tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
+		tmpFile.write( "		super.onCreate(savedInstanceState);\n")
+		tmpFile.write( "		initApkPath(\""+pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgName + "\");\n")
+		tmpFile.write( "	}\n")
+		tmpFile.write( "}\n")
+		tmpFile.flush()
+		tmpFile.close()
 		
-		os.system("sed -i \"s|__PROJECT_ORG_TYPE__|"+pkgProperties["COMPAGNY_TYPE"]+"|\" " + self.file_finalAbstraction)
-		os.system("sed -i \"s|__PROJECT_VENDOR__|"+pkgProperties["COMPAGNY_NAME2"]+"|\" " + self.file_finalAbstraction)
-		os.system("sed -i \"s|__PROJECT_NAME__|" + pkgName + "|\" "+ self.file_finalAbstraction)
-		os.system("sed -i \"s|__PROJECT_PACKAGE__|" + pkgName + "|\" " + self.file_finalAbstraction)
-		os.system("sed -i \"s|__CONF_OGL_ES_V__|2|\" " + self.file_finalAbstraction)
 		
 		lutinTools.CopyFile(pkgProperties["ICON"], self.GetStagingFolder(pkgName) + "/res/drawable/icon.png", True)
 		
@@ -230,8 +248,11 @@ class Target(lutinTarget.Target):
 			tmpFile.flush()
 			tmpFile.close()
 			debug.printElement("pkg", ".apk(signed debug)", "<==", ".apk (not signed)")
-			# verbose mode : -verbose
+			# verbose mode : 
+			#debugOption = "-verbose -certs "
+			debugOption = ""
 			cmdLine = "jarsigner " \
+			    + debugOption \
 			    + "-keystore " + lutinTools.GetCurrentPath(__file__) + "/AndroidDebugKey.jks " \
 			    + self.GetStagingFolder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey " \
