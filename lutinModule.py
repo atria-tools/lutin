@@ -81,6 +81,9 @@ class module:
 		                     "DESCRIPTION" : set(""),
 		                     "VERSION" : set("0.0.0"),
 		                     "NAME" : set("no-name"), # name of the application
+		                     "ANDROID_MANIFEST" : set(""), # By default generate the manifest
+		                     "ANDROID_JAVA_FILES" : ["DEFAULT"], # when user want to create his own services and activities
+		                     "ANDROID_RESOURCES" : [],
 		                     "RIGHT" : []
 		                    }
 		
@@ -611,11 +614,20 @@ class module:
 			self.packageProp[variable] = value
 		elif "NAME" == variable:
 			self.packageProp[variable] = value
+		elif "ANDROID_MANIFEST" == variable:
+			self.packageProp[variable] = value
+		elif "ANDROID_JAVA_FILES" == variable:
+			self.packageProp[variable] = value
+		elif "RIGHT" == variable:
+			self.packageProp[variable] = value
+		elif "ANDROID_RESOURCES" == variable:
+			self.packageProp[variable] = value
 		else:
 			debug.error("not know pak element : '" + variable + "'")
 	
-	def pkgAddRight(self, value):
-		self.packageProp["RIGHT"].append(value)
+	def pkgAdd(self, variable, value):
+		# TODO : Check values...
+		self.packageProp[variable].append(value)
 		
 
 
