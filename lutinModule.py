@@ -57,10 +57,10 @@ class module:
 		self.folders=[]
 		self.isBuild=False
 		## end of basic INIT ...
-		if moduleType == 'BINARY' \
-				or moduleType == 'LIBRARY' \
-				or moduleType == 'PACKAGE' \
-				or moduleType == 'PREBUILD':
+		if    moduleType == 'BINARY' \
+		   or moduleType == 'LIBRARY' \
+		   or moduleType == 'PACKAGE' \
+		   or moduleType == 'PREBUILD':
 			self.type=moduleType
 		else :
 			debug.error('for module "%s"' %moduleName)
@@ -81,9 +81,11 @@ class module:
 		                     "DESCRIPTION" : set(""),
 		                     "VERSION" : set("0.0.0"),
 		                     "NAME" : set("no-name"), # name of the application
-		                     "ANDROID_MANIFEST" : set(""), # By default generate the manifest
+		                     "ANDROID_MANIFEST" : "", # By default generate the manifest
 		                     "ANDROID_JAVA_FILES" : ["DEFAULT"], # when user want to create his own services and activities
 		                     "ANDROID_RESOURCES" : [],
+		                     "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
+		                     "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
 		                     "RIGHT" : []
 		                    }
 		
@@ -621,6 +623,8 @@ class module:
 		elif "RIGHT" == variable:
 			self.packageProp[variable] = value
 		elif "ANDROID_RESOURCES" == variable:
+			self.packageProp[variable] = value
+		elif "ANDROID_APPL_TYPE" == variable:
 			self.packageProp[variable] = value
 		else:
 			debug.error("not know pak element : '" + variable + "'")

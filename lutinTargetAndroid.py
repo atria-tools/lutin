@@ -105,20 +105,39 @@ class Target(lutinTarget.Target):
 		lutinTools.CreateDirectoryOfFile(self.file_finalAbstraction)
 		# Create file :
 		tmpFile = open(self.file_finalAbstraction, 'w')
-		tmpFile.write( "/**\n")
-		tmpFile.write( " * @author Edouard DUPIN, Kevin BILLONNEAU\n")
-		tmpFile.write( " * @copyright 2011, Edouard DUPIN, all right reserved\n")
-		tmpFile.write( " * @license BSD v3 (see license file)\n")
-		tmpFile.write( " * @note This file is autogenerate ==> see documantation to generate your own\n")
-		tmpFile.write( " */\n")
-		tmpFile.write( "package "+pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgName + ";\n")
-		tmpFile.write( "import org.ewol.EwolActivity;\n")
-		tmpFile.write( "public class " + pkgName + " extends EwolActivity {\n")
-		tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
-		tmpFile.write( "		super.onCreate(savedInstanceState);\n")
-		tmpFile.write( "		initApkPath(\""+pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgName + "\");\n")
-		tmpFile.write( "	}\n")
-		tmpFile.write( "}\n")
+		if pkgProperties["ANDROID_APPL_TYPE"]=="APPL":
+			tmpFile.write( "/**\n")
+			tmpFile.write( " * @author Edouard DUPIN, Kevin BILLONNEAU\n")
+			tmpFile.write( " * @copyright 2011, Edouard DUPIN, all right reserved\n")
+			tmpFile.write( " * @license BSD v3 (see license file)\n")
+			tmpFile.write( " * @note This file is autogenerate ==> see documantation to generate your own\n")
+			tmpFile.write( " */\n")
+			tmpFile.write( "package "+pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgName + ";\n")
+			tmpFile.write( "import org.ewol.EwolActivity;\n")
+			tmpFile.write( "public class " + pkgName + " extends EwolActivity {\n")
+			tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
+			tmpFile.write( "		super.onCreate(savedInstanceState);\n")
+			tmpFile.write( "		initApkPath(\""+pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgName + "\");\n")
+			tmpFile.write( "	}\n")
+			tmpFile.write( "}\n")
+		else :
+			# wallpaper mode ...
+			tmpFile.write( "/**\n")
+			tmpFile.write( " * @author Edouard DUPIN, Kevin BILLONNEAU\n")
+			tmpFile.write( " * @copyright 2011, Edouard DUPIN, all right reserved\n")
+			tmpFile.write( " * @license BSD v3 (see license file)\n")
+			tmpFile.write( " * @note This file is autogenerate ==> see documantation to generate your own\n")
+			tmpFile.write( " */\n")
+			tmpFile.write( "package "+pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgName + ";\n")
+			tmpFile.write( "import org.ewol.EwolWallpaper;\n")
+			tmpFile.write( "public class " + pkgName + " extends EwolWallpaper {\n")
+			tmpFile.write( "	public static final String SHARED_PREFS_NAME = \"" + pkgName + "settings\";\n")
+			tmpFile.write( "	public Engine onCreateEngine() {\n")
+			tmpFile.write( "		Engine tmpEngine = super.onCreateEngine();\n")
+			tmpFile.write( "		initApkPath(\""+pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgName + "\");\n")
+			tmpFile.write( "		return tmpEngine;\n")
+			tmpFile.write( "	}\n")
+			tmpFile.write( "}\n")
 		tmpFile.flush()
 		tmpFile.close()
 		
@@ -126,7 +145,7 @@ class Target(lutinTarget.Target):
 		lutinTools.CopyFile(pkgProperties["ICON"], self.GetStagingFolder(pkgName) + "/res/drawable/icon.png", True)
 		
 		
-		if (pkgProperties["ANDROID_MANIFEST"]!=""):
+		if pkgProperties["ANDROID_MANIFEST"]!="":
 			debug.printElement("pkg", "AndroidManifest.xml", "<==", pkgProperties["ANDROID_MANIFEST"])
 			lutinTools.CopyFile(pkgProperties["ANDROID_MANIFEST"], self.GetStagingFolder(pkgName) + "/AndroidManifest.xml", True)
 		else:
@@ -140,34 +159,52 @@ class Target(lutinTarget.Target):
 			tmpFile.write( "          android:versionName=\""+pkgProperties["VERSION"]+"\"> \n")
 			tmpFile.write( "    <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />\n")
 			tmpFile.write( "    <uses-sdk android:minSdkVersion=\"" + str(self.boardId) + "\" /> \n")
-			tmpFile.write( "    <uses-feature android:name=\"android.software.live_wallpaper\" /> \n")
-			tmpFile.write( "	\n")
-			tmpFile.write( "	<application android:label=\"" + pkgName + "\" \n")
-			tmpFile.write( "	             android:icon=\"@drawable/icon\"")
-			#tmpFile.write( "\n	             android:permission=\"android.permission.BIND_WALLPAPER\"")
-			tmpFile.write( " >\n")
-			tmpFile.write( "		<activity android:name=\"." + pkgName + "\" \n")
-			if "debug"==self.buildMode:
-				tmpFile.write( "		          android:label=\"" + pkgProperties["NAME"] + "-debug\" \n")
+			if pkgProperties["ANDROID_APPL_TYPE"]=="APPL":
+				tmpFile.write( "	<application android:label=\"" + pkgName + "\" \n")
+				tmpFile.write( "	             android:icon=\"@drawable/icon\">\n")
+				tmpFile.write( "		<activity android:name=\"." + pkgName + "\" \n")
+				tmpFile.write( "		          android:label=\"" + pkgProperties["NAME"])
+				if "debug"==self.buildMode:
+					tmpFile.write("-debug")
+				tmpFile.write( "\"\n")
+				tmpFile.write( "		          android:icon=\"@drawable/icon\" \n")
+				tmpFile.write( "		          android:hardwareAccelerated=\"true\" \n")
+				tmpFile.write( "		          android:configChanges=\"orientation\"> \n")
+				tmpFile.write( "			<intent-filter> \n")
+				tmpFile.write( "				<action android:name=\"android.intent.action.MAIN\" /> \n")
+				tmpFile.write( "				<category android:name=\"android.intent.category.LAUNCHER\" /> \n")
+				tmpFile.write( "			</intent-filter> \n")
+				tmpFile.write( "		</activity> \n")
+				tmpFile.write( "	</application> \n")
 			else:
-				tmpFile.write( "		          android:label=\"" + pkgProperties["NAME"] + "\" \n")
-			tmpFile.write( "		          android:icon=\"@drawable/icon\" \n")
-			tmpFile.write( "		          android:hardwareAccelerated=\"true\" \n")
-			tmpFile.write( "		          android:configChanges=\"orientation\"> \n")
-			tmpFile.write( "			<intent-filter> \n")
-			tmpFile.write( "				<action android:name=\"android.intent.action.MAIN\" /> \n")
-			tmpFile.write( "				<category android:name=\"android.intent.category.LAUNCHER\" /> \n")
-			tmpFile.write( "			</intent-filter> \n")
-			tmpFile.write( "		</activity> \n")
-			#tmpFile.write( "		<service android:name=\""+pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgName + "Service\"\n")
-			#tmpFile.write( "		         android:label=\"" + pkgName + "\" >\n")
-			#tmpFile.write( "			<intent-filter>\n")
-			#tmpFile.write( "				<action android:name=\"android.service.wallpaper.WallpaperService\" />\n")
-			#tmpFile.write( "			</intent-filter>\n")
-			#tmpFile.write( "			<meta-data android:name=\"android.service.wallpaper\"/>\n")
-			##tmpFile.write( "			           android:resource=\"@xml/fallingsnow_wp\" />\n")
-			#tmpFile.write( "		</service>\n")
-			tmpFile.write( "	</application> \n")
+				tmpFile.write( "	<application android:label=\"" + pkgName + "\" \n")
+				tmpFile.write( "	             android:icon=\"@drawable/icon\">\n")
+				tmpFile.write( "		<service android:name=\"." + pkgName + "\" \n")
+				tmpFile.write( "		         android:permission=\"android.permission.BIND_WALLPAPER\" \n")
+				tmpFile.write( "		         android:label=\"" + pkgProperties["NAME"])
+				if "debug"==self.buildMode:
+					tmpFile.write("-debug")
+				tmpFile.write( "\"\n")
+				tmpFile.write( "		          android:icon=\"@drawable/icon\">\n")
+				tmpFile.write( "			<intent-filter>\n")
+				tmpFile.write( "				<action android:name=\"android.service.wallpaper.WallpaperService\" />\n")
+				tmpFile.write( "			</intent-filter>\n")
+				if True: #len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+					tmpFile.write( "			<meta-data android:name=\"android.service.wallpaper\"\n")
+					tmpFile.write( "			           android:resource=\"@xml/livewallpaper\" />\n")
+				tmpFile.write( "		</service>\n")
+				if True: #len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+					tmpFile.write( "		<activity android:label=\"Setting\"\n")
+					tmpFile.write( "		          android:name=\"." + pkgName + "Settings\"\n")
+					tmpFile.write( "		          android:theme=\"@android:style/Theme.Light.WallpaperSettings\"\n")
+					tmpFile.write( "		          android:exported=\"true\"\n")
+					tmpFile.write( "		          android:icon=\"@drawable/icon\">\n")
+					tmpFile.write( "		</activity>\n")
+				tmpFile.write( "	</application>\n")
+				# TODO : Generate Needed files for configurations
+				# TODO : Set the configuration properties on the ewol properties
+				# TODO : Set wallpaper without properties
+			# write package autorisations :
 			if True==self.CheckRightPackage(pkgProperties, "WRITE_EXTERNAL_STORAGE"):
 				tmpFile.write( "	<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" /> \n")
 			if True==self.CheckRightPackage(pkgProperties, "CAMERA"):
@@ -236,9 +273,7 @@ class Target(lutinTarget.Target):
 				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolRendererGL.java "
 				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolSurfaceViewGL.java "
 				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolActivity.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolWallpaperService.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/LessonTwoRenderer.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/LessonThreeRenderer.java "
+				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolWallpaper.java "
 			else:
 				filesString += element + " "
 		
