@@ -236,6 +236,9 @@ class Target(lutinTarget.Target):
 				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolRendererGL.java "
 				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolSurfaceViewGL.java "
 				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolActivity.java "
+				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolWallpaperService.java "
+				filesString += self.folder_ewol + "/sources/android/src/org/ewol/LessonTwoRenderer.java "
+				filesString += self.folder_ewol + "/sources/android/src/org/ewol/LessonThreeRenderer.java "
 			else:
 				filesString += element + " "
 		
