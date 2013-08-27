@@ -18,6 +18,7 @@ mylutinArg.Add(lutinArg.argDefine("c", "color", desc="Display makefile output in
 mylutinArg.Add(lutinArg.argDefine("f", "force", desc="Force the rebuild without checking the dependency"))
 mylutinArg.Add(lutinArg.argDefine("P", "pretty", desc="print the debug has pretty display"))
 mylutinArg.Add(lutinArg.argDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
+mylutinArg.Add(lutinArg.argDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
 
 mylutinArg.AddSection("properties", "keep in the sequency of the cible")
 mylutinArg.Add(lutinArg.argDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
@@ -73,6 +74,10 @@ def parseGenericArg(argument,active):
 	elif argument.GetOptionName() == "pretty":
 		if active==True:
 			lutinEnv.SetPrintPrettyMode(True)
+		return True
+	elif argument.GetOptionName() == "force-strip":
+		if active==True:
+			lutinEnv.SetForceStripMode(True)
 		return True
 	return False
 

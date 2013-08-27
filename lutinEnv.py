@@ -54,3 +54,17 @@ def PrintPretty(myString):
 		return tmpcmdLine
 	else:
 		return myString
+
+forceStripMode=False
+
+def SetForceStripMode(val):
+	global forceStripMode
+	if val==True:
+		forceStripMode = True
+	else:
+		forceStripMode = False
+
+def GetForceStripMode():
+	global forceStripMode
+	return forceStripMode
+

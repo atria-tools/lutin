@@ -4,6 +4,7 @@ import lutinTarget
 import lutinTools
 import os
 import stat
+import lutinMultiprocess
 
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
@@ -57,10 +58,38 @@ class Target(lutinTarget.Target):
 		tmpFile.close()
 		## Enable Execution in script
 		os.chmod(finalFilepostRm, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
-		# copy licence and information : 
-		lutinTools.CopyFile("os-Linux/README", self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/README")
-		lutinTools.CopyFile("license.txt", self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/copyright")
-		lutinTools.CopyFile("changelog", self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/changelog")
+		## Readme donumentation
+		readmeFileDest = self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/README"
+		if os.path.exists("os-Linux/README")==True:
+			lutinTools.CopyFile("os-Linux/README", readmeFileDest)
+		elif os.path.exists("README")==True:
+			lutinTools.CopyFile("README", readmeFileDest)
+		elif os.path.exists("README.md")==True:
+			lutinTools.CopyFile("README.md", readmeFileDest)
+		else:
+			debug.info("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
+			tmpFile = open(readmeFileDest, 'w')
+			tmpFile.write("No documentation for " + pkgName + "\n")
+			tmpFile.flush()
+			tmpFile.close()
+		## licence file
+		licenseFileDest = self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/copyright"
+		if os.path.exists("license.txt")==True:
+			lutinTools.CopyFile("license.txt", licenseFileDest)
+		else:
+			debug.info("no file 'license.txt' ==> generate an empty one")
+			tmpFile = open(licenseFileDest, 'w')
+			tmpFile.write("No license define by the developper for " + pkgName + "\n")
+			tmpFile.flush()
+			tmpFile.close()
+		##changeLog file
+		changeLogFileDest = self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/changelog"
+		if os.path.exists("changelog")==True:
+			lutinTools.CopyFile("changelog", changeLogFileDest)
+		else:
+			debug.info("no file 'changelog' ==> generate an empty one")
+			lutinMultiprocess.RunCommand("git log > " + changeLogFileDest)
+		## create the package :
 		debug.debug("pachage : " + self.GetStagingFolder(pkgName) + "/" + pkgName + ".deb")
 		os.system("cd " + self.GetStagingFolder("") + " ; dpkg-deb --build " + pkgName)
 		lutinTools.CreateDirectoryOfFile(self.GetFinalFolder())

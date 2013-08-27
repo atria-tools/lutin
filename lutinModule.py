@@ -10,6 +10,7 @@ import lutinDebug as debug
 import lutinHeritage as heritage
 import lutinDepend as dependency
 import lutinMultiprocess
+import lutinEnv
 
 """
 	
@@ -279,7 +280,8 @@ class module:
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		debug.printElement("SharedLib", libName, "==>", file_dst)
 		lutinMultiprocess.RunCommand(cmdLine)
-		if "release"==target.buildMode:
+		if    "release"==target.buildMode \
+		   or lutinEnv.GetForceStripMode()==True:
 			debug.printElement("SharedLib(strip)", libName, "", "")
 			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
@@ -313,7 +315,8 @@ class module:
 		debug.printElement("Executable", self.name, "==>", file_dst)
 		
 		lutinMultiprocess.RunCommand(cmdLine)
-		if "release"==target.buildMode:
+		if    "release"==target.buildMode \
+		   or lutinEnv.GetForceStripMode()==True:
 			debug.printElement("Executable(strip)", self.name, "", "")
 			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
