@@ -161,7 +161,18 @@ if __name__ == '__main__':
 	debug.verbose("Use Make as a make stadard")
 	sys.path.append(lutinTools.GetRunFolder())
 	debug.verbose(" try to impoert module 'lutinBase.py'")
-	__import__("lutinBase")
+	if os.path.exists("lutinBase.py" )==True:
+		__import__("lutinBase")
+	else:
+		debug.debug("missing file lutinBase.py ==> loading subPath...");
+		# Import all sub path without out and archive
+		for folder in os.listdir("."):
+			if os.path.isdir(folder)==True:
+				if     folder.lower()!="android" \
+				   and folder.lower()!="archive" \
+				   and folder.lower()!="out" :
+					debug.debug("Automatic load path: '" + folder + "'")
+					lutinModule.ImportPath(folder)
 	Start()
 
 
