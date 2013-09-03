@@ -10,8 +10,26 @@ import os
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
 		
-		self.folder_ndk = os.getenv('PROJECT_NDK', lutinTools.GetRunFolder() + "/../android/ndk")
-		self.folder_sdk = os.getenv('PROJECT_SDK', lutinTools.GetRunFolder() + "/../android/sdk")
+		self.folder_ndk = os.getenv('PROJECT_NDK', "AUTO")
+		self.folder_sdk = os.getenv('PROJECT_SDK', "AUTO")
+		# auto search NDK
+		if self.folder_ndk == "AUTO":
+			for folder in os.listdir("."):
+				if os.path.isdir(folder)==True:
+					if folder=="android":
+						self.folder_ndk = folder + "/ndk"
+			if self.folder_ndk == "AUTO":
+				self.folder_ndk = lutinTools.GetRunFolder() + "/../android/ndk"
+		# auto search SDK
+		if self.folder_sdk == "AUTO":
+			for folder in os.listdir("."):
+				if os.path.isdir(folder)==True:
+					if folder=="android":
+						self.folder_sdk = folder + "/sdk"
+			if self.folder_sdk == "AUTO":
+				self.folder_sdk = lutinTools.GetRunFolder() + "/../android/sdk"
+		
+		
 		arch = "ARMv7"
 		if lutinHost.OS64BITS==True:
 			cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86_64/bin/arm-linux-androideabi-"
