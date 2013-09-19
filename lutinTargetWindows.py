@@ -38,7 +38,7 @@ class Target(lutinTarget.Target):
 	def GetStagingFolderData(self, binaryName):
 		return self.GetStagingFolder(binaryName) + self.folder_data
 	
-	def MakePackage(self, pkgName, pkgProperties):
+	def MakePackage(self, pkgName, pkgProperties, basePkgPath):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")

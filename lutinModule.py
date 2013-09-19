@@ -415,7 +415,7 @@ class module:
 			target.copyToStaging(self.name)
 			if target.endGeneratePackage==True:
 				# generate the package with his properties ...
-				target.MakePackage(self.name, self.packageProp)
+				target.MakePackage(self.name, self.packageProp, self.originFolder + "/..")
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			

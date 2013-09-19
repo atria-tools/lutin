@@ -21,7 +21,7 @@ class Target(lutinTarget.Target):
 			result += elem
 		return result
 	
-	def MakePackage(self, pkgName, pkgProperties):
+	def MakePackage(self, pkgName, pkgProperties, basePkgPath):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "' v"+pkgProperties["VERSION"])
@@ -60,12 +60,12 @@ class Target(lutinTarget.Target):
 		os.chmod(finalFilepostRm, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
 		## Readme donumentation
 		readmeFileDest = self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/README"
-		if os.path.exists("os-Linux/README")==True:
-			lutinTools.CopyFile("os-Linux/README", readmeFileDest)
-		elif os.path.exists("README")==True:
-			lutinTools.CopyFile("README", readmeFileDest)
-		elif os.path.exists("README.md")==True:
-			lutinTools.CopyFile("README.md", readmeFileDest)
+		if os.path.exists(basePkgPath + "/os-Linux/README")==True:
+			lutinTools.CopyFile(basePkgPath + "/os-Linux/README", readmeFileDest)
+		elif os.path.exists(basePkgPath + "/README")==True:
+			lutinTools.CopyFile(basePkgPath + "/README", readmeFileDest)
+		elif os.path.exists(basePkgPath + "/README.md")==True:
+			lutinTools.CopyFile(basePkgPath + "/README.md", readmeFileDest)
 		else:
 			debug.info("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
 			tmpFile = open(readmeFileDest, 'w')
@@ -74,8 +74,8 @@ class Target(lutinTarget.Target):
 			tmpFile.close()
 		## licence file
 		licenseFileDest = self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/copyright"
-		if os.path.exists("license.txt")==True:
-			lutinTools.CopyFile("license.txt", licenseFileDest)
+		if os.path.exists(basePkgPath + "/license.txt")==True:
+			lutinTools.CopyFile(basePkgPath + "/license.txt", licenseFileDest)
 		else:
 			debug.info("no file 'license.txt' ==> generate an empty one")
 			tmpFile = open(licenseFileDest, 'w')
@@ -84,8 +84,8 @@ class Target(lutinTarget.Target):
 			tmpFile.close()
 		##changeLog file
 		changeLogFileDest = self.GetStagingFolder(pkgName) + "/usr/share/doc/"+ pkgName + "/changelog"
-		if os.path.exists("changelog")==True:
-			lutinTools.CopyFile("changelog", changeLogFileDest)
+		if os.path.exists(basePkgPath + "/changelog")==True:
+			lutinTools.CopyFile(basePkgPath + "/changelog", changeLogFileDest)
 		else:
 			debug.info("no file 'changelog' ==> generate an empty one")
 			lutinMultiprocess.RunCommand("git log > " + changeLogFileDest)
