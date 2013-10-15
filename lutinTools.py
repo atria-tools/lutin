@@ -35,6 +35,12 @@ def RemoveFile(path):
 	if os.path.isfile(path):
 		os.remove(path)
 
+def FileSize(path):
+	if not os.path.isfile(path):
+		return 0
+	statinfo = os.stat(path)
+	return statinfo.st_size
+
 
 def ListToStr(list):
 	if type(list) == type(str()):

@@ -14,7 +14,7 @@ mylutinArg = lutinArg.lutinArg()
 mylutinArg.Add(lutinArg.argDefine("h", "help", desc="display this help"))
 mylutinArg.AddSection("option", "Can be set one time in all case")
 mylutinArg.Add(lutinArg.argDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"]], desc="Display makefile debug level (verbose) default =2"))
-mylutinArg.Add(lutinArg.argDefine("c", "color", desc="Display makefile output in color"))
+mylutinArg.Add(lutinArg.argDefine("C", "color", desc="Display makefile output in color"))
 mylutinArg.Add(lutinArg.argDefine("f", "force", desc="Force the rebuild without checking the dependency"))
 mylutinArg.Add(lutinArg.argDefine("P", "pretty", desc="print the debug has pretty display"))
 mylutinArg.Add(lutinArg.argDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
@@ -22,7 +22,7 @@ mylutinArg.Add(lutinArg.argDefine("s", "force-strip", desc="Force the stripping 
 
 mylutinArg.AddSection("properties", "keep in the sequency of the cible")
 mylutinArg.Add(lutinArg.argDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
-mylutinArg.Add(lutinArg.argDefine("C", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
+mylutinArg.Add(lutinArg.argDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
 mylutinArg.Add(lutinArg.argDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
 mylutinArg.Add(lutinArg.argDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 
@@ -109,7 +109,7 @@ def Start():
 	# parse all argument
 	for argument in localArgument:
 		if True==parseGenericArg(argument, False):
-			None # nothing to do ...
+			continue
 		elif argument.GetOptionName() == "package":
 			generatePackage=False
 		elif argument.GetOptionName() == "compilator":

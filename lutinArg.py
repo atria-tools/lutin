@@ -150,9 +150,9 @@ class lutinArg:
 				for prop in self.m_listProperties:
 					if prop.GetOptionBig()=="":
 						continue
-					if prop.GetOptionBig() == option[2:2+len(prop.GetOptionBig())]:
+					if prop.GetOptionBig() == option[2:]:
 						# find it
-						debug.verbose("find argument 2 : " + option[2:2+len(prop.GetOptionBig())])
+						debug.verbose("find argument 2 : " + option[2:])
 						if prop.NeedParameters()==True:
 							internalSub = option[2+len(prop.GetOptionBig()):]
 							if len(internalSub)!=0:

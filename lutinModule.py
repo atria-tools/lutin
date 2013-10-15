@@ -282,11 +282,16 @@ class module:
 		lutinMultiprocess.RunCommand(cmdLine)
 		if    "release"==target.buildMode \
 		   or lutinEnv.GetForceStripMode()==True:
+			# get the file size of the non strip file
+			originSize = lutinTools.FileSize(file_dst);
 			debug.printElement("SharedLib(strip)", libName, "", "")
 			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
 				file_dst])
 			lutinMultiprocess.RunCommand(cmdLineStrip)
+			# get the stip size of the binary
+			stripSize = lutinTools.FileSize(file_dst)
+			debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
 		# write cmd line only after to prevent errors ...
 		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
@@ -317,11 +322,16 @@ class module:
 		lutinMultiprocess.RunCommand(cmdLine)
 		if    "release"==target.buildMode \
 		   or lutinEnv.GetForceStripMode()==True:
+			# get the file size of the non strip file
+			originSize = lutinTools.FileSize(file_dst);
 			debug.printElement("Executable(strip)", self.name, "", "")
 			cmdLineStrip=lutinTools.ListToStr([
 				target.strip,
 				file_dst])
 			lutinMultiprocess.RunCommand(cmdLineStrip)
+			# get the stip size of the binary
+			stripSize = lutinTools.FileSize(file_dst)
+			debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
 		# write cmd line only after to prevent errors ...
 		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		
