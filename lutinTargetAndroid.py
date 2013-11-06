@@ -31,10 +31,21 @@ class Target(lutinTarget.Target):
 		
 		
 		arch = "ARMv7"
+		tmpOsVal = "64"
+		gccVersion = "4.8"
 		if lutinHost.OS64BITS==True:
-			cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86_64/bin/arm-linux-androideabi-"
-		else:
-			cross = self.folder_ndk + "/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-"
+			tmpOsVal = "_64"
+		baseFolderArm = self.folder_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+		baseFolderMips = self.folder_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+		baseFolderX86 = self.folder_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+		cross = baseFolderArm + "arm-linux-androideabi-"
+		if not os.path.isdir(baseFolderArm):
+			debug.error("Gcc Arm pah does not exist !!!")
+		if not os.path.isdir(baseFolderMips):
+			debug.info("Gcc Mips pah does not exist !!!")
+		if not os.path.isdir(baseFolderX86):
+			debug.info("Gcc x86 pah does not exist !!!")
+		
 		if typeCompilator!="gcc":
 			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
 		
@@ -362,7 +373,8 @@ class Target(lutinTarget.Target):
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.printElement("pkg", "R.java", "<==", "Resources files")
 		lutinTools.CreateDirectoryOfFile(self.GetStagingFolder(pkgName) + "/src/noFile")
-		cmdLine = self.folder_sdk + "/build-tools/17.0.0/aapt p -f " \
+		androidToolPath = self.folder_sdk + "/build-tools/19.0.0/"
+		cmdLine = androidToolPath + "aapt p -f " \
 		          + "-M " + self.GetStagingFolder(pkgName) + "/AndroidManifest.xml " \
 		          + "-F " + self.GetStagingFolder(pkgName) + "/resources.res " \
 		          + "-I " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
@@ -404,7 +416,7 @@ class Target(lutinTarget.Target):
 		lutinMultiprocess.RunCommand(cmdLine)
 		
 		debug.printElement("pkg", ".dex", "<==", "*.class")
-		cmdLine = self.folder_sdk + "/build-tools/17.0.0/dx " \
+		cmdLine = androidToolPath + "dx " \
 		          + "--dex --no-strict " \
 		          + "--output=" + self.GetStagingFolder(pkgName) + "/build/" + pkgName + ".dex " \
 		          + self.GetStagingFolder(pkgName) + "/build/classes/ "
