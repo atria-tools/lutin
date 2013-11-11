@@ -35,21 +35,25 @@ class Target(lutinTarget.Target):
 		gccVersion = "4.8"
 		if lutinHost.OS64BITS==True:
 			tmpOsVal = "_64"
-		baseFolderArm = self.folder_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-		baseFolderMips = self.folder_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-		baseFolderX86 = self.folder_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-		cross = baseFolderArm + "arm-linux-androideabi-"
-		if not os.path.isdir(baseFolderArm):
-			debug.error("Gcc Arm pah does not exist !!!")
-		if not os.path.isdir(baseFolderMips):
-			debug.info("Gcc Mips pah does not exist !!!")
-		if not os.path.isdir(baseFolderX86):
-			debug.info("Gcc x86 pah does not exist !!!")
+		if typeCompilator == "clang":
+			cross = self.folder_ndk + "/toolchains/llvm-3.3/prebuilt/linux-x86_64/bin/"
+		else:
+			baseFolderArm = self.folder_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+			baseFolderMips = self.folder_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+			baseFolderX86 = self.folder_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+			cross = baseFolderArm + "arm-linux-androideabi-"
+			if not os.path.isdir(baseFolderArm):
+				debug.error("Gcc Arm pah does not exist !!!")
+			if not os.path.isdir(baseFolderMips):
+				debug.info("Gcc Mips pah does not exist !!!")
+			if not os.path.isdir(baseFolderX86):
+				debug.info("Gcc x86 pah does not exist !!!")
 		
-		if typeCompilator!="gcc":
-			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
+		lutinTarget.Target.__init__(self, "Android", typeCompilator, debugMode, generatePackage, arch, cross)
 		
-		lutinTarget.Target.__init__(self, "Android", "gcc", debugMode, generatePackage, arch, cross)
+		# for gcc :
+		
+		# for clang :
 		
 		
 		self.folder_bin="/mustNotCreateBinary"
@@ -60,8 +64,22 @@ class Target(lutinTarget.Target):
 		
 		# board id at 14 is for android 4.0 and more ...
 		self.boardId = 14
-		self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include")
+		self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
+		#self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
+		#self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
 		self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/system/include/")
+		if True:
+			if typeCompilator == "clang":
+				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
+			else:
+				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/include/")
+				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/x86/include/")
+				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/include/")
+				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/include/")
+				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/include/")
+		else :
+			self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/stlport/stlport/")
+			self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
 		
 		self.global_sysroot = "--sysroot=" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm"
 		
@@ -101,7 +119,7 @@ class Target(lutinTarget.Target):
 		self.global_flags_cc.append("-fomit-frame-pointer")
 		self.global_flags_cc.append("-fno-strict-aliasing")
 		
-		self.global_flags_xx.append("-fno-rtti")
+		self.global_flags_xx.append("-frtti")
 		self.global_flags_xx.append("-Wa,--noexecstack")
 		
 		

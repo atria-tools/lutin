@@ -13,7 +13,7 @@ class Target:
 		debug.info("=================================");
 		debug.info("== Target='"+self.name +"'");
 		debug.info("=================================");
-		if "clang"==typeCompilator:
+		if typeCompilator == "clang":
 			self.cc=self.cross + "clang"
 			self.xx=self.cross + "clang++"
 		else:
@@ -30,7 +30,7 @@ class Target:
 		###############################################################################
 		self.global_include_cc=[]
 		self.global_flags_cc=['-D__TARGET_OS__'+self.name]
-		self.global_flags_xx=[]
+		self.global_flags_xx=['-std=c++11']
 		self.global_flags_mm=[]
 		self.global_flags_m=[]
 		self.global_flags_ar=['rcs']
