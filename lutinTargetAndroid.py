@@ -77,6 +77,10 @@ class Target(lutinTarget.Target):
 				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/include/")
 				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/include/")
 				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/include/")
+				self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
+				self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
+				self.global_flags_ld.append(self.folder_ndk +"/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/lib/libatomic.a")
+				self.global_flags_ld.append(self.folder_ndk +"/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/lib/libgomp.a")
 		else :
 			self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/stlport/stlport/")
 			self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
@@ -115,7 +119,7 @@ class Target(lutinTarget.Target):
 		self.global_flags_cc.append("-fstack-protector")
 		self.global_flags_cc.append("-Wno-psabi")
 		self.global_flags_cc.append("-mtune=xscale")
-		self.global_flags_cc.append("-fno-exceptions")
+		self.global_flags_cc.append("-fexceptions")
 		self.global_flags_cc.append("-fomit-frame-pointer")
 		self.global_flags_cc.append("-fno-strict-aliasing")
 		
