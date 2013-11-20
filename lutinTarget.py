@@ -11,26 +11,33 @@ class Target:
 		self.name=name
 		self.endGeneratePackage = generatePackage
 		debug.info("=================================");
-		debug.info("== Target='"+self.name +"'");
+		debug.info("== Target='" + self.name + "'");
 		debug.info("=================================");
+		self.ar=self.cross + "ar"
+		self.ranlib=self.cross + "ranlib"
 		if typeCompilator == "clang":
 			self.cc=self.cross + "clang"
 			self.xx=self.cross + "clang++"
+			#self.ar=self.cross + "llvm-ar"
+			#self.ranlib="ls"
 		else:
 			self.cc=self.cross + "gcc"
 			self.xx=self.cross + "g++"
-		self.ar=self.cross + "ar"
+			#self.ar=self.cross + "ar"
+			#self.ranlib=self.cross + "ranlib"
 		self.ld=self.cross + "ld"
 		self.nm=self.cross + "nm"
 		self.strip=self.cross + "strip"
-		self.ranlib=self.cross + "ranlib"
 		self.dlltool=self.cross + "dlltool"
 		###############################################################################
 		# Target global variables.
 		###############################################################################
 		self.global_include_cc=[]
 		self.global_flags_cc=['-D__TARGET_OS__'+self.name]
-		self.global_flags_xx=['-std=c++11']
+		if self.name != "Windows":
+			self.global_flags_xx=['-std=c++11']
+		else:
+			self.global_flags_xx=['-std=c++0X']
 		self.global_flags_mm=[]
 		self.global_flags_m=[]
 		self.global_flags_ar=['rcs']

@@ -267,8 +267,21 @@ class module:
 			"-o", file_dst,
 			target.global_sysroot,
 			"-shared",
+			#"-lstdc++",
+			#
+			#"-L/home/edupin/dev/perso/android/ndk/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/thumb/",
+			#"-lgnustl_static",
+			#
+			#"-static-libstdc++",
+			#"-static-libgcc",
+			#"-L/home/edupin/dev/perso/android/ndk/platforms/android-14/arch-arm/usr/lib/",
+			#"/home/edupin/dev/perso/android/ndk/platforms/android-18/arch-mips/usr/lib/libstdc++.a",
+			#"-lgnustl_static*",
+			#"-lgnustl_shared",
 			file_src,
 			depancy.src,
+			#"/home/edupin/dev/perso/android/ndk/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/libgnustl_static.a",
+			#"/home/edupin/dev/perso/android/ndk/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/libsupc++.a",
 			self.flags_ld,
 			depancy.flags_ld,
 			target.global_flags_ld])

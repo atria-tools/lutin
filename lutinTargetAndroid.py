@@ -64,24 +64,56 @@ class Target(lutinTarget.Target):
 		
 		# board id at 14 is for android 4.0 and more ...
 		self.boardId = 14
-		self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
-		#self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
-		#self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
-		self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/system/include/")
+		if arch == "ARMv5" or arch == "ARMv7":
+			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
+		elif arch == "mips":
+			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
+		elif arch == "x86":
+			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
+		
 		if True:
 			if typeCompilator == "clang":
 				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
+				if arch == "ARMv5":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+				elif arch == "ARMv7":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi-v7a/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+				elif arch == "mips":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/mips/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+				elif arch == "x86":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/x86/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
 			else:
 				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/include/")
-				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/x86/include/")
-				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/include/")
-				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/include/")
-				#self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/include/")
-				self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
-				self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
-				self.global_flags_ld.append(self.folder_ndk +"/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/lib/libatomic.a")
-				self.global_flags_ld.append(self.folder_ndk +"/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/lib/libgomp.a")
+				if arch == "ARMv5":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
+					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
+				elif arch == "ARMv7":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
+					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
+				elif arch == "mips":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "libgnustl_static.a")
+					self.global_flags_ld.append(         stdCppBasePath + "libsupc++.a")
+				elif arch == "x86":
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/x86/"
+					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
+					self.global_flags_ld.append(         stdCppBasePath + "libgnustl_static.a")
+					self.global_flags_ld.append(         stdCppBasePath + "libsupc++.a")
 		else :
+			self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/system/include/")
 			self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/stlport/stlport/")
 			self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
 		
@@ -120,6 +152,7 @@ class Target(lutinTarget.Target):
 		self.global_flags_cc.append("-Wno-psabi")
 		self.global_flags_cc.append("-mtune=xscale")
 		self.global_flags_cc.append("-fexceptions")
+		##self.global_flags_cc.append("-fno-exceptions")
 		self.global_flags_cc.append("-fomit-frame-pointer")
 		self.global_flags_cc.append("-fno-strict-aliasing")
 		
