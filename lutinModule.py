@@ -91,6 +91,26 @@ class module:
 		                    }
 		
 	
+	###############################################################################
+	## add Some copilation flags for this module (and only this one)
+	###############################################################################
+	def add_extra_compile_flags(self):
+		self.CompileFlags_CC([
+			"-Wall",
+			"-Wsign-compare",
+			"-Wreturn-type",
+			"-Wint-to-pointer-cast",
+			"-Wno-write-strings"]);
+		#only for gcc : "-Wunused-variable", "-Wunused-but-set-variable",
+	
+	###############################################################################
+	## remove all unneeded warning on compilation ==> for extern libs ...
+	###############################################################################
+	def remove_compile_warning(self):
+		self.CompileFlags_CC([
+			"-Wno-int-to-pointer-cast"
+			]);
+		# only for gcc :"-Wno-unused-but-set-variable"
 	
 	###############################################################################
 	## Commands for running gcc to compile a m++ file.
@@ -267,21 +287,8 @@ class module:
 			"-o", file_dst,
 			target.global_sysroot,
 			"-shared",
-			#"-lstdc++",
-			#
-			#"-L/home/edupin/dev/perso/android/ndk/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/thumb/",
-			#"-lgnustl_static",
-			#
-			#"-static-libstdc++",
-			#"-static-libgcc",
-			#"-L/home/edupin/dev/perso/android/ndk/platforms/android-14/arch-arm/usr/lib/",
-			#"/home/edupin/dev/perso/android/ndk/platforms/android-18/arch-mips/usr/lib/libstdc++.a",
-			#"-lgnustl_static*",
-			#"-lgnustl_shared",
 			file_src,
 			depancy.src,
-			#"/home/edupin/dev/perso/android/ndk/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/libgnustl_static.a",
-			#"/home/edupin/dev/perso/android/ndk/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi/libsupc++.a",
 			self.flags_ld,
 			depancy.flags_ld,
 			target.global_flags_ld])
