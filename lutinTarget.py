@@ -36,9 +36,10 @@ class Target:
 		self.global_flags_cc=['-D__TARGET_OS__'+self.name]
 		if self.name != "Windows":
 			self.global_flags_xx=['-std=c++11']
+			self.global_flags_mm=['-std=c++11']
 		else:
 			self.global_flags_xx=['-std=c++0X']
-		self.global_flags_mm=[]
+			self.global_flags_mm=[]
 		self.global_flags_m=[]
 		self.global_flags_ar=['rcs']
 		self.global_flags_ld=[]

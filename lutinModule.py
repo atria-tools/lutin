@@ -110,6 +110,9 @@ class module:
 		self.CompileFlags_CC([
 			"-Wno-int-to-pointer-cast"
 			]);
+		self.CompileFlags_XX([
+			"-Wno-c++11-narrowing"
+			])
 		# only for gcc :"-Wno-unused-but-set-variable"
 	
 	###############################################################################
