@@ -64,9 +64,9 @@ class Target:
 		else:
 			self.buildMode = "release"
 		self.folder_out="/out" + self.folder_arch + "/" + self.buildMode
-		self.folder_final="/final"
-		self.folder_staging="/staging"
-		self.folder_build="/build"
+		self.folder_final="/final/" + typeCompilator
+		self.folder_staging="/staging/" + typeCompilator
+		self.folder_build="/build/" + typeCompilator
 		self.folder_bin="/usr/bin"
 		self.folder_lib="/usr/lib"
 		self.folder_data="/usr/share"
