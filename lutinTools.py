@@ -41,6 +41,13 @@ def FileSize(path):
 	statinfo = os.stat(path)
 	return statinfo.st_size
 
+def FileReadData(path):
+	if not os.path.isfile(path):
+		return ""
+	file = open(path, "r")
+	data_file = file.read()
+	file.close()
+	return data_file
 
 def ListToStr(list):
 	if type(list) == type(str()):
