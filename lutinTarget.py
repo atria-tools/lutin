@@ -67,6 +67,7 @@ class Target:
 		self.folder_final="/final/" + typeCompilator
 		self.folder_staging="/staging/" + typeCompilator
 		self.folder_build="/build/" + typeCompilator
+		self.folder_doc="/doc/"
 		self.folder_bin="/usr/bin"
 		self.folder_lib="/usr/lib"
 		self.folder_data="/usr/share"
@@ -148,6 +149,9 @@ class Target:
 	
 	def GetBuildFolder(self, moduleName):
 		return lutinTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName
+	
+	def GetDocFolder(self, moduleName):
+		return lutinTools.GetRunFolder() + self.folder_out + self.folder_doc + "/" + moduleName
 	
 	def IsModuleBuild(self,module):
 		for mod in self.buildDone:
@@ -255,6 +259,9 @@ class Target:
 						elif actionName == "build":
 							debug.debug("build module '" + moduleName + "'")
 							return mod.Build(self, None)
+						elif actionName == "doc":
+							debug.debug("Create doc module '" + moduleName + "'")
+							return mod.CreateDoc(self)
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
 

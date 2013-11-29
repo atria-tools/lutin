@@ -11,6 +11,7 @@ import lutinHeritage as heritage
 import lutinDepend as dependency
 import lutinMultiprocess
 import lutinEnv
+import lutinDoc
 
 """
 	
@@ -35,6 +36,8 @@ class module:
 		self.name=''
 		# Dependency list:
 		self.depends=[]
+		# Dependency list:
+		self.docPath=lutinTools.GetCurrentPath(file)
 		# export PATH
 		self.export_path=[]
 		self.local_path=[]
@@ -374,6 +377,22 @@ class module:
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
 			lutinTools.CopyAnythingTarget(target, self.originFolder+"/"+element[0],element[1])
+	
+	###############################################################################
+	## Create the module documentation:
+	###############################################################################
+	def CreateDoc(self, target) :
+		if self.docPath == "":
+			return False
+		lutinTools.RemoveFolderAndSubFolder(target.GetDocFolder(self.name));
+		for root, dirnames, filenames in os.walk(self.docPath):
+			tmpList = fnmatch.filter(filenames, "*.h")
+			# Import the module :
+			for filename in tmpList:
+				fileCompleteName = os.path.join(root, filename)
+				debug.debug("    Find a file : '" + fileCompleteName + "'")
+				lutinDoc.GenerateDocFile(fileCompleteName, target.GetDocFolder(self.name));
+	
 	
 	# call here to build the module
 	def Build(self, target, packageName):
