@@ -4,7 +4,7 @@ import sys
 import lutinTools
 # TODO : Add try of generic input ...
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/ply/ply/")
-sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppheaderParser/")
+sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppHeaderParser/")
 import lutinDocHtml
 import lutinDocMd
 

@@ -2,12 +2,24 @@
 import lutinDebug as debug
 import sys
 import lutinTools
-# TODO : Add try of generic input ...
-sys.path.append(lutinTools.GetCurrentPath(__file__) + "/ply/ply/")
-sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppheaderParser/")
 import CppHeaderParser
-import lutinDocHtml
-import lutinDocMd
+
+def display_doxygen_param(comment, input, output):
+	data = "<b>Parameter"
+	if input == True:
+		data += " [input]"
+	if output == True:
+		data += " [output]"
+	data += ":</b> "
+	#extract first element:
+	val = comment.find(" ")
+	var = comment[:val]
+	endComment = comment[val:]
+	data += "<span class=\"code-argument\">" + var + "</span> " + endComment
+	
+	data += "<br/>"
+	return data
+
 
 def parse_doxygen(data) :
 	pos = data.find("/*");
@@ -56,21 +68,13 @@ def parse_doxygen(data) :
 			None
 		elif    element[:14] == "param[in,out] " \
 		     or element[:14] == "param[out,in] ":
-			data3 += "<b>Parameter [input] [output]:</b> "
-			data3 += element[14:]
-			data3 += "<br/>"
+			data3 += display_doxygen_param(element[14:], True, True)
 		elif element[:10] == "param[in] ":
-			data3 += "<b>Parameter [input]:</b> "
-			data3 += element[10:]
-			data3 += "<br/>"
+			data3 += display_doxygen_param(element[10:], True, False)
 		elif element[:11] == "param[out] ":
-			data3 += "<b>Parameter [output]:</b> "
-			data3 += element[11:]
-			data3 += "<br/>"
+			data3 += display_doxygen_param(element[11:], False, True)
 		elif element[:6] == "param ":
-			data3 += "<b>Parameter:</b> "
-			data3 += element[6:]
-			data3 += "<br/>"
+			data3 += display_doxygen_param(element[6:], False, False)
 		elif element[:7] == "return ":
 			data3 += "<b>Return:</b> "
 			data3 += element[7:]
@@ -99,11 +103,11 @@ def displayReductFunction(function, file, classement, sizeReturn, sizefunction) 
 		lineData += writeExpendSize("", sizeReturn+1)
 	else :
 		lineData += writeExpendSize(function["rtnType"], sizeReturn+1)
-	
-	lineData += writeExpendSize(function["name"], sizefunction+1)
+	parameterPos = len(lineData) + sizefunction+2;
+	lineData +="<a class=\"code-function\" href=\"#"+ function["name"] + "\">" + function["name"] + "</a>"
+	lineData += writeExpendSize("", sizefunction+1 - len(function["name"]))
 	lineData += "("
 	file.write(lineData);
-	parameterPos = len(lineData);
 	isFirst = True
 	for param in function["parameters"]:
 		if isFirst == False:
@@ -112,7 +116,7 @@ def displayReductFunction(function, file, classement, sizeReturn, sizefunction) 
 		file.write(param['type'])
 		if param['name'] != "":
 			file.write(" ")
-			file.write(param['name'])
+			file.write("<span class=\"code-argument\">" + param['name'] + "</span>")
 		isFirst = False
 	file.write(");")
 	file.write("<br>")
@@ -127,21 +131,21 @@ def displayFunction(namespace, function, file, classement, sizeReturn, sizefunct
 		lineData = namespace + "::"
 	if function['destructor'] :
 		lineData += "~"
-	lineData += function["name"] + "( ... )"
+	lineData +="<a id=\""+ function["name"] + "\">" + function["name"] + "</a> ()"
 	file.write("<h3>" + lineData + "</h3>\n\n")
 	
+	file.write("<pre>\n");
 	if function['destructor'] :
 		lineData = "~"
 	elif function['constructor'] :
 		lineData = ""
 	else :
 		lineData = function["rtnType"] + " "
-
-	file.write("<pre>\n");
-	lineData += function["name"]
+	
+	parameterPos = len(lineData) + len(function["name"]) + 1;
+	lineData += "<span class=\"code-function\">" + function["name"] + "</span>"
 	lineData += "("
 	file.write(lineData);
-	parameterPos = len(lineData);
 	isFirst = True
 	for param in function["parameters"]:
 		if isFirst == False:
@@ -150,7 +154,7 @@ def displayFunction(namespace, function, file, classement, sizeReturn, sizefunct
 		file.write(param['type'])
 		if param['name'] != "":
 			file.write(" ")
-			file.write(param['name'])
+			file.write("<span class=\"code-argument\">" + param['name'] + "</span>")
 		isFirst = False
 	file.write(");")
 	file.write("</pre>\n");

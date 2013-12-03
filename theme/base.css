@@ -72,7 +72,7 @@ p {
 }
 
 pre {
-	margin-left: 20px;
+	#margin-left: 20px;
 	display: block;
 	padding: 9.5px;
 	margin: 0 0 10px;
@@ -86,5 +86,23 @@ pre {
 	border: 1px solid #ccc;
 	border: 1px solid rgba(0, 0, 0, 0.15);
 	border-radius: 4px;
+}
+
+.code-function {
+	text-decoration:none;
+	color:#09857e;
+	font-weight:bold;
+}
+
+.code-type {
+	text-decoration:none;
+	color:#376d0a;
+	font-weight:bold;
+}
+
+.code-argument {
+	text-decoration:none;
+	color:#B80000;
+	font-weight:bold;
 }
 
