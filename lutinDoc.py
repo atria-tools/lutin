@@ -17,10 +17,11 @@ class doc:
 	def __init__(self, moduleName):
 		self.moduleName = moduleName
 		self.listClass = dict()
+		self.listEnum = dict()
 		self.listVariable = dict()
 		self.listFunction = dict()
 		self.listNamepsaces = dict()
-		
+		self.target = None
 	
 	##
 	## @brief Add a File at the parsing system
@@ -32,8 +33,10 @@ class doc:
 		try:
 			metaData = CppHeaderParser.CppHeader(filename)
 		except CppHeaderParser.CppParseError, e:
-			debug.error(" can not parse the file: '" + filename + "' error : " + e)
+			debug.warning(" can not parse the file: '" + filename + "' error : " + str(e))
 			return False
+		
+		#debug.info(str(metaData.enums))
 		
 		# add all classes :
 		for element in metaData.classes:
@@ -46,6 +49,20 @@ class doc:
 				debug.warning("Might merge class : '" + className + "' file : " + filename)
 			else:
 				self.listClass[className] = localClass
+		
+		# add all enums:
+		for localEnum in metaData.enums:
+			if localEnum['namespace'] == '':
+				enumName = localEnum['name']
+			else:
+				enumName = localEnum['namespace'] + "::" + localEnum['name']
+				enumName = enumName.replace("::::", "::")
+			if enumName in self.listEnum.keys():
+				debug.warning("Might merge enum : '" + enumName + "' file : " + filename)
+			else:
+				self.listEnum[enumName] = localEnum
+		
+		# add all namaspace:
 		
 		# add all namespaces:
 		
@@ -60,7 +77,9 @@ class doc:
 	## @param[in] destFolder Destination folder.
 	## @param[in] mode (optinnal) generation output mode {html, markdown ...}
 	##
-	def generate_documantation(self, destFolder, mode="html"):
+	def generate_documantation(self, target, destFolder, mode="html"):
+		# local store of the target
+		self.target = target
 		if mode == "html":
 			if lutinDocHtml.generate(self, destFolder) == False:
 				debug.warning("Generation Documentation :'" + mode + "' ==> return an error for " + self.moduleName)
@@ -69,7 +88,9 @@ class doc:
 			None
 		else:
 			debug.error("Unknow Documantation mode generation :'" + mode + "'")
+			self.target = None
 			return False
+		self.target = None
 		return True
 	
 	##
@@ -110,4 +131,66 @@ class doc:
 						break;
 		debug.verbose("find childs : " + str(list))
 		return list
+	
+	##
+	## @brief trnsform the classname in a generic link (HTML)
+	## @param[in] elementName Name of the class requested
+	## @return [className, link]
+	##
+	def get_class_link(self, elementName):
+		if    elementName == "const" \
+		   or elementName == "enum" \
+		   or elementName == "void" \
+		   or elementName == "char" \
+		   or elementName == "char32_t" \
+		   or elementName == "float" \
+		   or elementName == "double" \
+		   or elementName == "bool" \
+		   or elementName == "int8_t" \
+		   or elementName == "uint8_t" \
+		   or elementName == "int16_t" \
+		   or elementName == "uint16_t" \
+		   or elementName == "int32_t" \
+		   or elementName == "uint32_t" \
+		   or elementName == "int64_t" \
+		   or elementName == "uint64_t" \
+		   or elementName == "int" \
+		   or elementName == "T" \
+		   or elementName == "CLASS_TYPE" \
+		   or elementName[:5] == "std::" \
+		   or elementName[:6] == "appl::" \
+		   or elementName == "&" \
+		   or elementName == "*" \
+		   or elementName == "**":
+			return [elementName, ""]
+		if elementName in self.listClass.keys():
+			link = elementName.replace(":","_") + ".html"
+			return [elementName, link]
+		elif elementName in self.listEnum.keys():
+			link = elementName.replace(":","_") + ".html"
+			return [elementName, link]
+		else:
+			return self.target.doc_get_link(elementName)
+		return [elementName, ""]
+	
+	##
+	## @brief trnsform the classname in a generic link (HTML) (external access ==> from target)
+	## @param[in] elementName Name of the class requested
+	## @return [className, link]
+	##
+	def get_class_link_from_target(self, elementName):
+		# reject when auto call :
+		if self.target != None:
+			return [elementName, ""]
+		# search in local list :
+		if elementName in self.listClass.keys():
+			link = elementName.replace(":","_") + ".html"
+			return [elementName, "../" + self.moduleName + "/" + link]
+		elif elementName in self.listEnum.keys():
+			link = elementName.replace(":","_") + ".html"
+			return [elementName, "../" + self.moduleName + "/" + link]
+		# did not find :
+		return [elementName, ""]
+	
+	
 

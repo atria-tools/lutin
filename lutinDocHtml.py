@@ -24,14 +24,14 @@ def replace_storage_keyword(match):
 
 def display_color(valBase):
 	# storage keyword :
-	p = re.compile("(inline|const|class|virtual|private|public|protected|friend|const|extern|auto|register|static|unsigned|signed|volatile|char|double|float|int|long|short|void|typedef|struct|union|enum)")
+	p = re.compile("(inline|const|class|virtual|private|public|protected|friend|const|extern|auto|register|static|volatile|typedef|struct|union|enum)")
 	val = p.sub(replace_storage_keyword, valBase)
 	# type :
 	p = re.compile("(bool|BOOL|char(16_t|32_t)?|double|float|u?int(8|16|32|64|128)?(_t)?|long|short|signed|size_t|unsigned|void|(I|U)(8|16|32|64|128))")
 	val = p.sub(replace_type, val)
 	return val, len(valBase)
 
-def display_type(type, localClassName):
+def display_type(type, myDoc):
 	type = type.replace("inline ", "")
 	lenght = 0;
 	isFirst = True
@@ -43,12 +43,10 @@ def display_type(type, localClassName):
 			lenght += 1
 		isFirst = False
 		# check if the element in internal at the current lib
-		if element[:len(localClassName)] == localClassName:
-			out += "<a href=\"" + element.replace(":","_") + ".html\" class=\"code-type\">" + element + "</a>"
+		name, link = myDoc.get_class_link(element)
+		if len(link) != 0:
+			out += "<a href=\"" + link + "\" class=\"code-type\">" + name + "</a>"
 			lenght += len(element)
-		# check if the element is in local Lib:
-		elif False:
-			None
 		# Ckeck if the variable in a standard class:
 		elif element in global_class_link.keys():
 			out += "<a href=\"" + global_class_link[element] + "\" class=\"code-type\">" + element + "</a>"
@@ -148,7 +146,7 @@ def white_space(size) :
 		ret += " "
 	return ret
 
-def displayReductFunction(function, file, classement, sizeReturn, sizefunction, localClassName) :
+def display_reduct_function(function, file, classement, sizeReturn, sizefunction, myDoc) :
 	file.write(classement + " ")
 	lenght = len(classement)+1;
 	if function['destructor'] :
@@ -158,7 +156,7 @@ def displayReductFunction(function, file, classement, sizeReturn, sizefunction, 
 		file.write(white_space(sizeReturn+1))
 		lenght += sizeReturn+1;
 	else :
-		typeData, typeLen = display_type(function["rtnType"], localClassName);
+		typeData, typeLen = display_type(function["rtnType"], myDoc);
 		file.write(typeData)
 		file.write(white_space(sizeReturn+1 - typeLen))
 		lenght += sizeReturn+1;
@@ -172,7 +170,7 @@ def displayReductFunction(function, file, classement, sizeReturn, sizefunction, 
 			file.write(",<br/>")
 			file.write(white_space(parameterPos))
 		
-		typeData, typeLen = display_type(param["type"], localClassName);
+		typeData, typeLen = display_type(param["type"], myDoc);
 		file.write(typeData)
 		if param['name'] != "":
 			file.write(" ")
@@ -182,7 +180,7 @@ def displayReductFunction(function, file, classement, sizeReturn, sizefunction, 
 	file.write("<br>")
 
 
-def displayFunction(namespace, function, file, classement, sizeReturn, sizefunction, localClassName) :
+def displayFunction(namespace, function, file, classement, sizeReturn, sizefunction, myDoc) :
 	lineData = ""
 	if    (    function['constructor'] == True \
 	        or function['destructor'] == True \
@@ -201,7 +199,7 @@ def displayFunction(namespace, function, file, classement, sizeReturn, sizefunct
 	elif function['constructor'] :
 		lenght = 0;
 	else :
-		typeData, typeLen = display_type(function["rtnType"], localClassName);
+		typeData, typeLen = display_type(function["rtnType"], myDoc);
 		file.write(typeData + " ")
 		lenght = typeLen+1;
 	
@@ -212,7 +210,7 @@ def displayFunction(namespace, function, file, classement, sizeReturn, sizefunct
 		if isFirst == False:
 			file.write(",\n")
 			file.write(white_space(parameterPos))
-		typeData, typeLen = display_type(param["type"], localClassName);
+		typeData, typeLen = display_type(param["type"], myDoc);
 		file.write(typeData)
 		if param['name'] != "":
 			file.write(" ")
@@ -253,13 +251,13 @@ def generate(myDoc, outFolder) :
 	genericHeader += "<html>\n"
 	genericHeader += "<head>\n"
 	genericHeader += "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\n"
-	genericHeader += "	<title>Ewol Library</title>\n"
+	genericHeader += "	<title>" + myDoc.moduleName+ " Library</title>\n"
 	genericHeader += "	<link rel=\"stylesheet\" href=\"base.css\">\n"
 	genericHeader += "</head>\n"
 	genericHeader += "<body>\n"
 	genericHeader += "	<div class=\"navbar navbar-fixed-top\">\n"
 	genericHeader += "		<div class=\"container\">\n"
-	genericHeader += "			<h1>Ewol Library</h1>\n"
+	genericHeader += "			<h1>" + myDoc.moduleName+ " Library</h1>\n"
 	#genericHeader += "			<ul>\n"
 	baseNamespace = ""
 	for className in sorted(myDoc.listClass.iterkeys()) :
@@ -281,6 +279,27 @@ def generate(myDoc, outFolder) :
 		
 	if baseNamespace != "":
 		genericHeader += "				</ul>\n"
+	
+	for enumName in sorted(myDoc.listEnum.iterkeys()) :
+		pos = enumName.find("::")
+		if pos >= 0:
+			namespace = enumName[:pos]
+			rest = enumName[pos+2:]
+		else:
+			namespace = ""
+			rest = enumName
+		if baseNamespace != namespace:
+			if baseNamespace != "":
+				genericHeader += "				</ul>\n"
+			genericHeader += "				<li>" + namespace + "</li>\n"
+			genericHeader += "				<ul>\n"
+			baseNamespace = namespace
+			
+		genericHeader += "				<li><a href=\"" + class_name_to_file_name(enumName) + "\">" + rest + "</a></li>\n"
+		
+	if baseNamespace != "":
+		genericHeader += "				</ul>\n"
+		
 	#genericHeader += "			</ul>\n"
 	genericHeader += "		</div>\n"
 	genericHeader += "	</div>\n"
@@ -303,9 +322,8 @@ def generate(myDoc, outFolder) :
 		
 		file.write(genericHeader)
 		
-		file.write("<h1>" + className + "</h1>\n")
-		file.write("\n")
-		file.write("\n")
+		file.write("<h1>Class: " + className + "</h1>\n")
+		file.write("<br/>\n")
 		# calculate function max size return & function name size:
 		sizeReturn=0
 		sizefunction=0
@@ -324,11 +342,11 @@ def generate(myDoc, outFolder) :
 		# TODO: ...
 		file.write("<pre>\n");
 		for function in localClass["methods"]["public"]:
-			displayReductFunction(function, file, "+ ", sizeReturn, sizefunction, className)
+			display_reduct_function(function, file, "+ ", sizeReturn, sizefunction, myDoc)
 		for function in localClass["methods"]["protected"]:
-			displayReductFunction(function, file, "# ", sizeReturn, sizefunction, className)
+			display_reduct_function(function, file, "# ", sizeReturn, sizefunction, myDoc)
 		for function in localClass["methods"]["private"]:
-			displayReductFunction(function, file, "- ", sizeReturn, sizefunction, className)
+			display_reduct_function(function, file, "- ", sizeReturn, sizefunction, myDoc)
 		file.write("</pre>\n");
 		file.write("\n")
 		file.write("\n")
@@ -343,13 +361,15 @@ def generate(myDoc, outFolder) :
 				if level != 0:
 					file.write(white_space(level*4) + "+--> ")
 				if heritedClass != className:
-					file.write("<a href=\"" + class_name_to_file_name(heritedClass) + "\">" + heritedClass + "</a>\n")
+					name, link = myDoc.get_class_link(heritedClass)
+					file.write("<a href=\"" + link + "\">" + name + "</a>\n")
 				else:
 					file.write("<b>" + heritedClass + "</b>\n")
 				level += 1;
 			for heritedClass in heritageDown:
 				file.write(white_space(level*4) + "+--> ")
-				file.write("<a href=\"" + class_name_to_file_name(heritedClass) + "\">" + heritedClass + "</a>\n")
+				name, link = myDoc.get_class_link(heritedClass)
+				file.write("<a href=\"" + link + "\">" + name + "</a>\n")
 			file.write("</pre>\n")
 			file.write("<br/>\n")
 		"""
@@ -371,18 +391,47 @@ def generate(myDoc, outFolder) :
 		file.write("<h2>Detail:<h2>\n")
 		# display all the class internal functions :
 		for function in localClass["methods"]["public"]:
-			displayFunction(localClass['namespace'] , function, file, "+ ", sizeReturn, sizefunction, className)
+			displayFunction(localClass['namespace'] , function, file, "+ ", sizeReturn, sizefunction, myDoc)
 			file.write("\n<hr/>\n")
 		for function in localClass["methods"]["protected"]:
-			displayFunction(localClass['namespace'] , function, file, "# ", sizeReturn, sizefunction, className)
+			displayFunction(localClass['namespace'] , function, file, "# ", sizeReturn, sizefunction, myDoc)
 			file.write("\n<hr/>\n")
 		for function in localClass["methods"]["private"]:
-			displayFunction(localClass['namespace'] , function, file, "- ", sizeReturn, sizefunction, className)
+			displayFunction(localClass['namespace'] , function, file, "- ", sizeReturn, sizefunction, myDoc)
 			file.write("\n<hr/>\n")
 		
 		file.write(genericFooter)
 		
 		file.close()
+	
+	for enumName in sorted(myDoc.listEnum.iterkeys()) :
+		localEnum = myDoc.listEnum[enumName]
+		debug.debug("    enum: " + enumName)
+		fileName = outFolder + "/" + class_name_to_file_name(enumName)
+		# create directory (in case)
+		lutinTools.CreateDirectoryOfFile(fileName);
+		debug.printElement("doc", myDoc.moduleName, "<==", enumName)
+		# open the file :
+		file = open(fileName, "w")
+		
+		file.write(genericHeader)
+		
+		file.write("<h1>Enum: " + enumName + "</h1>\n")
+		file.write("<br/>\n")
+		file.write("Value :<br>\n")
+		file.write("<ul>\n")
+		#debug.info("    enum: " + str(localEnum))
+		for value in localEnum["values"]:
+			file.write("<li>" + value["name"])
+			if "doxygen" in value.keys():
+				file.write("       " + value["doxygen"] )
+			file.write("</li>")
+		file.write("</ul>\n")
+		
+		file.write(genericFooter)
+		
+		file.close()
+	
 
 
 

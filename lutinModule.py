@@ -13,19 +13,17 @@ import lutinMultiprocess
 import lutinEnv
 import lutinDoc
 
-"""
-	
-"""
 class module:
-	"""
-	Module class represent all system needed for a specific
-		module like 
-			- type (bin/lib ...)
-			- dependency
-			- flags
-			- files
-			- ...
-	"""
+	
+	##
+	## @brief Module class represent all system needed for a specific
+	## 	module like 
+	## 		- type (bin/lib ...)
+	## 		- dependency
+	## 		- flags
+	## 		- files
+	## 		- ...
+	##
 	def __init__(self, file, moduleName, moduleType):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
 		self.originFile=''
@@ -37,8 +35,8 @@ class module:
 		# Dependency list:
 		self.depends=[]
 		# Dependency list:
-		self.docPath=lutinTools.GetCurrentPath(file)
-		self.documentation = lutinDoc.doc(self.name)
+		self.docPath = ""
+		self.documentation = None
 		# export PATH
 		self.export_path=[]
 		self.local_path=[]
@@ -94,9 +92,9 @@ class module:
 		                    }
 		
 	
-	###############################################################################
-	## add Some copilation flags for this module (and only this one)
-	###############################################################################
+	##
+	## @brief Add Some copilation flags for this module (and only this one)
+	##
 	def add_extra_compile_flags(self):
 		self.CompileFlags_CC([
 			"-Wall",
@@ -106,9 +104,9 @@ class module:
 			"-Wno-write-strings"]);
 		#only for gcc : "-Wunused-variable", "-Wunused-but-set-variable",
 	
-	###############################################################################
-	## remove all unneeded warning on compilation ==> for extern libs ...
-	###############################################################################
+	##
+	## @brief remove all unneeded warning on compilation ==> for extern libs ...
+	##
 	def remove_compile_warning(self):
 		self.CompileFlags_CC([
 			"-Wno-int-to-pointer-cast"
@@ -118,9 +116,9 @@ class module:
 			])
 		# only for gcc :"-Wno-unused-but-set-variable"
 	
-	###############################################################################
-	## Commands for running gcc to compile a m++ file.
-	###############################################################################
+	##
+	## @brief Commands for running gcc to compile a m++ file.
+	##
 	def Compile_mm_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
@@ -151,9 +149,9 @@ class module:
 		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
 		return file_dst
 	
-	###############################################################################
-	## Commands for running gcc to compile a m file.
-	###############################################################################
+	##
+	## @brief Commands for running gcc to compile a m file.
+	##
 	def Compile_m_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
@@ -184,9 +182,9 @@ class module:
 		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
 		return file_dst
 	
-	###############################################################################
-	## Commands for running gcc to compile a C++ file.
-	###############################################################################
+	##
+	## @brief Commands for running gcc to compile a C++ file.
+	##
 	def Compile_xx_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
@@ -216,9 +214,9 @@ class module:
 		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
 		return file_dst
 	
-	###############################################################################
-	## Commands for running gcc to compile a C file.
-	###############################################################################
+	##
+	## @brief Commands for running gcc to compile a C file.
+	##
 	def Compile_cc_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
@@ -246,9 +244,9 @@ class module:
 		return file_dst
 	
 	
-	###############################################################################
-	## Commands for running ar.
-	###############################################################################
+	##
+	## @brief Commands for running ar.
+	##
 	def Link_to_a(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-static")
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
@@ -280,9 +278,9 @@ class module:
 		return file_dst
 	
 	
-	###############################################################################
-	## Commands for running gcc to link a shared library.
-	###############################################################################
+	##
+	## @brief Commands for running gcc to link a shared library.
+	##
 	def Link_to_so(self, file, binary, target, depancy, libName=""):
 		if libName=="":
 			libName = self.name
@@ -300,8 +298,8 @@ class module:
 			target.global_flags_ld])
 		
 		# check the dependency for this file :
-		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
-				and False==dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine):
+		if     dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) == False \
+		   and dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
 			return tmpList[1]
 		lutinTools.CreateDirectoryOfFile(file_dst)
 		debug.printElement("SharedLib", libName, "==>", file_dst)
@@ -323,9 +321,9 @@ class module:
 		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
 	
 	
-	###############################################################################
-	## Commands for running gcc to link an executable.
-	###############################################################################
+	##
+	## @brief Commands for running gcc to link an executable.
+	##
 	def Link_to_bin(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, self.name,self.originFolder,file,"bin")
 		#create comdLine : 
@@ -362,26 +360,34 @@ class module:
 		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
 		
 	
-	###############################################################################
-	## Commands for copying files
-	###############################################################################
+	##
+	## @brief Commands for copying files
+	##
 	def files_to_staging(self, binaryName, target):
 		for element in self.files:
 			debug.verbose("Might copy file : " + element[0] + " ==> " + element[1])
 			target.AddFileStaging(self.originFolder+"/"+element[0], element[1])
 	
-	###############################################################################
-	## Commands for copying files
-	###############################################################################
+	##
+	## @brief Commands for copying files
+	##
 	def folders_to_staging(self, binaryName, target):
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
 			lutinTools.CopyAnythingTarget(target, self.originFolder+"/"+element[0],element[1])
 	
-	###############################################################################
-	## Create the module documentation:
-	###############################################################################
-	def CreateDoc(self, target) :
+	##
+	## @brief Set the documentation availlable for this module
+	##
+	def doc_enable(self):
+		self.docPath = lutinTools.GetCurrentPath(self.originFile)
+		self.documentation = lutinDoc.doc(self.name)
+	
+	##
+	## @brief Create the module documentation:
+	## @param[in,out] target target that request generation of the documentation
+	##
+	def doc_parse_code(self, target):
 		if self.docPath == "":
 			return False
 		for root, dirnames, filenames in os.walk(self.docPath):
@@ -391,9 +397,28 @@ class module:
 				fileCompleteName = os.path.join(root, filename)
 				debug.debug("    Find a file : '" + fileCompleteName + "'")
 				self.documentation.add_file(fileCompleteName)
+	
+	##
+	## @brief Generate real documentation files
+	## @param[in,out] target target that request generation of the documentation
+	##
+	def doc_generate(self, target):
+		if self.docPath == "":
+			return False
 		# Real creation of the documentation :
 		lutinTools.RemoveFolderAndSubFolder(target.GetDocFolder(self.name));
-		self.documentation.generate_documantation(target.GetDocFolder(self.name))
+		self.documentation.generate_documantation(target, target.GetDocFolder(self.name))
+	
+	
+	##
+	## @brief Get link on a class or an enum in all the subclasses
+	## @param[in] name of the class
+	## @return [real element name, link on it]
+	##
+	def doc_get_link(self, target, elementName):
+		if self.docPath == "":
+			return [elementName, ""]
+		return self.documentation.get_class_link_from_target(elementName);
 	
 	
 	# call here to build the module

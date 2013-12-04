@@ -41,9 +41,11 @@ def usage():
 	print "			Clean all (same as previous)"
 	print "		dump"
 	print "			Dump all the module dependency and properties"
+	print "		doc"
+	print "			Create documentation of all module that is mark as availlable on it"
 	listOfAllModule = lutinModule.ListAllModuleWithDesc()
 	for mod in listOfAllModule:
-		print "		" + mod[0] + " / " + mod[0] + "-clean / " + mod[0] + "-dump"
+		print "		" + mod[0] + " / " + mod[0] + "-clean / " + mod[0] + "-dump" + mod[0] + "-doc"
 		print "			" + mod[1]
 	print "	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all"
 	exit(0)

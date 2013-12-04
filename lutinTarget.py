@@ -207,10 +207,18 @@ class Target:
 			self.LoadIfNeeded(modName)
 	
 	def Build(self, name, packagesName=None):
-		if name == "dump":
+		if name == "doc":
+			debug.info("Documentation for all")
+			self.LoadAll()
+			print 'Doc all modules'
+			for mod in self.moduleList:
+				mod.doc_parse_code(self)
+			for mod in self.moduleList:
+				mod.doc_generate(self)
+		elif name == "dump":
 			debug.info("dump all")
 			self.LoadAll()
-			print 'Dump all module properties'
+			print 'Dump all modules properties'
 			for mod in self.moduleList:
 				mod.Display(self)
 		elif name == "all":
@@ -261,9 +269,23 @@ class Target:
 							return mod.Build(self, None)
 						elif actionName == "doc":
 							debug.debug("Create doc module '" + moduleName + "'")
-							return mod.CreateDoc(self)
+							if mod.doc_parse_code(self) == False:
+								return False
+							return mod.doc_generate(self)
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
+	##
+	## @brief Get link on a class or an enum in all the subclasses
+	## @param[in] name of the class
+	## @return [real element name, link on it]
+	##
+	def doc_get_link(self, elementName):
+		for mod in self.moduleList:
+			elementRealName, link = mod.doc_get_link(self, elementName)
+			if len(link) != 0:
+				debug.verbose("find the element : " + elementName + " ==> " + link)
+				return [elementRealName, link]
+		return [elementName, ""]
 
 __startTargetName="lutinTarget"
 
