@@ -3,6 +3,62 @@ import lutinDebug as debug
 import sys
 import lutinTools
 import CppHeaderParser
+import re
+
+global_class_link = {
+	"std::string"    : "http://www.cplusplus.com/reference/string/string/",
+	"std::u16string" : "http://www.cplusplus.com/reference/string/u16string/",
+	"std::u32string" : "http://www.cplusplus.com/reference/string/u32string/",
+	"std::wstring"   : "http://www.cplusplus.com/reference/string/wstring/",
+	"std::vector"    : "http://www.cplusplus.com/reference/vector/vector/"
+	}
+
+
+def replace_type(match):
+	value = "<span class=\"code-type\">" + match.group() + "</span>"
+	return value
+
+def replace_storage_keyword(match):
+	value = "<span class=\"code-storage-keyword\">" + match.group() + "</span>"
+	return value
+
+def display_color(valBase):
+	# storage keyword :
+	p = re.compile("(inline|const|class|virtual|private|public|protected|friend|const|extern|auto|register|static|unsigned|signed|volatile|char|double|float|int|long|short|void|typedef|struct|union|enum)")
+	val = p.sub(replace_storage_keyword, valBase)
+	# type :
+	p = re.compile("(bool|BOOL|char(16_t|32_t)?|double|float|u?int(8|16|32|64|128)?(_t)?|long|short|signed|size_t|unsigned|void|(I|U)(8|16|32|64|128))")
+	val = p.sub(replace_type, val)
+	return val, len(valBase)
+
+def display_type(type, localClassName):
+	type = type.replace("inline ", "")
+	lenght = 0;
+	isFirst = True
+	out = ''
+	# we split all the element in list sepa=rated with space to keep class... and standard c+ class
+	for element in type.split(' '):
+		if isFirst == False:
+			out += " "
+			lenght += 1
+		isFirst = False
+		# check if the element in internal at the current lib
+		if element[:len(localClassName)] == localClassName:
+			out += "<a href=\"" + element.replace(":","_") + ".html\" class=\"code-type\">" + element + "</a>"
+			lenght += len(element)
+		# check if the element is in local Lib:
+		elif False:
+			None
+		# Ckeck if the variable in a standard class:
+		elif element in global_class_link.keys():
+			out += "<a href=\"" + global_class_link[element] + "\" class=\"code-type\">" + element + "</a>"
+			lenght += len(element)
+		else:
+			data, lenghtTmp = display_color(element)
+			out += data
+			lenght += lenghtTmp
+	# get every subelement class :
+	return [out,lenght]
 
 def display_doxygen_param(comment, input, output):
 	data = "<b>Parameter"
@@ -15,6 +71,7 @@ def display_doxygen_param(comment, input, output):
 	val = comment.find(" ")
 	var = comment[:val]
 	endComment = comment[val:]
+	# TODO : Check if it exist in the parameter list ...
 	data += "<span class=\"code-argument\">" + var + "</span> " + endComment
 	
 	data += "<br/>"
@@ -38,9 +95,9 @@ def parse_doxygen(data) :
 		data = data.replace("\n **", "\n")
 		data = data.replace("\n * ", "\n")
 		data = data.replace("\n *", "\n")
-		data = data.replace("\r", "")
+		data = data.replace("\r", '')
 	streams = data.split("@")
-	data2 = ""
+	data2 = ''
 	for element in streams:
 		if    element[:1] == "\n" \
 		   or element[:2] == "\n\n":
@@ -60,7 +117,7 @@ def parse_doxygen(data) :
 			data2 += element[5:]
 			data2 += "<br/> "
 	
-	data3 = ""
+	data3 = ''
 	for element in streams:
 		if    element[:1] == "\n" \
 		   or element[:2] == "\n\n":
@@ -79,41 +136,44 @@ def parse_doxygen(data) :
 			data3 += "<b>Return:</b> "
 			data3 += element[7:]
 			data3 += "<br/>"
-	if data3 != "":
+	if data3 != '':
 		data2 += "<ul>\n"
 		data2 += data3
 		data2 += "</ul>\n"
 	return data2
 
-
-
-def writeExpendSize(data, size) :
-	ret = data
+def white_space(size) :
+	ret = ''
 	for iii in range(len(ret), size):
 		ret += " "
 	return ret
 
-def displayReductFunction(function, file, classement, sizeReturn, sizefunction) :
-	lineData = classement + " "
-	
+def displayReductFunction(function, file, classement, sizeReturn, sizefunction, localClassName) :
+	file.write(classement + " ")
+	lenght = len(classement)+1;
 	if function['destructor'] :
-		lineData += writeExpendSize("", sizeReturn)
-		lineData += "~"
+		file.write(white_space(sizeReturn) + "~")
+		lenght += sizeReturn+1;
 	elif function['constructor'] :
-		lineData += writeExpendSize("", sizeReturn+1)
+		file.write(white_space(sizeReturn+1))
+		lenght += sizeReturn+1;
 	else :
-		lineData += writeExpendSize(function["rtnType"], sizeReturn+1)
-	parameterPos = len(lineData) + sizefunction+2;
-	lineData +="<a class=\"code-function\" href=\"#"+ function["name"] + "\">" + function["name"] + "</a>"
-	lineData += writeExpendSize("", sizefunction+1 - len(function["name"]))
-	lineData += "("
-	file.write(lineData);
+		typeData, typeLen = display_type(function["rtnType"], localClassName);
+		file.write(typeData)
+		file.write(white_space(sizeReturn+1 - typeLen))
+		lenght += sizeReturn+1;
+	parameterPos = lenght + sizefunction+2;
+	file.write("<a class=\"code-function\" href=\"#"+ function["name"] + "\">" + function["name"] + "</a>")
+	file.write(white_space(sizefunction+1 - len(function["name"])))
+	file.write("(")
 	isFirst = True
 	for param in function["parameters"]:
 		if isFirst == False:
 			file.write(",<br/>")
-			file.write(writeExpendSize("",parameterPos))
-		file.write(param['type'])
+			file.write(white_space(parameterPos))
+		
+		typeData, typeLen = display_type(param["type"], localClassName);
+		file.write(typeData)
 		if param['name'] != "":
 			file.write(" ")
 			file.write("<span class=\"code-argument\">" + param['name'] + "</span>")
@@ -122,7 +182,7 @@ def displayReductFunction(function, file, classement, sizeReturn, sizefunction) 
 	file.write("<br>")
 
 
-def displayFunction(namespace, function, file, classement, sizeReturn, sizefunction) :
+def displayFunction(namespace, function, file, classement, sizeReturn, sizefunction, localClassName) :
 	lineData = ""
 	if    (    function['constructor'] == True \
 	        or function['destructor'] == True \
@@ -136,22 +196,24 @@ def displayFunction(namespace, function, file, classement, sizeReturn, sizefunct
 	
 	file.write("<pre>\n");
 	if function['destructor'] :
-		lineData = "~"
+		file.write("~")
+		lenght = 1;
 	elif function['constructor'] :
-		lineData = ""
+		lenght = 0;
 	else :
-		lineData = function["rtnType"] + " "
+		typeData, typeLen = display_type(function["rtnType"], localClassName);
+		file.write(typeData + " ")
+		lenght = typeLen+1;
 	
-	parameterPos = len(lineData) + len(function["name"]) + 1;
-	lineData += "<span class=\"code-function\">" + function["name"] + "</span>"
-	lineData += "("
-	file.write(lineData);
+	parameterPos = lenght + len(function["name"]) + 1;
+	file.write("<span class=\"code-function\">" + function["name"] + "</span>(")
 	isFirst = True
 	for param in function["parameters"]:
 		if isFirst == False:
 			file.write(",\n")
-			file.write(writeExpendSize("", parameterPos))
-		file.write(param['type'])
+			file.write(white_space(parameterPos))
+		typeData, typeLen = display_type(param["type"], localClassName);
+		file.write(typeData)
 		if param['name'] != "":
 			file.write(" ")
 			file.write("<span class=\"code-argument\">" + param['name'] + "</span>")
@@ -178,53 +240,68 @@ def calsulateSizeReturn(function, size) :
 		return len(function["rtnType"])+1
 	return size
 
-def add_header(file):
-	file.write("<!DOCTYPE html>\n")
-	file.write("<html>\n")
-	file.write("<head>\n")
-	file.write("	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\n")
-	file.write("	<title>Ewol Library</title>\n")
-	file.write("	<link rel=\"stylesheet\" href=\"base.css\">\n")
-	file.write("</head>\n")
-	file.write("<body>\n")
-	file.write("	<div class=\"navbar navbar-fixed-top\">\n");
-	file.write("		<div class=\"container\">\n")
-	file.write("			Ewol Library\n")
-	file.write("		</div>\n")
-	file.write("	</div>\n")
-	file.write("	<div class=\"container\" id=\"content\">\n")
+def class_name_to_file_name(className):
+	className = className.replace(":", "_")
+	className = className.replace(" ", "")
+	className += ".html"
+	return className
 
-def add_buttom(file):
-	file.write("	</div>\n")
-	file.write("</body>\n")
-	file.write("</html>\n")
-
-def GenerateDocFile(filename, outFolder) :
-	try:
-		metaData = CppHeaderParser.CppHeader(filename)
-	except CppHeaderParser.CppParseError,  e:
-		debug.error(" can not parse the file: '" + filename + "' error : " + e)
-		return False
-	
-	lutinTools.CreateDirectoryOfFile(outFolder+"/");
+def generate(myDoc, outFolder) :
 	lutinTools.CopyFile(lutinTools.GetCurrentPath(__file__)+"/theme/base.css", outFolder+"/base.css")
-	
-	for element in metaData.classes:
-		classFileName = outFolder + "/"
-		localClass = metaData.classes[element]
-		if localClass['namespace'] == "":
-			className = localClass['name']
+	# create common header
+	genericHeader  = "<!DOCTYPE html>\n"
+	genericHeader += "<html>\n"
+	genericHeader += "<head>\n"
+	genericHeader += "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\n"
+	genericHeader += "	<title>Ewol Library</title>\n"
+	genericHeader += "	<link rel=\"stylesheet\" href=\"base.css\">\n"
+	genericHeader += "</head>\n"
+	genericHeader += "<body>\n"
+	genericHeader += "	<div class=\"navbar navbar-fixed-top\">\n"
+	genericHeader += "		<div class=\"container\">\n"
+	genericHeader += "			<h1>Ewol Library</h1>\n"
+	#genericHeader += "			<ul>\n"
+	baseNamespace = ""
+	for className in sorted(myDoc.listClass.iterkeys()) :
+		pos = className.find("::")
+		if pos >= 0:
+			namespace = className[:pos]
+			rest = className[pos+2:]
 		else:
-			className = localClass['namespace'] + "::" + localClass['name']
+			namespace = ""
+			rest = className
+		if baseNamespace != namespace:
+			if baseNamespace != "":
+				genericHeader += "				</ul>\n"
+			genericHeader += "				<li>" + namespace + "</li>\n"
+			genericHeader += "				<ul>\n"
+			baseNamespace = namespace
+			
+		genericHeader += "				<li><a href=\"" + class_name_to_file_name(className) + "\">" + rest + "</a></li>\n"
+		
+	if baseNamespace != "":
+		genericHeader += "				</ul>\n"
+	#genericHeader += "			</ul>\n"
+	genericHeader += "		</div>\n"
+	genericHeader += "	</div>\n"
+	genericHeader += "	<div class=\"container\" id=\"content\">\n"
+	
+	genericFooter  = "	</div>\n"
+	genericFooter += "</body>\n"
+	genericFooter += "</html>\n"
+	
+	
+	for className in sorted(myDoc.listClass.iterkeys()) :
+		localClass = myDoc.listClass[className]
 		debug.debug("    class: " + className)
-		classFileName += className
-		# Replace all :: with __
-		classFileName = classFileName.replace(":", "_")
-		classFileName = classFileName.replace(" ", "")
-		classFileName += ".html"
+		classFileName = outFolder + "/" + class_name_to_file_name(className)
+		# create directory (in case)
+		lutinTools.CreateDirectoryOfFile(classFileName);
+		debug.printElement("doc", myDoc.moduleName, "<==", className)
+		# open the file :
 		file = open(classFileName, "w")
 		
-		add_header(file)
+		file.write(genericHeader)
 		
 		file.write("<h1>" + className + "</h1>\n")
 		file.write("\n")
@@ -247,27 +324,34 @@ def GenerateDocFile(filename, outFolder) :
 		# TODO: ...
 		file.write("<pre>\n");
 		for function in localClass["methods"]["public"]:
-			displayReductFunction(function, file, "public:   ", sizeReturn, sizefunction)
+			displayReductFunction(function, file, "+ ", sizeReturn, sizefunction, className)
 		for function in localClass["methods"]["protected"]:
-			displayReductFunction(function, file, "protected:", sizeReturn, sizefunction)
+			displayReductFunction(function, file, "# ", sizeReturn, sizefunction, className)
 		for function in localClass["methods"]["private"]:
-			displayReductFunction(function, file, "private:  ", sizeReturn, sizefunction)
+			displayReductFunction(function, file, "- ", sizeReturn, sizefunction, className)
 		file.write("</pre>\n");
 		file.write("\n")
 		file.write("\n")
-
-
-		if len(localClass['inherits']) != 0:
+		heritage = myDoc.get_heritage_list(className)
+		heritageDown = myDoc.get_down_heritage_list(className)
+		if    len(heritage) > 1 \
+		   or len(heritageDown) > 0:
 			file.write("<h2>Object Hierarchy:</h2>\n")
 			file.write("<pre>\n")
-			for heritedClass in localClass['inherits']:
-				file.write("" + heritedClass['class'] + "\n")
-			file.write("    |\n")
-			file.write("    +--> " +  localClass['name'] + "\n")
+			level = 0;
+			for heritedClass in heritage:
+				if level != 0:
+					file.write(white_space(level*4) + "+--> ")
+				if heritedClass != className:
+					file.write("<a href=\"" + class_name_to_file_name(heritedClass) + "\">" + heritedClass + "</a>\n")
+				else:
+					file.write("<b>" + heritedClass + "</b>\n")
+				level += 1;
+			for heritedClass in heritageDown:
+				file.write(white_space(level*4) + "+--> ")
+				file.write("<a href=\"" + class_name_to_file_name(heritedClass) + "\">" + heritedClass + "</a>\n")
 			file.write("</pre>\n")
 			file.write("<br/>\n")
-
-
 		"""
 		file.write("<h2>Signals:</h2>\n")
 		# display all signals :
@@ -287,21 +371,18 @@ def GenerateDocFile(filename, outFolder) :
 		file.write("<h2>Detail:<h2>\n")
 		# display all the class internal functions :
 		for function in localClass["methods"]["public"]:
-			displayFunction(localClass['namespace'] , function, file, "public:   ", sizeReturn, sizefunction)
+			displayFunction(localClass['namespace'] , function, file, "+ ", sizeReturn, sizefunction, className)
 			file.write("\n<hr/>\n")
 		for function in localClass["methods"]["protected"]:
-			displayFunction(localClass['namespace'] , function, file, "protected:", sizeReturn, sizefunction)
+			displayFunction(localClass['namespace'] , function, file, "# ", sizeReturn, sizefunction, className)
 			file.write("\n<hr/>\n")
 		for function in localClass["methods"]["private"]:
-			displayFunction(localClass['namespace'] , function, file, "private:  ", sizeReturn, sizefunction)
+			displayFunction(localClass['namespace'] , function, file, "- ", sizeReturn, sizefunction, className)
 			file.write("\n<hr/>\n")
 		
-		add_buttom(file)
+		file.write(genericFooter)
 		
 		file.close()
 
 
-"""
-
-"""
 

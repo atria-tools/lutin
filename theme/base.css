@@ -5,7 +5,7 @@ html {
 
 body {
 	font-family: 'Ubuntu',Tahoma,sans-serif;
-	padding-top: 60px;
+	padding-top: 40px;
 	padding-bottom: 40px;
 	font-size: 15px;
 	line-height: 150%;
@@ -13,7 +13,7 @@ body {
 	color: #333333;
 	background-color: #ffffff;
 	display: block;
-	margin-left: 50px;
+	margin-left: 250px;
 	margin-right: 50px;
 };
 
@@ -38,24 +38,31 @@ body {
 }
 
 .navbar-fixed-top {
+	width:210px;
 	display: block;
 	position: fixed;
 	padding-top: 0px;
 	top: 0;
-	min-height: 40px;
+	height: 100%;
 	right: 0;
 	left: 0;
 	margin-bottom: 0;
 	background-color: #d44413;
 	border: 1px solid #c64012;
-	font-size: 20px;
+	font-size: 15px;
 	font-weight: 200;
 	color: #ffffff;
 	text-shadow: 0 1px 0 #ce4213;
 	padding: 10px 20px 10px;
 	margin-left: -20px;
+	overflow:scroll;
+	overflow-x:hidden;
 }
-
+/*
+.navbar ul {
+	font-size: 15px;
+};
+*/
 h1, h2, h3, h4, h5, h6 {
 	display: block;
 	margin: 10px 0;
@@ -88,6 +95,8 @@ pre {
 	border-radius: 4px;
 }
 
+
+
 .code-function {
 	text-decoration:none;
 	color:#09857e;
@@ -106,3 +115,17 @@ pre {
 	font-weight:bold;
 }
 
+.code-number {
+	text-decoration:none;
+	color:#007b00;
+}
+
+.code-keyword {
+	text-decoration:none;
+	color:#215eb8;
+	font-weight:bold;
+}
+.code-storage-keyword {
+	text-decoration:none;
+	color:#466cb4;
+}

@@ -33,11 +33,12 @@ class module:
 		# type of the module:
 		self.type='LIBRARY'
 		# Name of the module
-		self.name=''
+		self.name=moduleName
 		# Dependency list:
 		self.depends=[]
 		# Dependency list:
 		self.docPath=lutinTools.GetCurrentPath(file)
+		self.documentation = lutinDoc.doc(self.name)
 		# export PATH
 		self.export_path=[]
 		self.local_path=[]
@@ -72,7 +73,6 @@ class module:
 			raise 'Input value error'
 		self.originFile = file;
 		self.originFolder = lutinTools.GetCurrentPath(self.originFile)
-		self.name=moduleName
 		self.localHeritage = heritage.heritage(self)
 		
 		self.packageProp = { "COMPAGNY_TYPE" : set(""),
@@ -384,14 +384,16 @@ class module:
 	def CreateDoc(self, target) :
 		if self.docPath == "":
 			return False
-		lutinTools.RemoveFolderAndSubFolder(target.GetDocFolder(self.name));
 		for root, dirnames, filenames in os.walk(self.docPath):
 			tmpList = fnmatch.filter(filenames, "*.h")
 			# Import the module :
 			for filename in tmpList:
 				fileCompleteName = os.path.join(root, filename)
 				debug.debug("    Find a file : '" + fileCompleteName + "'")
-				lutinDoc.GenerateDocFile(fileCompleteName, target.GetDocFolder(self.name));
+				self.documentation.add_file(fileCompleteName)
+		# Real creation of the documentation :
+		lutinTools.RemoveFolderAndSubFolder(target.GetDocFolder(self.name));
+		self.documentation.generate_documantation(target.GetDocFolder(self.name))
 	
 	
 	# call here to build the module

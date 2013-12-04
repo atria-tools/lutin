@@ -357,19 +357,19 @@ class CppClass(dict):
         'methods':
         {
             'public':[],
-            'protected':[], 
+            'protected':[],
             'private':[]
         }, 
         'properties':
         {
             'public':[],
-            'protected':[], 
+            'protected':[],
             'private':[]
         },
         'enums':
         {
             'public':[],
-            'protected':[], 
+            'protected':[],
             'private':[]
         }
     }
