@@ -8,6 +8,8 @@ sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppHeaderParse
 import CppHeaderParser
 import lutinDocHtml
 import lutinDocMd
+import os
+import fnmatch
 
 ##
 ## @brief Main Documantion class
@@ -22,6 +24,60 @@ class doc:
 		self.listFunction = dict()
 		self.listNamepsaces = dict()
 		self.target = None
+		self.webSite = ""
+		self.pathParsing = ""
+		self.externalLink = []
+		self.title = moduleName + " Library"
+		self.styleHtml = ""
+	
+	##
+	## @brief Set the module website (activate only when compile in release mode, else "../moduleName/)
+	## @param[in] url New Website url
+	##
+	def set_website(self, url):
+		self.webSite = url
+	
+	##
+	## @brief set the parsing folder
+	## @param[in] path New path to parse
+	##
+	def set_path(self, path):
+		self.pathParsing = path
+	
+	##
+	## @brief List of validate external library link (disable otherwise)
+	## @param[in] availlable List of all module link availlable 
+	##
+	def set_external_link(self, availlable):
+		self.externalLink = availlable
+	
+	##
+	## @brief Set the library title
+	## @param[in] title New title to set.
+	##
+	def set_title(self, title):
+		self.title = title
+	
+	##
+	## @brief new html basic css file
+	## @param[in] file File of the css style sheet
+	##
+	def set_html_css(self, cssFile):
+		self.styleHtml = cssFile
+	
+	
+	##
+	## @brief Create the module documentation:
+	## @param[in,out] target target that request generation of the documentation
+	##
+	def doc_parse_code(self):
+		for root, dirnames, filenames in os.walk(self.pathParsing):
+			tmpList = fnmatch.filter(filenames, "*.h")
+			# Import the module :
+			for filename in tmpList:
+				fileCompleteName = os.path.join(root, filename)
+				debug.debug("    Find a file : '" + fileCompleteName + "'")
+				self.add_file(fileCompleteName)
 	
 	##
 	## @brief Add a File at the parsing system
@@ -52,10 +108,12 @@ class doc:
 		
 		# add all enums:
 		for localEnum in metaData.enums:
-			if localEnum['namespace'] == '':
-				enumName = localEnum['name']
+			if "name" not in localEnum.keys():
+				continue
+			if localEnum["namespace"] == "":
+				enumName = localEnum["name"]
 			else:
-				enumName = localEnum['namespace'] + "::" + localEnum['name']
+				enumName = localEnum["namespace"] + "::" + localEnum['name']
 				enumName = enumName.replace("::::", "::")
 			if enumName in self.listEnum.keys():
 				debug.warning("Might merge enum : '" + enumName + "' file : " + filename)

@@ -34,8 +34,7 @@ class module:
 		self.name=moduleName
 		# Dependency list:
 		self.depends=[]
-		# Dependency list:
-		self.docPath = ""
+		# Documentation list:
 		self.documentation = None
 		# export PATH
 		self.export_path=[]
@@ -380,34 +379,30 @@ class module:
 	## @brief Set the documentation availlable for this module
 	##
 	def doc_enable(self):
-		self.docPath = lutinTools.GetCurrentPath(self.originFile)
 		self.documentation = lutinDoc.doc(self.name)
+		self.documentation.set_path(lutinTools.GetCurrentPath(self.originFile))
 	
 	##
 	## @brief Create the module documentation:
 	## @param[in,out] target target that request generation of the documentation
 	##
 	def doc_parse_code(self, target):
-		if self.docPath == "":
+		if self.documentation == None:
 			return False
-		for root, dirnames, filenames in os.walk(self.docPath):
-			tmpList = fnmatch.filter(filenames, "*.h")
-			# Import the module :
-			for filename in tmpList:
-				fileCompleteName = os.path.join(root, filename)
-				debug.debug("    Find a file : '" + fileCompleteName + "'")
-				self.documentation.add_file(fileCompleteName)
+		self.documentation.doc_parse_code()
+		return True
 	
 	##
 	## @brief Generate real documentation files
 	## @param[in,out] target target that request generation of the documentation
 	##
 	def doc_generate(self, target):
-		if self.docPath == "":
+		if self.documentation == None:
 			return False
 		# Real creation of the documentation :
 		lutinTools.RemoveFolderAndSubFolder(target.GetDocFolder(self.name));
 		self.documentation.generate_documantation(target, target.GetDocFolder(self.name))
+		return True
 	
 	
 	##
@@ -416,7 +411,7 @@ class module:
 	## @return [real element name, link on it]
 	##
 	def doc_get_link(self, target, elementName):
-		if self.docPath == "":
+		if self.documentation == None:
 			return [elementName, ""]
 		return self.documentation.get_class_link_from_target(elementName);
 	
