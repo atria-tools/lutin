@@ -413,7 +413,7 @@ class module:
 	def doc_get_link(self, target, elementName):
 		if self.documentation == None:
 			return [elementName, ""]
-		return self.documentation.get_class_link_from_target(elementName);
+		return self.documentation.get_class_link_from_target(elementName, target);
 	
 	
 	# call here to build the module

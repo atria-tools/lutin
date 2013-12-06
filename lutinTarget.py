@@ -79,6 +79,9 @@ class Target:
 		self.listFinalFile=[]
 		
 	
+	def get_build_mode(self):
+		return self.buildMode
+	
 	def AddFileStaging(self, inputFile, outputFile):
 		for source, dst in self.listFinalFile:
 			if dst == outputFile :

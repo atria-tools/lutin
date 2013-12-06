@@ -236,17 +236,23 @@ class doc:
 	## @param[in] elementName Name of the class requested
 	## @return [className, link]
 	##
-	def get_class_link_from_target(self, elementName):
+	def get_class_link_from_target(self, elementName, target):
 		# reject when auto call :
 		if self.target != None:
 			return [elementName, ""]
 		# search in local list :
 		if elementName in self.listClass.keys():
 			link = elementName.replace(":","_") + ".html"
-			return [elementName, "../" + self.moduleName + "/" + link]
+			if target.get_build_mode() == "debug":
+				return [elementName, "../" + self.moduleName + "/" + link]
+			elif self.webSite != "":
+				return [elementName, self.webSite + "/" + link]
 		elif elementName in self.listEnum.keys():
 			link = elementName.replace(":","_") + ".html"
-			return [elementName, "../" + self.moduleName + "/" + link]
+			if target.get_build_mode() == "debug":
+				return [elementName, "../" + self.moduleName + "/" + link]
+			elif self.webSite != "":
+				return [elementName, self.webSite + "/" + link]
 		# did not find :
 		return [elementName, ""]
 	
