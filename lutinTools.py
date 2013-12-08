@@ -49,6 +49,11 @@ def FileReadData(path):
 	file.close()
 	return data_file
 
+def FileWriteData(path, data):
+	file = open(path, "w")
+	file.write(data)
+	file.close()
+
 def ListToStr(list):
 	if type(list) == type(str()):
 		return list + " "

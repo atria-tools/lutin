@@ -5,6 +5,7 @@ import lutinTools
 # TODO : Add try of generic input ...
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/ply/ply/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppHeaderParser/")
+sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeBB/")
 import CppHeaderParser
 import lutinDocHtml
 import lutinDocMd
@@ -18,6 +19,7 @@ import fnmatch
 class doc:
 	def __init__(self, moduleName):
 		self.moduleName = moduleName
+		self.listDocFile = []
 		self.listClass = dict()
 		self.listEnum = dict()
 		self.listVariable = dict()
@@ -26,6 +28,7 @@ class doc:
 		self.target = None
 		self.webSite = ""
 		self.pathParsing = ""
+		self.pathGlobalDoc = ""
 		self.externalLink = []
 		self.title = moduleName + " Library"
 		self.styleHtml = ""
@@ -43,6 +46,13 @@ class doc:
 	##
 	def set_path(self, path):
 		self.pathParsing = path
+	
+	##
+	## @brief set the glabal documentation parsing folder
+	## @param[in] path New path to parse
+	##
+	def set_path_general_doc(self, path):
+		self.pathGlobalDoc = path
 	
 	##
 	## @brief List of validate external library link (disable otherwise)
@@ -65,22 +75,39 @@ class doc:
 	def set_html_css(self, cssFile):
 		self.styleHtml = cssFile
 	
-	
 	##
 	## @brief Create the module documentation:
 	## @param[in,out] target target that request generation of the documentation
 	##
 	def doc_parse_code(self):
-		for root, dirnames, filenames in os.walk(self.pathParsing):
-			tmpList = fnmatch.filter(filenames, "*.h")
-			# Import the module :
-			for filename in tmpList:
-				fileCompleteName = os.path.join(root, filename)
-				debug.debug("    Find a file : '" + fileCompleteName + "'")
-				self.add_file(fileCompleteName)
+		if self.pathParsing != "":
+			for root, dirnames, filenames in os.walk(self.pathParsing):
+				tmpList = fnmatch.filter(filenames, "*.h")
+				# Import the module :
+				for filename in tmpList:
+					fileCompleteName = os.path.join(root, filename)
+					debug.debug("    Find a file : '" + fileCompleteName + "'")
+					self.add_file(fileCompleteName)
+		if self.pathGlobalDoc != "":
+			for root, dirnames, filenames in os.walk(self.pathGlobalDoc):
+				tmpList = fnmatch.filter(filenames, "*.bb")
+				# Import the module :
+				for filename in tmpList:
+					fileCompleteName = os.path.join(root, filename)
+					debug.debug("    Find a doc file : '" + fileCompleteName + "'")
+					self.add_file_doc(fileCompleteName)
 	
 	##
-	## @brief Add a File at the parsing system
+	## @brief Add a documentation file at the parsing system
+	## @param[in] filename File To add at the parsing element system.
+	## @return True if no error occured, False otherwise
+	##
+	def add_file_doc(self, filename):
+		debug.debug("adding file in documantation : '" + filename + "'");
+		self.listDocFile.append(filename)
+	
+	##
+	## @brief Add a file at the parsing system
 	## @param[in] filename File To add at the parsing element system.
 	## @return True if no error occured, False otherwise
 	##

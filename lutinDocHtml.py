@@ -4,6 +4,7 @@ import sys
 import lutinTools
 import CppHeaderParser
 import re
+import codeBB
 
 global_class_link = {
 	"std::string"    : "http://www.cplusplus.com/reference/string/string/",
@@ -251,13 +252,13 @@ def generate(myDoc, outFolder) :
 	genericHeader += "<html>\n"
 	genericHeader += "<head>\n"
 	genericHeader += "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\n"
-	genericHeader += "	<title>" + myDoc.moduleName+ " Library</title>\n"
+	genericHeader += "	<title>" + myDoc.moduleName + " Library</title>\n"
 	genericHeader += "	<link rel=\"stylesheet\" href=\"base.css\">\n"
 	genericHeader += "</head>\n"
 	genericHeader += "<body>\n"
 	genericHeader += "	<div class=\"navbar navbar-fixed-top\">\n"
 	genericHeader += "		<div class=\"container\">\n"
-	genericHeader += "			<h1>" + myDoc.moduleName+ " Library</h1>\n"
+	genericHeader += "			<h1>" + myDoc.moduleName + " Library</h1>\n"
 	#genericHeader += "			<ul>\n"
 	baseNamespace = ""
 	for className in sorted(myDoc.listClass.iterkeys()) :
@@ -309,6 +310,16 @@ def generate(myDoc, outFolder) :
 	genericFooter += "</body>\n"
 	genericFooter += "</html>\n"
 	
+	# create index.hml : 
+	file = open(outFolder + "/index.html", "w")
+	file.write(genericHeader)
+	file.write("<h1>" + myDoc.moduleName + "</h1>");
+	file.write("<br/>");
+	file.write("TODO : Main page ...");
+	file.write("<br/>");
+	file.write("<br/>");
+	file.write(genericFooter)
+	file.close();
 	
 	for className in sorted(myDoc.listClass.iterkeys()) :
 		localClass = myDoc.listClass[className]
@@ -432,6 +443,8 @@ def generate(myDoc, outFolder) :
 		
 		file.close()
 	
+	for docInputName in myDoc.listDocFile :
+		codeBB.transcode_file(docInputName, docInputName+".html")
 
 
 
