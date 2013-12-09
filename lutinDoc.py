@@ -20,6 +20,7 @@ class doc:
 	def __init__(self, moduleName):
 		self.moduleName = moduleName
 		self.listDocFile = []
+		self.listTutorialFile = []
 		self.listClass = dict()
 		self.listEnum = dict()
 		self.listVariable = dict()
@@ -94,17 +95,33 @@ class doc:
 				# Import the module :
 				for filename in tmpList:
 					fileCompleteName = os.path.join(root, filename)
-					debug.debug("    Find a doc file : '" + fileCompleteName + "'")
-					self.add_file_doc(fileCompleteName)
+					tutorialPath = os.path.join(self.pathGlobalDoc, "tutorial/")
+					debug.verbose("    Find a doc file : '" + fileCompleteName + "'")
+					pathBase = fileCompleteName[len(self.pathGlobalDoc):len(fileCompleteName)-3]
+					if fileCompleteName[:len(tutorialPath)] == tutorialPath:
+						self.add_file_doc(fileCompleteName, pathBase)
+					else:
+						self.add_tutorial_doc(fileCompleteName, pathBase)
 	
 	##
 	## @brief Add a documentation file at the parsing system
 	## @param[in] filename File To add at the parsing element system.
+	## @param[in] outPath output system file.
 	## @return True if no error occured, False otherwise
 	##
-	def add_file_doc(self, filename):
+	def add_file_doc(self, filename, outPath):
 		debug.debug("adding file in documantation : '" + filename + "'");
-		self.listDocFile.append(filename)
+		self.listDocFile.append([filename, outPath])
+	
+	##
+	## @brief Add a documentation file at the parsing system
+	## @param[in] filename File To add at the parsing element system.
+	## @param[in] outPath output system file.
+	## @return True if no error occured, False otherwise
+	##
+	def add_tutorial_doc(self, filename, outPath):
+		debug.debug("adding file in documantation : '" + filename + "'");
+		self.listTutorialFile.append([filename, outPath])
 	
 	##
 	## @brief Add a file at the parsing system

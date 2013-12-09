@@ -443,8 +443,27 @@ def generate(myDoc, outFolder) :
 		
 		file.close()
 	
-	for docInputName in myDoc.listDocFile :
-		codeBB.transcode_file(docInputName, docInputName+".html")
+	for docInputName,outpath in myDoc.listDocFile :
+		debug.printElement("doc", myDoc.moduleName, "<==", docInputName)
+		outputFileName = outFolder + "/" + outpath.replace('/','_') +".html"
+		debug.debug("output file : " + outputFileName)
+		lutinTools.CreateDirectoryOfFile(outputFileName)
+		inData = lutinTools.FileReadData(docInputName)
+		if inData == "":
+			continue
+		outData = genericHeader + codeBB.transcode(inData) + genericFooter
+		lutinTools.FileWriteData(outputFileName, outData)
+	
+	for docInputName,outpath in myDoc.listTutorialFile :
+		debug.printElement("tutorial", myDoc.moduleName, "<==", docInputName)
+		outputFileName = outFolder + "/" + outpath+".html"
+		debug.debug("output file : " + outputFileName)
+		lutinTools.CreateDirectoryOfFile(outputFileName)
+		inData = lutinTools.FileReadData(docInputName)
+		if inData == "":
+			continue
+		outData = genericHeader + codeBB.transcode(inData) + genericFooter
+		lutinTools.FileWriteData(outputFileName, outData)
 
 
 

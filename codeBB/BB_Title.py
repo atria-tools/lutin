@@ -18,23 +18,23 @@ import re
 def transcode(value):
 	
 	value = re.sub(r'\n======(.*?)======',
-	               r'<h5>\1</h5>',
+	               r'\n<h5>\1</h5>',
 	               value)
 	
 	value = re.sub(r'\n=====(.*?)=====',
-	               r'<h4>\1</h4>',
+	               r'\n<h4>\1</h4>',
 	               value)
 	
 	value = re.sub(r'\n====(.*?)====',
-	               r'<h3>\1</h3>',
+	               r'\n<h3>\1</h3>',
 	               value)
 	
 	value = re.sub(r'\n===(.*?)===',
-	               r'<h2>\1</h2>',
+	               r'\n<h2>\1</h2>',
 	               value)
 	
 	value = re.sub(r'\n==(.*?)==',
-	               r'<h1>\1</h1>',
+	               r'\n<h1>\1</h1>',
 	               '\n' + value)
 	# todo : remove \n at the start of the file ...
 	

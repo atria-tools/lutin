@@ -24,7 +24,7 @@ def transcode(value):
 	value = BB_Title.transcode(value)
 	value = BB_Text.transcode(value)
 	value = BB_IndentAndDot.transcode(value)
-	#value = BB_Link.transcode(value)
+	value = BB_Link.transcode(value)
 	value = BB_Image.transcode(value)
 	value = BB_Table.transcode(value)
 	value = BB_Code.transcode(value)

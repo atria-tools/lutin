@@ -17,10 +17,6 @@ def transcode(value):
 	               r'\n',
 	               value)
 	
-	value = re.sub(r'\n\n\n',
-	               r'<br/><br/>',
-	               value)
-	
 	value = re.sub(r'\n\n',
 	               r'<br/>',
 	               value)

@@ -15,12 +15,13 @@ def transcode(value):
 	
 	value = re.sub(r'\/\*(.*?)\*\/',
 	               r'',
-	               value)
-	
+	               value,
+	               flags=re.DOTALL)
+	"""
 	value = re.sub(r'\/\/(.*?)\n',
 	               r'',
 	               value)
-	
+	"""
 	return value
 
 

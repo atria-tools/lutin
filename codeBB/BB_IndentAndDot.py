@@ -47,13 +47,15 @@ def transcode(value):
 	value = re.sub(r'\n:',
 	               r'\n:INDENT:',
 	               value)
-	p = re.compile('((\:INDENT\:(.*?)\n)*)')
+	p = re.compile('((\:INDENT\:(.*?)\n)*)',
+	               flags=re.DOTALL)
 	value = p.sub(replace_wiki_identation,
 	              value)
 	
 	value = re.sub(r'\*\*(.*?)\n',
 	               r'<li>\1</li>',
-	               value)
+	               value,
+	               flags=re.DOTALL)
 	
 	return value
 
@@ -61,7 +63,7 @@ def transcode(value):
 def replace_wiki_identation(match):
 	if match.group() == "":
 		return ""
-	debug.info("plop: " + str(match.group()))
+	#debug.verbose("plop: " + str(match.group()))
 	value  = "<ul>"
 	value += re.sub(r':INDENT:',
 	               r'',

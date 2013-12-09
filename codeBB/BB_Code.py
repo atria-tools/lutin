@@ -16,11 +16,13 @@ import re
 ## @return Transformed string.
 ##
 def transcode(value):
+	#value = re.sub(r'\[code(( |\t|\n|\r)+style=(.*))?\](.*?)\[/code\]',
+	value = re.sub(r'\[code(( |\t|\n|\r)+style=(.*?))?\](.*?)\[/code\]',
+	               r'<pre>\4</pre>',
+	               value,
+	               flags=re.DOTALL)
 	
-	value = re.sub(r'\[code=(\#[0-9A-F]{6}|[a-z\-]+)\](.*?)\[/color\]',
-	               r'<span style="color: \1;">\2</span>',
-	               value)
-	
+	# TODO : remove the basic indentation of the element (to have a better display in the text tutorial ...
 	return value
 
 
