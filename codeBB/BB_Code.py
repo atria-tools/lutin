@@ -2,6 +2,7 @@
 import lutinDebug as debug
 import sys
 import lutinTools
+import codeHL
 import re
 
 
@@ -18,11 +19,19 @@ import re
 def transcode(value):
 	#value = re.sub(r'\[code(( |\t|\n|\r)+style=(.*))?\](.*?)\[/code\]',
 	value = re.sub(r'\[code(( |\t|\n|\r)+style=(.*?))?\](.*?)\[/code\]',
-	               r'<pre>\4</pre>',
+	               replace_code, #r'<pre>\4</pre>',
 	               value,
 	               flags=re.DOTALL)
 	
 	# TODO : remove the basic indentation of the element (to have a better display in the text tutorial ...
 	return value
 
+
+
+def replace_code(match):
+	if match.group() == "":
+		return ""
+	#debug.info("plop: " + str(match.groups()))
+	value = codeHL.transcode(match.groups()[2], match.groups()[3])
+	return '<pre>' + value + '</pre>'
 

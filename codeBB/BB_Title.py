@@ -7,6 +7,7 @@ import re
 
 ##
 ## @brief Transcode .
+##      =?=Page Title=?=
 ##      ==Title 1==
 ##      ===Title 2===
 ##      ====Title 3====
@@ -16,6 +17,10 @@ import re
 ## @return Transformed string.
 ##
 def transcode(value):
+	
+	value = re.sub(r'=\?=(.*?)=\?=',
+	               r'<h1><center>\1</center></h1>',
+	               value)
 	
 	value = re.sub(r'\n======(.*?)======',
 	               r'\n<h5>\1</h5>',
@@ -36,7 +41,8 @@ def transcode(value):
 	value = re.sub(r'\n==(.*?)==',
 	               r'\n<h1>\1</h1>',
 	               '\n' + value)
-	# todo : remove \n at the start of the file ...
+	
+	value = value[1:]
 	
 	return value
 

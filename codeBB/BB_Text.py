@@ -22,6 +22,7 @@ import re
 ## @return Transformed string.
 ##
 def transcode(value):
+	
 	value = re.sub(r'\[b\](.*?)\[/b\]',
 	               r'<span style="font-weight: bold;">\1</span>',
 	               value,

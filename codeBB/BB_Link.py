@@ -31,6 +31,19 @@ def transcode(value):
 	value = re.sub(r'\[lib\[(.*?) \| (.*?)\]\]',
 	               r'<a href="../\1">\2</a>',
 	               value)
+	
+	value = re.sub(r'\[doc\[(.*?) \| (.*?)\]\]',
+	               r'<a href="\1.html">\2</a>',
+	               value)
+	
+	value = re.sub(r'\[tutorial\[(.*?) \| (.*?)\]\]',
+	               r'<a href="tutorial_\1.html">\2</a>',
+	               value)
+	
+	value = re.sub(r'\[class\[(.*?)\]\]',
+	               replace_link_class,
+	               value)
+	
 	"""
 	p = re.compile('\[\[(.*?)(|(.*?))\]\])',
 	               flags=re.DOTALL)
@@ -51,3 +64,14 @@ def replace_link(match):
 	value += "</ul>"
 	return transcode(value)
 """
+
+def replace_link_class(match):
+	if match.group() == "":
+		return ""
+	#debug.info("plop: " + str(match.group()))
+	className = match.groups()[0]
+	value = re.sub(':', '_', className)
+	return '<a href="' + value + '.html">' + className + '</a>'
+
+
+

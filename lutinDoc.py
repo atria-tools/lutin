@@ -6,6 +6,7 @@ import lutinTools
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/ply/ply/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppHeaderParser/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeBB/")
+sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeHL/")
 import CppHeaderParser
 import lutinDocHtml
 import lutinDocMd

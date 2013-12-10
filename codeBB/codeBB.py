@@ -2,6 +2,7 @@
 import lutinDebug as debug
 import sys
 import lutinTools
+import re
 import BB_Title
 import BB_Text
 import BB_IndentAndDot
@@ -20,6 +21,9 @@ import BB_Specification
 ## @return Transformed string.
 ##
 def transcode(value):
+	# remove html property
+	value = re.sub(r'<', r'&lt;', value)
+	value = re.sub(r'>', r'&gt;', value)
 	value = BB_comment.transcode(value)
 	value = BB_Title.transcode(value)
 	value = BB_Text.transcode(value)
