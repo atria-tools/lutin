@@ -55,8 +55,8 @@ body {
 	text-shadow: 0 1px 0 #ce4213;
 	padding: 10px 20px 10px;
 	margin-left: -20px;
-	overflow:scroll;
-	overflow-x:hidden;
+	//overflow:scroll;
+	//overflow-x:hidden;
 }
 /*
 .navbar ul {

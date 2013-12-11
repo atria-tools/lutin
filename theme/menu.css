@@ -1,0 +1,146 @@
+/* CSS Document */
+
+/*----------------MENU-----------------*/
+div#menu div{
+	margin-top: 0px;
+	background: #6699FF;
+}
+/* permet l'affichage du haut du menu*/
+div#menu h2{
+	color: #000000;
+	FONT-FAMILY: Arial;
+	FONT-SIZE: 9pt;
+	text-align:left;
+	margin: 0;
+	padding: 3px;
+	padding-left: 6px;
+	background: #1a62db;
+}
+div#menu h3{
+	margin: 0;
+	padding: 6px;
+	background: #6699FF;
+}
+
+div#menu a{
+	color: #000000;
+	bgcolor=#6699FF;
+	FONT-FAMILY: Arial;
+	FONT-SIZE: 9pt;
+}
+div#menu li {
+	position: relative;
+	list-style:none;
+	margin:0px;
+	border-bottom: 1px solid #0008ab;
+}
+div#menu li.sousmenu {
+	background: url(sous_menu.gif) 95% 50% no-repeat;
+}
+div#menu li:hover {
+	background: #0008ab;
+}
+div#menu li.sousmenu:hover {
+	background: #0008ab;
+}
+div#menu ul ul {
+	position: absolute;
+	top: 0px;
+}
+
+/*TAILLE PREMIERE COLONNE*/
+div#menu {
+	float: center;
+	width: 200px;
+	text-align:left;
+}
+div#menu ul {
+	margin: 0;
+	padding: 0;
+	width: 200px;
+	background: #6699FF;
+	border: 0px solid;
+}
+div#menu ul ul {
+	left: 199px;
+	display:none;
+	background: #FFFFFF;
+}
+div#menu li a {
+	display: block;
+	padding: 2px 0px 2px 4px;
+	text-decoration: none;
+	width: 191px;
+	border-left: 3px solid #6699FF;
+}
+div#menu form {
+	border-left: 8px solid #6699FF;
+	background: #6699FF;
+	FONT-FAMILY: Arial;
+	margin:0px;
+	FONT-SIZE: 8pt;
+}
+div#menu texte {
+	border-left: 8px solid #6699FF;
+	FONT-FAMILY: Arial;
+	FONT-SIZE: 9pt;
+	font-weight:bold;
+	border-bottom: 1px solid #6699FF;
+}
+
+/*TAILLE DEUXIEME COLONE*/
+
+div#menu ul.niveau1 ul {
+	left: 200px;
+	height: 500px;
+	border: 1px solid #0008ab;
+	background: #1a62db;
+	/*
+	overflow:scroll;
+	overflow-y:auto;
+	overflow-x:hidden;
+	*/
+}
+div#menu ul.niveau1 li {
+	background: #6699FF;
+}
+div#menu ul.niveau1 li.sousmenu:hover ul.niveau2 {
+	width:219px;
+	display:block;
+}
+
+
+
+/*TAILLE TROISIEME COLONNE*/
+div#menu ul.niveau2 ul {
+	left: 219px;
+	height: 500px;
+}
+div#menu ul.niveau2 li a {
+	width: 200px;
+}
+div#menu ul.niveau2 li.sousmenu:hover ul.niveau3 {
+	width:10em;
+	display:block;
+}
+
+/*TAILLE Quatrieme COLONNE*/
+div#menu ul.niveau3 ul {
+	left: 369px;
+	height: 500px;
+}
+div#menu ul.niveau3 li a {
+	width: 200px;
+}
+div#menu ul.niveau3 li.sousmenu:hover ul.niveau4 {
+	width:10em;
+	display:block;
+}
+/*TAILLE DEUXIEME COLONE BIS????*/
+
+/*COULEUR DES BORDURES*/
+div#menu li a:hover {
+	border-left-color: #000ADE;
+	background: #6699FF;
+	font-weight:bold;
+}

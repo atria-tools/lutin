@@ -5,6 +5,7 @@ import lutinTools
 import CppHeaderParser
 import re
 import codeBB
+import collections
 
 global_class_link = {
 	"std::string"    : "http://www.cplusplus.com/reference/string/string/",
@@ -244,9 +245,75 @@ def class_name_to_file_name(className):
 	className = className.replace(" ", "")
 	className += ".html"
 	return className
+"""
+<div id="navigation">
+	<center>
+		<div id="menu">
+			<h2>Le manga</h2>
+			<ul class="niveau1">
+				<li class="sousmenu"><a href="http://127.0.0.1/AMS/Galerie_view/">Galerie</a>
+					<ul class="niveau2">
+						<li><a href="http://127.0.0.1/AMS/Galerie_view/Hunter_X_Hunter">Hunter_X_Hunter</a></li>
+						<li><a href="http://127.0.0.1/AMS/Galerie_view/Negima">Negima</a></li>
+						<li><a href="http://127.0.0.1/AMS/Galerie_view/Shaman_King">Shaman_King</a></li>
+						<li><a href="http://127.0.0.1/AMS/Galerie_view/love_Hina">love_Hina</a></li>
+					</ul>
+				</li>
+				<li class="sousmenu"><a href="http://127.0.0.1/AMS/Wiki_view/Wiki_view/HxH/Accueil">Hunter X Hunter </a>
+					<ul class="niveau2">
+						<li class="sousmenu"> Generalite :</li>
+						<li><a href="http://127.0.0.1/AMS/Wiki_view/HxH/hxh_resumer_general"> Generalite</a></li>
+						<li><a href="http://127.0.0.1/AMS/Wiki_view/HxH/manga/liste_des_tomes"> Les differents tomes  </a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</center>
+</div>
+"""
+
+def addElement(elementList, tree):
+	if elementList[0] in tree.keys():
+		tree[elementList[0]] == addElement(elementList[1:], tree[elementList[0]])
+	else :
+		tree[elementList[0]] == elementList[0]
+		if len(elementList) != 1:
+			tree[elementList[0]] == addElement(elementList[1:], tree[elementList[0]])
+	return tree
+
+def recursively_default_dict():
+	return collections.defaultdict(recursively_default_dict)
+
+def createTree(list):
+	output = []
+	myTree = recursively_default_dict()
+	#myTree['a']['b'] = 'c'
+	for className in sorted(list) :
+		list = className.split("::")
+		if len(list)==1:
+			myTree[list[0]] == className
+		elif len(list)==2:
+			myTree[list[0]][list[1]] == className
+		elif len(list)==3:
+			myTree[list[0]][list[1]][list[2]] == className
+		elif len(list)==4:
+			myTree[list[0]][list[1]][list[2]][list[3]] == className
+		elif len(list)==5:
+			myTree[list[0]][list[1]][list[2]][list[3]][list[4]] == className
+		else:
+			myTree[list[0]][list[1]][list[2]][list[3]][list[4]][list[5]] == className
+		
+		#output.append(className.split("::"))
+		#myTree = addElement(className.split("::"), myTree)
+	#debug.info("plop" + str(myTree))
+	return myTree
+
+def addSub(tree, filterSubNamespace=False):
+	return ""
 
 def generate(myDoc, outFolder) :
 	lutinTools.CopyFile(lutinTools.GetCurrentPath(__file__)+"/theme/base.css", outFolder+"/base.css")
+	lutinTools.CopyFile(lutinTools.GetCurrentPath(__file__)+"/theme/menu.css", outFolder+"/menu.css")
 	# create common header
 	genericHeader  = "<!DOCTYPE html>\n"
 	genericHeader += "<html>\n"
@@ -254,54 +321,116 @@ def generate(myDoc, outFolder) :
 	genericHeader += "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\n"
 	genericHeader += "	<title>" + myDoc.moduleName + " Library</title>\n"
 	genericHeader += "	<link rel=\"stylesheet\" href=\"base.css\">\n"
+	genericHeader += "	<link rel=\"stylesheet\" href=\"menu.css\">\n"
 	genericHeader += "</head>\n"
 	genericHeader += "<body>\n"
 	genericHeader += "	<div class=\"navbar navbar-fixed-top\">\n"
 	genericHeader += "		<div class=\"container\">\n"
 	genericHeader += "			<h1>" + myDoc.moduleName + " Library</h1>\n"
-	#genericHeader += "			<ul>\n"
-	baseNamespace = ""
-	for className in sorted(myDoc.listClass.iterkeys()) :
-		pos = className.find("::")
-		if pos >= 0:
-			namespace = className[:pos]
-			rest = className[pos+2:]
-		else:
-			namespace = ""
-			rest = className
-		if baseNamespace != namespace:
-			if baseNamespace != "":
-				genericHeader += "				</ul>\n"
-			genericHeader += "				<li>" + namespace + "</li>\n"
-			genericHeader += "				<ul>\n"
-			baseNamespace = namespace
-			
-		genericHeader += "				<li><a href=\"" + class_name_to_file_name(className) + "\">" + rest + "</a></li>\n"
-		
-	if baseNamespace != "":
-		genericHeader += "				</ul>\n"
+	genericHeader += '			<div id="menu">\n'
+	genericHeader += '				<h2>' + myDoc.moduleName + '</h2>\n'
+	globalList = []
+	for className in myDoc.listClass.keys() :
+		globalList.append(className)
+	for enumName in myDoc.listEnum.keys() :
+		globalList.append(enumName)
+	# check if all element start wuth the lib namespace (better for interpretations ...)
+	allSartWithModuleName = True
+	for className in sorted(globalList) :
+		if className[:len(myDoc.moduleName)+2] != myDoc.moduleName+"::":
+			allSartWithModuleName = False
+			break
+	myTree = createTree(globalList)
+	for element in sorted(myTree.keys()) :
+		debug.warning("  * " + element)
+		#get elemement
+		subElementTree = myTree[element]
+		for subElement in sorted(subElementTree.keys()) :
+			debug.warning("        " + subElement)
+			#get elemement
+			subSubElementTree = subElementTree[subElement]
+			for subSubElement in sorted(subSubElementTree.keys()) :
+				debug.warning("            " + subSubElement)
 	
-	for enumName in sorted(myDoc.listEnum.iterkeys()) :
-		pos = enumName.find("::")
+	genericHeader +=     '				<ul class="niveau1">\n'
+	if     len(myTree.keys()) == 1 \
+	   and myDoc.moduleName in myTree.keys():
+		myTree = myTree[myDoc.moduleName]
+		# todo : in this case I will create a lib element and set all global element in it, other namespace will have there own entry ...:
+		# ewol
+		#   ewol
+		#   widget
+		#   compositing
+		#   resources
+		#   sys
+	for element in sorted(myTree.keys()) :
+		#get elemement
+		subElementTree = myTree[element]
+		if len(myTree.keys()) != 1:
+			# TODO : ...
+			None
+		if len(subElementTree.keys()) == 0:
+			genericHeader +=         '							<li><a>' + element + '</a></li>\n'
+			continue
+		genericHeader +=     '					<li class="sousmenu"><a>' + element + '</a>\n'
+		genericHeader +=     '						<ul class="niveau2">\n'
+		for subElement in sorted(subElementTree.keys()) :
+			#get elemement
+			subSubElementTree = subElementTree[subElement]
+			debug.warning('len = ' + str(len(subSubElementTree.keys())) + " list" + str(subSubElementTree.keys()))
+			if len(subSubElementTree.keys()) == 0:
+				genericHeader +=         '							<li><a>' + subElement + '</a></li>\n'
+				continue
+			
+			genericHeader +=     '							<li class="sousmenu"><a>' + subElement + '</a>\n'
+			genericHeader +=     '								<ul class="niveau3">\n'
+			for subSubElement in sorted(subSubElementTree.keys()) :
+				#get elemement
+				subSubSubElementTree = subSubElementTree[subSubElement]
+				if len(subSubSubElementTree.keys()) == 0:
+					genericHeader +=         '							<li><a>' + subSubElement + '</a></li>\n'
+					continue
+				genericHeader +=         '							<li><a>****' + subSubElement + '****</a></li>\n'
+			genericHeader +=     '								</ul>\n'
+			genericHeader +=     '							</li>\n'
+		genericHeader +=     '						</ul>\n'
+		genericHeader +=     '					</li>\n'
+	
+	genericHeader +=     '				<ul>\n'
+	"""
+	baseNamespace = ""
+	for className in sorted(globalList) :
+		searchIn = className
+		if allSartWithModuleName == True:
+			searchIn = className[len(myDoc.moduleName)+2:]
+		pos = searchIn.find("::")
 		if pos >= 0:
-			namespace = enumName[:pos]
-			rest = enumName[pos+2:]
+			namespace = searchIn[:pos]
+			rest = searchIn[pos+2:]
 		else:
 			namespace = ""
-			rest = enumName
+			rest = searchIn
 		if baseNamespace != namespace:
 			if baseNamespace != "":
-				genericHeader += "				</ul>\n"
-			genericHeader += "				<li>" + namespace + "</li>\n"
-			genericHeader += "				<ul>\n"
+				genericHeader += '						</ul>\n'
+				genericHeader += '					</li>\n'
+				genericHeader += '				</ul>\n'
+			genericHeader +=     '				<ul class="niveau1">\n'
+			genericHeader +=     '					<li class="sousmenu"><a>' + namespace + '</a>\n'
+			genericHeader +=     '						<ul class="niveau2">\n'
 			baseNamespace = namespace
 			
-		genericHeader += "				<li><a href=\"" + class_name_to_file_name(enumName) + "\">" + rest + "</a></li>\n"
+		genericHeader +=         '							<li><a href="' + class_name_to_file_name(className) + '">' + rest + '</a></li>\n'
 		
 	if baseNamespace != "":
-		genericHeader += "				</ul>\n"
-		
-	#genericHeader += "			</ul>\n"
+		genericHeader +=         '						</ul>\n'
+		genericHeader +=         '					</li>\n'
+		genericHeader +=         '				</ul>\n'
+	genericHeader +=             '			</div>\n'
+	"""
+	genericHeader +=             '			<h3> </h3>\n'
+	genericHeader +=             '		</div>\n'
+	
 	genericHeader += "		</div>\n"
 	genericHeader += "	</div>\n"
 	genericHeader += "	<div class=\"container\" id=\"content\">\n"
@@ -348,19 +477,44 @@ def generate(myDoc, outFolder) :
 			sizefunction = calsulateSizeFunction(function, sizefunction)
 			sizeReturn = calsulateSizeReturn(function, sizeReturn)
 		
+		file.write("<h2>Constructor and Destructor:</h2>\n")
+		file.write("<pre>\n");
+		for function in localClass["methods"]["public"]:
+			if    function['destructor'] \
+			   or function['constructor'] :
+				display_reduct_function(function, file, "+ ", sizeReturn, sizefunction, myDoc)
+		for function in localClass["methods"]["protected"]:
+			if    function['destructor'] \
+			   or function['constructor'] :
+				display_reduct_function(function, file, "# ", sizeReturn, sizefunction, myDoc)
+		for function in localClass["methods"]["private"]:
+			if    function['destructor'] \
+			   or function['constructor'] :
+				display_reduct_function(function, file, "- ", sizeReturn, sizefunction, myDoc)
+		
+		file.write("</pre>\n");
+		
 		file.write("<h2>Synopsis:</h2>\n")
 		# display all functions :
 		# TODO: ...
 		file.write("<pre>\n");
 		for function in localClass["methods"]["public"]:
-			display_reduct_function(function, file, "+ ", sizeReturn, sizefunction, myDoc)
+			if     not function['destructor'] \
+			   and not function['constructor'] :
+				display_reduct_function(function, file, "+ ", sizeReturn, sizefunction, myDoc)
 		for function in localClass["methods"]["protected"]:
-			display_reduct_function(function, file, "# ", sizeReturn, sizefunction, myDoc)
+			if     not function['destructor'] \
+			   and not function['constructor'] :
+				display_reduct_function(function, file, "# ", sizeReturn, sizefunction, myDoc)
 		for function in localClass["methods"]["private"]:
-			display_reduct_function(function, file, "- ", sizeReturn, sizefunction, myDoc)
+			if     not function['destructor'] \
+			   and not function['constructor'] :
+				display_reduct_function(function, file, "- ", sizeReturn, sizefunction, myDoc)
 		file.write("</pre>\n");
 		file.write("\n")
 		file.write("\n")
+		
+		
 		heritage = myDoc.get_heritage_list(className)
 		heritageDown = myDoc.get_down_heritage_list(className)
 		if    len(heritage) > 1 \
