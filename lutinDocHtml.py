@@ -331,8 +331,16 @@ def generate(myDoc, outFolder) :
 	genericHeader += '				<h2>' + myDoc.moduleName + '</h2>\n'
 	globalList = []
 	for className in myDoc.listClass.keys() :
+		element = myDoc.listClass[className]
+		if "doxygen" in element.keys():
+			if element["doxygen"].find("@not-in-doc") >= 0:
+				continue
 		globalList.append(className)
 	for enumName in myDoc.listEnum.keys() :
+		element = myDoc.listEnum[enumName]
+		if "doxygen" in element.keys():
+			if element["doxygen"].find("@not-in-doc") >= 0:
+				continue
 		globalList.append(enumName)
 	# check if all element start wuth the lib namespace (better for interpretations ...)
 	allSartWithModuleName = True
@@ -364,37 +372,47 @@ def generate(myDoc, outFolder) :
 		#   resources
 		#   sys
 	for element in sorted(myTree.keys()) :
+		logicalNamespace = element[0].lower() + element[1:]
+		logicalClass = element[0].upper() + element[1:]
+		# reject class that have the same name of a namespace ==> set it in the namespace ...
+		if logicalNamespace != element: # this is a class :
+			if element in myTree.keys():
+				continue
 		#get elemement
 		subElementTree = myTree[element]
 		if len(myTree.keys()) != 1:
 			# TODO : ...
 			None
 		if len(subElementTree.keys()) == 0:
-			genericHeader +=         '							<li><a>' + element + '</a></li>\n'
+			genericHeader +=            '					<li><a href="' + class_name_to_file_name("ewol::" + element) + '">' + element + '</a></li>\n'
 			continue
-		genericHeader +=     '					<li class="sousmenu"><a>' + element + '</a>\n'
-		genericHeader +=     '						<ul class="niveau2">\n'
+		genericHeader +=                '					<li class="sousmenu"><a>' + element + '</a>\n'
+		genericHeader +=                '						<ul class="niveau2">\n'
+		# check if we checking a namespace with a classe name is availlable ...
+		if logicalNamespace == element:
+			if logicalClass in myTree.keys():
+				genericHeader +=         '							<li><a href="' + class_name_to_file_name("ewol::" + logicalClass) + '">' + logicalClass + '</a></li>\n'
 		for subElement in sorted(subElementTree.keys()) :
 			#get elemement
 			subSubElementTree = subElementTree[subElement]
 			debug.warning('len = ' + str(len(subSubElementTree.keys())) + " list" + str(subSubElementTree.keys()))
 			if len(subSubElementTree.keys()) == 0:
-				genericHeader +=         '							<li><a>' + subElement + '</a></li>\n'
+				genericHeader +=         '							<li><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + '">' + subElement + '</a></li>\n'
 				continue
 			
-			genericHeader +=     '							<li class="sousmenu"><a>' + subElement + '</a>\n'
-			genericHeader +=     '								<ul class="niveau3">\n'
+			genericHeader +=             '							<li class="sousmenu"><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + '">' + subElement + '</a>\n'
+			genericHeader +=             '								<ul class="niveau3">\n'
 			for subSubElement in sorted(subSubElementTree.keys()) :
 				#get elemement
 				subSubSubElementTree = subSubElementTree[subSubElement]
 				if len(subSubSubElementTree.keys()) == 0:
-					genericHeader +=         '							<li><a>' + subSubElement + '</a></li>\n'
+					genericHeader +=     '							<li><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + "::" + subSubElement + '">' + subSubElement + '</a></li>\n'
 					continue
 				genericHeader +=         '							<li><a>****' + subSubElement + '****</a></li>\n'
-			genericHeader +=     '								</ul>\n'
-			genericHeader +=     '							</li>\n'
-		genericHeader +=     '						</ul>\n'
-		genericHeader +=     '					</li>\n'
+			genericHeader +=             '								</ul>\n'
+			genericHeader +=             '							</li>\n'
+		genericHeader +=                 '						</ul>\n'
+		genericHeader +=                 '					</li>\n'
 	
 	genericHeader +=     '				<ul>\n'
 	"""
