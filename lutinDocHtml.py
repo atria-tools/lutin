@@ -348,17 +348,8 @@ def generate(myDoc, outFolder) :
 		if className[:len(myDoc.moduleName)+2] != myDoc.moduleName+"::":
 			allSartWithModuleName = False
 			break
+	# create the class tree ...
 	myTree = createTree(globalList)
-	for element in sorted(myTree.keys()) :
-		debug.warning("  * " + element)
-		#get elemement
-		subElementTree = myTree[element]
-		for subElement in sorted(subElementTree.keys()) :
-			debug.warning("        " + subElement)
-			#get elemement
-			subSubElementTree = subElementTree[subElement]
-			for subSubElement in sorted(subSubElementTree.keys()) :
-				debug.warning("            " + subSubElement)
 	
 	genericHeader +=     '				<ul class="niveau1">\n'
 	if     len(myTree.keys()) == 1 \
@@ -395,7 +386,6 @@ def generate(myDoc, outFolder) :
 		for subElement in sorted(subElementTree.keys()) :
 			#get elemement
 			subSubElementTree = subElementTree[subElement]
-			debug.warning('len = ' + str(len(subSubElementTree.keys())) + " list" + str(subSubElementTree.keys()))
 			if len(subSubElementTree.keys()) == 0:
 				genericHeader +=         '							<li><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + '">' + subElement + '</a></li>\n'
 				continue
