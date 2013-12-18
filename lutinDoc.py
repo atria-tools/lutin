@@ -5,9 +5,11 @@ import lutinTools
 # TODO : Add try of generic input ...
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/ply/ply/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/CppHeaderParser/")
+sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeBB/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeHL/")
 import CppHeaderParser
+import Parse
 import lutinDocHtml
 import lutinDocMd
 import os
@@ -131,6 +133,9 @@ class doc:
 	##
 	def add_file(self, filename):
 		debug.debug("adding file in documantation : '" + filename + "'");
+		plop = Parse.parse_file('/home/edupin/dev/perso/Widget.h')
+		debug.error("parse done");
+		
 		try:
 			metaData = CppHeaderParser.CppHeader(filename)
 		except CppHeaderParser.CppParseError, e:
