@@ -255,7 +255,7 @@ class Target(lutinTarget.Target):
 				tmpFile.write( "\"\n")
 				tmpFile.write( "		          android:icon=\"@drawable/icon\" \n")
 				tmpFile.write( "		          android:hardwareAccelerated=\"true\" \n")
-				tmpFile.write( "		          android:configChanges=\"orientation\"> \n")
+				tmpFile.write( "		          android:configChanges=\"keyboard|keyboardHidden|orientation|screenSize\"> \n")
 				tmpFile.write( "			<intent-filter> \n")
 				tmpFile.write( "				<action android:name=\"android.intent.action.MAIN\" /> \n")
 				tmpFile.write( "				<category android:name=\"android.intent.category.LAUNCHER\" /> \n")
