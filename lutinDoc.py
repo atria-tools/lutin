@@ -8,6 +8,7 @@ sys.path.append(lutinTools.GetCurrentPath(__file__) + "/cppParser/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeBB/")
 sys.path.append(lutinTools.GetCurrentPath(__file__) + "/codeHL/")
 import Parse
+import Node
 import lutinDocHtml
 import lutinDocMd
 import os
@@ -21,6 +22,7 @@ class doc:
 	def __init__(self, moduleName):
 		self.moduleName = moduleName
 		self.listDocFile = []
+		self.structureLib = Node.MainNode("library", moduleName)
 		self.listTutorialFile = []
 		self.listClass = dict()
 		self.listEnum = dict()
@@ -90,6 +92,8 @@ class doc:
 					fileCompleteName = os.path.join(root, filename)
 					debug.debug("    Find a file : '" + fileCompleteName + "'")
 					self.add_file(fileCompleteName)
+		self.structureLib.debug_display()
+		debug.error("ended")
 		if self.pathGlobalDoc != "":
 			for root, dirnames, filenames in os.walk(self.pathGlobalDoc):
 				tmpList = fnmatch.filter(filenames, "*.bb")
@@ -131,6 +135,15 @@ class doc:
 	##
 	def add_file(self, filename):
 		debug.debug("adding file in documantation : '" + filename + "'");
+		
+		#plop = Parse.parse_file('ewol/sources/ewol/context/MacOs/OpenglView.h')
+		#debug.error("parse done");
+		
+		parsedFile = Parse.parse_file(filename)
+		self.structureLib = parsedFile.fusion(self.structureLib)
+		
+		
+	def deprecate(self):
 		plop = Parse.parse_file('Widget.h')
 		debug.error("parse done");
 		

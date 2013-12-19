@@ -5,12 +5,14 @@ import Node
 
 class Type():
 	def __init__(self, stack=[]):
-		if len(stack) == 0:
-			debug.error("Can not parse Type : " + str(stack))
 		self.name = ""
 		self.const = False # the const xxxxx
 		self.reference = False
 		self.constVar = False # the char* const VarName
+		
+		if len(stack) == 0:
+			# None type
+			return
 		if len(stack) == 1:
 			self.name = stack[0]
 			return;
@@ -45,4 +47,8 @@ class Type():
 class TypeVoid(Type):
 	def __init__(self):
 		Type.__init__(self, ['void'])
+
+class TypeNone(Type):
+	def __init__(self):
+		Type.__init__(self)
 

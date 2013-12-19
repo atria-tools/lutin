@@ -5,8 +5,24 @@ import Node
 
 class Variable(Node.Node):
 	def __init__(self, stack=[], file="", lineNumber=0):
+		name = ""
+		# TODO : better manageement for xxx[**][**] element:
+		res = []
+		for element in stack:
+			if element == '[':
+				break
+			else:
+				res.append(element)
+		stack = res
+		
 		if len(stack) < 2:
-			debug.error("Can not parse variable : " + str(stack))
+			if stack[0] == 'void':
+				pass
+			else:
+				debug.error("Can not parse variable : " + str(stack))
+		else:
+			name = stack[len(stack)-1]
+		
 		Node.Node.__init__(self, 'variable', stack[len(stack)-1], file, lineNumber)
 		# force the sublist error  generation ...
 		self.subList = None
@@ -15,6 +31,9 @@ class Variable(Node.Node):
 		self.static = False
 		self.external = False
 		self.volatile = False
+		#empty name ... ==> this is really bad ...
+		if name == "":
+			return
 		
 		if 'static' in stack:
 			self.static = True

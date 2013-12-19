@@ -14,10 +14,13 @@ def concatenate_template(list):
 
 class Class(Node.Node):
 	def __init__(self, stack=[], file="", lineNumber=0):
+		# check input :
 		if len(stack) < 2:
 			debug.error("Can not parse class : " + str(stack))
 			return
 		Node.Node.__init__(self, 'class', stack[1], file, lineNumber)
+		self.subList = []
+		self.access = "private"
 		# heritage list :
 		self.inherit = []
 		if len(stack) == 2:
@@ -30,7 +33,7 @@ class Class(Node.Node):
 			debug.error("error in parsing class : " + str(stack) + " missing ':' at the 3rd position ...")
 		
 		list = concatenate_template(stack[3:])
-		debug.info("inherit : " + str(list))
+		debug.verbose("inherit : " + str(list))
 		access = "private"
 		for element in list:
 			if element in ['private', 'protected', 'public']:
@@ -40,7 +43,7 @@ class Class(Node.Node):
 			else:
 				self.inherit.append({'access' : access, 'class' : element})
 		
-		debug.info("class : " + self.to_str())
+		debug.verbose("class : " + self.to_str())
 	
 	def to_str(self) :
 		ret = "class " + self.name

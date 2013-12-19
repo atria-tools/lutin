@@ -15,6 +15,7 @@ import Union
 import Methode
 import Enum
 import Variable
+import Node
 
 tokens = [
 	'NUMBER',
@@ -114,11 +115,6 @@ lex.lex()
 
 doxygenCommentCache = ""
 
-supportedAccessSpecifier = [
-	'public',
-	'protected',
-	'private'
-]
 
 ##
 ## @brief Join the class name element : ['class', 'Bar', ':', ':', 'Foo'] -> ['class', 'Bar::Foo']
@@ -168,21 +164,20 @@ class parse_file():
 			ret += "    "
 		return ret
 	
+	def fusion(self, baseNode):
+		baseNode.fusion(self.mainNode)
+		return baseNode
+	
 	def __init__(self, fileName):
-		self.m_classes = []
+		self.mainNode = Node.MainNode("main-node", "tmp")
 		self.m_elementParseStack = []
-		debug.info("Parse File tod document : '" + fileName + "'")
+		debug.debug("Parse file : '" + fileName + "'")
 		
 		self.headerFileName = fileName
 		
 		self.anon_union_counter = [-1, 0]
 		# load all the file data :
 		headerFileStr = lutinTools.FileReadData(fileName)
-		
-		# Make sure supportedAccessSpecifier are sane
-		for i in range(0, len(supportedAccessSpecifier)):
-			if " " not in supportedAccessSpecifier[i]: continue
-			supportedAccessSpecifier[i] = re.sub("[ ]+", " ", supportedAccessSpecifier[i]).strip()
 		
 		# Strip out template declarations
 		# TODO : What is the real need ???
@@ -193,8 +188,12 @@ class parse_file():
 		headerFileStr = re.sub("\r", "", headerFileStr)
 		# TODO : Can generate some error ...
 		headerFileStr = re.sub("\#if 0(.*?)(\#endif|\#else)", "", headerFileStr, flags=re.DOTALL)
+		headerFileafter = re.sub("\@interface(.*?)\@end", "", headerFileStr, flags=re.DOTALL)
+		if headerFileStr != headerFileafter :
+			debug.debug(" Objective C interface ... ==> not supported")
+			return
 		
-		debug.debug(headerFileStr)
+		debug.verbose(headerFileStr)
 
 		# Change multi line #defines and expressions to single lines maintaining line nubmers
 		matches = re.findall(r'(?m)^(?:.*\\\n)+.*$', headerFileStr)
@@ -278,7 +277,7 @@ class parse_file():
 			elif tok.type == 'CLOSE_BRACE':
 				if len(self.nameStack) != 0:
 					if self.previous_is('enum') == True:
-						debug.info(self.gen_debug_space() + "enum list... : " + str(self.nameStack));
+						self.brace_type_append('enum list', self.nameStack);
 					else:
 						debug.warning(self.gen_debug_space() + "end brace DROP : " + str(self.nameStack));
 				self.stack = []
@@ -325,7 +324,7 @@ class parse_file():
 			      or tok.type == 'CHAR_LITERAL':
 				self.nameStack.append(tok.value)
 			elif tok.type == 'COLON':
-				if self.nameStack[0] in ['private', 'protected', 'public']:
+				if self.nameStack[0] in Node.accessList:
 					debug.debug(self.gen_debug_space() + "change visibility : " + self.nameStack[0]);
 					self.brace_type_change_access(self.nameStack[0])
 					self.nameStack = []
@@ -336,7 +335,7 @@ class parse_file():
 				if len(self.nameStack) != 0:
 					self.nameStack = create_compleate_class_name(self.nameStack)
 					if is_a_function(self.nameStack):
-						debug.info(self.gen_debug_space() + "function : " + str(self.nameStack));
+						self.brace_type_append('function', self.nameStack);
 					elif 'namespace' in self.nameStack:
 						debug.debug(self.gen_debug_space() + "find a namespace DECLARATION : " + str(self.nameStack));
 					elif 'class' in self.nameStack:
@@ -351,17 +350,23 @@ class parse_file():
 						debug.debug(self.gen_debug_space() + "find a union     DECLARATION : " + str(self.nameStack));
 					else:
 						if self.previous_is('enum') == True:
-							debug.info(self.gen_debug_space() + "enum list : " + str(self.nameStack));
+							self.brace_type_append('enum list', self.nameStack);
 						else:
 							# TODO : Check if it is true in all case : 
 							self.brace_type_append('variable', self.nameStack);
 							#debug.warning(self.gen_debug_space() + "semicolumn : " + str(self.nameStack));
 				self.stack = []
 				self.nameStack = []
+		#self.debug_display();
+	
+	def debug_display(self):
+		debug.info("Debug display :")
+		self.mainNode.debug_display(1)
 	
 	def create_element(self, type, stack):
 		ret = None
-		if type == 'empty':
+		if    type == 'empty' \
+		   or type == 'enum list':
 			pass
 		elif type == 'namespace':
 			ret = Namespace.Namespace(stack, self.headerFileName, self.curLine)
@@ -386,46 +391,75 @@ class parse_file():
 		return ret
 	
 	def brace_type_push(self, type, stack):
-		debug.info(self.gen_debug_space() + "find a <<" + type + ">> : " + str(stack));
+		debug.debug(self.gen_debug_space() + "find a <<" + type + ">> : " + str(stack));
 		myClassElement = self.create_element(type, stack)
 		element = { 'type' : type,
 		            'stack' : stack,
-		            'access' : None,
 		            'node' : myClassElement
 		          }
-		if type == 'class':
-			element['access'] = "private"
-		elif type == 'struct':
-			element['access'] = "public"
 		self.braceDepthType.append(element)
 		#debug.info ("append : " + str(element))
 	
+	def brace_type_append_current(self, element, id = -50):
+		if id == -50:
+			id = len(self.braceDepthType)-1
+		if id >= 0:
+			while self.braceDepthType[id]['node'] == None:
+				# special case for empty brace, just add it to the upper
+				id -=1
+				if id < 0:
+					break;
+		if id < 0:
+			self.mainNode.append(element)
+		else:
+			self.braceDepthType[id]['node'].append(element)
+	
 	def brace_type_append(self, type, stack):
-		debug.info(self.gen_debug_space() + " append a <<" + type + ">> : " + str(stack));
+		debug.debug(self.gen_debug_space() + " append a <<" + type + ">> : " + str(stack));
 		lastType = self.get_last_type()
 		newType = self.create_element(type, stack)
-		if newType == None:
-			debug.info("TODO : Parse the special type")
+		if newType != None:
+			self.brace_type_append_current(newType)
 			return
-		if len(self.braceDepthType) == 0:
-			debug.info("TODO : Append in glocal directly ...")
+		# enum sub list:
+		if     lastType == 'enum' \
+		   and type == 'enum list':
+			id = len(self.braceDepthType)-1
+			self.braceDepthType[id]['node'].enum_append(stack)
 			return
-		self.braceDepthType[len(self.braceDepthType)-1]['node'].append(newType)
+		debug.info("TODO : Parse the special type")
 	
 	def brace_type_pop(self):
+		id = len(self.braceDepthType)-1
+		if id < 0:
+			debug.warning("Try to pop the stack with No more element ...")
+			return
+		if self.braceDepthType[id]['node'] == None:
+			# nothing to add at the upper ...
+			pass
+		else:
+			# add it on the previous
+			self.brace_type_append_current(self.braceDepthType[id]['node'], id-1)
 		self.braceDepthType.pop()
 	
 	def brace_type_change_access(self, newOne):
-		if len(self.braceDepthType) == 0:
-			debug.error("set access in nothing ... ")
-			return
-		if newOne not in supportedAccessSpecifier:
+		if newOne not in Node.accessList:
 			debug.error("unknow access type : " + newOne)
 			return
-		if self.braceDepthType[len(self.braceDepthType)-1]['access'] == None:
-			debug.error("Can not set access in other as : 'class' or 'struct' :" + str(self.braceDepthType[len(self.braceDepthType)-1]))
-			return
-		self.braceDepthType[len(self.braceDepthType)-1]['access'] = newOne
+		id = len(self.braceDepthType)-1
+		if id >= 0:
+			while self.braceDepthType[id]['node'] == None:
+				# special case for empty brace, just add it to the upper
+				id -=1
+				if id < 0:
+					break;
+		if id < 0:
+			debug.warning("can not change the main access on the library")
+		else:
+			if self.braceDepthType[id]['node'].get_access() == None:
+				debug.error("Can not set access in other as : 'class' or 'struct' :" + str(self.braceDepthType[id]))
+				return
+			self.braceDepthType[id]['node'].set_access(newOne)
 	
 	def previous_is(self, type):
 		if self.get_last_type() == type:
@@ -441,6 +475,17 @@ def is_a_function(stack) :
 	# in a function we need to have functionName + ( + )
 	if len(stack) < 3:
 		return False
+	if ':' in stack:
+		res = []
+		for element in stack:
+			if element != ':':
+				res.append(element)
+			else:
+				break
+		stack = res
+	if     stack[len(stack)-2] == '=' \
+	   and stack[len(stack)-1] == '0':
+		stack = stack[:len(stack)-2]
 	#can end with 2 possibilities : ')', 'const' or ')'
 	if    stack[len(stack)-1] == ')' \
 	   or (     stack[len(stack)-2] == ')' \
