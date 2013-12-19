@@ -1,24 +1,15 @@
 #!/usr/bin/python
-try :
-	# normal install module
-	import ply.lex as lex
-except ImportError :
-	# local module
-	import lex
-import os
-import sys
-import re
-
+import lutinDebug as debug
 import Node
 
-import inspect
-
-
-class Enum(Node):
-	def __init__(self):
-		self.name = libName
-		
-		#List is contituated of 3 element : {'name':"plop", 'value':5, 'doc'=""}, ...]
-		self.list = []
-		
+class Enum(Node.Node):
+	def __init__(self, stack=[], file="", lineNumber=0):
+		name = ""
+		Node.Node.__init__(self, 'enum', name, file, lineNumber)
+		# CPP section:
+		self.listElement = []
 	
+	def to_str(self) :
+		return "enum " + self.name + " { ... };"
+		
+

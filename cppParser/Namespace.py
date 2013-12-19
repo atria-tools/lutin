@@ -1,29 +1,16 @@
 #!/usr/bin/python
-try :
-	# normal install module
-	import ply.lex as lex
-except ImportError :
-	# local module
-	import lex
-import os
-import sys
-import re
+import lutinDebug as debug
+import Node
 
-import inspect
-
-class Namespace():
-	def __init__(self):
-		self.name = ""
-		# CPP section:
-		self.namespaces = []
-		self.classes = []
-		# C section:
-		self.structs = []
-		self.variables = []
-		self.methodes = []
-		self.unions = []
-		self.types = []
+class Namespace(Node.Node):
+	def __init__(self, stack=[], file="", lineNumber=0):
+		if len(stack) != 2:
+			debug.error("Can not parse namespace : " + str(stack))
+		Node.Node.__init__(self, 'namespace', stack[1], file, lineNumber)
+		
+		debug.verbose("find class : " + self.to_str())
 	
 	def to_str(self) :
-		return ""
+		return "namespace " + self.name + " { ... };"
+		
 

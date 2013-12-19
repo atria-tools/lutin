@@ -1,10 +1,14 @@
 #!/usr/bin/python
-try :
-	# normal install module
-	import ply.lex as lex
-except ImportError :
-	# local module
-	import lex
-import os
-import sys
-import re
+import lutinDebug as debug
+import Node
+
+class Union(Node.Node):
+	def __init__(self, stack=[], file="", lineNumber=0):
+		name = ""
+		Node.Node.__init__(self, 'union', name, file, lineNumber)
+		self.list = []
+	
+	def to_str(self) :
+		return "union " + self.name + " { ... };"
+		
+

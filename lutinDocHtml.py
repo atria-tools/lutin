@@ -2,7 +2,7 @@
 import lutinDebug as debug
 import sys
 import lutinTools
-import CppHeaderParser
+#import CppHeaderParser
 import re
 import codeBB
 import collections

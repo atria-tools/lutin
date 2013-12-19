@@ -1,23 +1,18 @@
-#!/usr/bin/python
-try :
-	# normal install module
-	import ply.lex as lex
-except ImportError :
-	# local module
-	import lex
-import os
-import sys
-import re
+##!/usr/bin/python
+import lutinDebug as debug
+import Node
+import Type
 
-
-
-class Methode():
-	def __init__(self):
+class Methode(Node.Node):
+	def __init__(self, stack=[], file="", lineNumber=0):
+		name = ""
+		Node.Node.__init__(self, 'methode', name, file, lineNumber)
 		self.name = ""
 		self.returnType = Type.TypeVoid()
 		self.virtual = False # only for C++
 		self.static = False
 		self.inline = False
+		self.const = False # the end of line cont methode is sont for the class ...
 		self.doc = None
 		self.variable = None
 		self.visibility = "private" # only for C++ : "public" "protected" "private"
@@ -36,5 +31,7 @@ class Methode():
 		ret += "("
 		# ...
 		ret += ")"
+		if self.const == True:
+			ret += " const"
 		return ret
 

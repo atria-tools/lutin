@@ -17,7 +17,9 @@ class Target(lutinTarget.Target):
 			sys.path.append("c:\\MinGW\\bin" )
 			os.environ['PATH'] += ";c:\\MinGW\\bin\\"
 		else:
-			cross = "i586-mingw32msvc-"
+			#cross = "i586-mingw32msvc-"
+			cross = "x86_64-w64-mingw32-"
+			#cross = "i686-w64-mingw32-"
 		
 		if typeCompilator!="gcc":
 			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
