@@ -84,11 +84,35 @@ class Node():
 		else:
 			self.subList.append({'access' : self.access, 'node' : newSubElement})
 	
+	##
 	## @ brief only for namespace :
+	## 
+	##
 	def fusion(self, addedElement):
 		for element in addedElement.subList:
 			self.append(element['node'])
 	
+	##
+	## @brief Get the list of all specify type
+	## @param[in] type Type requested ['namespace', 'class', 'struct', 'methode', 'enum', 'define', 'union', 'variable', 'constructor', 'destructor'] (can be a list)
+	## @param[in] sorted Request to sort the return list.
+	## @return The requested list or []
+	##
+	def get_all_sub_type(self, type='all', sorted = False):
+		if type == 'all':
+			return self.subList
+		if isinstance(type, list) == False:
+			type = [type]
+		if self.subList == None:
+			return []
+		ret = []
+		for element in self.subList:
+			if element['node'].get_node_type() in type:
+				ret.append(element)
+		if sorted == True:
+			# TODO : Sorted the list ...
+			pass
+		return ret
 
 
 

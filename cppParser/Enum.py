@@ -33,10 +33,13 @@ class Enum(Node.Node):
 		if len(tmp) != 0:
 			subList.append(tmp)
 		
-		debug.verbose(" TODO : Need to append enum : " + str(subList))
-		
-		# TODO : Set the value at the enum ...
+		#debug.verbose(" TODO : Need to append enum : " + str(subList))
 		for element in subList:
-			self.listElement.append(element[0])
+			value = ""
+			if len(element) > 2:
+				if element[1] == '=':
+					for tmp in element[2:]:
+						value += tmp
+			self.listElement.append({'name' : element[0], 'value' : value})
 		
-		debug.info("enum list : " + str(self.listElement))
+		debug.verbose("enum list : " + str(self.listElement))

@@ -24,11 +24,6 @@ class doc:
 		self.listDocFile = []
 		self.structureLib = Node.MainNode("library", moduleName)
 		self.listTutorialFile = []
-		self.listClass = dict()
-		self.listEnum = dict()
-		self.listVariable = dict()
-		self.listFunction = dict()
-		self.listNamepsaces = dict()
 		self.target = None
 		self.webSite = ""
 		self.pathParsing = ""
@@ -92,8 +87,8 @@ class doc:
 					fileCompleteName = os.path.join(root, filename)
 					debug.debug("    Find a file : '" + fileCompleteName + "'")
 					self.add_file(fileCompleteName)
-		self.structureLib.debug_display()
-		debug.error("ended")
+		# display the hierarchie of all the class and namespace ...
+		#self.structureLib.debug_display()
 		if self.pathGlobalDoc != "":
 			for root, dirnames, filenames in os.walk(self.pathGlobalDoc):
 				tmpList = fnmatch.filter(filenames, "*.bb")
@@ -136,58 +131,8 @@ class doc:
 	def add_file(self, filename):
 		debug.debug("adding file in documantation : '" + filename + "'");
 		
-		#plop = Parse.parse_file('ewol/sources/ewol/context/MacOs/OpenglView.h')
-		#debug.error("parse done");
-		
 		parsedFile = Parse.parse_file(filename)
 		self.structureLib = parsedFile.fusion(self.structureLib)
-		
-		
-	def deprecate(self):
-		plop = Parse.parse_file('Widget.h')
-		debug.error("parse done");
-		
-		try:
-			metaData = CppHeaderParser.CppHeader(filename)
-		except CppHeaderParser.CppParseError, e:
-			debug.warning(" can not parse the file: '" + filename + "' error : " + str(e))
-			return False
-		
-		#debug.info(str(metaData.enums))
-		
-		# add all classes :
-		for element in metaData.classes:
-			localClass = metaData.classes[element]
-			if localClass['namespace'] == '':
-				className = localClass['name']
-			else:
-				className = localClass['namespace'] + "::" + localClass['name']
-			if className in self.listClass.keys():
-				debug.warning("Might merge class : '" + className + "' file : " + filename)
-			else:
-				self.listClass[className] = localClass
-		
-		# add all enums:
-		for localEnum in metaData.enums:
-			if "name" not in localEnum.keys():
-				continue
-			if localEnum["namespace"] == "":
-				enumName = localEnum["name"]
-			else:
-				enumName = localEnum["namespace"] + "::" + localEnum['name']
-				enumName = enumName.replace("::::", "::")
-			if enumName in self.listEnum.keys():
-				debug.warning("Might merge enum : '" + enumName + "' file : " + filename)
-			else:
-				self.listEnum[enumName] = localEnum
-		
-		# add all namaspace:
-		
-		# add all namespaces:
-		
-		# add all global vars:
-		
-		# add all global function:
 		
 		return True
 	
@@ -211,6 +156,9 @@ class doc:
 			return False
 		self.target = None
 		return True
+	
+	def get_base_doc_node(self):
+		return self.structureLib
 	
 	##
 	## @brief Get the heritage list (parent) of one element.

@@ -311,134 +311,133 @@ def createTree(list):
 def addSub(tree, filterSubNamespace=False):
 	return ""
 
-def generate(myDoc, outFolder) :
+def generate_menu(element, namespaceStack=[], level=1):
+	listBase = element.get_all_sub_type(['namespace'])
+	if len(listBase) == 0:
+		return ""
+	ret = ""
+	ret += '<ul class="niveau' + str(level) + '">\n'
+	for element in listBase:
+		namespaceStack.append(element['node'].get_name())
+		retTmp = generate_menu(element['node'], namespaceStack, level+1)
+		namespaceStack.pop()
+		if retTmp != "":
+			subMenu = ' class="sousmenu"'
+		else:
+			subMenu = ''
+		ret += '	<li' + subMenu + '>' + generate_link(element['node'], namespaceStack) + '\n'
+		ret += retTmp
+		ret += '	</li>\n'
+	ret += '</ul>\n'
+	return ret
+
+def generate_html_page_name(element, namespaceStack):
+	link = ""
+	for name in namespaceStack:
+		link += name + "__"
+	return element.get_node_type() + "_" + link + element.get_name() + '.html'
+
+def generate_name(element, namespaceStack):
+	link = ""
+	for name in namespaceStack:
+		link += name + "::"
+	return element.get_node_type() + ": " + link + element.get_name()
+
+
+def generate_link(element, namespaceStack):
+	return '<a href="' + generate_html_page_name(element, namespaceStack) + '">' + element.get_name() + '</a>'
+
+def generate_stupid_index_page(outFolder, header, footer, myLutinDoc):
+	# create index.hml : 
+	filename = outFolder + "/index.html"
+	lutinTools.CreateDirectoryOfFile(filename);
+	file = open(filename, "w")
+	file.write(header)
+	file.write("<h1>" + myLutinDoc.get_base_doc_node().get_name() + "</h1>");
+	file.write("<br/>");
+	file.write("TODO : Main page ...");
+	file.write("<br/>");
+	file.write("<br/>");
+	file.write(footer)
+	file.close();
+
+def generate_page(outFolder, header, footer, element, namespaceStack=[]):
+	if element.get_node_type() in ['library', 'application', 'namespace', 'class', 'struct', 'enum', 'union']:
+		listBase = element.get_all_sub_type(['library', 'application', 'namespace', 'class', 'struct', 'enum', 'union'])
+		for elem in listBase:
+			if element.get_node_type() in ['namespace', 'class', 'struct']:
+				namespaceStack.append(element.get_name())
+				generate_page(outFolder, header, footer, elem['node'], namespaceStack)
+				namespaceStack.pop()
+			else:
+				generate_page(outFolder, header, footer, elem['node'], namespaceStack)
+	
+	
+	filename = outFolder + '/' + generate_html_page_name(element, namespaceStack)
+	lutinTools.CreateDirectoryOfFile(filename);
+	file = open(filename, "w")
+	file.write(header)
+	file.write("<h1>" + generate_name(element, namespaceStack) + "</h1>");
+	if element.get_node_type() == 'library':
+		file.write("TODO : the page ...");
+	elif element.get_node_type() == 'application':
+		file.write("TODO : the page ...");
+	elif element.get_node_type() == 'namespace':
+		file.write("TODO : the page ...");
+	elif element.get_node_type() == 'class':
+		file.write("<h2>Constructor and Destructor:</h2>\n")
+		file.write("<pre>\n");
+		file.write("</pre>\n");
+		file.write("<br/>\n")
+		
+		file.write("<h2>Synopsis:</h2>\n")
+		file.write("<pre>\n");
+		file.write("</pre>\n");
+		file.write("<br/>\n")
+		
+		# display all functions :
+		file.write("<h2>Detail:<h2>\n")
+		
+		file.write("TODO : the page ...");
+	elif element.get_node_type() == 'struct':
+		file.write("TODO : the page ...");
+	elif element.get_node_type() == 'enum':
+		file.write("TODO : the page ...");
+	elif element.get_node_type() == 'union':
+		file.write("TODO : the page ...");
+	else:
+		# not in a specific file ...
+		debug.warning("might not appear here :'" + element.get_node_type() + "' = '" + element.get_name() + "'")
+		pass
+	file.write(footer)
+	file.close();
+	
+
+
+
+
+def generate(myLutinDoc, outFolder) :
+	myDoc = myLutinDoc.get_base_doc_node()
 	lutinTools.CopyFile(lutinTools.GetCurrentPath(__file__)+"/theme/base.css", outFolder+"/base.css")
 	lutinTools.CopyFile(lutinTools.GetCurrentPath(__file__)+"/theme/menu.css", outFolder+"/menu.css")
 	# create common header
-	genericHeader  = "<!DOCTYPE html>\n"
-	genericHeader += "<html>\n"
-	genericHeader += "<head>\n"
-	genericHeader += "	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0\">\n"
-	genericHeader += "	<title>" + myDoc.moduleName + " Library</title>\n"
-	genericHeader += "	<link rel=\"stylesheet\" href=\"base.css\">\n"
-	genericHeader += "	<link rel=\"stylesheet\" href=\"menu.css\">\n"
-	genericHeader += "</head>\n"
-	genericHeader += "<body>\n"
-	genericHeader += "	<div class=\"navbar navbar-fixed-top\">\n"
-	genericHeader += "		<div class=\"container\">\n"
-	genericHeader += "			<h1>" + myDoc.moduleName + " Library</h1>\n"
+	genericHeader  = '<!DOCTYPE html>\n'
+	genericHeader += '<html>\n'
+	genericHeader += '<head>\n'
+	genericHeader += '	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">\n'
+	genericHeader += '	<title>' + myDoc.get_name() + ' Library</title>\n'
+	genericHeader += '	<link rel="stylesheet" href="base.css">\n'
+	genericHeader += '	<link rel="stylesheet" href="menu.css">\n'
+	genericHeader += '</head>\n'
+	genericHeader += '<body>\n'
+	genericHeader += '	<div class="navbar navbar-fixed-top">\n'
+	genericHeader += '		<div class="container">\n'
+	genericHeader += '			<h1>' + myDoc.get_name() + ' Library</h1>\n'
 	genericHeader += '			<div id="menu">\n'
-	genericHeader += '				<h2>' + myDoc.moduleName + '</h2>\n'
-	globalList = []
-	for className in myDoc.listClass.keys() :
-		element = myDoc.listClass[className]
-		if "doxygen" in element.keys():
-			if element["doxygen"].find("@not-in-doc") >= 0:
-				continue
-		globalList.append(className)
-	for enumName in myDoc.listEnum.keys() :
-		element = myDoc.listEnum[enumName]
-		if "doxygen" in element.keys():
-			if element["doxygen"].find("@not-in-doc") >= 0:
-				continue
-		globalList.append(enumName)
-	# check if all element start wuth the lib namespace (better for interpretations ...)
-	allSartWithModuleName = True
-	for className in sorted(globalList) :
-		if className[:len(myDoc.moduleName)+2] != myDoc.moduleName+"::":
-			allSartWithModuleName = False
-			break
-	# create the class tree ...
-	myTree = createTree(globalList)
-	
-	genericHeader +=     '				<ul class="niveau1">\n'
-	if     len(myTree.keys()) == 1 \
-	   and myDoc.moduleName in myTree.keys():
-		myTree = myTree[myDoc.moduleName]
-		# todo : in this case I will create a lib element and set all global element in it, other namespace will have there own entry ...:
-		# ewol
-		#   ewol
-		#   widget
-		#   compositing
-		#   resources
-		#   sys
-	for element in sorted(myTree.keys()) :
-		logicalNamespace = element[0].lower() + element[1:]
-		logicalClass = element[0].upper() + element[1:]
-		# reject class that have the same name of a namespace ==> set it in the namespace ...
-		if logicalNamespace != element: # this is a class :
-			if element in myTree.keys():
-				continue
-		#get elemement
-		subElementTree = myTree[element]
-		if len(myTree.keys()) != 1:
-			# TODO : ...
-			None
-		if len(subElementTree.keys()) == 0:
-			genericHeader +=            '					<li><a href="' + class_name_to_file_name("ewol::" + element) + '">' + element + '</a></li>\n'
-			continue
-		genericHeader +=                '					<li class="sousmenu"><a>' + element + '</a>\n'
-		genericHeader +=                '						<ul class="niveau2">\n'
-		# check if we checking a namespace with a classe name is availlable ...
-		if logicalNamespace == element:
-			if logicalClass in myTree.keys():
-				genericHeader +=         '							<li><a href="' + class_name_to_file_name("ewol::" + logicalClass) + '">' + logicalClass + '</a></li>\n'
-		for subElement in sorted(subElementTree.keys()) :
-			#get elemement
-			subSubElementTree = subElementTree[subElement]
-			if len(subSubElementTree.keys()) == 0:
-				genericHeader +=         '							<li><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + '">' + subElement + '</a></li>\n'
-				continue
-			
-			genericHeader +=             '							<li class="sousmenu"><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + '">' + subElement + '</a>\n'
-			genericHeader +=             '								<ul class="niveau3">\n'
-			for subSubElement in sorted(subSubElementTree.keys()) :
-				#get elemement
-				subSubSubElementTree = subSubElementTree[subSubElement]
-				if len(subSubSubElementTree.keys()) == 0:
-					genericHeader +=     '							<li><a href="' + class_name_to_file_name("ewol::" + element + "::" + subElement) + "::" + subSubElement + '">' + subSubElement + '</a></li>\n'
-					continue
-				genericHeader +=         '							<li><a>****' + subSubElement + '****</a></li>\n'
-			genericHeader +=             '								</ul>\n'
-			genericHeader +=             '							</li>\n'
-		genericHeader +=                 '						</ul>\n'
-		genericHeader +=                 '					</li>\n'
-	
-	genericHeader +=     '				<ul>\n'
-	"""
-	baseNamespace = ""
-	for className in sorted(globalList) :
-		searchIn = className
-		if allSartWithModuleName == True:
-			searchIn = className[len(myDoc.moduleName)+2:]
-		pos = searchIn.find("::")
-		if pos >= 0:
-			namespace = searchIn[:pos]
-			rest = searchIn[pos+2:]
-		else:
-			namespace = ""
-			rest = searchIn
-		if baseNamespace != namespace:
-			if baseNamespace != "":
-				genericHeader += '						</ul>\n'
-				genericHeader += '					</li>\n'
-				genericHeader += '				</ul>\n'
-			genericHeader +=     '				<ul class="niveau1">\n'
-			genericHeader +=     '					<li class="sousmenu"><a>' + namespace + '</a>\n'
-			genericHeader +=     '						<ul class="niveau2">\n'
-			baseNamespace = namespace
-			
-		genericHeader +=         '							<li><a href="' + class_name_to_file_name(className) + '">' + rest + '</a></li>\n'
-		
-	if baseNamespace != "":
-		genericHeader +=         '						</ul>\n'
-		genericHeader +=         '					</li>\n'
-		genericHeader +=         '				</ul>\n'
-	genericHeader +=             '			</div>\n'
-	"""
-	genericHeader +=             '			<h3> </h3>\n'
-	genericHeader +=             '		</div>\n'
-	
+	#genericHeader += '				<h2>' + myDoc.moduleName + '</h2>\n'
+	genericHeader += generate_menu(myDoc)
+	#genericHeader += '				<h3> </h3>\n'
+	genericHeader += '			</div>\n'
 	genericHeader += "		</div>\n"
 	genericHeader += "	</div>\n"
 	genericHeader += "	<div class=\"container\" id=\"content\">\n"
@@ -448,16 +447,12 @@ def generate(myDoc, outFolder) :
 	genericFooter += "</html>\n"
 	
 	# create index.hml : 
-	file = open(outFolder + "/index.html", "w")
-	file.write(genericHeader)
-	file.write("<h1>" + myDoc.moduleName + "</h1>");
-	file.write("<br/>");
-	file.write("TODO : Main page ...");
-	file.write("<br/>");
-	file.write("<br/>");
-	file.write(genericFooter)
-	file.close();
+	generate_stupid_index_page(outFolder, genericHeader, genericFooter, myLutinDoc)
 	
+	# create the namespace index properties :
+	generate_page(outFolder, genericHeader, genericFooter, myDoc)
+	
+	"""
 	for className in sorted(myDoc.listClass.iterkeys()) :
 		localClass = myDoc.listClass[className]
 		debug.debug("    class: " + className)
@@ -545,7 +540,7 @@ def generate(myDoc, outFolder) :
 				file.write("<a href=\"" + link + "\">" + name + "</a>\n")
 			file.write("</pre>\n")
 			file.write("<br/>\n")
-		"""
+		" ""
 		file.write("<h2>Signals:</h2>\n")
 		# display all signals :
 		# TODO: ...
@@ -553,7 +548,7 @@ def generate(myDoc, outFolder) :
 		file.write("<h2>Configuration:</h2>\n")
 		# display all configuration :
 		# TODO: ...
-		"""
+		" ""
 		
 		if "doxygen" in localClass:
 			file.write("<h2>Description:</h2>\n")
@@ -604,9 +599,10 @@ def generate(myDoc, outFolder) :
 		file.write(genericFooter)
 		
 		file.close()
+	"""
 	
-	for docInputName,outpath in myDoc.listDocFile :
-		debug.printElement("doc", myDoc.moduleName, "<==", docInputName)
+	for docInputName,outpath in myLutinDoc.listDocFile :
+		debug.printElement("doc", myLutinDoc.moduleName, "<==", docInputName)
 		outputFileName = outFolder + "/" + outpath.replace('/','_') +".html"
 		debug.debug("output file : " + outputFileName)
 		lutinTools.CreateDirectoryOfFile(outputFileName)
@@ -616,8 +612,8 @@ def generate(myDoc, outFolder) :
 		outData = genericHeader + codeBB.transcode(inData) + genericFooter
 		lutinTools.FileWriteData(outputFileName, outData)
 	
-	for docInputName,outpath in myDoc.listTutorialFile :
-		debug.printElement("tutorial", myDoc.moduleName, "<==", docInputName)
+	for docInputName,outpath in myLutinDoc.listTutorialFile :
+		debug.printElement("tutorial", myLutinDoc.moduleName, "<==", docInputName)
 		outputFileName = outFolder + "/" + outpath+".html"
 		debug.debug("output file : " + outputFileName)
 		lutinTools.CreateDirectoryOfFile(outputFileName)
