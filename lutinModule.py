@@ -11,7 +11,6 @@ import lutinHeritage as heritage
 import lutinDepend as dependency
 import lutinMultiprocess
 import lutinEnv
-import lutinDoc
 
 class module:
 	
@@ -374,47 +373,6 @@ class module:
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
 			lutinTools.CopyAnythingTarget(target, self.originFolder+"/"+element[0],element[1])
-	
-	##
-	## @brief Set the documentation availlable for this module
-	##
-	def doc_enable(self):
-		self.documentation = lutinDoc.doc(self.name)
-		self.documentation.set_path(lutinTools.GetCurrentPath(self.originFile))
-	
-	##
-	## @brief Create the module documentation:
-	## @param[in,out] target target that request generation of the documentation
-	##
-	def doc_parse_code(self, target):
-		if self.documentation == None:
-			return False
-		self.documentation.doc_parse_code()
-		return True
-	
-	##
-	## @brief Generate real documentation files
-	## @param[in,out] target target that request generation of the documentation
-	##
-	def doc_generate(self, target):
-		if self.documentation == None:
-			return False
-		# Real creation of the documentation :
-		lutinTools.RemoveFolderAndSubFolder(target.GetDocFolder(self.name));
-		self.documentation.generate_documantation(target, target.GetDocFolder(self.name))
-		return True
-	
-	
-	##
-	## @brief Get link on a class or an enum in all the subclasses
-	## @param[in] name of the class
-	## @return [real element name, link on it]
-	##
-	def doc_get_link(self, target, elementName):
-		if self.documentation == None:
-			return [elementName, ""]
-		return self.documentation.get_class_link_from_target(elementName, target);
-	
 	
 	# call here to build the module
 	def Build(self, target, packageName):
