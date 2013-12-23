@@ -15,15 +15,15 @@ currentThreadWorking = 0
 threads = []
 
 exitFlag = False # resuest stop of the thread
-isInit = False # the thread are initialized
+isinit = False # the thread are initialized
 errorOccured = False # a thread have an error
 processorAvaillable = 1 # number of CPU core availlable
 
-def StoreCommand(cmdLine, file):
+def store_command(cmdLine, file):
 	# write cmd line only after to prevent errors ...
 	if file!="":
 		# Create directory:
-		lutinTools.CreateDirectoryOfFile(file)
+		lutinTools.create_directory_of_file(file)
 		# Store the command Line:
 		file2 = open(file, "w")
 		file2.write(cmdLine)
@@ -31,8 +31,8 @@ def StoreCommand(cmdLine, file):
 		file2.close()
 
 
-def RunCommand(cmdLine, storeCmdLine=""):
-	debug.debug(lutinEnv.PrintPretty(cmdLine))
+def run_command(cmdLine, storeCmdLine=""):
+	debug.debug(lutinEnv.print_pretty(cmdLine))
 	try:
 		retcode = subprocess.call(cmdLine, shell=True)
 	except OSError as e:
@@ -50,7 +50,7 @@ def RunCommand(cmdLine, storeCmdLine=""):
 		return
 	
 	# write cmd line only after to prevent errors ...
-	StoreCommand(cmdLine, storeCmdLine)
+	store_command(cmdLine, storeCmdLine)
 	
 
 
@@ -80,8 +80,8 @@ class myThread(threading.Thread):
 					comment = data[2]
 					cmdLine = data[1]
 					cmdStoreFile = data[3]
-					debug.printElement( "[" + str(self.threadID) + "] " + comment[0], comment[1], comment[2], comment[3])
-					RunCommand(cmdLine, cmdStoreFile)
+					debug.print_element( "[" + str(self.threadID) + "] " + comment[0], comment[1], comment[2], comment[3])
+					run_command(cmdLine, cmdStoreFile)
 				else:
 					debug.warning("unknow request command : " + data[0])
 			else:
@@ -95,21 +95,21 @@ class myThread(threading.Thread):
 		debug.verbose("Exiting " + self.name)
 
 
-def ErrorOccured():
+def error_occured():
 	global exitFlag
 	exitFlag = True
 
-def SetCoreNumber(numberOfcore):
+def set_core_number(numberOfcore):
 	global processorAvaillable
 	processorAvaillable = numberOfcore
 	debug.debug(" set number of core for multi process compilation : " + str(processorAvaillable))
 	# nothing else to do
 
-def Init():
+def init():
 	global exitFlag
-	global isInit
-	if isInit==False:
-		isInit=True
+	global isinit
+	if isinit==False:
+		isinit=True
 		global threads
 		global queueLock
 		global workQueue
@@ -123,7 +123,7 @@ def Init():
 		
 
 
-def UnInit():
+def un_init():
 	global exitFlag
 	# Notify threads it's time to exit
 	exitFlag = True
@@ -136,13 +136,13 @@ def UnInit():
 
 
 
-def RunInPool(cmdLine, comment, storeCmdLine=""):
+def run_in_pool(cmdLine, comment, storeCmdLine=""):
 	if processorAvaillable <= 1:
-		debug.printElement(comment[0], comment[1], comment[2], comment[3])
-		RunCommand(cmdLine, storeCmdLine)
+		debug.print_element(comment[0], comment[1], comment[2], comment[3])
+		run_command(cmdLine, storeCmdLine)
 		return
 	# multithreaded mode
-	Init()
+	init()
 	# Fill the queue
 	queueLock.acquire()
 	debug.verbose("add : in pool cmdLine")
@@ -150,7 +150,7 @@ def RunInPool(cmdLine, comment, storeCmdLine=""):
 	queueLock.release()
 	
 
-def PoolSynchrosize():
+def pool_synchrosize():
 	global errorOccured
 	if processorAvaillable <= 1:
 		#in this case : nothing to synchronise
@@ -171,6 +171,6 @@ def PoolSynchrosize():
 		debug.verbose("queue is empty")
 	else:
 		debug.debug("Thread return with error ... ==> stop all the pool")
-		UnInit()
+		un_init()
 		debug.error("Pool error occured ...")
 	

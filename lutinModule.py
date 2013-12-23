@@ -12,7 +12,7 @@ import lutinDepend as dependency
 import lutinMultiprocess
 import lutinEnv
 
-class module:
+class Module:
 	
 	##
 	## @brief Module class represent all system needed for a specific
@@ -56,7 +56,7 @@ class module:
 		# copy files and folders:
 		self.files=[]
 		self.folders=[]
-		self.isBuild=False
+		self.isbuild=False
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
 		   or moduleType == 'LIBRARY' \
@@ -68,7 +68,7 @@ class module:
 			debug.error('    ==> error : "%s" ' %moduleType)
 			raise 'Input value error'
 		self.originFile = file;
-		self.originFolder = lutinTools.GetCurrentPath(self.originFile)
+		self.originFolder = lutinTools.get_current_path(self.originFile)
 		self.localHeritage = heritage.heritage(self)
 		
 		self.packageProp = { "COMPAGNY_TYPE" : set(""),
@@ -91,10 +91,10 @@ class module:
 		
 	
 	##
-	## @brief Add Some copilation flags for this module (and only this one)
+	## @brief add Some copilation flags for this module (and only this one)
 	##
 	def add_extra_compile_flags(self):
-		self.CompileFlags_CC([
+		self.compile_flags_CC([
 			"-Wall",
 			"-Wsign-compare",
 			"-Wreturn-type",
@@ -106,10 +106,10 @@ class module:
 	## @brief remove all unneeded warning on compilation ==> for extern libs ...
 	##
 	def remove_compile_warning(self):
-		self.CompileFlags_CC([
+		self.compile_flags_CC([
 			"-Wno-int-to-pointer-cast"
 			]);
-		self.CompileFlags_XX([
+		self.compile_flags_XX([
 			"-Wno-c++11-narrowing"
 			])
 		# only for gcc :"-Wno-unused-but-set-variable"
@@ -117,16 +117,16 @@ class module:
 	##
 	## @brief Commands for running gcc to compile a m++ file.
 	##
-	def Compile_mm_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+	def compile_mm_to_o(self, file, binary, target, depancy):
+		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst ,
 			target.global_include_cc,
-			lutinTools.AddPrefix("-I",self.export_path),
-			lutinTools.AddPrefix("-I",self.local_path),
-			lutinTools.AddPrefix("-I",depancy.path),
+			lutinTools.add_prefix("-I",self.export_path),
+			lutinTools.add_prefix("-I",self.local_path),
+			lutinTools.add_prefix("-I",depancy.path),
 			target.global_flags_cc,
 			target.global_flags_mm,
 			depancy.flags_cc,
@@ -139,27 +139,27 @@ class module:
 			"-x objective-c++",
 			file_src])
 		# check the dependency for this file :
-		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
 			return file_dst
-		lutinTools.CreateDirectoryOfFile(file_dst)
+		lutinTools.create_directory_of_file(file_dst)
 		comment = ["m++", self.name, "<==", file]
 		#process element
-		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
+		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
 		return file_dst
 	
 	##
 	## @brief Commands for running gcc to compile a m file.
 	##
-	def Compile_m_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+	def compile_m_to_o(self, file, binary, target, depancy):
+		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.cc,
 			"-o", file_dst ,
 			target.global_include_cc,
-			lutinTools.AddPrefix("-I",self.export_path),
-			lutinTools.AddPrefix("-I",self.local_path),
-			lutinTools.AddPrefix("-I",depancy.path),
+			lutinTools.add_prefix("-I",self.export_path),
+			lutinTools.add_prefix("-I",self.local_path),
+			lutinTools.add_prefix("-I",depancy.path),
 			target.global_flags_cc,
 			target.global_flags_m,
 			depancy.flags_cc,
@@ -172,27 +172,27 @@ class module:
 			"-x objective-c",
 			file_src])
 		# check the dependency for this file :
-		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
 			return file_dst
-		lutinTools.CreateDirectoryOfFile(file_dst)
+		lutinTools.create_directory_of_file(file_dst)
 		comment = ["m", self.name, "<==", file]
 		#process element
-		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
+		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
 		return file_dst
 	
 	##
 	## @brief Commands for running gcc to compile a C++ file.
 	##
-	def Compile_xx_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+	def compile_xx_to_o(self, file, binary, target, depancy):
+		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst ,
 			target.global_include_cc,
-			lutinTools.AddPrefix("-I",self.export_path),
-			lutinTools.AddPrefix("-I",self.local_path),
-			lutinTools.AddPrefix("-I",depancy.path),
+			lutinTools.add_prefix("-I",self.export_path),
+			lutinTools.add_prefix("-I",self.local_path),
+			lutinTools.add_prefix("-I",depancy.path),
 			target.global_flags_cc,
 			target.global_flags_xx,
 			depancy.flags_cc,
@@ -204,27 +204,27 @@ class module:
 			" -c -MMD -MP -g ",
 			file_src])
 		# check the dependency for this file :
-		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
 			return file_dst
-		lutinTools.CreateDirectoryOfFile(file_dst)
+		lutinTools.create_directory_of_file(file_dst)
 		comment = ["c++", self.name, "<==", file]
 		#process element
-		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
+		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
 		return file_dst
 	
 	##
 	## @brief Commands for running gcc to compile a C file.
 	##
-	def Compile_cc_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.fileGenerateObject(binary,self.name,self.originFolder,file)
+	def compile_cc_to_o(self, file, binary, target, depancy):
+		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
 		# create the command line befor requesting start:
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.cc,
 			"-o", file_dst,
 			target.global_include_cc,
-			lutinTools.AddPrefix("-I",self.export_path),
-			lutinTools.AddPrefix("-I",self.local_path),
-			lutinTools.AddPrefix("-I",depancy.path),
+			lutinTools.add_prefix("-I",self.export_path),
+			lutinTools.add_prefix("-I",self.local_path),
+			lutinTools.add_prefix("-I",depancy.path),
 			target.global_flags_cc,
 			depancy.flags_cc,
 			self.flags_cc,
@@ -233,22 +233,22 @@ class module:
 			file_src])
 		
 		# check the dependency for this file :
-		if False==dependency.NeedReBuild(file_dst, file_src, file_depend, file_cmd, cmdLine):
+		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
 			return file_dst
-		lutinTools.CreateDirectoryOfFile(file_dst)
+		lutinTools.create_directory_of_file(file_dst)
 		comment = ["c", self.name, "<==", file]
 		# process element
-		lutinMultiprocess.RunInPool(cmdLine, comment, file_cmd)
+		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
 		return file_dst
 	
 	
 	##
 	## @brief Commands for running ar.
 	##
-	def Link_to_a(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, self.name,self.originFolder,file,"lib-static")
+	def link_to_a(self, file, binary, target, depancy):
+		file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, self.name,self.originFolder,file,"lib-static")
 		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.ar,
 			target.global_flags_ar,
 			self.flags_ar,
@@ -257,34 +257,34 @@ class module:
 			#depancy.src])
 		
 		# check the dependency for this file :
-		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
-				and False==dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine):
+		if False==dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) \
+				and False==dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine):
 			return file_dst
-		lutinTools.CreateDirectoryOfFile(file_dst)
-		debug.printElement("StaticLib", self.name, "==>", file_dst)
+		lutinTools.create_directory_of_file(file_dst)
+		debug.print_element("StaticLib", self.name, "==>", file_dst)
 		# explicitly remove the destination to prevent error ...
 		if os.path.exists(file_dst) and os.path.isfile(file_dst):
 			os.remove(file_dst)
-		lutinMultiprocess.RunCommand(cmdLine)
+		lutinMultiprocess.run_command(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
-		cmdLineRanLib=lutinTools.ListToStr([
+		cmdLineRanLib=lutinTools.list_to_str([
 			target.ranlib,
 			file_dst ])
-		lutinMultiprocess.RunCommand(cmdLineRanLib)
+		lutinMultiprocess.run_command(cmdLineRanLib)
 		# write cmd line only after to prevent errors ...
-		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
+		lutinMultiprocess.store_command(cmdLine, file_cmd)
 		return file_dst
 	
 	
 	##
 	## @brief Commands for running gcc to link a shared library.
 	##
-	def Link_to_so(self, file, binary, target, depancy, libName=""):
+	def link_to_so(self, file, binary, target, depancy, libName=""):
 		if libName=="":
 			libName = self.name
-		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, libName,self.originFolder,file,"lib-shared")
+		file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, libName,self.originFolder,file,"lib-shared")
 		#create command Line
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst,
 			target.global_sysroot,
@@ -296,36 +296,36 @@ class module:
 			target.global_flags_ld])
 		
 		# check the dependency for this file :
-		if     dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) == False \
-		   and dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
+		if     dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) == False \
+		   and dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
 			return tmpList[1]
-		lutinTools.CreateDirectoryOfFile(file_dst)
-		debug.printElement("SharedLib", libName, "==>", file_dst)
-		lutinMultiprocess.RunCommand(cmdLine)
+		lutinTools.create_directory_of_file(file_dst)
+		debug.print_element("SharedLib", libName, "==>", file_dst)
+		lutinMultiprocess.run_command(cmdLine)
 		if    "release"==target.buildMode \
-		   or lutinEnv.GetForceStripMode()==True:
+		   or lutinEnv.get_force_strip_mode()==True:
 			# get the file size of the non strip file
-			originSize = lutinTools.FileSize(file_dst);
-			debug.printElement("SharedLib(strip)", libName, "", "")
-			cmdLineStrip=lutinTools.ListToStr([
+			originSize = lutinTools.file_size(file_dst);
+			debug.print_element("SharedLib(strip)", libName, "", "")
+			cmdLineStrip=lutinTools.list_to_str([
 				target.strip,
 				file_dst])
-			lutinMultiprocess.RunCommand(cmdLineStrip)
+			lutinMultiprocess.run_command(cmdLineStrip)
 			# get the stip size of the binary
-			stripSize = lutinTools.FileSize(file_dst)
+			stripSize = lutinTools.file_size(file_dst)
 			debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
 		# write cmd line only after to prevent errors ...
-		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
-		#debug.printElement("SharedLib", self.name, "==>", tmpList[1])
+		lutinMultiprocess.store_command(cmdLine, file_cmd)
+		#debug.print_element("SharedLib", self.name, "==>", tmpList[1])
 	
 	
 	##
 	## @brief Commands for running gcc to link an executable.
 	##
-	def Link_to_bin(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.GenerateFile(binary, self.name,self.originFolder,file,"bin")
+	def link_to_bin(self, file, binary, target, depancy):
+		file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, self.name,self.originFolder,file,"bin")
 		#create comdLine : 
-		cmdLine=lutinTools.ListToStr([
+		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst,
 			target.global_sysroot,
@@ -335,27 +335,27 @@ class module:
 			depancy.flags_ld,
 			target.global_flags_ld])
 		# check the dependency for this file :
-		if False==dependency.NeedRePackage(file_dst, file_src, True, file_cmd, cmdLine) \
-				and False==dependency.NeedRePackage(file_dst, depancy.src, False, file_cmd, cmdLine):
+		if False==dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) \
+				and False==dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine):
 			return file_dst
-		lutinTools.CreateDirectoryOfFile(file_dst)
-		debug.printElement("Executable", self.name, "==>", file_dst)
+		lutinTools.create_directory_of_file(file_dst)
+		debug.print_element("Executable", self.name, "==>", file_dst)
 		
-		lutinMultiprocess.RunCommand(cmdLine)
+		lutinMultiprocess.run_command(cmdLine)
 		if    "release"==target.buildMode \
-		   or lutinEnv.GetForceStripMode()==True:
+		   or lutinEnv.get_force_strip_mode()==True:
 			# get the file size of the non strip file
-			originSize = lutinTools.FileSize(file_dst);
-			debug.printElement("Executable(strip)", self.name, "", "")
-			cmdLineStrip=lutinTools.ListToStr([
+			originSize = lutinTools.file_size(file_dst);
+			debug.print_element("Executable(strip)", self.name, "", "")
+			cmdLineStrip=lutinTools.list_to_str([
 				target.strip,
 				file_dst])
-			lutinMultiprocess.RunCommand(cmdLineStrip)
+			lutinMultiprocess.run_command(cmdLineStrip)
 			# get the stip size of the binary
-			stripSize = lutinTools.FileSize(file_dst)
+			stripSize = lutinTools.file_size(file_dst)
 			debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
 		# write cmd line only after to prevent errors ...
-		lutinMultiprocess.StoreCommand(cmdLine, file_cmd)
+		lutinMultiprocess.store_command(cmdLine, file_cmd)
 		
 	
 	##
@@ -364,7 +364,7 @@ class module:
 	def files_to_staging(self, binaryName, target):
 		for element in self.files:
 			debug.verbose("Might copy file : " + element[0] + " ==> " + element[1])
-			target.AddFileStaging(self.originFolder+"/"+element[0], element[1])
+			target.add_file_staging(self.originFolder+"/"+element[0], element[1])
 	
 	##
 	## @brief Commands for copying files
@@ -372,12 +372,12 @@ class module:
 	def folders_to_staging(self, binaryName, target):
 		for element in self.folders:
 			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
-			lutinTools.CopyAnythingTarget(target, self.originFolder+"/"+element[0],element[1])
+			lutinTools.copy_anything_target(target, self.originFolder+"/"+element[0],element[1])
 	
 	# call here to build the module
-	def Build(self, target, packageName):
+	def build(self, target, packageName):
 		# ckeck if not previously build
-		if target.IsModuleBuild(self.name)==True:
+		if target.is_module_build(self.name)==True:
 			return self.localHeritage
 		
 		if     packageName==None \
@@ -390,12 +390,12 @@ class module:
 			None
 		
 		# build dependency befor
-		listSubFileNeededToBuild = []
+		listSubFileNeededTobuild = []
 		subHeritage = heritage.heritage(None)
 		for dep in self.depends:
-			inherit = target.Build(dep, packageName)
+			inherit = target.build(dep, packageName)
 			# add at the heritage list :
-			subHeritage.AddSub(inherit)
+			subHeritage.add_sub(inherit)
 		
 		# build local sources
 		for file in self.src:
@@ -403,62 +403,62 @@ class module:
 			fileExt = file.split(".")[-1]
 			if    fileExt == "c" \
 			   or fileExt == "C":
-				resFile = self.Compile_cc_to_o(file, packageName, target, subHeritage)
-				listSubFileNeededToBuild.append(resFile)
+				resFile = self.compile_cc_to_o(file, packageName, target, subHeritage)
+				listSubFileNeededTobuild.append(resFile)
 			elif    fileExt == "cpp" \
 			     or fileExt == "CPP" \
 			     or fileExt == "cxx" \
 			     or fileExt == "CXX" \
 			     or fileExt == "xx" \
 			     or fileExt == "XX":
-				resFile = self.Compile_xx_to_o(file, packageName, target, subHeritage)
-				listSubFileNeededToBuild.append(resFile)
+				resFile = self.compile_xx_to_o(file, packageName, target, subHeritage)
+				listSubFileNeededTobuild.append(resFile)
 			elif    fileExt == "mm" \
 			     or fileExt == "MM":
-				resFile = self.Compile_mm_to_o(file, packageName, target, subHeritage)
-				listSubFileNeededToBuild.append(resFile)
+				resFile = self.compile_mm_to_o(file, packageName, target, subHeritage)
+				listSubFileNeededTobuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
 		# when multiprocess availlable, we need to synchronize here ...
-		lutinMultiprocess.PoolSynchrosize()
+		lutinMultiprocess.pool_synchrosize()
 		
 		# generate end point:
 		if self.type=='PREBUILD':
 			# nothing to add ==> just dependence
 			None
 		elif self.type=='LIBRARY':
-			resFile = self.Link_to_a(listSubFileNeededToBuild, packageName, target, subHeritage)
-			self.localHeritage.AddSources(resFile)
+			resFile = self.link_to_a(listSubFileNeededTobuild, packageName, target, subHeritage)
+			self.localHeritage.add_sources(resFile)
 		elif self.type=='BINARY':
-			resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
+			resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, subHeritage)
 			# generate tree for this special binary
-			target.CleanModuleTree()
-			self.BuildTree(target, self.name)
-			target.copyToStaging(self.name)
+			target.clean_module_tree()
+			self.build_tree(target, self.name)
+			target.copy_to_staging(self.name)
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
 				# special case for android wrapper :
-				resFile = self.Link_to_so(listSubFileNeededToBuild, packageName, target, subHeritage, "libewol")
+				resFile = self.link_to_so(listSubFileNeededTobuild, packageName, target, subHeritage, "libewol")
 			else:
-				resFile = self.Link_to_bin(listSubFileNeededToBuild, packageName, target, subHeritage)
-			target.CleanModuleTree()
+				resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, subHeritage)
+			target.clean_module_tree()
 			# generate tree for this special binary
-			self.BuildTree(target, self.name)
-			target.copyToStaging(self.name)
+			self.build_tree(target, self.name)
+			target.copy_to_staging(self.name)
 			if target.endGeneratePackage==True:
 				# generate the package with his properties ...
-				target.MakePackage(self.name, self.packageProp, self.originFolder + "/..")
+				target.make_package(self.name, self.packageProp, self.originFolder + "/..")
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			
-		self.localHeritage.AddSub(subHeritage)
+		self.localHeritage.add_sub(subHeritage)
 		# return local dependency ...
 		return self.localHeritage
 	
 	# call here to build the module
-	def BuildTree(self, target, packageName):
+	def build_tree(self, target, packageName):
 		# ckeck if not previously build
-		if target.IsModuleBuildTree(self.name)==True:
+		if target.is_module_buildTree(self.name)==True:
 			return
 		debug.verbose("build tree of " + self.name)
 		# add all the elements (first added only one keep ==> permit to everload sublib element)
@@ -466,32 +466,32 @@ class module:
 		self.folders_to_staging(packageName, target)
 		#build tree of all submodules
 		for dep in self.depends:
-			inherit = target.BuildTree(dep, packageName)
+			inherit = target.build_tree(dep, packageName)
 	
 	
-	# call here to Clean the module
-	def Clean(self, target):
+	# call here to clean the module
+	def clean(self, target):
 		if self.type=='PREBUILD':
 			# nothing to add ==> just dependence
 			None
 		elif self.type=='LIBRARY':
 			# remove folder of the lib ... for this targer
-			folderBuild = target.GetBuildFolder(self.name)
-			debug.info("remove folder : '" + folderBuild + "'")
-			lutinTools.RemoveFolderAndSubFolder(folderBuild)
+			folderbuild = target.get_build_folder(self.name)
+			debug.info("remove folder : '" + folderbuild + "'")
+			lutinTools.remove_folder_and_sub_folder(folderbuild)
 		elif    self.type=='BINARY' \
 		     or self.type=='PACKAGE':
 			# remove folder of the lib ... for this targer
-			folderBuild = target.GetBuildFolder(self.name)
-			debug.info("remove folder : '" + folderBuild + "'")
-			lutinTools.RemoveFolderAndSubFolder(folderBuild)
-			folderStaging = target.GetStagingFolder(self.name)
+			folderbuild = target.get_build_folder(self.name)
+			debug.info("remove folder : '" + folderbuild + "'")
+			lutinTools.remove_folder_and_sub_folder(folderbuild)
+			folderStaging = target.get_staging_folder(self.name)
 			debug.info("remove folder : '" + folderStaging + "'")
-			lutinTools.RemoveFolderAndSubFolder(folderStaging)
+			lutinTools.remove_folder_and_sub_folder(folderStaging)
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
-	def AppendAndCheck(self, listout, newElement, order):
+	def append_and_check(self, listout, newElement, order):
 		for element in listout:
 			if element==newElement:
 				return
@@ -499,98 +499,98 @@ class module:
 		if True==order:
 			listout.sort()
 	
-	def AppendToInternalList(self, listout, list, order=False):
+	def append_to_internalList(self, listout, list, order=False):
 		if type(list) == type(str()):
-			self.AppendAndCheck(listout, list, order)
+			self.append_and_check(listout, list, order)
 		else:
 			# mulyiple imput in the list ...
 			for elem in list:
-				self.AppendAndCheck(listout, elem, order)
+				self.append_and_check(listout, elem, order)
 	
-	def AddModuleDepend(self, list):
-		self.AppendToInternalList(self.depends, list, True)
+	def add_module_depend(self, list):
+		self.append_to_internalList(self.depends, list, True)
 	
-	def AddExportPath(self, list):
-		self.AppendToInternalList(self.export_path, list)
+	def add_export_path(self, list):
+		self.append_to_internalList(self.export_path, list)
 	
-	def AddPath(self, list):
-		self.AppendToInternalList(self.local_path, list)
+	def add_path(self, list):
+		self.append_to_internalList(self.local_path, list)
 	
-	def AddExportflag_LD(self, list):
-		self.AppendToInternalList(self.export_flags_ld, list)
+	def add_export_flag_LD(self, list):
+		self.append_to_internalList(self.export_flags_ld, list)
 	
-	def AddExportFlag_CC(self, list):
-		self.AppendToInternalList(self.export_flags_cc, list)
+	def add_export_flag_CC(self, list):
+		self.append_to_internalList(self.export_flags_cc, list)
 	
-	def AddExportFlag_XX(self, list):
-		self.AppendToInternalList(self.export_flags_xx, list)
+	def add_export_flag_XX(self, list):
+		self.append_to_internalList(self.export_flags_xx, list)
 	
-	def AddExportFlag_M(self, list):
-		self.AppendToInternalList(self.export_flags_m, list)
+	def add_export_flag_M(self, list):
+		self.append_to_internalList(self.export_flags_m, list)
 	
-	def AddExportFlag_MM(self, list):
-		self.AppendToInternalList(self.export_flags_mm, list)
+	def add_export_flag_MM(self, list):
+		self.append_to_internalList(self.export_flags_mm, list)
 	
 	# add the link flag at the module
-	def CompileFlags_LD(self, list):
-		self.AppendToInternalList(self.flags_ld, list)
+	def compile_flags_LD(self, list):
+		self.append_to_internalList(self.flags_ld, list)
 	
-	def CompileFlags_CC(self, list):
-		self.AppendToInternalList(self.flags_cc, list)
+	def compile_flags_CC(self, list):
+		self.append_to_internalList(self.flags_cc, list)
 	
-	def CompileFlags_XX(self, list):
-		self.AppendToInternalList(self.flags_xx, list)
+	def compile_flags_XX(self, list):
+		self.append_to_internalList(self.flags_xx, list)
 	
-	def CompileFlags_M(self, list):
-		self.AppendToInternalList(self.flags_m, list)
+	def compile_flags_M(self, list):
+		self.append_to_internalList(self.flags_m, list)
 	
-	def CompileFlags_MM(self, list):
-		self.AppendToInternalList(self.flags_mm, list)
+	def compile_flags_MM(self, list):
+		self.append_to_internalList(self.flags_mm, list)
 	
-	def CompileFlags_S(self, list):
-		self.AppendToInternalList(self.flags_s, list)
+	def compile_flags_S(self, list):
+		self.append_to_internalList(self.flags_s, list)
 	
-	def AddSrcFile(self, list):
-		self.AppendToInternalList(self.src, list, True)
+	def add_src_file(self, list):
+		self.append_to_internalList(self.src, list, True)
 	
-	def CopyFile(self, src, dst):
+	def copy_file(self, src, dst):
 		self.files.append([src,dst])
 	
-	def CopyFolder(self, src, dst):
+	def copy_folder(self, src, dst):
 		self.folders.append([src,dst])
 	
-	def PrintList(self, description, list):
+	def print_list(self, description, list):
 		if len(list) > 0:
 			print '        %s' %description
 			for elem in list:
 				print '            %s' %elem
 	
-	def Display(self, target):
+	def display(self, target):
 		print '-----------------------------------------------'
 		print ' package : "%s"' %self.name
 		print '-----------------------------------------------'
 		print '    type:"%s"' %self.type
 		print '    file:"%s"' %self.originFile
 		print '    folder:"%s"' %self.originFolder
-		self.PrintList('depends',self.depends)
-		self.PrintList('flags_ld',self.flags_ld)
-		self.PrintList('flags_cc',self.flags_cc)
-		self.PrintList('flags_xx',self.flags_xx)
-		self.PrintList('flags_m',self.flags_m)
-		self.PrintList('flags_mm',self.flags_mm)
-		self.PrintList('flags_s',self.flags_s)
-		self.PrintList('src',self.src)
-		self.PrintList('files',self.files)
-		self.PrintList('folders',self.folders)
-		self.PrintList('export_path',self.export_path)
-		self.PrintList('export_flags_ld',self.export_flags_ld)
-		self.PrintList('export_flags_cc',self.export_flags_cc)
-		self.PrintList('export_flags_xx',self.export_flags_xx)
-		self.PrintList('export_flags_m',self.export_flags_m)
-		self.PrintList('export_flags_mm',self.export_flags_mm)
-		self.PrintList('local_path',self.local_path)
+		self.print_list('depends',self.depends)
+		self.print_list('flags_ld',self.flags_ld)
+		self.print_list('flags_cc',self.flags_cc)
+		self.print_list('flags_xx',self.flags_xx)
+		self.print_list('flags_m',self.flags_m)
+		self.print_list('flags_mm',self.flags_mm)
+		self.print_list('flags_s',self.flags_s)
+		self.print_list('src',self.src)
+		self.print_list('files',self.files)
+		self.print_list('folders',self.folders)
+		self.print_list('export_path',self.export_path)
+		self.print_list('export_flags_ld',self.export_flags_ld)
+		self.print_list('export_flags_cc',self.export_flags_cc)
+		self.print_list('export_flags_xx',self.export_flags_xx)
+		self.print_list('export_flags_m',self.export_flags_m)
+		self.print_list('export_flags_mm',self.export_flags_mm)
+		self.print_list('local_path',self.local_path)
 	
-	def pkgSet(self, variable, value):
+	def pkg_set(self, variable, value):
 		if "COMPAGNY_TYPE" == variable:
 			#	com : Commercial
 			#	net : Network??
@@ -664,7 +664,7 @@ class module:
 		else:
 			debug.error("not know pak element : '" + variable + "'")
 	
-	def pkgAdd(self, variable, value):
+	def pkg_add(self, variable, value):
 		# TODO : Check values...
 		self.packageProp[variable].append(value)
 		
@@ -674,7 +674,7 @@ class module:
 moduleList=[]
 __startModuleName="lutin_"
 
-def ImportPath(path):
+def import_path(path):
 	global moduleList
 	matches = []
 	debug.debug('Start find sub File : "%s"' %path)
@@ -690,40 +690,40 @@ def ImportPath(path):
 			debug.debug("integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
 			moduleList.append([moduleName,os.path.join(root, filename)])
 
-def LoadModule(target, name):
+def load_module(target, name):
 	global moduleList
 	for mod in moduleList:
-		if mod[0]==name:
+		if mod[0] == name:
 			sys.path.append(os.path.dirname(mod[1]))
 			theModule = __import__(__startModuleName + name)
 			#try:
-			tmpElement = theModule.Create(target)
+			tmpElement = theModule.create(target)
 			if (tmpElement == None) :
 				debug.debug("Request load module '" + name + "' not define for this platform")
 			else:
-				target.AddModule(tmpElement)
+				target.add_module(tmpElement)
 			#except:
 			#	debug.error(" no function 'Create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
 
-def ListAllModule():
+def list_all_module():
 	global moduleList
 	tmpListName = []
 	for mod in moduleList:
 		tmpListName.append(mod[0])
 	return tmpListName
 
-def ListAllModuleWithDesc():
+def list_all_module_with_desc():
 	global moduleList
 	tmpList = []
 	for mod in moduleList:
 		sys.path.append(os.path.dirname(mod[1]))
 		theModule = __import__("lutin_" + mod[0])
 		try:
-			tmpdesc = theModule.GetDesc()
-			AddModule(tmpElement)
+			tmpdesc = theModule.get_desc()
 			tmpList.append([mod[0], tmpdesc])
 		except:
-			tmpList.append([mod[0], "no description"])
+			debug.warning("has no naeme : " + mod[0])
+			tmpList.append([mod[0], ""])
 	return tmpList
 
 

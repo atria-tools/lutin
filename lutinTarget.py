@@ -81,7 +81,7 @@ class Target:
 	def get_build_mode(self):
 		return self.buildMode
 	
-	def AddFileStaging(self, inputFile, outputFile):
+	def add_file_staging(self, inputFile, outputFile):
 		for source, dst in self.listFinalFile:
 			if dst == outputFile :
 				debug.verbose("already added : " + outputFile)
@@ -89,29 +89,29 @@ class Target:
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
 		self.listFinalFile.append([inputFile,outputFile])
 	
-	def copyToStaging(self, binaryName):
-		baseFolder = self.GetStagingFolderData(binaryName)
+	def copy_to_staging(self, binaryName):
+		baseFolder = self.get_staging_folder_data(binaryName)
 		for source, dst in self.listFinalFile:
 			debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
-			lutinTools.CopyFile(source, baseFolder+"/"+dst)
+			lutinTools.copy_file(source, baseFolder+"/"+dst)
 	
 	
-	def CleanModuleTree(self):
+	def clean_module_tree(self):
 		self.buildTreeDone = []
 		self.listFinalFile = []
 	
 	
 	# TODO : Remove this hack ... ==> really bad ... but usefull
-	def SetEwolFolder(self, folder):
+	def set_ewol_folder(self, folder):
 		self.folder_ewol = folder
 	
 	
-	def fileGenerateObject(self,binaryName,moduleName,basePath,file):
+	def file_generate_object(self,binaryName,moduleName,basePath,file):
 		list=[]
 		list.append(basePath + "/" + file)
-		list.append(self.GetBuildFolder(moduleName) + "/" + file + self.suffix_obj)
-		list.append(self.GetBuildFolder(moduleName) + "/" + file + self.suffix_dependence)
-		list.append(self.GetBuildFolder(moduleName) + "/" + file + self.suffix_cmdLine)
+		list.append(self.get_build_folder(moduleName) + "/" + file + self.suffix_obj)
+		list.append(self.get_build_folder(moduleName) + "/" + file + self.suffix_dependence)
+		list.append(self.get_build_folder(moduleName) + "/" + file + self.suffix_cmdLine)
 		return list
 	"""
 		return a list of 3 elements :
@@ -119,118 +119,118 @@ class Target:
 			1 : destination file
 			2 : dependence files module (*.d)
 	"""
-	def GenerateFile(self,binaryName,moduleName,basePath,file,type):
+	def generate_file(self,binaryName,moduleName,basePath,file,type):
 		list=[]
 		if (type=="bin"):
 			list.append(file)
-			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
-			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
+			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_cmdLine)
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
-			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.GetStagingFolder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
+			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_cmdLine)
 		elif (type=="lib-static"):
 			list.append(file)
-			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_lib_static)
-			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.GetBuildFolder(moduleName) + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_cmdLine)
 		else:
 			debug.error("unknow type : " + type)
 		return list
 	
-	def GetFinalFolder(self):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_final
+	def get_final_folder(self):
+		return lutinTools.get_run_folder() + self.folder_out + self.folder_final
 	
-	def GetStagingFolder(self, binaryName):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName
+	def get_staging_folder(self, binaryName):
+		return lutinTools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName
 	
-	def GetStagingFolderData(self, binaryName):
-		return self.GetStagingFolder(binaryName) + self.folder_data + "/" + binaryName
+	def get_staging_folder_data(self, binaryName):
+		return self.get_staging_folder(binaryName) + self.folder_data + "/" + binaryName
 	
-	def GetBuildFolder(self, moduleName):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_build + "/" + moduleName
+	def get_build_folder(self, moduleName):
+		return lutinTools.get_run_folder() + self.folder_out + self.folder_build + "/" + moduleName
 	
-	def GetDocFolder(self, moduleName):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_doc + "/" + moduleName
+	def get_doc_folder(self, moduleName):
+		return lutinTools.get_run_folder() + self.folder_out + self.folder_doc + "/" + moduleName
 	
-	def IsModuleBuild(self,module):
+	def is_module_build(self,module):
 		for mod in self.buildDone:
 			if mod == module:
 				return True
 		self.buildDone.append(module)
 		return False
 	
-	def IsModuleBuildTree(self,module):
+	def is_module_buildTree(self,module):
 		for mod in self.buildTreeDone:
 			if mod == module:
 				return True
 		self.buildTreeDone.append(module)
 		return False
 	
-	def AddModule(self, newModule):
+	def add_module(self, newModule):
 		debug.debug("Import nodule for Taget : " + newModule.name)
 		self.moduleList.append(newModule)
 	
 	
 	# return inherit packages ...
 	"""
-	def Build(self, name, packagesName):
+	def build(self, name, packagesName):
 		for module in self.moduleList:
 			if module.name == name:
-				return module.Build(self, packagesName)
+				return module.build(self, packagesName)
 		debug.error("request to build an un-existant module name : '" + name + "'")
 	"""
 	
-	def BuildTree(self, name, packagesName):
+	def build_tree(self, name, packagesName):
 		for module in self.moduleList:
 			if module.name == name:
-				module.BuildTree(self, packagesName)
+				module.build_tree(self, packagesName)
 				return
 		debug.error("request to build tree on un-existant module name : '" + name + "'")
 	
-	def Clean(self, name):
+	def clean(self, name):
 		for module in self.moduleList:
 			if module.name == name:
-				module.Clean(self)
+				module.clean(self)
 				return
 		debug.error("request to clean an un-existant module name : '" + name + "'")
 	
-	def LoadIfNeeded(self, name):
+	def load_if_needed(self, name):
 		for elem in self.moduleList:
 			if elem.name == name:
 				return
-		lutinModule.LoadModule(self, name)
+		lutinModule.load_module(self, name)
 	
-	def LoadAll(self):
-		listOfAllTheModule = lutinModule.ListAllModule()
+	def load_all(self):
+		listOfAllTheModule = lutinModule.list_all_module()
 		for modName in listOfAllTheModule:
-			self.LoadIfNeeded(modName)
+			self.load_if_needed(modName)
 	
-	def Build(self, name, packagesName=None):
+	def build(self, name, packagesName=None):
 		if name == "dump":
 			debug.info("dump all")
-			self.LoadAll()
+			self.load_all()
 			print 'Dump all modules properties'
 			for mod in self.moduleList:
-				mod.Display(self)
+				mod.display(self)
 		elif name == "all":
-			debug.info("Build all")
-			self.LoadAll()
+			debug.info("build all")
+			self.load_all()
 			for mod in self.moduleList:
 				if self.name=="Android":
 					if mod.type == "PACKAGE":
-						mod.Build(self, None)
+						mod.build(self, None)
 				else:
 					if    mod.type == "BINARY" \
 					   or mod.type == "PACKAGE":
-						mod.Build(self, None)
+						mod.build(self, None)
 		elif name == "clean":
-			debug.info("Clean all")
-			self.LoadAll()
+			debug.info("clean all")
+			self.load_all()
 			for mod in self.moduleList:
-				mod.Clean(self)
+				mod.clean(self)
 		else:
 			# get the action an the module ....
 			gettedElement = name.split("-")
@@ -241,32 +241,32 @@ class Target:
 				actionName = "build"
 			debug.verbose("requested : " + moduleName + "-" + actionName)
 			if actionName == "install":
-				self.Build(moduleName + "-build")
-				self.InstallPackage(moduleName)
+				self.build(moduleName + "-build")
+				self.install_package(moduleName)
 			elif actionName == "uninstall":
-				self.UnInstallPackage(moduleName)
+				self.un_install_package(moduleName)
 			elif actionName == "log":
 				self.Log(moduleName)
 			else:
-				self.LoadIfNeeded(moduleName)
+				self.load_if_needed(moduleName)
 				# clean requested
 				for mod in self.moduleList:
 					if mod.name == moduleName:
 						if actionName == "dump":
 							debug.info("dump module '" + moduleName + "'")
-							return mod.Display(self)
+							return mod.display(self)
 						elif actionName == "clean":
 							debug.info("clean module '" + moduleName + "'")
-							return mod.Clean(self)
+							return mod.clean(self)
 						elif actionName == "build":
 							debug.debug("build module '" + moduleName + "'")
-							return mod.Build(self, None)
+							return mod.build(self, None)
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
 
 __startTargetName="lutinTarget"
 
-def TargetLoad(targetName, compilator, mode, generatePackage):
+def target_load(targetName, compilator, mode, generatePackage):
 	theTarget = __import__(__startTargetName + targetName)
 	#try:
 	tmpTarget = theTarget.Target(compilator, mode, generatePackage)

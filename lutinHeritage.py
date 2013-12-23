@@ -28,54 +28,54 @@ class heritage:
 			self.flags_mm=module.export_flags_mm
 			self.path=module.export_path
 	
-	def AppendAndCheck(self, listout, newElement):
+	def append_and_check(self, listout, newElement):
 		for element in listout:
 			if element==newElement:
 				return
 		listout.append(newElement)
 	
-	def AppendToInternalList(self, listout, list):
+	def append_to_internalList(self, listout, list):
 		if type(list) == type(str()):
-			self.AppendAndCheck(listout, list)
+			self.append_and_check(listout, list)
 		else:
 			# mulyiple imput in the list ...
 			for elem in list:
-				self.AppendAndCheck(listout, elem)
+				self.append_and_check(listout, elem)
 	
-	def AddFlag_LD(self, list):
-		self.AppendToInternalList(self.flags_ld, list)
+	def add_flag_LD(self, list):
+		self.append_to_internalList(self.flags_ld, list)
 	
-	def AddFlag_CC(self, list):
-		self.AppendToInternalList(self.flags_cc, list)
+	def add_flag_CC(self, list):
+		self.append_to_internalList(self.flags_cc, list)
 	
-	def AddFlag_XX(self, list):
-		self.AppendToInternalList(self.flags_xx, list)
+	def add_flag_XX(self, list):
+		self.append_to_internalList(self.flags_xx, list)
 	
-	def AddFlag_M(self, list):
-		self.AppendToInternalList(self.flags_m, list)
+	def add_flag_M(self, list):
+		self.append_to_internalList(self.flags_m, list)
 	
-	def AddFlag_MM(self, list):
-		self.AppendToInternalList(self.flags_mm, list)
+	def add_flag_MM(self, list):
+		self.append_to_internalList(self.flags_mm, list)
 	
-	def AddImportPath(self, list):
-		self.AppendToInternalList(self.path, list)
+	def add_import_path(self, list):
+		self.append_to_internalList(self.path, list)
 	
-	def AddSources(self, list):
-		self.AppendToInternalList(self.src, list)
+	def add_sources(self, list):
+		self.append_to_internalList(self.src, list)
 	
-	def NeedUpdate(self, list):
+	def need_update(self, list):
 		self.hasBeenUpdated=True
 	
-	def AddSub(self, other):
+	def add_sub(self, other):
 		if type(other) == type(None):
 			debug.verbose("input of the heriatege class is None !!!")
 			return
 		if other.hasBeenUpdated==True:
 			self.hasBeenUpdated = True
-		self.AddFlag_LD(other.flags_ld)
-		self.AddFlag_CC(other.flags_cc)
-		self.AddFlag_XX(other.flags_xx)
-		self.AddFlag_M(other.flags_m)
-		self.AddFlag_MM(other.flags_mm)
-		self.AddImportPath(other.path)
-		self.AddSources(other.src)
+		self.add_flag_LD(other.flags_ld)
+		self.add_flag_CC(other.flags_cc)
+		self.add_flag_XX(other.flags_xx)
+		self.add_flag_M(other.flags_m)
+		self.add_flag_MM(other.flags_mm)
+		self.add_import_path(other.path)
+		self.add_sources(other.src)

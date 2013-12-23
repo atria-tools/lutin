@@ -10,74 +10,75 @@ import lutinModule
 import lutinMultiprocess
 import lutinArg
 
-mylutinArg = lutinArg.lutinArg()
-mylutinArg.Add(lutinArg.argDefine("h", "help", desc="display this help"))
-mylutinArg.AddSection("option", "Can be set one time in all case")
-mylutinArg.Add(lutinArg.argDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"]], desc="Display makefile debug level (verbose) default =2"))
-mylutinArg.Add(lutinArg.argDefine("C", "color", desc="Display makefile output in color"))
-mylutinArg.Add(lutinArg.argDefine("f", "force", desc="Force the rebuild without checking the dependency"))
-mylutinArg.Add(lutinArg.argDefine("P", "pretty", desc="print the debug has pretty display"))
-mylutinArg.Add(lutinArg.argDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
-mylutinArg.Add(lutinArg.argDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
+myLutinArg = lutinArg.LutinArg()
+myLutinArg.add(lutinArg.ArgDefine("h", "help", desc="display this help"))
+myLutinArg.add_section("option", "Can be set one time in all case")
+myLutinArg.add(lutinArg.ArgDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"]], desc="display makefile debug level (verbose) default =2"))
+myLutinArg.add(lutinArg.ArgDefine("C", "color", desc="display makefile output in color"))
+myLutinArg.add(lutinArg.ArgDefine("f", "force", desc="Force the rebuild without checking the dependency"))
+myLutinArg.add(lutinArg.ArgDefine("P", "pretty", desc="print the debug has pretty display"))
+myLutinArg.add(lutinArg.ArgDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
+myLutinArg.add(lutinArg.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
 
-mylutinArg.AddSection("properties", "keep in the sequency of the cible")
-mylutinArg.Add(lutinArg.argDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
-mylutinArg.Add(lutinArg.argDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
-mylutinArg.Add(lutinArg.argDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
-mylutinArg.Add(lutinArg.argDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
+myLutinArg.add_section("properties", "keep in the sequency of the cible")
+myLutinArg.add(lutinArg.ArgDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
+myLutinArg.add(lutinArg.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
+myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
+myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 
-mylutinArg.AddSection("cible", "generate in order set")
-localArgument = mylutinArg.Parse()
+myLutinArg.add_section("cible", "generate in order set")
+localArgument = myLutinArg.parse()
 
 """
-	Display the help of this makefile
+	display the help of this makefile
 """
 def usage():
 	# generic argument displayed : 
-	mylutinArg.Display()
+	myLutinArg.display()
 	print "		all"
-	print "			Build all (only for the current selected board) (bynary and packages)"
+	print "			build all (only for the current selected board) (bynary and packages)"
 	print "		clean"
-	print "			Clean all (same as previous)"
+	print "			clean all (same as previous)"
 	print "		dump"
 	print "			Dump all the module dependency and properties"
-	listOfAllModule = lutinModule.ListAllModuleWithDesc()
+	listOfAllModule = lutinModule.list_all_module_with_desc()
 	for mod in listOfAllModule:
 		print "		" + mod[0] + " / " + mod[0] + "-clean / " + mod[0] + "-dump"
-		print "			" + mod[1]
+		if mod[1] != "":
+			print "			" + mod[1]
 	print "	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all"
 	exit(0)
 
 # preparse the argument to get the verbose element for debug mode
 def parseGenericArg(argument,active):
-	if argument.GetOptionName() == "help":
+	if argument.get_option_nName() == "help":
 		#display help
 		if active==False:
 			usage()
 		return True
-	elif argument.GetOptionName()=="jobs":
+	elif argument.get_option_nName()=="jobs":
 		if active==True:
-			lutinMultiprocess.SetCoreNumber(int(argument.GetArg()))
+			lutinMultiprocess.set_core_number(int(argument.get_arg()))
 		return True
-	elif argument.GetOptionName() == "verbose":
+	elif argument.get_option_nName() == "verbose":
 		if active==True:
-			debug.SetLevel(int(argument.GetArg()))
+			debug.set_level(int(argument.get_arg()))
 		return True
-	elif argument.GetOptionName() == "color":
+	elif argument.get_option_nName() == "color":
 		if active==True:
-			debug.EnableColor()
+			debug.enable_color()
 		return True
-	elif argument.GetOptionName() == "force":
+	elif argument.get_option_nName() == "force":
 		if active==True:
-			lutinEnv.SetForceMode(True)
+			lutinEnv.set_force_mode(True)
 		return True
-	elif argument.GetOptionName() == "pretty":
+	elif argument.get_option_nName() == "pretty":
 		if active==True:
-			lutinEnv.SetPrintPrettyMode(True)
+			lutinEnv.set_print_pretty_mode(True)
 		return True
-	elif argument.GetOptionName() == "force-strip":
+	elif argument.get_option_nName() == "force-strip":
 		if active==True:
-			lutinEnv.SetForceStripMode(True)
+			lutinEnv.set_force_strip_mode(True)
 		return True
 	return False
 
@@ -110,18 +111,18 @@ def Start():
 	for argument in localArgument:
 		if True==parseGenericArg(argument, False):
 			continue
-		elif argument.GetOptionName() == "package":
+		elif argument.get_option_nName() == "package":
 			generatePackage=False
-		elif argument.GetOptionName() == "compilator":
-			if compilator!=argument.GetArg():
-				debug.debug("change compilator ==> " + argument.GetArg())
-				compilator=argument.GetArg()
+		elif argument.get_option_nName() == "compilator":
+			if compilator!=argument.get_arg():
+				debug.debug("change compilator ==> " + argument.get_arg())
+				compilator=argument.get_arg()
 				#remove previous target
 				target = None
-		elif argument.GetOptionName() == "target":
+		elif argument.get_option_nName() == "target":
 			# No check input ==> this will be verify automaticly chen the target will be loaded
-			if targetName!=argument.GetArg():
-				targetName=argument.GetArg()
+			if targetName!=argument.get_arg():
+				targetName=argument.get_arg()
 				debug.debug("change target ==> " + targetName + " & reset mode : gcc&release")
 				#reset properties by defauult:
 				compilator="gcc"
@@ -129,37 +130,37 @@ def Start():
 				generatePackage=True
 				#remove previous target
 				target = None
-		elif argument.GetOptionName() == "mode":
-			if mode!=argument.GetArg():
-				mode = argument.GetArg()
+		elif argument.get_option_nName() == "mode":
+			if mode!=argument.get_arg():
+				mode = argument.get_arg()
 				debug.debug("change mode ==> " + mode)
 				#remove previous target
 				target = None
 		else:
-			if argument.GetOptionName() != "":
-				debug.warning("Can not understand argument : '" + argument.GetOptionName() + "'")
+			if argument.get_option_nName() != "":
+				debug.warning("Can not understand argument : '" + argument.get_option_nName() + "'")
 				usage()
 			else:
 				#load the target if needed :
 				if target == None:
-					target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
-				target.Build(argument.GetArg())
+					target = lutinTarget.target_load(targetName, compilator, mode, generatePackage)
+				target.build(argument.get_arg())
 				actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
 		#load the target if needed :
 		if target == None:
-			target = lutinTarget.TargetLoad(targetName, compilator, mode, generatePackage)
-		target.Build("all")
+			target = lutinTarget.target_load(targetName, compilator, mode, generatePackage)
+		target.build("all")
 	# stop all started threads 
-	lutinMultiprocess.UnInit()
+	lutinMultiprocess.un_init()
 
 """
 	When the user use with make.py we initialise ourself
 """
 if __name__ == '__main__':
 	debug.verbose("Use Make as a make stadard")
-	sys.path.append(lutinTools.GetRunFolder())
+	sys.path.append(lutinTools.get_run_folder())
 	debug.verbose(" try to impoert module 'lutinBase.py'")
 	if os.path.exists("lutinBase.py" )==True:
 		__import__("lutinBase")
@@ -172,7 +173,7 @@ if __name__ == '__main__':
 				   and folder.lower()!="archive" \
 				   and folder.lower()!="out" :
 					debug.debug("Automatic load path: '" + folder + "'")
-					lutinModule.ImportPath(folder)
+					lutinModule.import_path(folder)
 	Start()
 
 

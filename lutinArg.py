@@ -2,18 +2,18 @@
 import sys
 import lutinDebug as debug
 
-class argElement:
+class ArgElement:
 	def __init__(self, option, value=""):
 		self.m_option = option;
 		self.m_arg = value;
 	
-	def GetOptionName(self):
+	def get_option_nName(self):
 		return self.m_option
 	
-	def GetArg(self):
+	def get_arg(self):
 		return self.m_arg
 	
-	def Display(self):
+	def display(self):
 		if len(self.m_arg)==0:
 			debug.info("option : " + self.m_option)
 		elif len(self.m_option)==0:
@@ -22,7 +22,7 @@ class argElement:
 			debug.info("option : " + self.m_option + ":" + self.m_arg)
 
 
-class argDefine:
+class ArgDefine:
 	def __init__(self,
 	             smallOption="", # like v for -v
 	             bigOption="", # like verbose for --verbose
@@ -41,19 +41,19 @@ class argDefine:
 				self.m_haveParam = False
 		self.m_description = desc;
 	
-	def GetOptionSmall(self):
+	def get_option_small(self):
 		return self.m_optionSmall
 		
-	def GetOptionBig(self):
+	def get_option_big(self):
 		return self.m_optionBig
 	
-	def NeedParameters(self):
+	def need_parameters(self):
 		return self.m_haveParam
 	
-	def GetPorperties(self):
+	def get_porperties(self):
 		return ""
 	
-	def CheckAvaillable(self, argument):
+	def check_availlable(self, argument):
 		if len(self.m_list)==0:
 			return True
 		for element,desc in self.m_list:
@@ -61,7 +61,7 @@ class argDefine:
 				return True
 		return False
 	
-	def Display(self):
+	def display(self):
 		if self.m_optionSmall != "" and self.m_optionBig != "":
 			print("		-" + self.m_optionSmall + " / --" + self.m_optionBig)
 		elif self.m_optionSmall != "":
@@ -89,50 +89,50 @@ class argDefine:
 					tmpElementPrint += val
 				print("				{ " + tmpElementPrint + " }")
 	
-	def Parse(self, argList, currentID):
+	def parse(self, argList, currentID):
 		return currentID;
 
 
-class argSection:
+class ArgSection:
 	def __init__(self,
 	             sectionName="",
 	             desc=""):
 		self.m_section = sectionName;
 		self.m_description = desc;
 	
-	def GetOptionSmall(self):
+	def get_option_small(self):
 		return ""
 		
-	def GetOptionBig(self):
+	def get_option_big(self):
 		return ""
 		
-	def GetPorperties(self):
+	def get_porperties(self):
 		return " [" + self.m_section + "]"
 	
-	def Display(self):
+	def display(self):
 		print("	[" + self.m_section + "] : " + self.m_description)
 	
-	def Parse(self, argList, currentID):
+	def parse(self, argList, currentID):
 		return currentID;
 
 
-class lutinArg:
+class LutinArg:
 	def __init__(self):
 		self.m_listProperties = []
 	
-	def Add(self, argument):
-		self.m_listProperties.append(argument) #argDefine(smallOption, bigOption, haveParameter, parameterList, description));
+	def add(self, argument):
+		self.m_listProperties.append(argument) #ArgDefine(smallOption, bigOption, haveParameter, parameterList, description));
 	
-	def AddSection(self, sectionName, sectionDesc):
-		self.m_listProperties.append(argSection(sectionName, sectionDesc))
+	def add_section(self, sectionName, sectionDesc):
+		self.m_listProperties.append(ArgSection(sectionName, sectionDesc))
 	
-	def Parse(self):
+	def parse(self):
 		listArgument = [] # composed of list element
-		NotParseNextElement=False
+		NotparseNextElement=False
 		for iii in range(1, len(sys.argv)):
 			# special case of parameter in some elements
-			if NotParseNextElement==True:
-				NotParseNextElement = False
+			if NotparseNextElement==True:
+				NotparseNextElement = False
 				continue
 			debug.verbose("parse [" + str(iii) + "]=" + sys.argv[iii])
 			argument = sys.argv[iii]
@@ -148,41 +148,41 @@ class lutinArg:
 			if option[:2]=="--":
 				# big argument
 				for prop in self.m_listProperties:
-					if prop.GetOptionBig()=="":
+					if prop.get_option_big()=="":
 						continue
-					if prop.GetOptionBig() == option[2:]:
+					if prop.get_option_big() == option[2:]:
 						# find it
 						debug.verbose("find argument 2 : " + option[2:])
-						if prop.NeedParameters()==True:
-							internalSub = option[2+len(prop.GetOptionBig()):]
+						if prop.need_parameters()==True:
+							internalSub = option[2+len(prop.get_option_big()):]
 							if len(internalSub)!=0:
 								if len(optionParam)!=0:
 									# wrong argument ...
-									debug.warning("maybe wrong argument for : '" + prop.GetOptionBig() + "' cmdLine='" + argument + "'")
-									prop.Display()
+									debug.warning("maybe wrong argument for : '" + prop.get_option_big() + "' cmdLine='" + argument + "'")
+									prop.display()
 									continue
 								optionParam = internalSub
 							if len(optionParam)==0:
 								#Get the next parameters 
 								if len(sys.argv) > iii+1:
 									optionParam = sys.argv[iii+1]
-									NotParseNextElement=True
+									NotparseNextElement=True
 								else :
 									# missing arguments
-									debug.warning("parsing argument error : '" + prop.GetOptionBig() + "' Missing : subParameters ... cmdLine='" + argument + "'")
-									prop.Display()
+									debug.warning("parsing argument error : '" + prop.get_option_big() + "' Missing : subParameters ... cmdLine='" + argument + "'")
+									prop.display()
 									exit(-1)
-							if prop.CheckAvaillable(optionParam)==False:
-								debug.warning("argument error : '" + prop.GetOptionBig() + "' SubParameters not availlable ... cmdLine='" + argument + "' option='" + optionParam + "'")
-								prop.Display()
+							if prop.check_availlable(optionParam)==False:
+								debug.warning("argument error : '" + prop.get_option_big() + "' SubParameters not availlable ... cmdLine='" + argument + "' option='" + optionParam + "'")
+								prop.display()
 								exit(-1)
-							listArgument.append(argElement(prop.GetOptionBig(),optionParam))
+							listArgument.append(ArgElement(prop.get_option_big(),optionParam))
 							argumentFound = True
 						else:
 							if len(optionParam)!=0:
-								debug.warning("parsing argument error : '" + prop.GetOptionBig() + "' need no subParameters : '" + optionParam + "'   cmdLine='" + argument + "'")
-								prop.Display()
-							listArgument.append(argElement(prop.GetOptionBig()))
+								debug.warning("parsing argument error : '" + prop.get_option_big() + "' need no subParameters : '" + optionParam + "'   cmdLine='" + argument + "'")
+								prop.display()
+							listArgument.append(ArgElement(prop.get_option_big()))
 							argumentFound = True
 						break;
 				if False==argumentFound:
@@ -190,61 +190,61 @@ class lutinArg:
 			elif option[:1]=="-":
 				# small argument
 				for prop in self.m_listProperties:
-					if prop.GetOptionSmall()=="":
+					if prop.get_option_small()=="":
 						continue
-					if prop.GetOptionSmall() == option[1:1+len(prop.GetOptionSmall())]:
+					if prop.get_option_small() == option[1:1+len(prop.get_option_small())]:
 						# find it
-						debug.verbose("find argument 1 : " + option[1:1+len(prop.GetOptionSmall())])
-						if prop.NeedParameters()==True:
-							internalSub = option[1+len(prop.GetOptionSmall()):]
+						debug.verbose("find argument 1 : " + option[1:1+len(prop.get_option_small())])
+						if prop.need_parameters()==True:
+							internalSub = option[1+len(prop.get_option_small()):]
 							if len(internalSub)!=0:
 								if len(optionParam)!=0:
 									# wrong argument ...
-									debug.warning("maybe wrong argument for : '" + prop.GetOptionBig() + "' cmdLine='" + argument + "'")
-									prop.Display()
+									debug.warning("maybe wrong argument for : '" + prop.get_option_big() + "' cmdLine='" + argument + "'")
+									prop.display()
 									continue
 								optionParam = internalSub
 							if len(optionParam)==0:
 								#Get the next parameters 
 								if len(sys.argv) > iii+1:
 									optionParam = sys.argv[iii+1]
-									NotParseNextElement=True
+									NotparseNextElement=True
 								else :
 									# missing arguments
-									debug.warning("parsing argument error : '" + prop.GetOptionBig() + "' Missing : subParameters  cmdLine='" + argument + "'")
-									prop.Display()
+									debug.warning("parsing argument error : '" + prop.get_option_big() + "' Missing : subParameters  cmdLine='" + argument + "'")
+									prop.display()
 									exit(-1)
-							if prop.CheckAvaillable(optionParam)==False:
-								debug.warning("argument error : '" + prop.GetOptionBig() + "' SubParameters not availlable ... cmdLine='" + argument + "' option='" + optionParam + "'")
-								prop.Display()
+							if prop.check_availlable(optionParam)==False:
+								debug.warning("argument error : '" + prop.get_option_big() + "' SubParameters not availlable ... cmdLine='" + argument + "' option='" + optionParam + "'")
+								prop.display()
 								exit(-1)
-							listArgument.append(argElement(prop.GetOptionBig(),optionParam))
+							listArgument.append(ArgElement(prop.get_option_big(),optionParam))
 							argumentFound = True
 						else:
 							if len(optionParam)!=0:
-								debug.warning("parsing argument error : '" + prop.GetOptionBig() + "' need no subParameters : '" + optionParam + "'  cmdLine='" + argument + "'")
-								prop.Display()
-							listArgument.append(argElement(prop.GetOptionBig()))
+								debug.warning("parsing argument error : '" + prop.get_option_big() + "' need no subParameters : '" + optionParam + "'  cmdLine='" + argument + "'")
+								prop.display()
+							listArgument.append(ArgElement(prop.get_option_big()))
 							argumentFound = True
 						break;
 			
 			if argumentFound==False:
 				#unknow element ... ==> just add in the list ...
 				debug.verbose("unknow argument : " + argument)
-				listArgument.append(argElement("", argument))
+				listArgument.append(ArgElement("", argument))
 			
 		#for argument in listArgument:
-		#	argument.Display()
+		#	argument.display()
 		#exit(0)
 		return listArgument;
 	
 	
 	
-	def Display(self):
+	def display(self):
 		print "usage:"
 		listOfPropertiesArg = "";
 		for element in self.m_listProperties :
-			listOfPropertiesArg += element.GetPorperties()
+			listOfPropertiesArg += element.get_porperties()
 		print "	" + sys.argv[0] + listOfPropertiesArg + " ..."
 		for element in self.m_listProperties :
-			element.Display()
+			element.display()

@@ -18,12 +18,12 @@ color_cyan   = ""
 
 debugLock = threading.Lock()
 
-def SetLevel(id):
+def set_level(id):
 	global debugLevel
 	debugLevel = id
 	#print "SetDebug level at " + str(debugLevel)
 
-def EnableColor():
+def enable_color():
 	global debugColor
 	debugColor = True
 	global color_default
@@ -80,14 +80,14 @@ def error(input, threadID=-1):
 		debugLock.acquire()
 		print(color_red + "[ERROR] " + input + color_default)
 		debugLock.release()
-	lutinMultiprocess.ErrorOccured()
+	lutinMultiprocess.error_occured()
 	if threadID != -1:
 		thread.interrupt_main()
 	exit(-1)
 	#os_exit(-1)
 	#raise "error happend"
 
-def printElement(type, lib, dir, name):
+def print_element(type, lib, dir, name):
 	global debugLock
 	global debugLevel
 	if debugLevel >= 3:

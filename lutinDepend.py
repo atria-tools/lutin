@@ -4,14 +4,14 @@ import lutinDebug as debug
 import lutinEnv as environement
 
 
-def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
+def need_re_build(dst, src, dependFile, file_cmd="", cmdLine=""):
 	debug.verbose("Resuest check of dependency of :")
 	debug.verbose("		dst='" + dst + "'")
 	debug.verbose("		str='" + src + "'")
 	debug.verbose("		dept='" + dependFile + "'")
 	debug.verbose("		cmd='" + file_cmd + "'")
 	# if force mode selected ==> just force rebuild ...
-	if environement.GetForceMode():
+	if environement.get_force_mode():
 		debug.verbose("			==> must rebuild (force mode)")
 		return True
 	
@@ -86,7 +86,7 @@ def NeedReBuild(dst, src, dependFile, file_cmd="", cmdLine=""):
 
 
 
-def NeedRePackage(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
+def need_re_package(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
 	debug.verbose("Resuest check of dependency of :")
 	debug.verbose("		dst='" + dst + "'")
 	debug.verbose("		src()=")
@@ -97,7 +97,7 @@ def NeedRePackage(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
 		return False
 	
 	# if force mode selected ==> just force rebuild ...
-	if environement.GetForceMode():
+	if environement.get_force_mode():
 		debug.verbose("			==> must re-package (force mode)")
 		return True
 	

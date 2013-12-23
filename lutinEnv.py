@@ -5,32 +5,32 @@ import lutinDebug as debug
 
 forceMode=False
 
-def SetForceMode(val):
+def set_force_mode(val):
 	global forceMode
 	if val==1:
 		forceMode = 1
 	else:
 		forceMode = 0
 
-def GetForceMode():
+def get_force_mode():
 	global forceMode
 	return forceMode
 
 
 printPrettyMode=False
 
-def SetPrintPrettyMode(val):
+def set_print_pretty_mode(val):
 	global printPrettyMode
 	if val==True:
 		printPrettyMode = True
 	else:
 		printPrettyMode = False
 
-def GetPrintPrettyMode():
+def get_print_pretty_mode():
 	global printPrettyMode
 	return printPrettyMode
 
-def PrintPretty(myString):
+def print_pretty(myString):
 	global printPrettyMode
 	if True==printPrettyMode:
 		if myString[len(myString)-1]==' ' : 
@@ -57,14 +57,14 @@ def PrintPretty(myString):
 
 forceStripMode=False
 
-def SetForceStripMode(val):
+def set_force_strip_mode(val):
 	global forceStripMode
 	if val==True:
 		forceStripMode = True
 	else:
 		forceStripMode = False
 
-def GetForceStripMode():
+def get_force_strip_mode():
 	global forceStripMode
 	return forceStripMode
 

@@ -24,18 +24,18 @@ class Target(lutinTarget.Target):
 		self.suffix_package=''
 		
 	
-	def GetStagingFolder(self, binaryName):
-		return lutinTools.GetRunFolder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/Contents/"
+	def get_staging_folder(self, binaryName):
+		return lutinTools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/Contents/"
 	
-	def GetStagingFolderData(self, binaryName):
-		return self.GetStagingFolder(binaryName) + self.folder_data + "/"
+	def get_staging_folder_data(self, binaryName):
+		return self.get_staging_folder(binaryName) + self.folder_data + "/"
 	
-	def MakePackage(self, pkgName, pkgProperties, basePkgPath):
+	def make_package(self, pkgName, pkgProperties, basePkgPath):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		# http://www.sandroid.org/imcross/#Deployment
-		infoFile=self.GetStagingFolder(pkgName) + "/Info.plist"
+		infoFile=self.get_staging_folder(pkgName) + "/Info.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
@@ -55,7 +55,7 @@ class Target(lutinTarget.Target):
 		tmpFile.write("\n\n")
 		tmpFile.flush()
 		tmpFile.close()
-		infoFile=self.GetStagingFolder(pkgName) + "/PkgInfo"
+		infoFile=self.get_staging_folder(pkgName) + "/PkgInfo"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write("APPL?????")
@@ -66,14 +66,14 @@ class Target(lutinTarget.Target):
 		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
 		#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
 	
-	def InstallPackage(self, pkgName):
+	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
-	def UnInstallPackage(self, pkgName):
+	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")

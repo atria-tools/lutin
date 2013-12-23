@@ -37,23 +37,23 @@ class Target(lutinTarget.Target):
 		self.suffix_package=''
 	
 	
-	def GetStagingFolderData(self, binaryName):
-		return self.GetStagingFolder(binaryName) + self.folder_data
+	def get_staging_folder_data(self, binaryName):
+		return self.get_staging_folder(binaryName) + self.folder_data
 	
-	def MakePackage(self, pkgName, pkgProperties, basePkgPath):
+	def make_package(self, pkgName, pkgProperties, basePkgPath):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 	
-	def InstallPackage(self, pkgName):
+	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
-	def UnInstallPackage(self, pkgName):
+	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
