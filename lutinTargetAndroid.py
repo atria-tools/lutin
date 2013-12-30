@@ -483,7 +483,7 @@ class Target(lutinTarget.Target):
 		cmdLine =   "java -Xmx128M " \
 		          + "-classpath " + self.folder_sdk + "/tools/lib/sdklib.jar " \
 		          + builderDebug \
-		          + "com.android.sdklib.build.ApkbuilderMain " \
+		          + "com.android.sdklib.build.ApkBuilderMain " \
 		          + self.get_staging_folder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
 		          + "-u " \
 		          + "-z " + self.get_staging_folder(pkgName) + "/resources.res " \
