@@ -227,8 +227,9 @@ class Target(lutinTarget.Target):
 		tmpFile.flush()
 		tmpFile.close()
 		
-		
-		lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", True)
+		if     "ICON" in pkgProperties.keys() \
+		   and pkgProperties["ICON"] != "":
+			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", True)
 		
 		
 		if pkgProperties["ANDROID_MANIFEST"]!="":

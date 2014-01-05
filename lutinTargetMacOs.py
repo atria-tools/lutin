@@ -34,6 +34,11 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
+		
+		if    "ICON" in pkgProperties.keys() \
+		   and pkgProperties["ICON"] != "":
+			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder_data(pkgName) + "/icon.icns", True)
+		
 		# http://www.sandroid.org/imcross/#Deployment
 		infoFile=self.get_staging_folder(pkgName) + "/Info.plist"
 		# Create the info file
@@ -49,7 +54,7 @@ class Target(lutinTarget.Target):
 		tmpFile.write("        <key>CFBundleIdentifier</key>\n")
 		tmpFile.write("        <string>com."+pkgProperties["COMPAGNY_NAME2"]+"."+pkgName+"</string>\n")
 		tmpFile.write("        <key>CFBundleIconFile</key>\n")
-		tmpFile.write("        <string>"+pkgName+".icns</string>\n")
+		tmpFile.write("        <string>icon.icns</string>\n")
 		tmpFile.write("    </dict>\n")
 		tmpFile.write("</plist>\n")
 		tmpFile.write("\n\n")
