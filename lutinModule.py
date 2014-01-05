@@ -698,12 +698,13 @@ def load_module(target, name):
 			theModule = __import__(__startModuleName + name)
 			#try:
 			tmpElement = theModule.create(target)
+			#except:
+			#tmpElement = None
+			#debug.warning(" no function 'create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
 			if (tmpElement == None) :
 				debug.debug("Request load module '" + name + "' not define for this platform")
 			else:
 				target.add_module(tmpElement)
-			#except:
-			#	debug.error(" no function 'Create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
 
 def list_all_module():
 	global moduleList
