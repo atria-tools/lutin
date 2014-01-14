@@ -1,15 +1,18 @@
 #!/usr/bin/python
 import lutinDebug as debug
 import datetime
-import lutinTools
-import lutinModule
+import lutinTools as tools
+import os
+import fnmatch
 import lutinExtProjectGenerator
+from collections import defaultdict
+
 
 # id example : FFBA2F79187F44AE0034CC66
 genericID    =                   100000
 
 def convert_name_in_base_id(name,fill=True):
-	out = ""
+	out = "FF"
 	for element in name.lower():
 		if   element == "a": out += "01"
 		elif element == "b": out += "02"
@@ -52,7 +55,7 @@ dictId = {}
 
 def convert_folder_in_base_id(name, package):
 	global dictId
-	debug.info(" generate Id for : " + package + ":" + name);
+	debug.verbose(" generate Id for : " + package + ":" + name);
 	if package not in dictId.keys():
 		dictId[package] = {"lastID": 100000, "sub":{}}
 	if name not in dictId[package]["sub"].keys():
@@ -60,12 +63,6 @@ def convert_folder_in_base_id(name, package):
 		dictId[package]["lastID"] = dictId[package]["lastID"] + 1
 		dictId[package]["sub"][name] = {"id":generatedID}
 	return dictId[package]["sub"][name]["id"]
-
-def create_tree(fileList):
-	tree = {}
-	##"declare-name"
-
-from collections import defaultdict
 
 FILE_MARKER = '<files>'
 
@@ -158,34 +155,45 @@ def generate_tree(treedata, package, tree = []):
 
 
 XCodeTypeElements = {
-	'a':         ('archive.ar',            'PBXFrameworksBuildPhase'),
-	'app':       ('wrapper.application',   None),
-	's':         ('sourcecode.asm',        'PBXSourcesBuildPhase'),
-	'c':         ('sourcecode.c.c',        'PBXSourcesBuildPhase'),
-	'cpp':       ('sourcecode.cpp.cpp',    'PBXSourcesBuildPhase'),
-	'framework': ('wrapper.framework',     'PBXFrameworksBuildPhase'),
-	'h':         ('sourcecode.c.h',        None),
-	'hpp':       ('sourcecode.c.h',        None),
-	'icns':      ('image.icns',            'PBXResourcesBuildPhase'),
-	'm':         ('sourcecode.c.objc',     'PBXSourcesBuildPhase'),
-	'j':         ('sourcecode.c.objc',     'PBXSourcesBuildPhase'),
-	'mm':        ('sourcecode.cpp.objcpp', 'PBXSourcesBuildPhase'),
-	'nib':       ('wrapper.nib',           'PBXResourcesBuildPhase'),
-	'plist':     ('text.plist.xml',        'PBXResourcesBuildPhase'),
-	'json':      ('text.json',             'PBXResourcesBuildPhase'),
-	'png':       ('image.png',             'PBXResourcesBuildPhase'),
-	'rtf':       ('text.rtf',              'PBXResourcesBuildPhase'),
-	'tiff':      ('image.tiff',            'PBXResourcesBuildPhase'),
-	'txt':       ('text',                  'PBXResourcesBuildPhase'),
-	'xcodeproj': ('wrapper.pb-project',    None),
-	'xib':       ('file.xib',              'PBXResourcesBuildPhase'),
-	'strings':   ('text.plist.strings',    'PBXResourcesBuildPhase'),
-	'bundle':    ('wrapper.plug-in',       'PBXResourcesBuildPhase'),
-	'dylib':     ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase'),
-	'fsh':       ('sourcecode.glsl',       'PBXResourcesBuildPhase'),
-	'frag':      ('sourcecode.glsl',       'PBXResourcesBuildPhase'),
-	'vsh':       ('sourcecode.glsl',       'PBXResourcesBuildPhase'),
-	'vert':      ('sourcecode.glsl',       'PBXResourcesBuildPhase')
+	'a':         ('archive.ar',            'PBXFrameworksBuildPhase', ''),
+	'xcodeproj': ('wrapper.pb-project',    None,                      '""'),
+	'app':       ('wrapper.application',   None,                      ''),
+	'framework': ('wrapper.framework',     'PBXFrameworksBuildPhase', 'SDKROOT'),
+	'dylib':     ('compiled.mach-o.dylib', 'PBXFrameworksBuildPhase', '"<group>"'),
+	'h':         ('sourcecode.c.h',        None,                      '"<group>"'),
+	'H':         ('sourcecode.c.h',        None,                      '"<group>"'),
+	'hpp':       ('sourcecode.c.h',        None,                      '"<group>"'),
+	'hxx':       ('sourcecode.c.h',        None,                      '"<group>"'),
+	'S':         ('sourcecode.asm',        'PBXSourcesBuildPhase',    '"<group>"'),
+	's':         ('sourcecode.asm',        'PBXSourcesBuildPhase',    '"<group>"'),
+	'c':         ('sourcecode.c.c',        'PBXSourcesBuildPhase',    '"<group>"'),
+	'cpp':       ('sourcecode.cpp.cpp',    'PBXSourcesBuildPhase',    '"<group>"'),
+	'cxx':       ('sourcecode.cpp.cpp',    'PBXSourcesBuildPhase',    '"<group>"'),
+	'm':         ('sourcecode.c.objc',     'PBXSourcesBuildPhase',    '"<group>"'),
+	'j':         ('sourcecode.c.objc',     'PBXSourcesBuildPhase',    '"<group>"'),
+	'mm':        ('sourcecode.cpp.objcpp', 'PBXSourcesBuildPhase',    '"<group>"'),
+	'icns':      ('image.icns',            'PBXResourcesBuildPhase',  '"<group>"'),
+	'nib':       ('wrapper.nib',           'PBXResourcesBuildPhase',  '"<group>"'),
+	'plist':     ('text.plist.xml',        'PBXResourcesBuildPhase',  '"<group>"'),
+	'json':      ('text.json',             'PBXResourcesBuildPhase',  '"<group>"'),
+	'rtf':       ('text.rtf',              'PBXResourcesBuildPhase',  '"<group>"'),
+	'png':       ('image.png',             'PBXResourcesBuildPhase',  '"<group>"'),
+	'tiff':      ('image.tiff',            'PBXResourcesBuildPhase',  '"<group>"'),
+	'txt':       ('text',                  'PBXResourcesBuildPhase',  '"<group>"'),
+	'fsh':       ('sourcecode.glsl',       'PBXResourcesBuildPhase',  '"<group>"'),
+	'frag':      ('sourcecode.glsl',       'PBXResourcesBuildPhase',  '"<group>"'),
+	'vsh':       ('sourcecode.glsl',       'PBXResourcesBuildPhase',  '"<group>"'),
+	'vert':      ('sourcecode.glsl',       'PBXResourcesBuildPhase',  '"<group>"'),
+	'svg':       ('image.png',             'PBXResourcesBuildPhase',  '"<group>"'),
+	'xml':       ('sourcecode.xml',        'PBXResourcesBuildPhase',  '"<group>"'),
+	'prog':      ('text.xml',              'PBXResourcesBuildPhase',  '"<group>"'),
+	'ttf':       ('text',                  'PBXResourcesBuildPhase',  '"<group>"'),
+	'conf':      ('text',                  'PBXResourcesBuildPhase',  '"<group>"'),
+	'emf':       ('text',                  'PBXResourcesBuildPhase',  '"<group>"'),
+	'xib':       ('file.xib',              'PBXResourcesBuildPhase',  '"<group>"'),
+	'strings':   ('text.plist.strings',    'PBXResourcesBuildPhase',  '"<group>"'),
+	'bundle':    ('wrapper.plug-in',       'PBXResourcesBuildPhase',  '"<group>"'),
+	'storyboard':('file.storyboard',       'PBXResourcesBuildPhase',  '"<group>"')
 }
 
 class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
@@ -193,17 +201,26 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		lutinExtProjectGenerator.ExtProjectGenerator.__init__(self, "XCode")
 		self.baseId = "FFFFFFFFFFFFFFFFFF"
 		
+		# set default framwork:
+		self.add_files("Frameworks",
+		               "System/Library/Frameworks",
+		               [ "Foundation.framework",
+		                 "CoreGraphics.framework",
+		                 "UIKit.framework",
+		                 "GLKit.framework",
+		                 "OpenGLES.framework",
+		                 "XCTest.framework" ]);
+		
 	def set_project_name(self, name):
 		self.name = name
 		self.baseId = convert_name_in_base_id(name)
 	
 	def add_files(self, group, basePath, srcList):
-		genericID = 100001
-		groupBaseID = convert_name_in_base_id(group)
-		if group in self.groups.keys() :
-			debug.error("use case not manage yet ...")
-			return
-		reworkedListFile = []
+		if group not in self.groups.keys() :
+			self.groups[group] = {
+			    "list-files" : [],
+			    "extra-flags" : []
+			    }
 		for element in srcList:
 			debug.info("plop : " + str(element))
 			debug.info("plop : " + str(basePath))
@@ -217,17 +234,38 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 			if pos >= 0:
 				extention = simpleName[pos+1:]
 			
-			reworkedListFile.append({ "path" : path,
-			                          "name" : simpleName,
-			                          "extention":extention,
-			                          "declare-name":element,
-			                          "id" : groupBaseID + str(genericID)})
-			genericID += 1
-		self.groups[group] = {
-		    "id" : groupBaseID + str(genericID + 100000),
-		    "list-files" : reworkedListFile,
-		    "extra-flags" : []
-		    }
+			self.groups[group]["list-files"].append({
+			    "path" : path,
+			    "name" : simpleName,
+			    "extention":extention,
+			    "declare-name":element})
+	
+	def add_data_file(self, basePath, srcList):
+		realBasePath = os.path.realpath(basePath)
+		if realBasePath[-1] == "/":
+			realBasePath = realBasePath[:-1]
+		debug.debug("add data file : " + str(srcList))
+		for realName,destName in srcList:
+			tools.copy_file(realBasePath+'/'+realName, 'out/iOs/' + self.name + '.xcodeproj/data/' + destName, force=True)
+			self.add_files("data", 'out/iOs/' + self.name + 'xcodeprj/data', [destName])
+	
+	def add_data_folder(self, basePath, srcList):
+		realBasePath = basePath
+		if realBasePath[-1] == "/":
+			realBasePath = realBasePath[:-1]
+		debug.debug("add data folder : " + str(srcList))
+		for inputPath,outputPath in srcList:
+			tmpPath = os.path.dirname(os.path.realpath(realBasePath + '/' + inputPath))
+			tmpRule = os.path.basename(inputPath)
+			debug.warning(" add folder : '" + tmpPath + "' rule : '" + tmpRule + "'")
+			for root, dirnames, filenames in os.walk(tmpPath):
+				tmpList = filenames
+				if len(tmpRule)>0:
+					tmpList = fnmatch.filter(filenames, tmpRule)
+				# Import the module :
+				for cycleFile in tmpList:
+					#for cycleFile in filenames:
+					self.add_data_file(tmpPath, [[cycleFile, outputPath+cycleFile]])
 	
 	def generate_project_file(self):
 		
@@ -248,9 +286,15 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 			for files in element["list-files"]:
 				debug.debug(" PBXBuildFile ?? " + str(files))
 				if files["extention"] in XCodeTypeElements.keys():
-					if XCodeTypeElements[files["extention"]][1] == "PBXSourcesBuildPhase":
-						data +='		/* ' + files["name"] + ' */\n'
-						data +='		************************ = { isa = PBXBuildFile; fileRef = ' + files["id"] + '; };\n'
+					if    XCodeTypeElements[files["extention"]][1] == "PBXSourcesBuildPhase" \
+					   or XCodeTypeElements[files["extention"]][1] == "PBXFrameworksBuildPhase"\
+					   or XCodeTypeElements[files["extention"]][1] == "PBXSourcesBuildPhase"\
+					   or XCodeTypeElements[files["extention"]][1] == "PBXVariantGroup":
+						data +='		' + convert_folder_in_base_id(files["declare-name"] + '_PBXBuildFile', group)
+						data +=' /* ' + files["name"] + ' in ' + group + ' */ = {'
+						data +=' isa = PBXBuildFile;'
+						data +=' fileRef = ' + convert_folder_in_base_id(files["declare-name"], group) + ';'
+						data +=' };\n'
 		data +='/* End PBXBuildFile section */\n'
 		data +='\n'
 		data +='/* Begin PBXContainerItemProxy section */\n'
@@ -281,82 +325,19 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 				debug.debug(" PBXBuildFile ?? " + str(files))
 				data +='		/* ' + files["name"] + ' */\n'
 				if files["extention"] in XCodeTypeElements.keys():
-				
 					data +='		' + convert_folder_in_base_id(files["declare-name"], group) + ' = {'
 					data +=' isa = PBXBuildFile;'
 					data +=' lastKnownFileType = ' + XCodeTypeElements[files["extention"]][0] + ';'
 					data +=' path = ' + files["path"] + ';'
 					data +=' name = ' + files["name"] + ';'
-					data +=' sourceTree = "<group>"; };\n'
+					data +=' sourceTree = ' + XCodeTypeElements[files["extention"]][2] + '; };\n'
 				else:
 					data +='		' + convert_folder_in_base_id(files["declare-name"], group) + ' = {'
 					data +=' isa = PBXBuildFile;'
-					data +=' lastKnownFileType = ' + XCodeTypeElements[files["extention"]][0] + ';'
+					#data +=' lastKnownFileType = ' + XCodeTypeElements[files["extention"]][0] + ';'
 					data +=' path = ' + files["path"] + ';'
 					data +=' name = ' + files["name"] + ';'
 					data +=' sourceTree = "<group>"; };\n'
-		"""
-		data +='		FFBA2F78187F44AE0034CC66 /* Foundation.framework */ = {''
-		data +='			isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };\n'
-		data +='		FFBA2F7A187F44AE0034CC66 /* CoreGraphics.framework */ = {'
-		data +='			isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		data +='		FFBA2F7C187F44AE0034CC66 /* UIKit.framework */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		data +='		FFBA2F7E187F44AE0034CC66 /* GLKit.framework */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
-		data +='		FFBA2F80187F44AE0034CC66 /* OpenGLES.framework */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		data +='		FFBA2F84187F44AE0034CC66 /* edn-Info.plist */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "edn-Info.plist"; sourceTree = "<group>"; };
-		data +='		FFBA2F86187F44AE0034CC66 /* en */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		data +='		FFBA2F88187F44AE0034CC66 /* main.m */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		data +='		FFBA2F8A187F44AE0034CC66 /* edn-Prefix.pch */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "edn-Prefix.pch"; sourceTree = "<group>"; };
-		data +='		FFBA2F8B187F44AE0034CC66 /* AppDelegate.h */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		data +='		FFBA2F8C187F44AE0034CC66 /* AppDelegate.m */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		data +='		FFBA2F8F187F44AE0034CC66 /* Base */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		data +='		FFBA2F92187F44AE0034CC66 /* Base */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
-		data +='		FFBA2F94187F44AE0034CC66 /* Shader.fsh */ = {
-		data +='			isa = PBXFileReference;
-		data +='			lastKnownFileType = sourcecode.glsl;
-		data +='			name = Shader.fsh;
-		data +='			path = Shaders/Shader.fsh;
-		data +='			sourceTree = "<group>";
-		data +='		};
-		data +='		FFBA2F96187F44AE0034CC66 /* Shader.vsh */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
-		data +='		FFBA2F98187F44AE0034CC66 /* ViewController.h */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		data +='		FFBA2F99187F44AE0034CC66 /* ViewController.m */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		data +='		FFBA2F9B187F44AE0034CC66 /* Images.xcassets */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		data +='		FFBA2FA1187F44AE0034CC66 /* ednTests.xctest */ = {
-		data +='			isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ednTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		data +='		FFBA2FA2187F44AE0034CC66 /* XCTest.framework */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		data +='		FFBA2FAA187F44AF0034CC66 /* ednTests-Info.plist */ = {
-		data +='			isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ednTests-Info.plist"; sourceTree = "<group>"; };
-		data +='		FFBA2FAC187F44AF0034CC66 /* en */ = {
-		data +='			isa = PBXFileReference;
-		data +='			lastKnownFileType = text.plist.strings;
-		data +='			name = en;
-		data +='			path = en.lproj/InfoPlist.strings;
-		data +='			sourceTree = "<group>";
-		data +='		};
-		data +='		FFBA2FAE187F44AF0034CC66 /* ednTests.m */ = {\n'
-		data +='			isa = PBXFileReference;\n'
-		data +='			lastKnownFileType = sourcecode.c.objc;\n'
-		data +='			path = ednTests.m;\n'
-		data +='			sourceTree = "<group>";\n'
-		data +='		};\n'
-		"""
 		
 		data +='/* End PBXFileReference section */\n'
 		data +='\n'
@@ -366,11 +347,14 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='			isa = PBXFrameworksBuildPhase;\n'
 		data +='			buildActionMask = 2147483647;\n'
 		data +='			files = (\n'
-		data +='				FFBA2F81187F44AE0034CC66 /* OpenGLES.framework in Frameworks */,\n'
-		data +='				FFBA2F7B187F44AE0034CC66 /* CoreGraphics.framework in Frameworks */,\n'
-		data +='				FFBA2F7D187F44AE0034CC66 /* UIKit.framework in Frameworks */,\n'
-		data +='				FFBA2F7F187F44AE0034CC66 /* GLKit.framework in Frameworks */,\n'
-		data +='				FFBA2F79187F44AE0034CC66 /* Foundation.framework in Frameworks */,\n'
+		for group in self.groups:
+			element = self.groups[group]
+			for files in element["list-files"]:
+				if files["extention"] not in XCodeTypeElements.keys():
+					continue
+				if XCodeTypeElements[files["extention"]][1] == "PBXFrameworksBuildPhase":
+					data +='				' + convert_folder_in_base_id(files["declare-name"] + '_PBXBuildFile', group)
+					data +=' /* ' + files["name"] + ' in ' + group + '*/,\n'
 		data +='			);\n'
 		data +='			runOnlyForDeploymentPostprocessing = 0;\n'
 		data +='		};\n'
@@ -382,9 +366,8 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='		' + convert_folder_in_base_id("?mainTreeGroup?", self.name) + ' = {\n'
 		data +='			isa = PBXGroup;\n'
 		data +='			children = (\n'
-		for group, element in self.groups:
+		for group in self.groups:
 			data +='				' + convert_folder_in_base_id("?tree?", group) + ' /* ' + group + ' */,\n'
-		data +='				' + convert_folder_in_base_id("?tree?", "frameworks") + ' /* Frameworks */,\n'
 		data +='				' + convert_folder_in_base_id("?tree?", "Products") + ' /* Products */,\n'
 		data +='			);\n'
 		data +='			sourceTree = "<group>";\n'
@@ -397,55 +380,14 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='			name = Products;\n'
 		data +='			sourceTree = "<group>";\n'
 		data +='		};\n'
-		data +='		' + convert_folder_in_base_id("?tree?", "frameworks") + ' /* Frameworks */ = {\n'
-		data +='			isa = PBXGroup;\n'
-		data +='			children = (\n'
-		data +='				FFBA2F78187F44AE0034CC66 /* Foundation.framework */,\n'
-		data +='				FFBA2F7A187F44AE0034CC66 /* CoreGraphics.framework */,\n'
-		data +='				FFBA2F7C187F44AE0034CC66 /* UIKit.framework */,\n'
-		data +='				FFBA2F7E187F44AE0034CC66 /* GLKit.framework */,\n'
-		data +='				FFBA2F80187F44AE0034CC66 /* OpenGLES.framework */,\n'
-		data +='				FFBA2FA2187F44AE0034CC66 /* XCTest.framework */,\n'
-		data +='			);\n'
-		data +='			name = Frameworks;\n'
-		data +='			sourceTree = "<group>";\n'
-		data +='		};\n'
 		# treeview :
-		for group, element in self.groups:
+		for group in self.groups:
+			element = self.groups[group]
 			main_dict = defaultdict(dict, ((FILE_MARKER, []),))
 			for line in element["list-files"]:
 				attach(line["declare-name"], main_dict)
+			#prettify(main_dict);
 			data += generate_tree(main_dict, group)
-		"""
-		data +='		FFBA2F82187F44AE0034CC66 /* edn */ = {\n'
-		data +='			isa = PBXGroup;\n'
-		data +='			children = (\n'
-		data +='				FFBA2F8B187F44AE0034CC66 /* AppDelegate.h */,\n'
-		data +='				FFBA2F8C187F44AE0034CC66 /* AppDelegate.m */,\n'
-		data +='				FFBA2F8E187F44AE0034CC66 /* Main_iPhone.storyboard */,\n'
-		data +='				FFBA2F91187F44AE0034CC66 /* Main_iPad.storyboard */,\n'
-		data +='				FFBA2F94187F44AE0034CC66 /* Shader.fsh */,\n'
-		data +='				FFBA2F96187F44AE0034CC66 /* Shader.vsh */,\n'
-		data +='				FFBA2F98187F44AE0034CC66 /* ViewController.h */,\n'
-		data +='				FFBA2F99187F44AE0034CC66 /* ViewController.m */,\n'
-		data +='				FFBA2F9B187F44AE0034CC66 /* Images.xcassets */,\n'
-		data +='				FFBA2F83187F44AE0034CC66 /* Supporting Files */,\n'
-		data +='			);\n'
-		data +='			path = edn;\n'
-		data +='			sourceTree = "<group>";\n'
-		data +='		};\n'
-		data +='		FFBA2F83187F44AE0034CC66 /* Supporting Files */ = {\n'
-		data +='			isa = PBXGroup;\n'
-		data +='			children = (\n'
-		data +='				FFBA2F84187F44AE0034CC66 /* edn-Info.plist */,\n'
-		data +='				FFBA2F85187F44AE0034CC66 /* InfoPlist.strings */,\n'
-		data +='				FFBA2F88187F44AE0034CC66 /* main.m */,\n'
-		data +='				FFBA2F8A187F44AE0034CC66 /* edn-Prefix.pch */,\n'
-		data +='			);\n'
-		data +='			name = "Supporting Files";\n'
-		data +='			sourceTree = "<group>";\n'
-		data +='		};\n'
-		"""
 		
 		data +='/* End PBXGroup section */\n'
 		data +='\n'
@@ -509,14 +451,14 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='			buildActionMask = 2147483647;\n'
 		data +='			files = (\n'
 		# list of all resources to copy
-		"""
-		data +='				FFBA2F95187F44AE0034CC66 /* Shader.fsh in Resources */,\n'
-		data +='				FFBA2F93187F44AE0034CC66 /* Main_iPad.storyboard in Resources */,\n'
-		data +='				FFBA2F90187F44AE0034CC66 /* Main_iPhone.storyboard in Resources */,\n'
-		data +='				FFBA2F9C187F44AE0034CC66 /* Images.xcassets in Resources */,\n'
-		data +='				FFBA2F87187F44AE0034CC66 /* InfoPlist.strings in Resources */,\n'
-		data +='				FFBA2F97187F44AE0034CC66 /* Shader.vsh in Resources */,\n'
-		"""
+		for group in self.groups:
+			element = self.groups[group]
+			for files in element["list-files"]:
+				if files["extention"] in XCodeTypeElements.keys():
+					if XCodeTypeElements[files["extention"]][1] == "PBXResourcesBuildPhase":
+						data +='				' + convert_folder_in_base_id(files["declare-name"] + '_PBXBuildFile', group) + ' = {'
+						data +=' /* ' + files["name"] + ' in ' + group + ' */'
+						data +=' ,\n'
 		data +='			);\n'
 		data +='			runOnlyForDeploymentPostprocessing = 0;\n'
 		data +='		};\n'
@@ -530,11 +472,15 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='			buildActionMask = 2147483647;\n'
 		data +='			files = (\n'
 		# list of all file to compile ...
-		"""
-		data +='				FFBA2F9A187F44AE0034CC66 /* ViewController.m in Sources */,\n'
-		data +='				FFBA2F8D187F44AE0034CC66 /* AppDelegate.m in Sources */,\n'
-		data +='				FFBA2F89187F44AE0034CC66 /* main.m in Sources */,\n'
-		"""
+		# TODO : review this ==> generate to many files ...
+		for group in self.groups:
+			element = self.groups[group]
+			for files in element["list-files"]:
+				if files["extention"] not in XCodeTypeElements.keys():
+					continue
+				if XCodeTypeElements[files["extention"]][1] == "PBXSourcesBuildPhase":
+					data +='				' + convert_folder_in_base_id(files["declare-name"] + '_PBXBuildFile', group)
+					data +=' /* ' + group + " : " + files["name"] + ' */,\n'
 		data +='			);\n'
 		data +='			runOnlyForDeploymentPostprocessing = 0;\n'
 		data +='		};\n'
@@ -546,6 +492,17 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='/* End PBXTargetDependency section */\n'
 		data +='\n'
 		data +='/* Begin PBXVariantGroup section */\n'
+		# not really needed, because it is for internal system data position ==> maybe change it if necessary ...
+		"""
+		for group in self.groups:
+			element = self.groups[group]
+			for files in element["list-files"]:
+				if files["extention"] not in XCodeTypeElements.keys():
+					continue
+				if XCodeTypeElements[files["extention"]][1] == "PBXSourcesBuildPhase":
+					data +='		' + convert_folder_in_base_id(files["declare-name"] + '_PBXBuildFile', group)
+		"""
+		
 		"""
 		data +='		FFBA2F85187F44AE0034CC66 /* InfoPlist.strings */ = {\n'
 		data +='			isa = PBXVariantGroup;\n'
@@ -707,10 +664,16 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 		data +='		};\n'
 		data +='/* End XCConfigurationList section */\n'
 		data +='	};\n'
-		data +='	rootObject = ******************* /* Project object */;\n'
+		data +='	rootObject = ' + convert_folder_in_base_id("?PBXProject?", self.name) + ' /* Project object */;\n'
 		data +='}\n'
 		
-		debug.info(data)
+		#debug.info(data)
+		
+		outName = 'out/iOs/' + self.name + '.xcodeproj/project.pbxproj'
+		tools.create_directory_of_file(outName)
+		tools.file_write_data(outName, data)
+		# TODO : Generate all dependency files ...
+		
 
 
 		

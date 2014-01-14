@@ -217,6 +217,12 @@ class Target:
 		for modName in listOfAllTheModule:
 			self.load_if_needed(modName)
 	
+	def project_add_module(self, name, projectMng, addedModule):
+		for module in self.moduleList:
+			if module.name == name:
+				module.ext_project_add_module(self, projectMng, addedModule)
+				return
+	
 	def build(self, name, packagesName=None):
 		if name == "dump":
 			debug.info("dump all")

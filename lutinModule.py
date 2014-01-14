@@ -668,9 +668,22 @@ class Module:
 		# TODO : Check values...
 		self.packageProp[variable].append(value)
 	
+	def ext_project_add_module(self, target, projectMng, addedModule = []):
+		if self.name in addedModule:
+			return
+		addedModule.append(self.name)
+		debug.verbose("add a module to the project generator :" + self.name)
+		debug.verbose("local path :" + self.originFolder)
+		projectMng.add_files(self.name, self.originFolder, self.src)
+		projectMng.add_data_file(self.originFolder, self.files)
+		projectMng.add_data_folder(self.originFolder, self.folders)
+		for depend in self.depends:
+			target.project_add_module(depend, projectMng, addedModule)
+	
+	
 	def create_project(self, target, projectMng):
 		projectMng.set_project_name(self.name)
-		projectMng.add_files(self.name, self.local_path[0], self.src)
+		self.ext_project_add_module(target, projectMng)
 		projectMng.generate_project_file()
 
 
