@@ -667,7 +667,11 @@ class Module:
 	def pkg_add(self, variable, value):
 		# TODO : Check values...
 		self.packageProp[variable].append(value)
-		
+	
+	def create_project(self, target, projectMng):
+		projectMng.set_project_name(self.name)
+		projectMng.add_files(self.name, self.local_path[0], self.src)
+		projectMng.generate_project_file()
 
 
 

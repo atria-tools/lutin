@@ -21,9 +21,10 @@ myLutinArg.add(lutinArg.ArgDefine("j", "jobs", haveParam=True, desc="Specifies t
 myLutinArg.add(lutinArg.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
 
 myLutinArg.add_section("properties", "keep in the sequency of the cible")
-myLutinArg.add(lutinArg.ArgDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
+myLutinArg.add(lutinArg.ArgDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["IOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
 myLutinArg.add(lutinArg.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
 myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
+myLutinArg.add(lutinArg.ArgDefine("r", "prj", desc="Use external project management (not build with lutin..."))
 myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 
 myLutinArg.add_section("cible", "generate in order set")
@@ -107,12 +108,16 @@ def Start():
 	# load the default target :
 	target = None
 	actionDone=False
+	#build with extern tool
+	externBuild=False
 	# parse all argument
 	for argument in localArgument:
 		if True==parseGenericArg(argument, False):
 			continue
 		elif argument.get_option_nName() == "package":
 			generatePackage=False
+		elif argument.get_option_nName() == "prj":
+			externBuild=True
 		elif argument.get_option_nName() == "compilator":
 			if compilator!=argument.get_arg():
 				debug.debug("change compilator ==> " + argument.get_arg())
@@ -143,14 +148,14 @@ def Start():
 			else:
 				#load the target if needed :
 				if target == None:
-					target = lutinTarget.target_load(targetName, compilator, mode, generatePackage)
+					target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild)
 				target.build(argument.get_arg())
 				actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
 		#load the target if needed :
 		if target == None:
-			target = lutinTarget.target_load(targetName, compilator, mode, generatePackage)
+			target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild)
 		target.build("all")
 	# stop all started threads 
 	lutinMultiprocess.un_init()
