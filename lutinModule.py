@@ -122,7 +122,8 @@ class Module:
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
-			"-o", file_dst ,
+			"-o", file_dst,
+			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
@@ -156,6 +157,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
 			"-o", file_dst ,
+			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
@@ -188,7 +190,8 @@ class Module:
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
-			"-o", file_dst ,
+			"-o", file_dst,
+			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
@@ -221,6 +224,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
 			"-o", file_dst,
+			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
@@ -328,6 +332,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst,
+			target.sysroot,
 			target.global_sysroot,
 			file_src,
 			depancy.src,
@@ -416,6 +421,10 @@ class Module:
 			elif    fileExt == "mm" \
 			     or fileExt == "MM":
 				resFile = self.compile_mm_to_o(file, packageName, target, subHeritage)
+				listSubFileNeededTobuild.append(resFile)
+			elif    fileExt == "m" \
+			     or fileExt == "M":
+				resFile = self.compile_m_to_o(file, packageName, target, subHeritage)
 				listSubFileNeededTobuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
@@ -675,11 +684,12 @@ class Module:
 		debug.verbose("add a module to the project generator :" + self.name)
 		debug.verbose("local path :" + self.originFolder)
 		projectMng.add_files(self.name, self.originFolder, self.src)
-		projectMng.add_data_file(self.originFolder, self.files)
-		projectMng.add_data_folder(self.originFolder, self.folders)
+		#projectMng.add_data_file(self.originFolder, self.files)
+		#projectMng.add_data_folder(self.originFolder, self.folders)
+		"""
 		for depend in self.depends:
 			target.project_add_module(depend, projectMng, addedModule)
-	
+		"""
 	
 	def create_project(self, target, projectMng):
 		projectMng.set_project_name(self.name)
@@ -712,6 +722,7 @@ def load_module(target, name):
 	for mod in moduleList:
 		if mod[0] == name:
 			sys.path.append(os.path.dirname(mod[1]))
+			debug.verbose("import module : '" + __startModuleName + name + "'")
 			theModule = __import__(__startModuleName + name)
 			#try:
 			tmpElement = theModule.create(target)

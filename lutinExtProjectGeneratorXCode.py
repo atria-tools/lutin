@@ -246,7 +246,7 @@ class ExtProjectGeneratorXCode(lutinExtProjectGenerator.ExtProjectGenerator):
 			realBasePath = realBasePath[:-1]
 		debug.debug("add data file : " + str(srcList))
 		for realName,destName in srcList:
-			tools.copy_file(realBasePath+'/'+realName, 'out/iOs/' + self.name + '.xcodeproj/data/' + destName, force=True)
+			tools.copy_file(realBasePath+'/'+realName, 'out/iOs/' + self.name + '/data/' + destName, force=True)
 			self.add_files("data", 'out/iOs/' + self.name + 'xcodeprj/data', [destName])
 	
 	def add_data_folder(self, basePath, srcList):

@@ -77,6 +77,8 @@ class Target:
 		# output staging files list :
 		self.listFinalFile=[]
 		
+		self.sysroot=""
+		
 		self.externProjectManager = None
 	
 	def set_use_of_extern_build_tool(self, mode):
