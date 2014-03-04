@@ -30,7 +30,7 @@ class Target(lutinTarget.Target):
 		self.global_flags_cc.append("-mios-simulator-version-min=7.0")
 		
 		#add a project generator:
-		#self.externProjectManager = lutinExtProjectGeneratorXCode.ExtProjectGeneratorXCode()
+		self.externProjectManager = lutinExtProjectGeneratorXCode.ExtProjectGeneratorXCode()
 		
 	
 	def get_staging_folder(self, binaryName):

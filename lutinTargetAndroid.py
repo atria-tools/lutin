@@ -266,7 +266,7 @@ class Target(lutinTarget.Target):
 				tmpFile.write( '				<category android:name="android.intent.category.LAUNCHER" /> \n')
 				tmpFile.write( '			</intent-filter> \n')
 				tmpFile.write( '		</activity> \n')
-				tmpFile.write( '	</application> \n')
+				tmpFile.write( '	</application>\n')
 			else:
 				tmpFile.write( '	<application android:label="' + pkgName + '" \n')
 				tmpFile.write( '	             android:permission="android.permission.BIND_WALLPAPER" \n')
@@ -293,30 +293,43 @@ class Target(lutinTarget.Target):
 				tmpFile.write( '	</application>\n')
 			# write package autorisations :
 			if True==self.check_right_package(pkgProperties, "WRITE_EXTERNAL_STORAGE"):
+				tmpFile.write( '	<permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> \n')
 			if True==self.check_right_package(pkgProperties, "CAMERA"):
+				tmpFile.write( '	<permission android:name="android.permission.CAMERA" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.CAMERA" /> \n')
 			if True==self.check_right_package(pkgProperties, "INTERNET"):
+				tmpFile.write( '	<permission android:name="android.permission.INTERNET" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.INTERNET" /> \n')
 			if True==self.check_right_package(pkgProperties, "MODIFY_AUDIO_SETTINGS"):
+				tmpFile.write( '	<permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> \n')
 			if True==self.check_right_package(pkgProperties, "READ_CALENDAR"):
+				tmpFile.write( '	<permission android:name="android.permission.READ_CALENDAR" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.READ_CALENDAR" /> \n')
 			if True==self.check_right_package(pkgProperties, "READ_CONTACTS"):
+				tmpFile.write( '	<permission android:name="android.permission.READ_CONTACTS" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.READ_CONTACTS" /> \n')
 			if True==self.check_right_package(pkgProperties, "READ_FRAME_BUFFER"):
+				tmpFile.write( '	<permission android:name="android.permission.READ_FRAME_BUFFER" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.READ_FRAME_BUFFER" /> \n')
 			if True==self.check_right_package(pkgProperties, "READ_PROFILE"):
+				tmpFile.write( '	<permission android:name="android.permission.READ_PROFILE" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.READ_PROFILE" /> \n')
 			if True==self.check_right_package(pkgProperties, "RECORD_AUDIO"):
+				tmpFile.write( '	<permission android:name="android.permission.RECORD_AUDIO" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.RECORD_AUDIO" /> \n')
 			if True==self.check_right_package(pkgProperties, "SET_ORIENTATION"):
+				tmpFile.write( '	<permission android:name="android.permission.SET_ORIENTATION" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.SET_ORIENTATION" /> \n')
 			if True==self.check_right_package(pkgProperties, "VIBRATE"):
+				tmpFile.write( '	<permission android:name="android.permission.VIBRATE" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.VIBRATE" /> \n')
 			if True==self.check_right_package(pkgProperties, "ACCESS_COARSE_LOCATION"):
+				tmpFile.write( '	<permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> \n')
 			if True==self.check_right_package(pkgProperties, "ACCESS_FINE_LOCATION"):
+				tmpFile.write( '	<permission android:name="android.permission.ACCESS_FINE_LOCATION" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> \n')
 			tmpFile.write( '</manifest>\n\n')
 			tmpFile.flush()
