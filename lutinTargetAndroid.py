@@ -227,10 +227,16 @@ class Target(lutinTarget.Target):
 		tmpFile.flush()
 		tmpFile.close()
 		
+		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/drawable/icon.png");
 		if     "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
 			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", True)
-		
+		else:
+			# to be sure that we have all time a resource ...
+			tmpFile = open(self.get_staging_folder(pkgName) + "/res/drawable/plop.txt", 'w')
+			tmpFile.write('plop\n')
+			tmpFile.flush()
+			tmpFile.close()
 		
 		if pkgProperties["ANDROID_MANIFEST"]!="":
 			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkgProperties["ANDROID_MANIFEST"])
@@ -249,7 +255,8 @@ class Target(lutinTarget.Target):
 			tmpFile.write( '	          android:targetSdkVersion="' + str(self.boardId) + '" /> \n')
 			if pkgProperties["ANDROID_APPL_TYPE"]=="APPL":
 				tmpFile.write( '	<application android:label="' + pkgName + '" \n')
-				tmpFile.write( '	             android:icon="@drawable/icon" \n')
+				if "ICON" in pkgProperties.keys():
+					tmpFile.write( '	             android:icon="@drawable/icon" \n')
 				if "debug"==self.buildMode:
 					tmpFile.write( '	             android:debuggable="true" \n')
 				tmpFile.write( '	             >\n')
@@ -258,7 +265,8 @@ class Target(lutinTarget.Target):
 				if "debug"==self.buildMode:
 					tmpFile.write("-debug")
 				tmpFile.write( '"\n')
-				tmpFile.write( '		          android:icon="@drawable/icon" \n')
+				if "ICON" in pkgProperties.keys():
+					tmpFile.write( '		          android:icon="@drawable/icon" \n')
 				tmpFile.write( '		          android:hardwareAccelerated="true" \n')
 				tmpFile.write( '		          android:configChanges="keyboard|keyboardHidden|orientation|screenSize"> \n')
 				tmpFile.write( '			<intent-filter> \n')
@@ -270,13 +278,17 @@ class Target(lutinTarget.Target):
 			else:
 				tmpFile.write( '	<application android:label="' + pkgName + '" \n')
 				tmpFile.write( '	             android:permission="android.permission.BIND_WALLPAPER" \n')
-				tmpFile.write( '	             android:icon="@drawable/icon">\n')
+				if "ICON" in pkgProperties.keys():
+					tmpFile.write( '	             android:icon="@drawable/icon"\n')
+				tmpFile.write( '	             >\n')
 				tmpFile.write( '		<service android:name=".' + pkgName + '" \n')
 				tmpFile.write( '		         android:label="' + pkgProperties['NAME'])
 				if "debug"==self.buildMode:
 					tmpFile.write("-debug")
 				tmpFile.write( '"\n')
-				tmpFile.write( '		         android:icon="@drawable/icon">\n')
+				if "ICON" in pkgProperties.keys():
+					tmpFile.write( '		         android:icon="@drawable/icon"\n')
+				tmpFile.write( '		         >\n')
 				tmpFile.write( '			<intent-filter>\n')
 				tmpFile.write( '				<action android:name="android.service.wallpaper.WallpaperService" />\n')
 				tmpFile.write( '			</intent-filter>\n')
@@ -288,7 +300,9 @@ class Target(lutinTarget.Target):
 					tmpFile.write( '		          android:name=".' + pkgName + 'Settings"\n')
 					tmpFile.write( '		          android:theme="@android:style/Theme.Light.WallpaperSettings"\n')
 					tmpFile.write( '		          android:exported="true"\n')
-					tmpFile.write( '		          android:icon="@drawable/icon">\n')
+					if "ICON" in pkgProperties.keys():
+						tmpFile.write( '		          android:icon="@drawable/icon"\n')
+					tmpFile.write( '		          >\n')
 					tmpFile.write( '		</activity>\n')
 				tmpFile.write( '	</application>\n')
 			# write package autorisations :
@@ -345,7 +359,9 @@ class Target(lutinTarget.Target):
 				tmpFile.write( "<wallpaper xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
 				if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
 					tmpFile.write( "           android:settingsActivity=\""+compleatePackageName + "."+ pkgName + "Settings\"\n")
-				tmpFile.write( "           android:thumbnail=\"@drawable/icon\"/>\n")
+				if "ICON" in pkgProperties.keys():
+					tmpFile.write( "           android:thumbnail=\"@drawable/icon\"\n")
+				tmpFile.write( "           />\n")
 				tmpFile.flush()
 				tmpFile.close()
 				# create wallpaper setting if needed (class and config file)

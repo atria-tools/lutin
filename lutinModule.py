@@ -75,7 +75,7 @@ class Module:
 		                     "COMPAGNY_NAME" : set(""),
 		                     "COMPAGNY_NAME2" : set(""),
 		                     "MAINTAINER" : set([]),
-		                     "ICON" : set(""),
+		                     #"ICON" : set(""),
 		                     "SECTION" : set([]),
 		                     "PRIORITY" : set(""),
 		                     "DESCRIPTION" : set(""),
