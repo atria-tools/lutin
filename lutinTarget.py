@@ -33,7 +33,8 @@ class Target:
 		# Target global variables.
 		###############################################################################
 		self.global_include_cc=[]
-		self.global_flags_cc=['-D__TARGET_OS__'+self.name]
+		self.global_flags_cc=['-D__TARGET_OS__'+self.name,
+		                      '-D_REENTRANT']
 		if self.name != "Windows":
 			self.global_flags_xx=['-std=c++11']
 			self.global_flags_mm=['-std=c++11']

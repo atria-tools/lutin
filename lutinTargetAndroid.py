@@ -6,6 +6,7 @@ import lutinTools
 import lutinHost
 import lutinMultiprocess
 import os
+import sys
 
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
@@ -28,7 +29,6 @@ class Target(lutinTarget.Target):
 						self.folder_sdk = folder + "/sdk"
 			if self.folder_sdk == "AUTO":
 				self.folder_sdk = lutinTools.get_run_folder() + "/../android/sdk"
-		
 		
 		arch = "ARMv7"
 		tmpOsVal = "64"
@@ -175,16 +175,24 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
+		pkgNameApplicationName = pkgName
+		if "debug"==self.buildMode:
+			pkgNameApplicationName += "debug"
 		# FINAL_FOLDER_JAVA_PROJECT
 		self.folder_javaProject=   self.get_staging_folder(pkgName) \
 		                         + "/src/" \
 		                         + pkgProperties["COMPAGNY_TYPE"] \
 		                         + "/" + pkgProperties["COMPAGNY_NAME2"] \
-		                         + "/" + pkgName + "/"
+		                         + "/" + pkgNameApplicationName + "/"
 		#FINAL_FILE_ABSTRACTION
-		self.file_finalAbstraction = self.folder_javaProject + "/" + pkgName + ".java"
+		self.file_finalAbstraction = self.folder_javaProject + "/" + pkgNameApplicationName + ".java"
 		
-		compleatePackageName = pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgName
+		compleatePackageName = pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgNameApplicationName
+		
+		if "ADMOD_ID" in pkgProperties:
+			pkgProperties["RIGHT"].append("INTERNET")
+			pkgProperties["RIGHT"].append("ACCESS_NETWORK_STATE")
+		
 		
 		debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
 		# Create folder :
@@ -200,11 +208,68 @@ class Target(lutinTarget.Target):
 			tmpFile.write( " */\n")
 			tmpFile.write( "package "+ compleatePackageName + ";\n")
 			tmpFile.write( "import org.ewol.EwolActivity;\n")
-			tmpFile.write( "public class " + pkgName + " extends EwolActivity {\n")
+			if "ADMOD_ID" in pkgProperties:
+				tmpFile.write( "import com.google.android.gms.ads.AdRequest;\n")
+				tmpFile.write( "import com.google.android.gms.ads.AdSize;\n")
+				tmpFile.write( "import com.google.android.gms.ads.AdView;\n")
+				tmpFile.write( "import android.widget.LinearLayout;\n")
+				tmpFile.write( "import android.widget.Button;\n")
+			tmpFile.write( "public class " + pkgNameApplicationName + " extends EwolActivity {\n")
+			if "ADMOD_ID" in pkgProperties:
+				tmpFile.write( "	/** The view to show the ad. */\n")
+				tmpFile.write( "	private AdView adView;\n")
+				tmpFile.write( "	private LinearLayout mLayout = null;\n")
 			tmpFile.write( "	public void onCreate(android.os.Bundle savedInstanceState) {\n")
 			tmpFile.write( "		super.onCreate(savedInstanceState);\n")
-			tmpFile.write( "		initApkPath(\"" + pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgName + "\");\n")
+			tmpFile.write( "		initApkPath(\"" + pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgNameApplicationName + "\");\n")
+			if "ADMOD_ID" in pkgProperties:
+				tmpFile.write( "		mLayout = new LinearLayout(this);\n")
+				tmpFile.write( "		mLayout.setOrientation(android.widget.LinearLayout.VERTICAL);\n")
+				tmpFile.write( "		setContentView(mLayout);\n")
+				tmpFile.write( "		\n")
+				tmpFile.write( "		LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(\n")
+				tmpFile.write( "			LinearLayout.LayoutParams.WRAP_CONTENT,\n")
+				tmpFile.write( "			LinearLayout.LayoutParams.WRAP_CONTENT);\n")
+				tmpFile.write( "		\n")
+				tmpFile.write( "		//params1.gravity = Gravity.TOP;\n")
+				tmpFile.write( "		\n")
+				tmpFile.write( "		// Create an adds.\n")
+				tmpFile.write( "		adView = new AdView(this);\n")
+				tmpFile.write( "		adView.setAdSize(AdSize.SMART_BANNER);\n")
+				tmpFile.write( "		adView.setAdUnitId(\"" + pkgProperties["ADMOD_ID"] + "\");\n")
+				tmpFile.write( "		\n")
+				tmpFile.write( "		// Add the AdView to the view hierarchy. The view will have no size until the ad is loaded.\n")
+				tmpFile.write( "		mLayout.addView(adView, params1);\n")
+				tmpFile.write( "		\n")
+				tmpFile.write( "		// Create an ad request. Check logcat output for the hashed device ID to get test ads on a physical device.\n")
+				tmpFile.write( "		AdRequest adRequest = new AdRequest.Builder()\n")
+				tmpFile.write( "			.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)\n")
+				tmpFile.write( "			.build();\n")
+				tmpFile.write( "		\n")
+				tmpFile.write( "		// Start loading the ad in the background.\n")
+				tmpFile.write( "		adView.loadAd(adRequest);\n")
+				tmpFile.write( "		mLayout.addView(mGLView, params1);\n")
 			tmpFile.write( "	}\n")
+			if "ADMOD_ID" in pkgProperties:
+				tmpFile.write( "	@Override protected void onResume() {\n")
+				tmpFile.write( "		super.onResume();\n")
+				tmpFile.write( "		if (adView != null) {\n")
+				tmpFile.write( "			adView.resume();\n")
+				tmpFile.write( "		}\n")
+				tmpFile.write( "	}\n")
+				tmpFile.write( "	@Override protected void onPause() {\n")
+				tmpFile.write( "		if (adView != null) {\n")
+				tmpFile.write( "			adView.pause();\n")
+				tmpFile.write( "		}\n")
+				tmpFile.write( "		super.onPause();\n")
+				tmpFile.write( "	}\n")
+				tmpFile.write( "	@Override protected void onDestroy() {\n")
+				tmpFile.write( "		// Destroy the AdView.\n")
+				tmpFile.write( "		if (adView != null) {\n")
+				tmpFile.write( "			adView.destroy();\n")
+				tmpFile.write( "		}\n")
+				tmpFile.write( "		super.onDestroy();\n")
+				tmpFile.write( "	}\n")
 			tmpFile.write( "}\n")
 		else :
 			# wallpaper mode ...
@@ -216,11 +281,11 @@ class Target(lutinTarget.Target):
 			tmpFile.write( " */\n")
 			tmpFile.write( "package "+ compleatePackageName + ";\n")
 			tmpFile.write( "import org.ewol.EwolWallpaper;\n")
-			tmpFile.write( "public class " + pkgName + " extends EwolWallpaper {\n")
-			tmpFile.write( "	public static final String SHARED_PREFS_NAME = \"" + pkgName + "settings\";\n")
+			tmpFile.write( "public class " + pkgNameApplicationName + " extends EwolWallpaper {\n")
+			tmpFile.write( "	public static final String SHARED_PREFS_NAME = \"" + pkgNameApplicationName + "settings\";\n")
 			tmpFile.write( "	public Engine onCreateEngine() {\n")
 			tmpFile.write( "		Engine tmpEngine = super.onCreateEngine();\n")
-			tmpFile.write( "		initApkPath(\"" + pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgName + "\");\n")
+			tmpFile.write( "		initApkPath(\"" + pkgProperties["COMPAGNY_TYPE"]+"\", \""+pkgProperties["COMPAGNY_NAME2"]+"\", \"" + pkgNameApplicationName + "\");\n")
 			tmpFile.write( "		return tmpEngine;\n")
 			tmpFile.write( "	}\n")
 			tmpFile.write( "}\n")
@@ -251,16 +316,20 @@ class Target(lutinTarget.Target):
 			tmpFile.write( '          android:versionCode="1" \n')
 			tmpFile.write( '          android:versionName="'+pkgProperties["VERSION"]+'"> \n')
 			tmpFile.write( '	<uses-feature android:glEsVersion="0x00020000" android:required="true" />\n')
-			tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(self.boardId) + '" ')
+			tmpFile.write( '	<uses-sdk android:minSdkVersion="' + str(self.boardId) + '" \n')
 			tmpFile.write( '	          android:targetSdkVersion="' + str(self.boardId) + '" /> \n')
 			if pkgProperties["ANDROID_APPL_TYPE"]=="APPL":
-				tmpFile.write( '	<application android:label="' + pkgName + '" \n')
+				tmpFile.write( '	<application android:label="' + pkgNameApplicationName + '" \n')
 				if "ICON" in pkgProperties.keys():
 					tmpFile.write( '	             android:icon="@drawable/icon" \n')
 				if "debug"==self.buildMode:
 					tmpFile.write( '	             android:debuggable="true" \n')
 				tmpFile.write( '	             >\n')
-				tmpFile.write( '		<activity android:name=".' + pkgName + '" \n')
+				if "ADMOD_ID" in pkgProperties:
+					tmpFile.write( '		<meta-data android:name="com.google.android.gms.version" \n')
+					tmpFile.write( '		           android:value="@integer/google_play_services_version"/>\n')
+				
+				tmpFile.write( '		<activity android:name=".' + pkgNameApplicationName + '" \n')
 				tmpFile.write( '		          android:label="' + pkgProperties['NAME'])
 				if "debug"==self.buildMode:
 					tmpFile.write("-debug")
@@ -274,14 +343,18 @@ class Target(lutinTarget.Target):
 				tmpFile.write( '				<category android:name="android.intent.category.LAUNCHER" /> \n')
 				tmpFile.write( '			</intent-filter> \n')
 				tmpFile.write( '		</activity> \n')
+				if "ADMOD_ID" in pkgProperties:
+					tmpFile.write( '		<activity android:name="com.google.android.gms.ads.AdActivity"\n')
+					tmpFile.write( '		          android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>\n')
+				
 				tmpFile.write( '	</application>\n')
 			else:
-				tmpFile.write( '	<application android:label="' + pkgName + '" \n')
+				tmpFile.write( '	<application android:label="' + pkgNameApplicationName + '" \n')
 				tmpFile.write( '	             android:permission="android.permission.BIND_WALLPAPER" \n')
 				if "ICON" in pkgProperties.keys():
 					tmpFile.write( '	             android:icon="@drawable/icon"\n')
 				tmpFile.write( '	             >\n')
-				tmpFile.write( '		<service android:name=".' + pkgName + '" \n')
+				tmpFile.write( '		<service android:name=".' + pkgNameApplicationName + '" \n')
 				tmpFile.write( '		         android:label="' + pkgProperties['NAME'])
 				if "debug"==self.buildMode:
 					tmpFile.write("-debug")
@@ -293,11 +366,11 @@ class Target(lutinTarget.Target):
 				tmpFile.write( '				<action android:name="android.service.wallpaper.WallpaperService" />\n')
 				tmpFile.write( '			</intent-filter>\n')
 				tmpFile.write( '			<meta-data android:name="android.service.wallpaper"\n')
-				tmpFile.write( '			           android:resource="@xml/' + pkgName + '_resource" />\n')
+				tmpFile.write( '			           android:resource="@xml/' + pkgNameApplicationName + '_resource" />\n')
 				tmpFile.write( '		</service>\n')
 				if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
 					tmpFile.write( '		<activity android:label="Setting"\n')
-					tmpFile.write( '		          android:name=".' + pkgName + 'Settings"\n')
+					tmpFile.write( '		          android:name=".' + pkgNameApplicationName + 'Settings"\n')
 					tmpFile.write( '		          android:theme="@android:style/Theme.Light.WallpaperSettings"\n')
 					tmpFile.write( '		          android:exported="true"\n')
 					if "ICON" in pkgProperties.keys():
@@ -315,6 +388,9 @@ class Target(lutinTarget.Target):
 			if True==self.check_right_package(pkgProperties, "INTERNET"):
 				tmpFile.write( '	<permission android:name="android.permission.INTERNET" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.INTERNET" /> \n')
+			if True==self.check_right_package(pkgProperties, "ACCESS_NETWORK_STATE"):
+				tmpFile.write( '	<permission android:name="android.permission.ACCESS_NETWORK_STATE" /> \n')
+				tmpFile.write( '	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> \n')
 			if True==self.check_right_package(pkgProperties, "MODIFY_AUDIO_SETTINGS"):
 				tmpFile.write( '	<permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> \n')
 				tmpFile.write( '	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /> \n')
@@ -352,13 +428,13 @@ class Target(lutinTarget.Target):
 			
 			if pkgProperties["ANDROID_APPL_TYPE"]!="APPL":
 				#create the Wallpaper sub files : (main element for the application
-				debug.print_element("pkg", pkgName + "_resource.xml", "<==", "package configurations")
-				lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgName + "_resource.xml")
-				tmpFile = open(self.get_staging_folder(pkgName) + "/res/xml/" + pkgName + "_resource.xml", 'w')
+				debug.print_element("pkg", pkgNameApplicationName + "_resource.xml", "<==", "package configurations")
+				lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_resource.xml")
+				tmpFile = open(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_resource.xml", 'w')
 				tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				tmpFile.write( "<wallpaper xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
 				if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-					tmpFile.write( "           android:settingsActivity=\""+compleatePackageName + "."+ pkgName + "Settings\"\n")
+					tmpFile.write( "           android:settingsActivity=\""+compleatePackageName + "."+ pkgNameApplicationName + "Settings\"\n")
 				if "ICON" in pkgProperties.keys():
 					tmpFile.write( "           android:thumbnail=\"@drawable/icon\"\n")
 				tmpFile.write( "           />\n")
@@ -366,9 +442,9 @@ class Target(lutinTarget.Target):
 				tmpFile.close()
 				# create wallpaper setting if needed (class and config file)
 				if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-					lutinTools.create_directory_of_file(self.folder_javaProject + pkgName + "Settings.java")
-					debug.print_element("pkg", self.folder_javaProject + pkgName + "Settings.java", "<==", "package configurations")
-					tmpFile = open(self.folder_javaProject + pkgName + "Settings.java", 'w');
+					lutinTools.create_directory_of_file(self.folder_javaProject + pkgNameApplicationName + "Settings.java")
+					debug.print_element("pkg", self.folder_javaProject + pkgNameApplicationName + "Settings.java", "<==", "package configurations")
+					tmpFile = open(self.folder_javaProject + pkgNameApplicationName + "Settings.java", 'w');
 					tmpFile.write( "package " + compleatePackageName + ";\n")
 					tmpFile.write( "\n")
 					tmpFile.write( "import " + compleatePackageName + ".R;\n")
@@ -377,12 +453,12 @@ class Target(lutinTarget.Target):
 					tmpFile.write( "import android.os.Bundle;\n")
 					tmpFile.write( "import android.preference.PreferenceActivity;\n")
 					tmpFile.write( "\n")
-					tmpFile.write( "public class " + pkgName + "Settings extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener\n")
+					tmpFile.write( "public class " + pkgNameApplicationName + "Settings extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener\n")
 					tmpFile.write( "{\n")
 					tmpFile.write( "	@Override protected void onCreate(Bundle icicle) {\n")
 					tmpFile.write( "		super.onCreate(icicle);\n")
-					tmpFile.write( "		getPreferenceManager().setSharedPreferencesName("+ pkgName + ".SHARED_PREFS_NAME);\n")
-					tmpFile.write( "		addPreferencesFromResource(R.xml."+ pkgName  + "_settings);\n")
+					tmpFile.write( "		getPreferenceManager().setSharedPreferencesName("+ pkgNameApplicationName + ".SHARED_PREFS_NAME);\n")
+					tmpFile.write( "		addPreferencesFromResource(R.xml."+ pkgNameApplicationName  + "_settings);\n")
 					tmpFile.write( "		getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);\n")
 					tmpFile.write( "	}\n")
 					tmpFile.write( "	@Override protected void onResume() {\n")
@@ -397,27 +473,27 @@ class Target(lutinTarget.Target):
 					tmpFile.flush()
 					tmpFile.close()
 					
-					debug.print_element("pkg", self.get_staging_folder(pkgName) + "/res/xml/" + pkgName + "_settings.xml", "<==", "package configurations")
-					lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgName + "_settings.xml")
-					tmpFile = open(self.get_staging_folder(pkgName) + "/res/xml/" + pkgName + "_settings.xml", 'w');
+					debug.print_element("pkg", self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml", "<==", "package configurations")
+					lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml")
+					tmpFile = open(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml", 'w');
 					tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 					tmpFile.write( "<PreferenceScreen xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
 					tmpFile.write( "                  android:title=\"Settings\"\n")
-					tmpFile.write( "                  android:key=\"" + pkgName  + "_settings\">\n")
+					tmpFile.write( "                  android:key=\"" + pkgNameApplicationName  + "_settings\">\n")
 					WALL_haveArray = False
 					for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in pkgProperties["ANDROID_WALLPAPER_PROPERTIES"]:
 						debug.info("find : '" + WALL_type + "'");
 						if WALL_type == "list":
 							debug.info("    create : LIST");
-							tmpFile.write( "	<ListPreference android:key=\"" + pkgName + "_" + WALL_key + "\"\n")
+							tmpFile.write( "	<ListPreference android:key=\"" + pkgNameApplicationName + "_" + WALL_key + "\"\n")
 							tmpFile.write( "	                android:title=\"" + WALL_title + "\"\n")
 							tmpFile.write( "	                android:summary=\"" + WALL_summary + "\"\n")
-							tmpFile.write( "	                android:entries=\"@array/" + pkgName + "_" + WALL_key + "_names\"\n")
-							tmpFile.write( "	                android:entryValues=\"@array/" + pkgName + "_" + WALL_key + "_prefix\"/>\n")
+							tmpFile.write( "	                android:entries=\"@array/" + pkgNameApplicationName + "_" + WALL_key + "_names\"\n")
+							tmpFile.write( "	                android:entryValues=\"@array/" + pkgNameApplicationName + "_" + WALL_key + "_prefix\"/>\n")
 							WALL_haveArray=True
 						elif WALL_type == "bool":
 							debug.info("    create : CHECKBOX");
-							tmpFile.write( "	<CheckBoxPreference android:key=\"" + pkgName + "_" + WALL_key + "\"\n")
+							tmpFile.write( "	<CheckBoxPreference android:key=\"" + pkgNameApplicationName + "_" + WALL_key + "\"\n")
 							tmpFile.write( "	                    android:title=\"" + WALL_title + "\"\n")
 							tmpFile.write( "	                    android:summary=\"" + WALL_summary + "\"\n")
 							tmpFile.write( "	                    android:summaryOn=\"" + WALL_other[0] + "\"\n")
@@ -433,11 +509,11 @@ class Target(lutinTarget.Target):
 								tmpFile = open(self.get_staging_folder(pkgName) + "/res/values/" + WALL_key + ".xml", 'w');
 								tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 								tmpFile.write( "<resources xmlns:xliff=\"urn:oasis:names:tc:xliff:document:1.2\">\n")
-								tmpFile.write( "	<string-array name=\"" + pkgName + "_" + WALL_key + "_names\">\n")
+								tmpFile.write( "	<string-array name=\"" + pkgNameApplicationName + "_" + WALL_key + "_names\">\n")
 								for WALL_subKey, WALL_display in WALL_other:
 									tmpFile.write( "		<item>" + WALL_display + "</item>\n")
 								tmpFile.write( "	</string-array>\n")
-								tmpFile.write( "	<string-array name=\"" + pkgName + "_" + WALL_key + "_prefix\">\n")
+								tmpFile.write( "	<string-array name=\"" + pkgNameApplicationName + "_" + WALL_key + "_prefix\">\n")
 								for WALL_subKey, WALL_display in WALL_other:
 									tmpFile.write( "		<item>" + WALL_subKey + "</item>\n")
 								tmpFile.write( "	</string-array>\n")
@@ -462,13 +538,17 @@ class Target(lutinTarget.Target):
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
 		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/src/noFile")
-		androidToolPath = self.folder_sdk + "/build-tools/19.0.0/"
+		androidToolPath = self.folder_sdk + "/build-tools/19.0.3/"
+		adModResouceFolder = ""
+		if "ADMOD_ID" in pkgProperties:
+			adModResouceFolder = " -S " + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
 		cmdLine = androidToolPath + "aapt p -f " \
 		          + "-M " + self.get_staging_folder(pkgName) + "/AndroidManifest.xml " \
 		          + "-F " + self.get_staging_folder(pkgName) + "/resources.res " \
 		          + "-I " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
 		          + "-S " + self.get_staging_folder(pkgName) + "/res/ " \
-		          + "-J " + self.get_staging_folder(pkgName) + "/src "
+		          + adModResouceFolder \
+		          + "-J " + self.get_staging_folder(pkgName) + "/src/ "
 		lutinMultiprocess.run_command(cmdLine)
 		#aapt  package -f -M ${manifest.file} -F ${packaged.resource.file} -I ${path.to.android-jar.library} 
 		#      -S ${android-resource-directory} [-m -J ${folder.to.output.the.R.java}]
@@ -493,12 +573,20 @@ class Target(lutinTarget.Target):
 			else:
 				filesString += element + " "
 		
+		if "ADMOD_ID" in pkgProperties:
+			filesString += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
+			
 		if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-			filesString += self.folder_javaProject + pkgName + "Settings.java "
+			filesString += self.folder_javaProject + pkgNameApplicationName + "Settings.java "
+		
+		adModJarFile = ""
+		if "ADMOD_ID" in pkgProperties:
+			adModJarFile = ":" + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
 		
 		cmdLine = "javac " \
 		          + "-d " + self.get_staging_folder(pkgName) + "/build/classes " \
-		          + "-classpath " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar " \
+		          + "-classpath " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
+		          + adModJarFile + " " \
 		          + filesString \
 		          + self.file_finalAbstraction + " "  \
 		          + self.get_staging_folder(pkgName) + "/src/R.java "
@@ -507,31 +595,35 @@ class Target(lutinTarget.Target):
 		debug.print_element("pkg", ".dex", "<==", "*.class")
 		cmdLine = androidToolPath + "dx " \
 		          + "--dex --no-strict " \
-		          + "--output=" + self.get_staging_folder(pkgName) + "/build/" + pkgName + ".dex " \
+		          + "--output=" + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
 		          + self.get_staging_folder(pkgName) + "/build/classes/ "
+		
+		if "ADMOD_ID" in pkgProperties:
+			cmdLine += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
+		
 		lutinMultiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk", "<==", ".dex, assets, .so, res")
 		#builderDebug="-agentlib:jdwp=transport=dt_socket,server=y,address=8050,suspend=y "
 		builderDebug=""
+		# note : set -u not signed application...
+		#+ ":" + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 		cmdLine =   "java -Xmx128M " \
-		          + "-classpath " + self.folder_sdk + "/tools/lib/sdklib.jar " \
+		          + " -classpath " + self.folder_sdk + "/tools/lib/sdklib.jar " \
 		          + builderDebug \
-		          + "com.android.sdklib.build.ApkBuilderMain " \
-		          + self.get_staging_folder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
-		          + "-u " \
-		          + "-z " + self.get_staging_folder(pkgName) + "/resources.res " \
-		          + "-f " + self.get_staging_folder(pkgName) + "/build/" + pkgName + ".dex " \
-		          + "-rf " + self.get_staging_folder(pkgName) + "/data "
+		          + " com.android.sdklib.build.ApkBuilderMain " \
+		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+		          + " -u " \
+		          + " -z " + self.get_staging_folder(pkgName) + "/resources.res " \
+		          + " -f " + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
+		          + " -rf " + self.get_staging_folder(pkgName) + "/data "
 		lutinMultiprocess.run_command(cmdLine)
 		
 		# doc :
 		# http://developer.android.com/tools/publishing/app-signing.html
+		# Create a key for signing your application:
+		# keytool -genkeypair -v -keystore AndroidKey.jks -storepass Pass__AndroidDebugKey -alias alias__AndroidDebugKey -keypass PassKey__AndroidDebugKey -keyalg RSA -validity 36500
 		if "debug"==self.buildMode:
-			# To create the debug Key ==> for all ...
-			#keytool -genkeypair -v -keystore $(BUILD_SYSTEM)/AndroidDebugKey.jks -storepass Pass__AndroidDebugKey -alias alias__AndroidDebugKey -keypass PassKey__AndroidDebugKey -keyalg RSA -validity 36500
-			# use default common generic debug key:
-			# generate the pass file (debug mode does not request to have a complicated key) :
 			tmpFile = open("tmpPass.boo", 'w')
 			tmpFile.write("Pass__AndroidDebugKey\n")
 			tmpFile.write("PassKey__AndroidDebugKey\n")
@@ -544,79 +636,61 @@ class Target(lutinTarget.Target):
 			cmdLine = "jarsigner " \
 			    + debugOption \
 			    + "-keystore " + lutinTools.get_current_path(__file__) + "/AndroidDebugKey.jks " \
-			    + self.get_staging_folder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
-			    + " alias__AndroidDebugKey " \
-			    + " < tmpPass.boo"
+			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
+			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+			    + " alias__AndroidDebugKey < tmpPass.boo"
 			lutinMultiprocess.run_command(cmdLine)
-			print("")
+			tmpFile = open("tmpPass.boo", 'w')
+			tmpFile.write("\n")
+			tmpFile.flush()
+			tmpFile.close()
 		else:
-			# keytool is situated in $(JAVA_HOME)/bin ...
-			#TODO : call the user the pass and the loggin he want ...
-			#$(if $(wildcard ./config/AndroidKey_$(PROJECT_NAME2).jks),$(empty), \
-			#	$(Q)echo "./config/$(PROJECT_NAME2).jks <== dynamic key (NOTE : It might ask some question to generate the key for android)" ; \
-			#	$(Q)keytool -genkeypair -v \
-			#	    -keystore ./config/$(PROJECT_NAME2).jks \
-			#	    -alias alias_$(PROJECT_NAME2) \
-			#	    -keyalg RSA \
-			#	    -validity 365 \
-			#)
-			# note we can add : -storepass Pass$(PROJECT_NAME2)
-			# note we can add : -keypass PassK$(PROJECT_NAME2)
-			
-			# Question poser a ce moment, les automatiser ...
-			# Quels sont vos prenom et nom ?
-			# Edoget_run_folderuard DUPIN
-			#   [Unknown] :  Quel est le nom de votre unite organisationnelle ?
-			# org
-			#   [Unknown] :  Quelle est le nom de votre organisation ?
-			# EWOL
-			#   [Unknown] :  Quel est le nom de votre ville de residence ?
-			# Paris
-			#   [Unknown] :  Quel est le nom de votre etat ou province ?
-			# France
-			#   [Unknown] :  Quel est le code de pays a deux lettres pour cette unite ?
-			# FR
-			#   [Unknown] :  Est-ce CN=Edouard DUPIN, OU=org, O=EWOL, L=Paris, ST=France, C=FR ?
-			# oui
-			#   [non] :  
-			# Generation d'une paire de clees RSA de a 024 bits et d'un certificat autosigne (SHA1withRSA) d'une validite de 365 jours
-			# 	pour : CN=Edouard DUPIN, OU=org, O=EWOL, L=Paris, ST=France, C=FR
-			
-			# keytool is situated in $(JAVA_HOME)/bin ...
-			#echo "apk(Signed) <== apk"
-			# sign the application request loggin and password : 
-			#jarsigner \
-			#    -keystore ./config/AndroidKey_$(PROJECT_NAME2).jks \
-			#    $(TARGET_OUT_STAGING)/build/$(PROJECT_NAME2)-unalligned.apk \
-			#    alias_$(PROJECT_NAME2)
-			debug.warning("TODO ...")
+			print("On release mode we need the file :  and key an pasword to sign the application ...")
+			debug.print_element("pkg", ".apk(signed debug)", "<==", ".apk (not signed)")
+			cmdLine = "jarsigner " \
+			    + " -keystore " + basePkgPath + "/AndroidKey.jks " \
+			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
+			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+			    + " " + pkgNameApplicationName
+			lutinMultiprocess.run_command(cmdLine)
+			cmdLine = "jarsigner " \
+			    + " -verify -verbose -certs " \
+			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
+			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk "
+			lutinMultiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
-		lutinTools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgName + ".apk")
+		lutinTools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk")
 		# verbose mode : -v
 		cmdLine = self.folder_sdk + "/tools/zipalign 4 " \
-		          + self.get_staging_folder(pkgName) + "/build/" + pkgName + "-unalligned.apk " \
-		          + self.get_staging_folder(pkgName) + "/" + pkgName + ".apk "
+		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
 		lutinMultiprocess.run_command(cmdLine)
 		
 		# copy file in the final stage :
-		lutinTools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgName + ".apk",
-		                    self.get_final_folder() + "/" + pkgName + ".apk",
+		lutinTools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk",
+		                    self.get_final_folder() + "/" + pkgNameApplicationName + ".apk",
 		                    True)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
+		pkgNameApplicationName = pkgName
+		if "debug"==self.buildMode:
+			pkgNameApplicationName += "debug"
 		cmdLine = self.folder_sdk + "/platform-tools/adb install -r " \
-		          + self.get_staging_folder(pkgName) + "/" + pkgName + ".apk "
+		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
 		lutinMultiprocess.run_command(cmdLine)
 	
 	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgName
+		pkgNameApplicationName = pkgName
+		if "debug"==self.buildMode:
+			pkgNameApplicationName += "debug"
+		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
 		RlutinMultiprocess.unCommand(cmdLine)
 	
 	def Log(self, pkgName):

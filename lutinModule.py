@@ -670,6 +670,8 @@ class Module:
 			self.packageProp[variable] = value
 		elif "ANDROID_APPL_TYPE" == variable:
 			self.packageProp[variable] = value
+		elif "ADMOD_ID" == variable:
+			self.packageProp[variable] = value
 		else:
 			debug.error("not know pak element : '" + variable + "'")
 	
