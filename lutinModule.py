@@ -80,6 +80,7 @@ class Module:
 		                     "PRIORITY" : set(""),
 		                     "DESCRIPTION" : set(""),
 		                     "VERSION" : set("0.0.0"),
+		                     "VERSION_CODE" : "",
 		                     "NAME" : set("no-name"), # name of the application
 		                     "ANDROID_MANIFEST" : "", # By default generate the manifest
 		                     "ANDROID_JAVA_FILES" : ["DEFAULT"], # when user want to create his own services and activities
@@ -657,6 +658,8 @@ class Module:
 		elif "DESCRIPTION" == variable:
 			self.packageProp[variable] = value
 		elif "VERSION" == variable:
+			self.packageProp[variable] = value
+		elif "VERSION_CODE" == variable:
 			self.packageProp[variable] = value
 		elif "NAME" == variable:
 			self.packageProp[variable] = value
