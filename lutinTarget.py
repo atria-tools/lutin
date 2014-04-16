@@ -6,7 +6,10 @@ import lutinModule
 
 class Target:
 	def __init__(self, name, typeCompilator, debugMode, generatePackage, arch, cross):
-		self.arch = arch
+		if arch != "":
+			self.arch = "-arch " + arch
+		else:
+			self.arch = ""
 		self.cross = cross
 		self.name=name
 		self.endGeneratePackage = generatePackage

@@ -41,14 +41,12 @@ def print_pretty(myString):
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
-		tmpcmdLine = tmpcmdLine.replace('-o\n\t', '-o ')
-		tmpcmdLine = tmpcmdLine.replace('-D\n\t', '-D ')
-		tmpcmdLine = tmpcmdLine.replace('-I\n\t', '-I ')
-		tmpcmdLine = tmpcmdLine.replace('-L\n\t', '-L ')
-		tmpcmdLine = tmpcmdLine.replace('g++\n\t', 'g++\t')
-		tmpcmdLine = tmpcmdLine.replace('gcc\n\t', 'gcc\t')
-		tmpcmdLine = tmpcmdLine.replace('ar\n\t', 'ar\t')
-		tmpcmdLine = tmpcmdLine.replace('ranlib\n\t', 'ranlib\t')
+		baseElementList = ["-o", "-D", "-I", "-L", "g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib", "-framework", "-isysroot", "-arch"]
+		for element in baseElementList:
+			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
+		baseElementList = ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]
+		for element in baseElementList:
+			tmpcmdLine = tmpcmdLine.replace('/'+element+' ', '/'+element+'\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t', ' \\\n\t')
 		
 		return tmpcmdLine

@@ -5,14 +5,17 @@ import lutinTools
 import os
 import stat
 import lutinExtProjectGeneratorXCode
+import lutinMultiprocess
 
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
-		cross = ""
-		
+		cross = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+		if typeCompilator == "gcc":
+			debug.info("compile only with clang for IOs");
+			typeCompilator = "clang"
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
-		lutinTarget.Target.__init__(self, "IOs", typeCompilator, debugMode, generatePackage, "", cross)
+		lutinTarget.Target.__init__(self, "IOs", typeCompilator, debugMode, generatePackage, "i386", cross)
 		
 		self.folder_bin=""
 		self.folder_lib="/lib"
@@ -26,13 +29,22 @@ class Target(lutinTarget.Target):
 		
 		self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk"
 		
-		self.global_flags_ld.append("-mios-simulator-version-min=7.0")
+		self.global_flags_ld.append([
+			"-mios-simulator-version-min=7.0",
+			"-Xlinker",
+			"-objc_abi_version",
+			"-Xlinker 2",
+			"-Xlinker",
+			"-no_implicit_dylibs",
+			"-stdlib=libc++",
+			"-fobjc-arc",
+			"-fobjc-link-runtime"])
+	
 		self.global_flags_cc.append("-mios-simulator-version-min=7.0")
 		
 		#add a project generator:
 		self.externProjectManager = lutinExtProjectGeneratorXCode.ExtProjectGeneratorXCode()
-		
-	
+
 	def get_staging_folder(self, binaryName):
 		return lutinTools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/"
 	
@@ -71,32 +83,34 @@ class Target(lutinTarget.Target):
 		tmpFile.write("			<key>CFBundleInfoDictionaryVersion</key>\n")
 		tmpFile.write("			<string>6.0</string>\n")
 		tmpFile.write("			<key>CFBundleName</key>\n")
-		tmpFile.write("			<string>projectName</string>\n")
+		tmpFile.write("			<string>" + pkgName + "</string>\n")
 		tmpFile.write("			<key>CFBundlePackageType</key>\n")
 		tmpFile.write("			<string>APPL</string>\n")
 		tmpFile.write("			<key>CFBundleShortVersionString</key>\n")
 		tmpFile.write("			<string>1.0</string>\n")
 		tmpFile.write("			<key>CFBundleSignature</key>\n")
 		tmpFile.write("			<string>????</string>\n")
-		"""
 		tmpFile.write("			<key>CFBundleSupportedPlatforms</key>\n")
 		tmpFile.write("			<array>\n")
 		tmpFile.write("				<string>iPhoneSimulator</string>\n")
 		tmpFile.write("			</array>\n")
+		"""
 		tmpFile.write("			<key>CFBundleVersion</key>\n")
 		tmpFile.write("			<string>1.0</string>\n")
+		"""
 		tmpFile.write("			<key>DTPlatformName</key>\n")
 		tmpFile.write("			<string>iphonesimulator</string>\n")
 		tmpFile.write("			<key>DTSDKName</key>\n")
 		tmpFile.write("			<string>iphonesimulator7.0</string>\n")
+		"""
 		tmpFile.write("			<key>LSRequiresIPhoneOS</key>\n")
 		tmpFile.write("			<true/>\n")
+		"""
 		tmpFile.write("			<key>UIDeviceFamily</key>\n")
 		tmpFile.write("			<array>\n")
 		tmpFile.write("				<integer>1</integer>\n")
 		tmpFile.write("				<integer>2</integer>\n")
 		tmpFile.write("			</array>\n")
-		"""
 		"""
 		tmpFile.write("			<key>UILaunchImages</key>\n")
 		tmpFile.write("			<array>\n")
@@ -118,7 +132,6 @@ class Target(lutinTarget.Target):
 		tmpFile.write("			<key>UIMainStoryboardFile~ipad</key>\n")
 		tmpFile.write("			<string>Main_iPad</string>\n")
 		"""
-		"""
 		tmpFile.write("			<key>UIRequiredDeviceCapabilities</key>\n")
 		tmpFile.write("			<array>\n")
 		tmpFile.write("				<string>armv7</string>\n")
@@ -128,6 +141,7 @@ class Target(lutinTarget.Target):
 		tmpFile.write("			<key>UISupportedInterfaceOrientations</key>\n")
 		tmpFile.write("			<array>\n")
 		tmpFile.write("				<string>UIInterfaceOrientationPortrait</string>\n")
+		tmpFile.write("				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n")
 		tmpFile.write("				<string>UIInterfaceOrientationLandscapeLeft</string>\n")
 		tmpFile.write("				<string>UIInterfaceOrientationLandscapeRight</string>\n")
 		tmpFile.write("			</array>\n")
@@ -138,7 +152,6 @@ class Target(lutinTarget.Target):
 		tmpFile.write("				<string>UIInterfaceOrientationLandscapeLeft</string>\n")
 		tmpFile.write("				<string>UIInterfaceOrientationLandscapeRight</string>\n")
 		tmpFile.write("			</array>\n")
-		"""
 		tmpFile.write("    </dict>\n")
 		tmpFile.write("</plist>\n")
 		tmpFile.write("\n\n")
@@ -177,7 +190,11 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.warning("    ==> TODO")
+		#destinationFolder = "~/Library/Developer/Xcode/DerivedData/" + pkgName + "-cmuvjchgtiteexdiacyqoexsyadg/Build/Products/Debug-iphonesimulator/" + pkgName + ".app"
+		destinationFolder = "~/Library/Application\ Support/iPhone\ Simulator/7.0.3/Applications/9F1F8349-E13D-4DC3-8343-1DCEB055489A/" + pkgName + ".app"
+		lutinTools.create_directory_of_file(destinationFolder + "/plop.txt")
+		cmdLine = "cp -rf " + self.get_staging_folder(pkgName) + " " + destinationFolder
+		lutinMultiprocess.run_command(cmdLine)
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
 	def un_install_package(self, pkgName):
@@ -186,6 +203,13 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
+		
+	def Log(self, pkgName):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("log of iOs board")
+		debug.debug("------------------------------------------------------------------------")
+		cmdLine = "tail -f ~/Library/Logs/iOS\ Simulator/7.0.3/system.log"
+		lutinMultiprocess.run_command(cmdLine)
 
 
 

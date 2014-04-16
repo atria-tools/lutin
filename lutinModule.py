@@ -124,6 +124,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst,
+			target.arch,
 			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
@@ -158,6 +159,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
 			"-o", file_dst ,
+			target.arch,
 			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
@@ -192,6 +194,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
 			"-o", file_dst,
+			target.arch,
 			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
@@ -225,6 +228,7 @@ class Module:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
 			"-o", file_dst,
+			target.arch,
 			target.sysroot,
 			target.global_include_cc,
 			lutinTools.add_prefix("-I",self.export_path),
@@ -293,6 +297,7 @@ class Module:
 			target.xx,
 			"-o", file_dst,
 			target.global_sysroot,
+			target.arch,
 			"-shared",
 			file_src,
 			depancy.src,
@@ -332,9 +337,10 @@ class Module:
 		#create comdLine : 
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
-			"-o", file_dst,
+			target.arch,
 			target.sysroot,
 			target.global_sysroot,
+			"-o", file_dst,
 			file_src,
 			depancy.src,
 			self.flags_ld,
