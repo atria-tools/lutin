@@ -276,10 +276,11 @@ class Module:
 			os.remove(file_dst)
 		lutinMultiprocess.run_command(cmdLine)
 		#$(Q)$(TARGET_RANLIB) $@
-		cmdLineRanLib=lutinTools.list_to_str([
-			target.ranlib,
-			file_dst ])
-		lutinMultiprocess.run_command(cmdLineRanLib)
+		if target.ranlib != "":
+			cmdLineRanLib=lutinTools.list_to_str([
+				target.ranlib,
+				file_dst ])
+			lutinMultiprocess.run_command(cmdLineRanLib)
 		# write cmd line only after to prevent errors ...
 		lutinMultiprocess.store_command(cmdLine, file_cmd)
 		return file_dst

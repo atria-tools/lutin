@@ -6,6 +6,7 @@ import os
 import stat
 import lutinExtProjectGeneratorXCode
 import lutinMultiprocess
+import random
 
 class Target(lutinTarget.Target):
 	def __init__(self, typeCompilator, debugMode, generatePackage):
@@ -17,9 +18,10 @@ class Target(lutinTarget.Target):
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
 		lutinTarget.Target.__init__(self, "IOs", typeCompilator, debugMode, generatePackage, "i386", cross)
 		
+		# remove unneeded ranlib ...
+		self.ranlib=""
 		self.folder_bin=""
-		self.folder_lib="/lib"
-		self.folder_data="/Resources"
+		self.folder_data="/share"
 		self.folder_doc="/doc"
 		
 		self.suffix_lib_static='.a'
@@ -186,14 +188,38 @@ class Target(lutinTarget.Target):
 		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
 		#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
 	
+	def createRandomNumber(self, len):
+		out = ""
+		for iii in range(0,len):
+			out += random.choice(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"])
+		return out
+	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		#destinationFolder = "~/Library/Developer/Xcode/DerivedData/" + pkgName + "-cmuvjchgtiteexdiacyqoexsyadg/Build/Products/Debug-iphonesimulator/" + pkgName + ".app"
-		destinationFolder = "~/Library/Application\ Support/iPhone\ Simulator/7.0.3/Applications/9F1F8349-E13D-4DC3-8343-1DCEB055489A/" + pkgName + ".app"
+		simulatorIdFile = ".iosSimutatorId_" + pkgName + ".txt"
+		if lutinTools.file_size(simulatorIdFile) < 10:
+			#create the file:
+			tmpFile = open(simulatorIdFile, 'w')
+			tmpFile.write(self.createRandomNumber(8))
+			tmpFile.write("-")
+			tmpFile.write(self.createRandomNumber(4))
+			tmpFile.write("-")
+			tmpFile.write(self.createRandomNumber(4))
+			tmpFile.write("-")
+			tmpFile.write(self.createRandomNumber(4))
+			tmpFile.write("-")
+			tmpFile.write(self.createRandomNumber(12))
+			tmpFile.flush()
+			tmpFile.close()
+		simulatorId = lutinTools.file_read_data(simulatorIdFile)
+		home = os.path.expanduser("~")
+		destinationFolder = home + "/Library/Application Support/iPhone Simulator/7.0.3/Applications/" + simulatorId + "/" + pkgName + ".app"
+		destinationFolder2 = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.0.3/Applications/" + simulatorId + "/" + pkgName + ".app"
+		debug.info("install in simulator : " + destinationFolder)
 		lutinTools.create_directory_of_file(destinationFolder + "/plop.txt")
-		cmdLine = "cp -rf " + self.get_staging_folder(pkgName) + " " + destinationFolder
+		cmdLine = "cp -rf " + self.get_staging_folder(pkgName) + " " + destinationFolder2
 		lutinMultiprocess.run_command(cmdLine)
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
@@ -201,7 +227,10 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.warning("    ==> TODO")
+		simulatorIdFile = ".iosSimutatorId_" + pkgName + ".txt"
+		if lutinTools.file_size(simulatorIdFile) < 10:
+			debug.warning("Can not get simulation O_ID : " + simulatorIdFile)
+		
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 		
 	def Log(self, pkgName):
