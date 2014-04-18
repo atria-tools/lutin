@@ -43,6 +43,8 @@ class Target(lutinTarget.Target):
 			"-fobjc-link-runtime"])
 	
 		self.global_flags_cc.append("-mios-simulator-version-min=7.0")
+		self.global_flags_m.append("-fobjc-arc")
+		#self.global_flags_m.append("-fmodules")
 		
 		#add a project generator:
 		self.externProjectManager = lutinExtProjectGeneratorXCode.ExtProjectGeneratorXCode()
@@ -215,12 +217,16 @@ class Target(lutinTarget.Target):
 			tmpFile.close()
 		simulatorId = lutinTools.file_read_data(simulatorIdFile)
 		home = os.path.expanduser("~")
+		destinationFolderBase = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.0.3/Applications/" + simulatorId
 		destinationFolder = home + "/Library/Application Support/iPhone Simulator/7.0.3/Applications/" + simulatorId + "/" + pkgName + ".app"
 		destinationFolder2 = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.0.3/Applications/" + simulatorId + "/" + pkgName + ".app"
 		debug.info("install in simulator : " + destinationFolder)
 		lutinTools.create_directory_of_file(destinationFolder + "/plop.txt")
 		cmdLine = "cp -rf " + self.get_staging_folder(pkgName) + " " + destinationFolder2
 		lutinMultiprocess.run_command(cmdLine)
+		cmdLine = "touch " + destinationFolderBase
+		lutinMultiprocess.run_command(cmdLine)
+			
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
 	def un_install_package(self, pkgName):
