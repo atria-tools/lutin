@@ -6,7 +6,7 @@ import os
 import stat
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage):
+	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
 		cross = ""
 		
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
@@ -52,7 +52,7 @@ class Target(lutinTarget.Target):
 		tmpFile.write("        <key>CFBundleName</key>\n")
 		tmpFile.write("        <string>"+pkgName+"</string>\n")
 		tmpFile.write("        <key>CFBundleIdentifier</key>\n")
-		tmpFile.write("        <string>com."+pkgProperties["COMPAGNY_NAME2"]+"."+pkgName+"</string>\n")
+		tmpFile.write("        <string>" + pkgProperties["COMPAGNY_TYPE"] + "." + pkgProperties["COMPAGNY_NAME2"] + "." + pkgName + "</string>\n")
 		tmpFile.write("	       <key>CFBundleSignature</key>\n")
 		tmpFile.write("        <string>????</string>\n")
 		tmpFile.write("        <key>CFBundleIconFile</key>\n")

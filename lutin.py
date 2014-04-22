@@ -26,6 +26,7 @@ myLutinArg.add(lutinArg.ArgDefine("c", "compilator", list=[["clang",""],["gcc","
 myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
 myLutinArg.add(lutinArg.ArgDefine("r", "prj", desc="Use external project management (not build with lutin..."))
 myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
+myLutinArg.add(lutinArg.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
 
 myLutinArg.add_section("cible", "generate in order set")
 localArgument = myLutinArg.parse()
@@ -107,6 +108,7 @@ def Start():
 	generatePackage=True
 	# load the default target :
 	target = None
+	simulationMode=False
 	actionDone=False
 	#build with extern tool
 	externBuild=False
@@ -116,6 +118,8 @@ def Start():
 			continue
 		elif argument.get_option_nName() == "package":
 			generatePackage=False
+		elif argument.get_option_nName() == "simulation":
+			simulationMode=True
 		elif argument.get_option_nName() == "prj":
 			externBuild=True
 		elif argument.get_option_nName() == "compilator":
@@ -133,6 +137,7 @@ def Start():
 				compilator="gcc"
 				mode="release"
 				generatePackage=True
+				simulationMode=False
 				#remove previous target
 				target = None
 		elif argument.get_option_nName() == "mode":
@@ -148,14 +153,14 @@ def Start():
 			else:
 				#load the target if needed :
 				if target == None:
-					target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild)
+					target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode)
 				target.build(argument.get_arg())
 				actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
 		#load the target if needed :
 		if target == None:
-			target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild)
+			target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode)
 		target.build("all")
 	# stop all started threads 
 	lutinMultiprocess.un_init()

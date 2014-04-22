@@ -9,7 +9,7 @@ import os
 import sys
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage):
+	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
 		
 		self.folder_ndk = os.getenv('PROJECT_NDK', "AUTO")
 		self.folder_sdk = os.getenv('PROJECT_SDK', "AUTO")
@@ -49,7 +49,7 @@ class Target(lutinTarget.Target):
 			if not os.path.isdir(baseFolderX86):
 				debug.info("Gcc x86 pah does not exist !!!")
 		
-		lutinTarget.Target.__init__(self, "Android", typeCompilator, debugMode, generatePackage, arch, cross)
+		lutinTarget.Target.__init__(self, "Android", typeCompilator, debugMode, generatePackage, arch, cross, sumulator)
 		
 		# for gcc :
 		

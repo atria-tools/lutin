@@ -682,6 +682,8 @@ class Module:
 			self.packageProp[variable] = value
 		elif "ADMOD_ID" == variable:
 			self.packageProp[variable] = value
+		elif "APPLE_APPLICATION_IOS_ID" == variable:
+			self.packageProp[variable] = value
 		else:
 			debug.error("not know pak element : '" + variable + "'")
 	

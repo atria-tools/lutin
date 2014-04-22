@@ -8,7 +8,7 @@ import lutinHost
 import sys
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage):
+	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
 		# on windows board the basic path is not correct 
 		# TODO : get external PATH for the minGW path
 		# TODO : Set the cyngwin path ...

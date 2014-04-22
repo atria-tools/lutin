@@ -5,11 +5,12 @@ import lutinTools
 import lutinModule
 
 class Target:
-	def __init__(self, name, typeCompilator, debugMode, generatePackage, arch, cross):
+	def __init__(self, name, typeCompilator, debugMode, generatePackage, arch, cross, sumulator=False):
 		if arch != "":
 			self.arch = "-arch " + arch
 		else:
 			self.arch = ""
+		self.sumulator = sumulator
 		self.cross = cross
 		self.name=name
 		self.endGeneratePackage = generatePackage
@@ -299,10 +300,10 @@ class Target:
 
 __startTargetName="lutinTarget"
 
-def target_load(targetName, compilator, mode, generatePackage, externBuild):
+def target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode):
 	theTarget = __import__(__startTargetName + targetName)
 	#try:
-	tmpTarget = theTarget.Target(compilator, mode, generatePackage)
+	tmpTarget = theTarget.Target(compilator, mode, generatePackage, simulationMode)
 	tmpTarget.set_use_of_extern_build_tool(externBuild)
 	return tmpTarget
 	#except:

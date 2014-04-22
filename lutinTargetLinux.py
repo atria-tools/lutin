@@ -7,7 +7,7 @@ import stat
 import lutinMultiprocess
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage):
+	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
 		lutinTarget.Target.__init__(self, "Linux", typeCompilator, debugMode, generatePackage, "", "")
 	
 	def generate_list_separate_coma(self, list):

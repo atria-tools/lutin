@@ -66,7 +66,7 @@ class ArgDefine:
 			print("		-" + self.m_optionSmall + " / --" + self.m_optionBig)
 		elif self.m_optionSmall != "":
 			print("		-" + self.m_optionSmall)
-		elif self.m_optionSmall != "":
+		elif self.m_optionBig != "":
 			print("		--" + self.m_optionBig)
 		else:
 			print("		???? ==> internal error ...")
