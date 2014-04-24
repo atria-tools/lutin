@@ -1,9 +1,10 @@
 #!/usr/bin/python
 import lutinDebug as debug
 import lutinTarget
-import lutinTools
+import lutinTools as tools
 import os
 import stat
+import re
 import lutinMultiprocess
 
 class Target(lutinTarget.Target):
@@ -23,19 +24,21 @@ class Target(lutinTarget.Target):
 	
 	def make_package(self, pkgName, pkgProperties, basePkgPath):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
+		debianPkgName = re.sub("_", "-", pkgName)
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + pkgName + "' v"+pkgProperties["VERSION"])
+		debug.info("Generate package '" + debianPkgName + "' v"+pkgProperties["VERSION"])
 		debug.debug("------------------------------------------------------------------------")
 		self.get_staging_folder(pkgName)
-		targetOutFolderDebian=self.get_staging_folder(pkgName) + "/DEBIAN/"
+		targetOutFolderDebian = self.get_staging_folder(pkgName) + "/DEBIAN/"
 		finalFileControl = targetOutFolderDebian + "control"
 		finalFilepostRm = targetOutFolderDebian + "postrm"
 		# create the folders :
-		lutinTools.create_directory_of_file(finalFileControl)
-		lutinTools.create_directory_of_file(finalFilepostRm)
+		tools.create_directory_of_file(finalFileControl)
+		tools.create_directory_of_file(finalFilepostRm)
 		## Create the control file
+		tools.create_directory_of_file(finalFileControl)
 		tmpFile = open(finalFileControl, 'w')
-		tmpFile.write("Package: " + pkgName + "\n")
+		tmpFile.write("Package: " + debianPkgName + "\n")
 		tmpFile.write("Version: " + pkgProperties["VERSION"] + "\n")
 		tmpFile.write("Section: " + self.generate_list_separate_coma(pkgProperties["SECTION"]) + "\n")
 		tmpFile.write("Priority: " + pkgProperties["PRIORITY"] + "\n")
@@ -59,13 +62,14 @@ class Target(lutinTarget.Target):
 		## Enable Execution in script
 		os.chmod(finalFilepostRm, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
 		## Readme donumentation
-		readmeFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ pkgName + "/README"
+		readmeFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ debianPkgName + "/README"
+		tools.create_directory_of_file(readmeFileDest)
 		if os.path.exists(basePkgPath + "/os-Linux/README")==True:
-			lutinTools.copy_file(basePkgPath + "/os-Linux/README", readmeFileDest)
+			tools.copy_file(basePkgPath + "/os-Linux/README", readmeFileDest)
 		elif os.path.exists(basePkgPath + "/README")==True:
-			lutinTools.copy_file(basePkgPath + "/README", readmeFileDest)
+			tools.copy_file(basePkgPath + "/README", readmeFileDest)
 		elif os.path.exists(basePkgPath + "/README.md")==True:
-			lutinTools.copy_file(basePkgPath + "/README.md", readmeFileDest)
+			tools.copy_file(basePkgPath + "/README.md", readmeFileDest)
 		else:
 			debug.info("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
 			tmpFile = open(readmeFileDest, 'w')
@@ -73,9 +77,10 @@ class Target(lutinTarget.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		## licence file
-		licenseFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ pkgName + "/copyright"
+		licenseFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ debianPkgName + "/copyright"
+		tools.create_directory_of_file(licenseFileDest)
 		if os.path.exists(basePkgPath + "/license.txt")==True:
-			lutinTools.copy_file(basePkgPath + "/license.txt", licenseFileDest)
+			tools.copy_file(basePkgPath + "/license.txt", licenseFileDest)
 		else:
 			debug.info("no file 'license.txt' ==> generate an empty one")
 			tmpFile = open(licenseFileDest, 'w')
@@ -83,9 +88,10 @@ class Target(lutinTarget.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		##changeLog file
-		changeLogFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ pkgName + "/changelog"
+		changeLogFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ debianPkgName + "/changelog"
+		tools.create_directory_of_file(changeLogFileDest)
 		if os.path.exists(basePkgPath + "/changelog")==True:
-			lutinTools.copy_file(basePkgPath + "/changelog", changeLogFileDest)
+			tools.copy_file(basePkgPath + "/changelog", changeLogFileDest)
 		else:
 			debug.info("no file 'changelog' ==> generate an empty one")
 			tmpFile = open(changeLogFileDest, 'w')
@@ -93,10 +99,10 @@ class Target(lutinTarget.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		## create the package :
-		debug.debug("pachage : " + self.get_staging_folder(pkgName) + "/" + pkgName + ".deb")
+		debug.debug("package : " + self.get_staging_folder(pkgName) + "/" + debianPkgName + ".deb")
 		os.system("cd " + self.get_staging_folder("") + " ; dpkg-deb --build " + pkgName)
-		lutinTools.create_directory_of_file(self.get_final_folder())
-		lutinTools.copy_file(self.get_staging_folder("") + "/" + pkgName + self.suffix_package, self.get_final_folder() + "/" + pkgName + self.suffix_package)
+		tools.create_directory_of_file(self.get_final_folder())
+		tools.copy_file(self.get_staging_folder("") + "/" + pkgName + self.suffix_package, self.get_final_folder() + "/" + pkgName + self.suffix_package)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
