@@ -88,7 +88,10 @@ class Target(lutinTarget.Target):
 			lutinTools.copy_file(basePkgPath + "/changelog", changeLogFileDest)
 		else:
 			debug.info("no file 'changelog' ==> generate an empty one")
-			lutinMultiprocess.run_command("git log > " + changeLogFileDest)
+			tmpFile = open(changeLogFileDest, 'w')
+			tmpFile.write("No changelog data " + pkgName + "\n")
+			tmpFile.flush()
+			tmpFile.close()
 		## create the package :
 		debug.debug("pachage : " + self.get_staging_folder(pkgName) + "/" + pkgName + ".deb")
 		os.system("cd " + self.get_staging_folder("") + " ; dpkg-deb --build " + pkgName)
