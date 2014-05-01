@@ -2,6 +2,7 @@
 import lutinDebug as debug
 import lutinTarget
 import lutinTools
+import lutinImage
 import os
 import stat
 import lutinExtProjectGeneratorXCode
@@ -72,7 +73,27 @@ class Target(lutinTarget.Target):
 		
 		if    "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
-			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder_data(pkgName) + "/icon.icns", True)
+			# Resize all icon needed for Ios ...
+			# TODO : Do not regenerate if source resource is not availlable
+			# TODO : Add a colored background ...
+			debug.print_element("pkg", "iTunesArtwork.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork.png", 512, 512)
+			debug.print_element("pkg", "iTunesArtwork@2x.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork@2x.png", 1024, 1024)
+			debug.print_element("pkg", "Icon-60@2x.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-60@2x.png", 120, 120)
+			debug.print_element("pkg", "Icon-76.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76.png", 76, 76)
+			debug.print_element("pkg", "Icon-76@2x.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76@2x.png", 152, 152)
+			debug.print_element("pkg", "Icon-Small-40.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40.png", 40, 40)
+			debug.print_element("pkg", "Icon-Small-40@2x.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40@2x.png", 80, 80)
+			debug.print_element("pkg", "Icon-Small.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small.png", 29, 29)
+			debug.print_element("pkg", "Icon-Small@2x.png", "<==", pkgProperties["ICON"])
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small@2x.png", 58, 58)
 		
 		debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
 		infoFile = self.get_staging_folder(pkgName) + "/PkgInfo"
@@ -96,10 +117,20 @@ class Target(lutinTarget.Target):
 		dataFile += "			<string>" + pkgName + "</string>\n"
 		dataFile += "			<key>CFBundleIdentifier</key>\n"
 		dataFile += "			<string>com." + pkgProperties["COMPAGNY_NAME2"] + "." + pkgName + "</string>\n"
-		"""
-		dataFile += "			<key>CFBundleIconFile</key>\n"
-		dataFile += "			<string>icon.icns</string>\n"
-		"""
+		
+		dataFile += "			<key>CFBundleIconFiles</key>\n"
+		dataFile += "			<array>\n"
+		dataFile += "				<string>Icon-60@2x.png</string>\n"
+		dataFile += "				<string>Icon-76.png</string>\n"
+		dataFile += "				<string>Icon-76@2x.png</string>\n"
+		dataFile += "				<string>Icon-Small-40.png</string>\n"
+		dataFile += "				<string>Icon-Small-40@2x.png</string>\n"
+		dataFile += "				<string>Icon-Small.png</string>\n"
+		dataFile += "				<string>Icon-Small@2x.png</string>\n"
+		dataFile += "				<string>iTunesArtwork.png</string>\n"
+		dataFile += "				<string>iTunesArtwork@2x.png</string>\n"
+		dataFile += "			</array>\n"
+		
 		dataFile += "			<key>CFBundleInfoDictionaryVersion</key>\n"
 		dataFile += "			<string>6.0</string>\n"
 		dataFile += "			<key>CFBundleName</key>\n"
