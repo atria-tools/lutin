@@ -375,18 +375,47 @@ class Module:
 	##
 	## @brief Commands for copying files
 	##
+	def image_to_staging(self, binaryName, target):
+		for source, destination, sizeX, sizeY in self.imageToCopy:
+			extension = source[source.rfind('.'):]
+			if     extension != ".png" \
+			   and extension != ".jpg" \
+			   and sizeX > 0:
+				debug.error("Can not manage image other than .png and jpg to resize : " + source);
+			displaySource = source
+			source = self.originFolder + "/" + source
+			if destination == "":
+				destination = source[source.rfind('/')+1:]
+				debug.verbose("Regenerate Destination : '" + destination + "'")
+			if sizeX > 0:
+				debug.verbose("Image file : " + displaySource + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
+				fileName, fileExtension = os.path.splitext(self.originFolder+"/" + source)
+				target.add_image_staging(source, destination, sizeX, sizeY)
+			else:
+				debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
+				target.add_file_staging(source, destination)
+	
+	##
+	## @brief Commands for copying files
+	##
 	def files_to_staging(self, binaryName, target):
-		for element in self.files:
-			debug.verbose("Might copy file : " + element[0] + " ==> " + element[1])
-			target.add_file_staging(self.originFolder+"/"+element[0], element[1])
+		for source, destination in self.files:
+			displaySource = source
+			source = self.originFolder + "/" + source
+			if destination == "":
+				destination = source[source.rfind('/')+1:]
+				debug.verbose("Regenerate Destination : '" + destination + "'")
+			# TODO : when destination is missing ...
+			debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
+			target.add_file_staging(source, destination)
 	
 	##
 	## @brief Commands for copying files
 	##
 	def folders_to_staging(self, binaryName, target):
-		for element in self.folders:
-			debug.verbose("Might copy folder : " + element[0] + "==>" + element[1])
-			lutinTools.copy_anything_target(target, self.originFolder+"/"+element[0],element[1])
+		for source, destination in self.folders:
+			debug.verbose("Might copy folder : " + source + "==>" + destination)
+			lutinTools.copy_anything_target(target, self.originFolder + "/" + source, destination)
 	
 	# call here to build the module
 	def build(self, target, packageName):
@@ -480,6 +509,7 @@ class Module:
 			return
 		debug.verbose("build tree of " + self.name)
 		# add all the elements (first added only one keep ==> permit to everload sublib element)
+		self.image_to_staging(packageName, target)
 		self.files_to_staging(packageName, target)
 		self.folders_to_staging(packageName, target)
 		#build tree of all submodules

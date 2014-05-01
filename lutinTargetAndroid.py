@@ -295,7 +295,7 @@ class Target(lutinTarget.Target):
 		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/drawable/icon.png");
 		if     "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
-			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", True)
+			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", 256, 256)
 		else:
 			# to be sure that we have all time a resource ...
 			tmpFile = open(self.get_staging_folder(pkgName) + "/res/drawable/plop.txt", 'w')

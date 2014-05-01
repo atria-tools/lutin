@@ -3,6 +3,7 @@ import lutinDebug as debug
 import datetime
 import lutinTools
 import lutinModule
+import lutinImage
 
 class Target:
 	def __init__(self, name, typeCompilator, debugMode, generatePackage, arch, cross, sumulator=False):
@@ -97,19 +98,31 @@ class Target:
 	def get_build_mode(self):
 		return self.buildMode
 	
-	def add_file_staging(self, inputFile, outputFile):
-		for source, dst in self.listFinalFile:
+	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY):
+		for source, dst, x, y in self.listFinalFile:
 			if dst == outputFile :
 				debug.verbose("already added : " + outputFile)
 				return
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
-		self.listFinalFile.append([inputFile,outputFile])
+		self.listFinalFile.append([inputFile,outputFile, sizeX, sizeY])
+	
+	def add_file_staging(self, inputFile, outputFile):
+		for source, dst, x, y in self.listFinalFile:
+			if dst == outputFile :
+				debug.verbose("already added : " + outputFile)
+				return
+		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
+		self.listFinalFile.append([inputFile,outputFile, -1, -1])
 	
 	def copy_to_staging(self, binaryName):
 		baseFolder = self.get_staging_folder_data(binaryName)
-		for source, dst in self.listFinalFile:
-			debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
-			lutinTools.copy_file(source, baseFolder+"/"+dst)
+		for source, dst, x, y in self.listFinalFile:
+			if x == -1:
+				debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
+				lutinTools.copy_file(source, baseFolder+"/"+dst)
+			else:
+				debug.verbose("resize image : '" + source + "' ==> '" + dst + "' size=(" + str(x) + "," + str(y) + ")");
+				lutinImage.resize(source, baseFolder+"/"+dst, x, y)
 	
 	
 	def clean_module_tree(self):
