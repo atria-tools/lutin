@@ -32,31 +32,32 @@ class Module:
 		# Name of the module
 		self.name=moduleName
 		# Dependency list:
-		self.depends=[]
+		self.depends = []
 		# Documentation list:
 		self.documentation = None
 		# export PATH
-		self.export_path=[]
-		self.local_path=[]
-		self.export_flags_ld=[]
-		self.export_flags_cc=[]
-		self.export_flags_xx=[]
-		self.export_flags_m=[]
-		self.export_flags_mm=[]
+		self.export_path = []
+		self.local_path = []
+		self.export_flags_ld = []
+		self.export_flags_cc = []
+		self.export_flags_xx = []
+		self.export_flags_m = []
+		self.export_flags_mm = []
 		# list of all flags:
-		self.flags_ld=[]
-		self.flags_cc=[]
-		self.flags_xx=[]
-		self.flags_m=[]
-		self.flags_mm=[]
-		self.flags_s=[]
-		self.flags_ar=[]
+		self.flags_ld = []
+		self.flags_cc = []
+		self.flags_xx = []
+		self.flags_m = []
+		self.flags_mm = []
+		self.flags_s = []
+		self.flags_ar = []
 		# sources list:
-		self.src=[]
+		self.src = []
 		# copy files and folders:
-		self.files=[]
-		self.folders=[]
-		self.isbuild=False
+		self.imageToCopy = []
+		self.files = []
+		self.folders = []
+		self.isbuild = False
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
 		   or moduleType == 'LIBRARY' \
@@ -570,11 +571,14 @@ class Module:
 	def add_src_file(self, list):
 		self.append_to_internalList(self.src, list, True)
 	
-	def copy_file(self, src, dst):
-		self.files.append([src,dst])
+	def copy_image(self, source, destination='', sizeX=-1, sizeY=-1):
+		self.imageToCopy.append([source, destination, sizeX, sizeY])
 	
-	def copy_folder(self, src, dst):
-		self.folders.append([src,dst])
+	def copy_file(self, source, destination=''):
+		self.files.append([source, destination])
+	
+	def copy_folder(self, source, destination=''):
+		self.folders.append([source, destination])
 	
 	def print_list(self, description, list):
 		if len(list) > 0:
