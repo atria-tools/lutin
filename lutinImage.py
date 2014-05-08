@@ -7,26 +7,34 @@ if platform.system() == "Darwin":
 	import CoreGraphics
 else:
 	from PIL import Image
-
+def get_pow_2_multiple(size):
+	base = 2
+	while size>base:
+		base = base * 2
+	return base
+					   
 def resize(srcFile, destFile, x, y):
+	x = get_pow_2_multiple(x)
 	extension = destFile[destFile.rfind('.'):]
 	if platform.system() == "Darwin":
 		source_image = CoreGraphics.CGImageImport(CoreGraphics.CGDataProviderCreateWithFilename(srcFile))
 		source_width = source_image.getWidth()
 		source_height = source_image.getHeight()
-		source_image_rect = CoreGraphics.CGRectMake(0, 0, source_width, source_height)
-		new_image = source_image.createWithImageInRect(source_image_rect)
-		colors_space = CoreGraphics.CGColorSpaceCreateDeviceRGB()
-		colors = CoreGraphics.CGFloatArray(5)
-		context = CoreGraphics.CGBitmapContextCreateWithColor(x, y, colors_space, colors)
-		context.setInterpolationQuality(CoreGraphics.kCGInterpolationHigh)
-		if im1.size[0] <= x:
+		if source_width <= x:
 			# for small image just copy:
 			tools.copy_file(srcFile, destFile)
 		else:
 			if y <= 0:
 				# keep ratio :
 				y = int(float(x) * float(source_height) / float(source_width))
+			y = get_pow_2_multiple(y)
+			debug.debug("Resize image: " + srcFile + " size=(" + str(source_width) + "x" + str(source_height) + ") -> (" + str(x) + "x" + str(y) + ")")
+			source_image_rect = CoreGraphics.CGRectMake(0, 0, source_width, source_height)
+			new_image = source_image.createWithImageInRect(source_image_rect)
+			colors_space = CoreGraphics.CGColorSpaceCreateDeviceRGB()
+			colors = CoreGraphics.CGFloatArray(5)
+			context = CoreGraphics.CGBitmapContextCreateWithColor(x, y, colors_space, colors)
+			context.setInterpolationQuality(CoreGraphics.kCGInterpolationHigh)
 			new_image_rect = CoreGraphics.CGRectMake(0, 0, x, y)
 			context.drawImage(new_image_rect, new_image)
 			tools.create_directory_of_file(destFile)
@@ -46,6 +54,7 @@ def resize(srcFile, destFile, x, y):
 			if y <= 0:
 				# keep ratio :
 				y = int(float(x) * float(im1.size[1]) / float(im1.size[0]))
+			y = get_pow_2_multiple(y)
 			# use one of these filter options to resize the image
 			tmpImage = im1.resize((x, y), Image.ANTIALIAS)
 			tools.create_directory_of_file(destFile)
