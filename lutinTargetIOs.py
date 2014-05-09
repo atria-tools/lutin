@@ -21,7 +21,8 @@ class Target(lutinTarget.Target):
 			arch = "i386"
 			cross = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
 		else:
-			arch="arm64"
+			arch="arm64" # for ipad air
+			#arch="armv7" # for Iphone 4
 			cross = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
 		lutinTarget.Target.__init__(self, "IOs", typeCompilator, debugMode, generatePackage, arch, cross, sumulator)
 		
