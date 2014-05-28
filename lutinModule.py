@@ -101,7 +101,10 @@ class Module:
 			"-Wsign-compare",
 			"-Wreturn-type",
 			"-Wint-to-pointer-cast",
-			"-Wno-write-strings"]);
+			"-Wno-write-strings",
+			"-Woverloaded-virtual",
+			"-Wnon-virtual-dtor",
+			"-Wno-unused-variable"]);
 		#only for gcc : "-Wunused-variable", "-Wunused-but-set-variable",
 	
 	##
