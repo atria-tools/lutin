@@ -88,7 +88,8 @@ class Module:
 		                     "ANDROID_RESOURCES" : [],
 		                     "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
 		                     "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
-		                     "RIGHT" : []
+		                     "RIGHT" : [],
+		                     "ADMOD_POSITION" : "top"
 		                    }
 		
 	
@@ -654,14 +655,7 @@ class Module:
 			#	edu : Education
 			#	pri : Private
 			#	museum : ...
-			if     "com" != value \
-			   and "net" != value \
-			   and "org" != value \
-			   and "gov" != value \
-			   and "mil" != value \
-			   and "edu" != value \
-			   and "pri" != value \
-			   and "museum" != value:
+			if value not in ["com", "net", "org", "gov", "mil", "edu", "pri", "museum"]:
 				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
 			else:
 				self.packageProp[variable] = value
@@ -691,11 +685,7 @@ class Module:
 		elif "PRIORITY" == variable:
 			#list = ["required","important","standard","optional","extra"]
 			#if isinstance(value, list):
-			if     "required" != value \
-			   and "important" != value \
-			   and "standard" != value \
-			   and "optional" != value \
-			   and "extra" != value:
+			if value not in ["required", "important", "standard", "optional", "extra"]:
 				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
 			else:
 				self.packageProp[variable] = value
@@ -721,8 +711,13 @@ class Module:
 			self.packageProp[variable] = value
 		elif "APPLE_APPLICATION_IOS_ID" == variable:
 			self.packageProp[variable] = value
+		elif "ADMOD_POSITION" == variable:
+			if value in ["top", "bottom"]:
+				self.packageProp[variable] = value
+			else:
+				debug.error("not know pkg element : '" + variable + "' with value : '" + value + "' must be [top|bottom]")
 		else:
-			debug.error("not know pak element : '" + variable + "'")
+			debug.error("not know pkg element : '" + variable + "'")
 	
 	def pkg_add(self, variable, value):
 		# TODO : Check values...
