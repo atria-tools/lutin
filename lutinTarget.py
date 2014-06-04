@@ -65,10 +65,15 @@ class Target:
 		
 		self.folder_arch="/" + self.name
 		
-		if "debug"==debugMode:
+		if "debug" == debugMode:
 			self.buildMode = "debug"
+			self.global_flags_cc.append("-g")
+			self.global_flags_cc.append("-DDEBUG")
+			self.global_flags_cc.append("-O0")
 		else:
 			self.buildMode = "release"
+			self.global_flags_cc.append("-DNDEBUG")
+			self.global_flags_cc.append("-O3")
 		self.folder_out="/out" + self.folder_arch + "/" + self.buildMode
 		self.folder_final="/final/" + typeCompilator
 		self.folder_staging="/staging/" + typeCompilator

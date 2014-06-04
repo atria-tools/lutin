@@ -143,7 +143,7 @@ class Module:
 			self.flags_cc,
 			self.export_flags_mm,
 			self.export_flags_cc,
-			"-c -MMD -MP -g",
+			"-c -MMD -MP",
 			"-x objective-c++",
 			file_src])
 		# check the dependency for this file :
@@ -178,7 +178,7 @@ class Module:
 			self.flags_cc,
 			self.export_flags_m,
 			self.export_flags_cc,
-			"-c -MMD -MP -g",
+			"-c -MMD -MP",
 			"-x objective-c",
 			file_src])
 		# check the dependency for this file :
@@ -213,7 +213,7 @@ class Module:
 			self.flags_cc,
 			self.export_flags_xx,
 			self.export_flags_cc,
-			" -c -MMD -MP -g ",
+			" -c -MMD -MP",
 			file_src])
 		# check the dependency for this file :
 		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
@@ -243,7 +243,7 @@ class Module:
 			depancy.flags_cc,
 			self.flags_cc,
 			self.export_flags_cc,
-			" -c -MMD -MP -g ",
+			" -c -MMD -MP",
 			file_src])
 		
 		# check the dependency for this file :
