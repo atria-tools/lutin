@@ -271,8 +271,8 @@ class Module:
 			#depancy.src])
 		
 		# check the dependency for this file :
-		if False==dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) \
-				and False==dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine):
+		if     False==dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) \
+		   and False==dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine):
 			return file_dst
 		lutinTools.create_directory_of_file(file_dst)
 		debug.print_element("StaticLib", self.name, "==>", file_dst)
@@ -425,7 +425,9 @@ class Module:
 	def build(self, target, packageName):
 		# ckeck if not previously build
 		if target.is_module_build(self.name)==True:
-			return self.localHeritage
+			return self.subHeritageList
+		# create the packege heritage
+		self.localHeritage = heritage.heritage(self)
 		
 		if     packageName==None \
 		   and (    self.type=="BINARY" \
@@ -438,11 +440,11 @@ class Module:
 		
 		# build dependency befor
 		listSubFileNeededTobuild = []
-		subHeritage = heritage.heritage(None)
+		self.subHeritageList = heritage.HeritageList()
 		for dep in self.depends:
-			inherit = target.build(dep, packageName)
+			inheritList = target.build(dep, packageName)
 			# add at the heritage list :
-			subHeritage.add_sub(inherit)
+			self.subHeritageList.add_heritage_list(inheritList)
 		
 		# build local sources
 		for file in self.src:
@@ -450,7 +452,7 @@ class Module:
 			fileExt = file.split(".")[-1]
 			if    fileExt == "c" \
 			   or fileExt == "C":
-				resFile = self.compile_cc_to_o(file, packageName, target, subHeritage)
+				resFile = self.compile_cc_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			elif    fileExt == "cpp" \
 			     or fileExt == "CPP" \
@@ -458,15 +460,15 @@ class Module:
 			     or fileExt == "CXX" \
 			     or fileExt == "xx" \
 			     or fileExt == "XX":
-				resFile = self.compile_xx_to_o(file, packageName, target, subHeritage)
+				resFile = self.compile_xx_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			elif    fileExt == "mm" \
 			     or fileExt == "MM":
-				resFile = self.compile_mm_to_o(file, packageName, target, subHeritage)
+				resFile = self.compile_mm_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			elif    fileExt == "m" \
 			     or fileExt == "M":
-				resFile = self.compile_m_to_o(file, packageName, target, subHeritage)
+				resFile = self.compile_m_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			else:
 				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
@@ -478,10 +480,10 @@ class Module:
 			# nothing to add ==> just dependence
 			None
 		elif self.type=='LIBRARY':
-			resFile = self.link_to_a(listSubFileNeededTobuild, packageName, target, subHeritage)
+			resFile = self.link_to_a(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
 			self.localHeritage.add_sources(resFile)
 		elif self.type=='BINARY':
-			resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, subHeritage)
+			resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
 			# generate tree for this special binary
 			target.clean_module_tree()
 			self.build_tree(target, self.name)
@@ -489,9 +491,9 @@ class Module:
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
 				# special case for android wrapper :
-				resFile = self.link_to_so(listSubFileNeededTobuild, packageName, target, subHeritage, "libewol")
+				resFile = self.link_to_so(listSubFileNeededTobuild, packageName, target, self.subHeritageList, "libewol")
 			else:
-				resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, subHeritage)
+				resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
 			target.clean_module_tree()
 			# generate tree for this special binary
 			self.build_tree(target, self.name)
@@ -502,9 +504,9 @@ class Module:
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			
-		self.localHeritage.add_sub(subHeritage)
+		self.subHeritageList.add_heritage(self.localHeritage)
 		# return local dependency ...
-		return self.localHeritage
+		return self.subHeritageList
 	
 	# call here to build the module
 	def build_tree(self, target, packageName):
