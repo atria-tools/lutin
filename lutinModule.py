@@ -391,13 +391,14 @@ class Module:
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
+			file_cmd = target.generate_file(binaryName, self.name, self.originFolder, destination, "image")[0]
 			if sizeX > 0:
 				debug.verbose("Image file : " + displaySource + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
 				fileName, fileExtension = os.path.splitext(self.originFolder+"/" + source)
-				target.add_image_staging(source, destination, sizeX, sizeY)
+				target.add_image_staging(source, destination, sizeX, sizeY, file_cmd)
 			else:
 				debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
-				target.add_file_staging(source, destination)
+				target.add_file_staging(source, destination, file_cmd)
 	
 	##
 	## @brief Commands for copying files
@@ -409,9 +410,10 @@ class Module:
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
+			file_cmd = target.generate_file(binaryName, self.name, self.originFolder, destination, "image")[0]
 			# TODO : when destination is missing ...
 			debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
-			target.add_file_staging(source, destination)
+			target.add_file_staging(source, destination, file_cmd)
 	
 	##
 	## @brief Commands for copying files

@@ -2,18 +2,32 @@
 import lutinDebug as debug
 import lutinTools as tools
 import platform
+import os
+import lutinMultiprocess
+import lutinDepend as dependency
 
 if platform.system() == "Darwin":
 	import CoreGraphics
 else:
 	from PIL import Image
+
 def get_pow_2_multiple(size):
 	base = 2
 	while size>base:
 		base = base * 2
 	return base
-					   
-def resize(srcFile, destFile, x, y):
+
+# TODO : 3 things to do :
+#        check if force requested
+#        check if time change
+#        check if command line change
+def resize(srcFile, destFile, x, y, cmd_file=None):
+	if os.path.exists(srcFile) == False:
+		debug.error("Request a resize an image that does not existed : '" + srcFile + "'")
+	cmd_line = "resize Image : " + srcFile + " ==> " + destFile + " newSize=(" + str(x) + "x" + str(y) + ")"
+	if False==dependency.need_re_build(destFile, srcFile, file_cmd=cmd_file , cmdLine=cmd_line):
+		return
+	# add cmdLine ...
 	x = get_pow_2_multiple(x)
 	extension = destFile[destFile.rfind('.'):]
 	if platform.system() == "Darwin":
@@ -28,6 +42,7 @@ def resize(srcFile, destFile, x, y):
 				# keep ratio :
 				y = int(float(x) * float(source_height) / float(source_width))
 			y = get_pow_2_multiple(y)
+			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", srcFile, "==>", destFile)
 			debug.debug("Resize image: " + srcFile + " size=(" + str(source_width) + "x" + str(source_height) + ") -> (" + str(x) + "x" + str(y) + ")")
 			source_image_rect = CoreGraphics.CGRectMake(0, 0, source_width, source_height)
 			new_image = source_image.createWithImageInRect(source_image_rect)
@@ -55,7 +70,9 @@ def resize(srcFile, destFile, x, y):
 				# keep ratio :
 				y = int(float(x) * float(im1.size[1]) / float(im1.size[0]))
 			y = get_pow_2_multiple(y)
+			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", srcFile, "==>", destFile)
 			# use one of these filter options to resize the image
 			tmpImage = im1.resize((x, y), Image.ANTIALIAS)
 			tools.create_directory_of_file(destFile)
 			tmpImage.save(destFile)
+	lutinMultiprocess.store_command(cmd_line, cmd_file)

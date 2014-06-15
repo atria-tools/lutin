@@ -21,7 +21,8 @@ processorAvaillable = 1 # number of CPU core availlable
 
 def store_command(cmdLine, file):
 	# write cmd line only after to prevent errors ...
-	if file!="":
+	if     file != "" \
+	   and file != None:
 		# Create directory:
 		lutinTools.create_directory_of_file(file)
 		# Store the command Line:

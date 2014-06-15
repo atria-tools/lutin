@@ -103,31 +103,34 @@ class Target:
 	def get_build_mode(self):
 		return self.buildMode
 	
-	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY):
-		for source, dst, x, y in self.listFinalFile:
+	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY, cmdFile=None):
+		for source, dst, x, y, cmdFile2 in self.listFinalFile:
 			if dst == outputFile :
 				debug.verbose("already added : " + outputFile)
 				return
-		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
-		self.listFinalFile.append([inputFile,outputFile, sizeX, sizeY])
+		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'")
+		self.listFinalFile.append([inputFile,outputFile, sizeX, sizeY, cmdFile])
 	
-	def add_file_staging(self, inputFile, outputFile):
-		for source, dst, x, y in self.listFinalFile:
+	def add_file_staging(self, inputFile, outputFile, cmdFile=None):
+		for source, dst, x, y, cmdFile2 in self.listFinalFile:
 			if dst == outputFile :
 				debug.verbose("already added : " + outputFile)
 				return
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
-		self.listFinalFile.append([inputFile,outputFile, -1, -1])
+		self.listFinalFile.append([inputFile, outputFile, -1, -1, cmdFile])
 	
 	def copy_to_staging(self, binaryName):
 		baseFolder = self.get_staging_folder_data(binaryName)
-		for source, dst, x, y in self.listFinalFile:
+		for source, dst, x, y, cmdFile in self.listFinalFile:
+			if     cmdFile != None \
+			   and cmdFile != "":
+				debug.verbose("cmd file " + cmdFile)
 			if x == -1:
 				debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
-				lutinTools.copy_file(source, baseFolder+"/"+dst)
+				lutinTools.copy_file(source, baseFolder+"/"+dst, cmdFile)
 			else:
 				debug.verbose("resize image : '" + source + "' ==> '" + dst + "' size=(" + str(x) + "," + str(y) + ")");
-				lutinImage.resize(source, baseFolder+"/"+dst, x, y)
+				lutinImage.resize(source, baseFolder+"/"+dst, x, y, cmdFile)
 	
 	
 	def clean_module_tree(self):
@@ -159,17 +162,19 @@ class Target:
 			list.append(file)
 			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_cmdLine)
 		elif (type=="lib-shared"):
 			list.append(file)
 			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_cmdLine)
 		elif (type=="lib-static"):
 			list.append(file)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_cmdLine)
+		elif (type=="image"):
+			list.append(self.get_build_folder(binaryName) + "/data/" + file + self.suffix_cmdLine)
 		else:
 			debug.error("unknow type : " + type)
 		return list

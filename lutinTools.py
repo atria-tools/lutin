@@ -4,6 +4,8 @@ import shutil
 import errno
 import lutinDebug as debug
 import fnmatch
+import lutinMultiprocess
+import lutinDepend as dependency
 
 
 """
@@ -78,16 +80,17 @@ def add_prefix(prefix,list):
 				result.append(prefix+elem)
 			return result
 
-def copy_file(src, dst, force=False):
-	if os.path.exists(src)==False:
+def copy_file(src, dst, cmd_file=None, force=False):
+	if os.path.exists(src) == False:
 		debug.error("Request a copy a file that does not existed : '" + src + "'")
-	if os.path.exists(dst):
-		if     force==False \
-		   and os.path.getmtime(dst) > os.path.getmtime(src):
-			return
+	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
+	if     force == False \
+	   and dependency.need_re_build(dst, src, file_cmd=cmd_file , cmdLine=cmd_line) == False:
+		return
 	debug.print_element("copy file", src, "==>", dst)
 	create_directory_of_file(dst)
 	shutil.copyfile(src, dst)
+	lutinMultiprocess.store_command(cmd_line, cmd_file)
 
 
 def copy_anything(src, dst):

@@ -4,32 +4,39 @@ import lutinDebug as debug
 import lutinEnv as environement
 
 
-def need_re_build(dst, src, dependFile, file_cmd="", cmdLine=""):
+def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
 	debug.verbose("Resuest check of dependency of :")
-	debug.verbose("		dst='" + dst + "'")
-	debug.verbose("		str='" + src + "'")
-	debug.verbose("		dept='" + dependFile + "'")
-	debug.verbose("		cmd='" + file_cmd + "'")
+	debug.verbose("		dst='" + str(dst) + "'")
+	debug.verbose("		str='" + str(src) + "'")
+	debug.verbose("		dept='" + str(dependFile) + "'")
+	debug.verbose("		cmd='" + str(file_cmd) + "'")
 	# if force mode selected ==> just force rebuild ...
 	if environement.get_force_mode():
 		debug.verbose("			==> must rebuild (force mode)")
 		return True
 	
 	# check if the destination existed:
-	if False==os.path.exists(dst):
+	if     dst != "" \
+	   and dst != None \
+	   and os.path.exists(dst) == False:
 		debug.verbose("			==> must rebuild (dst does not exist)")
 		return True
 	# chek the basic date if the 2 files
-	if os.path.getmtime(src) > os.path.getmtime(dst):
+	if     dst != "" \
+	   and dst != None \
+	   and os.path.getmtime(src) > os.path.getmtime(dst):
 		debug.verbose("			==> must rebuild (source time greater)")
 		return True
 	
-	if False==os.path.exists(dependFile):
+	if     dependFile != "" \
+	   and dependFile != None \
+	   and os.path.exists(dependFile) == False:
 		debug.verbose("			==> must rebuild (no depending file)")
 		return True
 	
-	if ""!=file_cmd:
-		if False==os.path.exists(file_cmd):
+	if     file_cmd != "" \
+	   and file_cmd != None:
+		if os.path.exists(file_cmd) == False:
 			debug.verbose("			==> must rebuild (no commandLine file)")
 			return True
 		# check if the 2 cmdline are similar :
@@ -44,42 +51,43 @@ def need_re_build(dst, src, dependFile, file_cmd="", cmdLine=""):
 		# the cmdfile is correct ...
 		file2.close()
 	
-	
-	debug.verbose("			start parsing dependency file : '" + dependFile + "'")
-	file = open(dependFile, "r")
-	for curLine in file.readlines():
-		# normal file : end with : ": \\n"
-		curLine = curLine[:len(curLine)-1]
-		# removing last \ ...
-		if curLine[len(curLine)-1:] == '\\' :
+	if     dependFile != "" \
+	   and dependFile != None:
+		debug.verbose("			start parsing dependency file : '" + dependFile + "'")
+		file = open(dependFile, "r")
+		for curLine in file.readlines():
+			# normal file : end with : ": \\n"
 			curLine = curLine[:len(curLine)-1]
-		# remove white space : 
-		#debug.verbose("				Line (read) : '" + curLine + "'");
-		curLine = curLine.strip()
-		#debug.verbose("				Line (strip) : '" + curLine + "'");
-		
-		testFile=""
-		if curLine[len(curLine)-1:] == ':':
-			debug.verbose("				Line (no check (already done) : '" + curLine + "'");
-		elif    len(curLine) == 0 \
-		     or curLine == '\\':
-			debug.verbose("				Line (Not parsed) : '" + curLine + "'");
-		else:
-			testFile = curLine
-			debug.verbose("				Line (might check) : '" + testFile + "'");
-		# really check files:
-		if testFile!="":
-			debug.verbose("					==> test");
-			if False==os.path.exists(testFile):
-				debug.verbose("			==> must rebuild (a dependency file does not exist)")
-				file.close()
-				return True
-			if os.path.getmtime(testFile) > os.path.getmtime(dst):
-				debug.verbose("			==> must rebuild (a dependency file time is newer)")
-				file.close()
-				return True
-	# close the current file :
-	file.close()
+			# removing last \ ...
+			if curLine[len(curLine)-1:] == '\\' :
+				curLine = curLine[:len(curLine)-1]
+			# remove white space : 
+			#debug.verbose("				Line (read) : '" + curLine + "'");
+			curLine = curLine.strip()
+			#debug.verbose("				Line (strip) : '" + curLine + "'");
+			
+			testFile=""
+			if curLine[len(curLine)-1:] == ':':
+				debug.verbose("				Line (no check (already done) : '" + curLine + "'");
+			elif    len(curLine) == 0 \
+			     or curLine == '\\':
+				debug.verbose("				Line (Not parsed) : '" + curLine + "'");
+			else:
+				testFile = curLine
+				debug.verbose("				Line (might check) : '" + testFile + "'");
+			# really check files:
+			if testFile!="":
+				debug.verbose("					==> test");
+				if False==os.path.exists(testFile):
+					debug.verbose("			==> must rebuild (a dependency file does not exist)")
+					file.close()
+					return True
+				if os.path.getmtime(testFile) > os.path.getmtime(dst):
+					debug.verbose("			==> must rebuild (a dependency file time is newer)")
+					file.close()
+					return True
+		# close the current file :
+		file.close()
 	
 	debug.verbose("			==> Not rebuild (all dependency is OK)")
 	return False
