@@ -322,7 +322,7 @@ class Target(lutinTarget.Target):
 		
 		if pkgProperties["ANDROID_MANIFEST"]!="":
 			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkgProperties["ANDROID_MANIFEST"])
-			lutinTools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_folder(pkgName) + "/AndroidManifest.xml", True)
+			lutinTools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_folder(pkgName) + "/AndroidManifest.xml", force=True)
 		else:
 			if "VERSION_CODE" not in pkgProperties:
 				pkgProperties["VERSION_CODE"] = "1"
@@ -550,7 +550,7 @@ class Target(lutinTarget.Target):
 		for res_source, res_dest in pkgProperties["ANDROID_RESOURCES"]:
 			if res_source == "":
 				continue
-			lutinTools.copy_file(res_source , self.get_staging_folder(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), True)
+			lutinTools.copy_file(res_source , self.get_staging_folder(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
 		
 		
 		# Doc :
@@ -689,7 +689,7 @@ class Target(lutinTarget.Target):
 		# copy file in the final stage :
 		lutinTools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk",
 		                    self.get_final_folder() + "/" + pkgNameApplicationName + ".apk",
-		                    True)
+		                    force=True)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
