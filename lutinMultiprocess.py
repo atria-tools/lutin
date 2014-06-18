@@ -24,7 +24,6 @@ def store_command(cmdLine, file):
 	if     file != "" \
 	   and file != None:
 		# Create directory:
-		debug.warning("lklk " + file)
 		lutinTools.create_directory_of_file(file)
 		# Store the command Line:
 		file2 = open(file, "w")

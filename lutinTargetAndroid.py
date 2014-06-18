@@ -31,6 +31,11 @@ class Target(lutinTarget.Target):
 			if self.folder_sdk == "AUTO":
 				self.folder_sdk = lutinTools.get_run_folder() + "/../android/sdk"
 		
+		if not os.path.isdir(self.folder_ndk):
+			debug.error("NDK path not set !!! set env : PROJECT_NDK on the NDK path")
+		if not os.path.isdir(self.folder_sdk):
+			debug.error("SDK path not set !!! set env : PROJECT_SDK on the SDK path")
+		
 		arch = ""#"ARMv7"
 		tmpOsVal = "64"
 		gccVersion = "4.8"
@@ -44,11 +49,11 @@ class Target(lutinTarget.Target):
 			baseFolderX86 = self.folder_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
 			cross = baseFolderArm + "arm-linux-androideabi-"
 			if not os.path.isdir(baseFolderArm):
-				debug.error("Gcc Arm pah does not exist !!!")
+				debug.error("Gcc Arm path does not exist !!!")
 			if not os.path.isdir(baseFolderMips):
-				debug.info("Gcc Mips pah does not exist !!!")
+				debug.info("Gcc Mips path does not exist !!!")
 			if not os.path.isdir(baseFolderX86):
-				debug.info("Gcc x86 pah does not exist !!!")
+				debug.info("Gcc x86 path does not exist !!!")
 		
 		lutinTarget.Target.__init__(self, "Android", typeCompilator, debugMode, generatePackage, arch, cross, sumulator)
 		arch = "ARMv7"
