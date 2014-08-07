@@ -323,6 +323,10 @@ class Target:
 
 __startTargetName="lutinTarget"
 
+def list_all_target():
+	tmpListName = ["Android", "Linux", "MacOs", "IOs", "Windows" ]
+	return tmpListName
+
 def target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode):
 	theTarget = __import__(__startTargetName + targetName)
 	#try:

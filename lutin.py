@@ -27,6 +27,8 @@ myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]
 myLutinArg.add(lutinArg.ArgDefine("r", "prj", desc="Use external project management (not build with lutin..."))
 myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 myLutinArg.add(lutinArg.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
+myLutinArg.add(lutinArg.ArgDefine("", "list-target", desc="list all availlables targets ==> for auto completion"))
+myLutinArg.add(lutinArg.ArgDefine("", "list-module", desc="list all availlables module ==> for auto completion"))
 
 myLutinArg.add_section("cible", "generate in order set")
 localArgument = myLutinArg.parse()
@@ -57,6 +59,28 @@ def parseGenericArg(argument,active):
 		#display help
 		if active==False:
 			usage()
+		return True
+	if argument.get_option_nName() == "list-module":
+		if active==False:
+			listOfModule = lutinModule.list_all_module()
+			retValue = ""
+			for moduleName in listOfModule:
+				if retValue != "":
+					retValue += " "
+				retValue += moduleName
+			print retValue
+			exit(0)
+		return True
+	if argument.get_option_nName() == "list-target":
+		if active==False:
+			listOfTarget = lutinTarget.list_all_target()
+			retValue = ""
+			for targetName in listOfTarget:
+				if retValue != "":
+					retValue += " "
+				retValue += targetName
+			print retValue
+			exit(0)
 		return True
 	elif argument.get_option_nName()=="jobs":
 		if active==True:
