@@ -91,7 +91,7 @@ class Module:
 		                     "RIGHT" : [],
 		                     "ADMOD_POSITION" : "top"
 		                    }
-		
+		self.subHeritageList = None
 	
 	##
 	## @brief add Some copilation flags for this module (and only this one)
@@ -427,6 +427,8 @@ class Module:
 	def build(self, target, packageName):
 		# ckeck if not previously build
 		if target.is_module_build(self.name)==True:
+			if self.subHeritageList == None:
+				self.localHeritage = heritage.heritage(self)
 			return self.subHeritageList
 		# create the packege heritage
 		self.localHeritage = heritage.heritage(self)
