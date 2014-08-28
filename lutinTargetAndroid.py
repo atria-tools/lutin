@@ -562,7 +562,7 @@ class Target(lutinTarget.Target):
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
 		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/src/noFile")
-		androidToolPath = self.folder_sdk + "/build-tools/19.0.3/"
+		androidToolPath = self.folder_sdk + "/build-tools/20.0.0/"
 		adModResouceFolder = ""
 		if "ADMOD_ID" in pkgProperties:
 			adModResouceFolder = " -S " + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
@@ -686,7 +686,7 @@ class Target(lutinTarget.Target):
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
 		lutinTools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk")
 		# verbose mode : -v
-		cmdLine = self.folder_sdk + "/tools/zipalign 4 " \
+		cmdLine = androidToolPath + "zipalign 4 " \
 		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
 		lutinMultiprocess.run_command(cmdLine)
