@@ -5,11 +5,15 @@ import platform
 import os
 import lutinMultiprocess
 import lutinDepend as dependency
-
-if platform.system() == "Darwin":
-	import CoreGraphics
-else:
-	from PIL import Image
+enableResizeImage = True
+try:
+	if platform.system() == "Darwin":
+		import CoreGraphics
+	else:
+		from PIL import Image
+except:
+	enableResizeImage = False
+	debug.warning("Missing python tools : CoreGraphics (MacOs) or PIL") 
 
 def get_pow_2_multiple(size):
 	base = 2
@@ -22,6 +26,8 @@ def get_pow_2_multiple(size):
 #        check if time change
 #        check if command line change
 def resize(srcFile, destFile, x, y, cmd_file=None):
+	if enableResizeImage == False:
+		return
 	if os.path.exists(srcFile) == False:
 		debug.error("Request a resize an image that does not existed : '" + srcFile + "'")
 	cmd_line = "resize Image : " + srcFile + " ==> " + destFile + " newSize=(" + str(x) + "x" + str(y) + ")"
