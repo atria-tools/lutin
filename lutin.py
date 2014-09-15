@@ -24,6 +24,8 @@ myLutinArg.add_section("properties", "keep in the sequency of the cible")
 myLutinArg.add(lutinArg.ArgDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["IOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
 myLutinArg.add(lutinArg.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
 myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
+myLutinArg.add(lutinArg.ArgDefine("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile"))
+myLutinArg.add(lutinArg.ArgDefine("b", "bus", list=[["auto","Automatic choice"],["32","32 bits"],["64","64 bits"]], desc="Adressing size (Bus size)"))
 myLutinArg.add(lutinArg.ArgDefine("r", "prj", desc="Use external project management (not build with lutin..."))
 myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 myLutinArg.add(lutinArg.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
@@ -128,6 +130,8 @@ def Start():
 	compilator="gcc"
 	# build mode
 	mode="release"
+	bus="auto"
+	arch="auto"
 	# package generationMode
 	generatePackage=True
 	# load the default target :
@@ -146,6 +150,12 @@ def Start():
 			simulationMode=True
 		elif argument.get_option_nName() == "prj":
 			externBuild=True
+		elif argument.get_option_nName() == "bus":
+			debug.warning("argument bus is not implemented")
+			bus=argument.get_arg()
+		elif argument.get_option_nName() == "arch":
+			debug.warning("argument arch is not implemented")
+			arch=argument.get_arg()
 		elif argument.get_option_nName() == "compilator":
 			if compilator!=argument.get_arg():
 				debug.debug("change compilator ==> " + argument.get_arg())
@@ -160,6 +170,8 @@ def Start():
 				#reset properties by defauult:
 				compilator="gcc"
 				mode="release"
+				bus="auto"
+				arch="auto"
 				generatePackage=True
 				simulationMode=False
 				#remove previous target

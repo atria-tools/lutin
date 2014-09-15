@@ -11,6 +11,10 @@ class Target:
 			self.arch = "-arch " + arch
 		else:
 			self.arch = ""
+		#processor type selection (auto/arm/ppc/x86)
+		self.selectArch = "auto"
+		#bus size selection (auto/32/64)
+		self.selectBus = "auto"
 		self.sumulator = sumulator
 		self.cross = cross
 		self.name=name
