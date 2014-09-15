@@ -44,7 +44,7 @@ class Target:
 			self.global_flags_xx=['-std=c++11']
 			self.global_flags_mm=['-std=c++11']
 		else:
-			self.global_flags_xx=['-static-libgcc', '-static-libstdc++', '-L', '-std=c++11']
+			self.global_flags_xx=['-static-libgcc', '-static-libstdc++', '-std=c++11']
 			self.global_flags_mm=[]
 		self.global_flags_m=[]
 		self.global_flags_ar=['rcs']
