@@ -1,17 +1,30 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 import lutinDebug as debug
 import lutinTarget
 import lutinTools
+import lutinHost
 import os
 import stat
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
-		cross = ""
-		
+	def __init__(self, config):
+		#processor type selection (auto/arm/ppc/x86)
+		if config["arch"] == "auto":
+			config["arch"] = "x86"
+		#bus size selection (auto/32/64)
+		if config["bus-size"] == "auto":
+			config["bus-size"] = str(lutinHost.BUS_SIZE)
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
-		lutinTarget.Target.__init__(self, "MacOs", typeCompilator, debugMode, generatePackage, "", cross)
+		lutinTarget.Target.__init__(self, "MacOs", config, "")
 		
 		self.folder_bin="/MacOS"
 		self.folder_lib="/lib"

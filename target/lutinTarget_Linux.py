@@ -1,4 +1,12 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 import lutinDebug as debug
 import lutinTarget
 import lutinTools as tools
@@ -6,10 +14,17 @@ import os
 import stat
 import re
 import lutinMultiprocess
+import lutinHost
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
-		lutinTarget.Target.__init__(self, "Linux", typeCompilator, debugMode, generatePackage, "", "")
+	def __init__(self, config):
+		#processor type selection (auto/arm/ppc/x86)
+		if config["arch"] == "auto":
+			config["arch"] = "x86"
+		#bus size selection (auto/32/64)
+		if config["bus-size"] == "auto":
+			config["bus-size"] = str(lutinHost.BUS_SIZE)
+		lutinTarget.Target.__init__(self, "Linux", config, "")
 	
 	def generate_list_separate_coma(self, list):
 		result = ""

@@ -1,4 +1,12 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 
 import lutinDebug as debug
 import lutinTarget
@@ -6,11 +14,21 @@ import lutinTools
 import lutinHost
 import lutinImage
 import lutinMultiprocess
+import lutinHost
 import os
 import sys
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
+	def __init__(self, config):
+		#processor type selection (auto/arm/ppc/x86)
+		if config["arch"] == "auto":
+			config["arch"] = "arm"
+		#bus size selection (auto/32/64)
+		if config["bus-size"] == "auto":
+			config["bus-size"] = "32"
+		
+		arch = ""#"ARMv7"
+		lutinTarget.Target.__init__(self, "Android", config, arch)
 		
 		self.folder_ndk = os.getenv('PROJECT_NDK', "AUTO")
 		self.folder_sdk = os.getenv('PROJECT_SDK', "AUTO")
@@ -36,18 +54,18 @@ class Target(lutinTarget.Target):
 		if not os.path.isdir(self.folder_sdk):
 			debug.error("SDK path not set !!! set env : PROJECT_SDK on the SDK path")
 		
-		arch = ""#"ARMv7"
+		
 		tmpOsVal = "64"
 		gccVersion = "4.8"
-		if lutinHost.OS64BITS==True:
+		if lutinHost.BUS_SIZE==64:
 			tmpOsVal = "_64"
-		if typeCompilator == "clang":
-			cross = self.folder_ndk + "/toolchains/llvm-3.3/prebuilt/linux-x86_64/bin/"
+		if self.config["compilator"] == "clang":
+			self.set_cross_base(self.folder_ndk + "/toolchains/llvm-3.3/prebuilt/linux-x86_64/bin/")
 		else:
 			baseFolderArm = self.folder_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
 			baseFolderMips = self.folder_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
 			baseFolderX86 = self.folder_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-			cross = baseFolderArm + "arm-linux-androideabi-"
+			self.set_cross_base(baseFolderArm + "arm-linux-androideabi-")
 			if not os.path.isdir(baseFolderArm):
 				debug.error("Gcc Arm path does not exist !!!")
 			if not os.path.isdir(baseFolderMips):
@@ -55,8 +73,14 @@ class Target(lutinTarget.Target):
 			if not os.path.isdir(baseFolderX86):
 				debug.info("Gcc x86 path does not exist !!!")
 		
-		lutinTarget.Target.__init__(self, "Android", typeCompilator, debugMode, generatePackage, arch, cross, sumulator)
 		arch = "ARMv7"
+		
+		if self.selectBus = "auto":
+			
+		
+		if self.selectArch = "auto":
+			lutinHost.BUS_SIZE
+		
 		# for gcc :
 		
 		# for clang :

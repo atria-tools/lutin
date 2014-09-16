@@ -1,4 +1,12 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 import lutinDebug as debug
 import lutinTarget
 import lutinTools
@@ -7,24 +15,34 @@ import os
 import stat
 import lutinExtProjectGeneratorXCode
 import lutinMultiprocess
+import lutinHost
 import random
 import re
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
-		if typeCompilator == "gcc":
+	def __init__(self, config):
+		if config["compilator"] == "gcc":
 			debug.info("compile only with clang for IOs");
-			typeCompilator = "clang"
+			config["compilator"] = "clang"
+		#processor type selection (auto/arm/ppc/x86)
+		if config["arch"] == "auto":
+			config["arch"] = "arm"
+		#bus size selection (auto/32/64)
+		if config["bus-size"] == "auto":
+			config["bus-size"] = "64"
+		
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
 		if sumulator == True:
 			arch = "i386"
-			cross = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
 		else:
 			arch="arm64" # for ipad air
 			#arch="armv7" # for Iphone 4
-			cross = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
-		lutinTarget.Target.__init__(self, "IOs", typeCompilator, debugMode, generatePackage, arch, cross, sumulator)
+		lutinTarget.Target.__init__(self, "IOs", config, arch)
+		if self.config["simulation"] == True:
+			self.set_cross_base("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/")
+		else:
+			self.set_cross_base("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/")
 		
 		# remove unneeded ranlib ...
 		self.ranlib=""

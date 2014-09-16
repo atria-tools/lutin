@@ -1,4 +1,12 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 import lutinDebug as debug
 
 

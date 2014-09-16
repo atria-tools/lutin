@@ -1,4 +1,12 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 import sys
 import os
 import inspect
@@ -360,7 +368,7 @@ class Module:
 		debug.print_element("Executable", self.name, "==>", file_dst)
 		
 		lutinMultiprocess.run_command(cmdLine)
-		if    "release"==target.buildMode \
+		if    "release"==target.config["mode"] \
 		   or lutinEnv.get_force_strip_mode()==True:
 			# get the file size of the non strip file
 			originSize = lutinTools.file_size(file_dst);

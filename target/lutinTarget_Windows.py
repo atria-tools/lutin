@@ -1,31 +1,49 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 import lutinDebug as debug
 import lutinTarget
 import lutinTools
+import lutinHost
 import os
 import stat
-import lutinHost
 import sys
 
 class Target(lutinTarget.Target):
-	def __init__(self, typeCompilator, debugMode, generatePackage, sumulator=False):
+	def __init__(self, config):
+		if config["compilator"] != "gcc":
+			debug.error("Windows does not support '" + config["compilator"] + "' compilator ... availlable : [gcc]")
+			config["compilator"] = "gcc"
+		
+		#processor type selection (auto/arm/ppc/x86)
+		if config["arch"] == "auto":
+			config["arch"] = "x86"
+		#bus size selection (auto/32/64)
+		if config["bus-size"] == "auto":
+			config["bus-size"] = str(lutinHost.BUS_SIZE)
+		
+		lutinTarget.Target.__init__(self, "Windows", config, "")
+		
 		# on windows board the basic path is not correct 
 		# TODO : get external PATH for the minGW path
 		# TODO : Set the cyngwin path ...
 		if lutinHost.OS == "Windows":
-			cross = "c:\\MinGW\\bin\\"
+			self.set_cross_base("c:\\MinGW\\bin\\")
 			sys.path.append("c:\\MinGW\\bin" )
 			os.environ['PATH'] += ";c:\\MinGW\\bin\\"
 		else:
-			#target 64 bits:
-			cross = "x86_64-w64-mingw32-"
-			# target 32 bits:
-			cross = "i686-w64-mingw32-"
-		
-		if typeCompilator!="gcc":
-			debug.error("Android does not support '" + typeCompilator + "' compilator ... availlable : [gcc]")
-		
-		lutinTarget.Target.__init__(self, "Windows", typeCompilator, debugMode, generatePackage, "", cross)
+			if self.config["bus-size"] == "64":
+				# 64 bits
+				self.set_cross_base("x86_64-w64-mingw32-")
+			else:
+				# 32 bits
+				self.set_cross_base("i686-w64-mingw32-")
 		
 		self.folder_bin=""
 		self.folder_lib="/lib"

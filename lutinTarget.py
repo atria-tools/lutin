@@ -1,49 +1,62 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
+import sys
+import os
+import inspect
+import fnmatch
 import lutinDebug as debug
 import datetime
 import lutinTools
 import lutinModule
 import lutinImage
+import lutinHost
 
 class Target:
-	def __init__(self, name, typeCompilator, debugMode, generatePackage, arch, cross, sumulator=False):
+	def __init__(self, name, config, arch):
+		self.config = config
+		
+		#processor type selection (auto/arm/ppc/x86)
+		self.selectArch = config["arch"]; # TODO : Remove THIS ...
+		#bus size selection (auto/32/64)
+		self.selectBus = config["bus-size"]; # TODO : Remove THIS ...
+		
+		if config["bus-size"] == "auto":
+			debug.error("system error ==> must generate the default 'bus-size' config")
+		if config["arch"] == "auto":
+			debug.error("system error ==> must generate the default 'bus-size' config")
+		
+		debug.info("config=" + str(config))
 		if arch != "":
 			self.arch = "-arch " + arch
 		else:
 			self.arch = ""
-		#processor type selection (auto/arm/ppc/x86)
-		self.selectArch = "auto"
-		#bus size selection (auto/32/64)
-		self.selectBus = "auto"
-		self.sumulator = sumulator
-		self.cross = cross
+		
+		# todo : remove this :
+		self.sumulator = config["simulation"]
 		self.name=name
-		self.endGeneratePackage = generatePackage
+		self.endGeneratePackage = config["generate-package"]
 		debug.info("=================================");
 		debug.info("== Target='" + self.name + "'");
 		debug.info("=================================");
-		self.ar=self.cross + "ar"
-		self.ranlib=self.cross + "ranlib"
-		if typeCompilator == "clang":
-			self.cc=self.cross + "clang"
-			self.xx=self.cross + "clang++"
-			#self.ar=self.cross + "llvm-ar"
-			#self.ranlib="ls"
-		else:
-			self.cc=self.cross + "gcc"
-			self.xx=self.cross + "g++"
-			#self.ar=self.cross + "ar"
-			#self.ranlib=self.cross + "ranlib"
-		self.ld=self.cross + "ld"
-		self.nm=self.cross + "nm"
-		self.strip=self.cross + "strip"
-		self.dlltool=self.cross + "dlltool"
+		
+		self.set_cross_base()
+		
 		###############################################################################
 		# Target global variables.
 		###############################################################################
 		self.global_include_cc=[]
 		self.global_flags_cc=['-D__TARGET_OS__'+self.name,
+		                      '-D__TARGET_ARCH__'+self.selectArch,
+		                      '-D__TARGET_ADDR__'+self.selectBus + 'BITS',
 		                      '-D_REENTRANT']
+		
 		if self.name != "Windows":
 			self.global_flags_xx=['-std=c++11']
 			self.global_flags_mm=['-std=c++11']
@@ -69,19 +82,14 @@ class Target:
 		
 		self.folder_arch="/" + self.name
 		
-		if "debug" == debugMode:
-			self.buildMode = "debug"
+		if "debug" == self.config["mode"]:
 			self.global_flags_cc.append("-g")
 			self.global_flags_cc.append("-DDEBUG")
 			self.global_flags_cc.append("-O0")
 		else:
-			self.buildMode = "release"
 			self.global_flags_cc.append("-DNDEBUG")
 			self.global_flags_cc.append("-O3")
-		self.folder_out="/out" + self.folder_arch + "/" + self.buildMode
-		self.folder_final="/final/" + typeCompilator
-		self.folder_staging="/staging/" + typeCompilator
-		self.folder_build="/build/" + typeCompilator
+		self.update_folder_tree()
 		self.folder_bin="/usr/bin"
 		self.folder_lib="/usr/lib"
 		self.folder_data="/usr/share"
@@ -96,6 +104,33 @@ class Target:
 		
 		self.externProjectManager = None
 	
+	def update_folder_tree(self):
+		self.folder_out="/out/" + self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"] + "/" + self.config["mode"]
+		self.folder_final="/final/" + self.config["compilator"]
+		self.folder_staging="/staging/" + self.config["compilator"]
+		self.folder_build="/build/" + self.config["compilator"]
+	
+	def set_cross_base(self, cross=""):
+		self.cross = cross
+		debug.debug("== Target='" + self.cross + "'");
+		self.ar = self.cross + "ar"
+		self.ranlib = self.cross + "ranlib"
+		if self.config["compilator"] == "clang":
+			self.cc = self.cross + "clang"
+			self.xx = self.cross + "clang++"
+			#self.ar=self.cross + "llvm-ar"
+			#self.ranlib="ls"
+		else:
+			self.cc = self.cross + "gcc"
+			self.xx = self.cross + "g++"
+			#self.ar=self.cross + "ar"
+			#self.ranlib=self.cross + "ranlib"
+		self.ld = self.cross + "ld"
+		self.nm = self.cross + "nm"
+		self.strip = self.cross + "strip"
+		self.dlltool = self.cross + "dlltool"
+		self.update_folder_tree()
+	
 	def set_use_of_extern_build_tool(self, mode):
 		if mode == True:
 			if self.externProjectManager == None:
@@ -105,7 +140,7 @@ class Target:
 			self.externProjectManager = None
 	
 	def get_build_mode(self):
-		return self.buildMode
+		return self.config["mode"]
 	
 	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY, cmdFile=None):
 		for source, dst, x, y, cmdFile2 in self.listFinalFile:
@@ -325,17 +360,61 @@ class Target:
 					debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
 
-__startTargetName="lutinTarget"
+targetList=[]
+__startTargetName="lutinTarget_"
+
+
+def import_path(path):
+	global targetList
+	matches = []
+	debug.debug('Start find sub File : "%s"' %path)
+	for root, dirnames, filenames in os.walk(path):
+		tmpList = fnmatch.filter(filenames, __startTargetName + "*.py")
+		# Import the module :
+		for filename in tmpList:
+			debug.debug('    Find a file : "%s"' %os.path.join(root, filename))
+			#matches.append(os.path.join(root, filename))
+			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
+			targetName = filename.replace('.py', '')
+			targetName = targetName.replace(__startTargetName, '')
+			debug.debug("integrate module: '" + targetName + "' from '" + os.path.join(root, filename) + "'")
+			targetList.append([targetName,os.path.join(root, filename)])
+
+
+def load_target(name, config):
+	global targetList
+	debug.debug("load target: " + name)
+	if len(targetList) == 0:
+		debug.error("No target to compile !!!")
+	debug.debug("list target: " + str(targetList))
+	for mod in targetList:
+		if mod[0] == name:
+			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
+			sys.path.append(os.path.dirname(mod[1]))
+			debug.verbose("import target : '" + __startTargetName + name + "'")
+			theTarget = __import__(__startTargetName + name)
+			#create the target
+			tmpTarget = theTarget.Target(config)
+			#tmpTarget.set_use_of_extern_build_tool(externBuild)
+			return tmpTarget
 
 def list_all_target():
-	tmpListName = ["Android", "Linux", "MacOs", "IOs", "Windows" ]
+	global targetList
+	tmpListName = []
+	for mod in targetList:
+		tmpListName.append(mod[0])
 	return tmpListName
 
-def target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode):
-	theTarget = __import__(__startTargetName + targetName)
-	#try:
-	tmpTarget = theTarget.Target(compilator, mode, generatePackage, simulationMode)
-	tmpTarget.set_use_of_extern_build_tool(externBuild)
-	return tmpTarget
-	#except:
-	#	debug.error("Can not create the Target : '" + targetName + "'")
+def list_all_target_with_desc():
+	global targetList
+	tmpList = []
+	for mod in targetList:
+		sys.path.append(os.path.dirname(mod[1]))
+		theTarget = __import__(__startTargetName + mod[0])
+		try:
+			tmpdesc = theTarget.get_desc()
+			tmpList.append([mod[0], tmpdesc])
+		except:
+			debug.warning("has no name : " + mod[0])
+			tmpList.append([mod[0], ""])
+	return tmpList

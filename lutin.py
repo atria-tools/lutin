@@ -1,4 +1,12 @@
 #!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
 # for path inspection:
 import sys
 import os
@@ -21,7 +29,7 @@ myLutinArg.add(lutinArg.ArgDefine("j", "jobs", haveParam=True, desc="Specifies t
 myLutinArg.add(lutinArg.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
 
 myLutinArg.add_section("properties", "keep in the sequency of the cible")
-myLutinArg.add(lutinArg.ArgDefine("t", "target", list=[["Android",""],["Linux",""],["MacOs",""],["IOs",""],["Windows",""]], desc="Select a target (by default the platform is the computer that compile this"))
+myLutinArg.add(lutinArg.ArgDefine("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'"))
 myLutinArg.add(lutinArg.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
 myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
 myLutinArg.add(lutinArg.ArgDefine("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile"))
@@ -126,60 +134,61 @@ import lutinTools
 def Start():
 	#available target : Linux / MacOs / Windows / Android ...
 	targetName=lutinHost.OS
-	#compilation base
-	compilator="gcc"
-	# build mode
-	mode="release"
-	bus="auto"
-	arch="auto"
-	# package generationMode
-	generatePackage=True
+	config = {
+	             "compilator":"gcc",
+	             "mode":"release",
+	             "bus-size":"auto",
+	             "arch":"auto",
+	             "generate-package":True,
+	             "simulation":False,
+	             "extern-build":False
+	          }
 	# load the default target :
 	target = None
-	simulationMode=False
 	actionDone=False
-	#build with extern tool
-	externBuild=False
 	# parse all argument
 	for argument in localArgument:
 		if True==parseGenericArg(argument, False):
 			continue
 		elif argument.get_option_nName() == "package":
-			generatePackage=False
+			config["generate-package"]=False
 		elif argument.get_option_nName() == "simulation":
-			simulationMode=True
+			config["simulation"]=True
 		elif argument.get_option_nName() == "prj":
-			externBuild=True
+			config["extern-build"]=True
 		elif argument.get_option_nName() == "bus":
 			debug.warning("argument bus is not implemented")
-			bus=argument.get_arg()
+			config["bus-size"]=argument.get_arg()
 		elif argument.get_option_nName() == "arch":
 			debug.warning("argument arch is not implemented")
-			arch=argument.get_arg()
+			config["arch"]=argument.get_arg()
 		elif argument.get_option_nName() == "compilator":
 			if compilator!=argument.get_arg():
 				debug.debug("change compilator ==> " + argument.get_arg())
-				compilator=argument.get_arg()
+				config["compilator"]=argument.get_arg()
 				#remove previous target
 				target = None
 		elif argument.get_option_nName() == "target":
 			# No check input ==> this will be verify automaticly chen the target will be loaded
 			if targetName!=argument.get_arg():
 				targetName=argument.get_arg()
-				debug.debug("change target ==> " + targetName + " & reset mode : gcc&release")
+				debug.debug("change target ==> '" + targetName + "' & reset mode : gcc&release")
 				#reset properties by defauult:
-				compilator="gcc"
-				mode="release"
-				bus="auto"
-				arch="auto"
-				generatePackage=True
-				simulationMode=False
+				config = {
+				             "compilator":"gcc",
+				             "mode":"release",
+				             "bus-size":"auto",
+				             "arch":"auto",
+				             "generate-package":True,
+				             "simulation":False,
+				             "extern-build":False
+				          }
 				#remove previous target
 				target = None
 		elif argument.get_option_nName() == "mode":
-			if mode!=argument.get_arg():
-				mode = argument.get_arg()
-				debug.debug("change mode ==> " + mode)
+			if config["mode"]!=argument.get_arg():
+				config["mode"] = argument.get_arg()
+				debug.debug("change mode ==> " + config["mode"])
 				#remove previous target
 				target = None
 		else:
@@ -189,14 +198,14 @@ def Start():
 			else:
 				#load the target if needed :
 				if target == None:
-					target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode)
+					target = lutinTarget.load_target(targetName, config)
 				target.build(argument.get_arg())
 				actionDone=True
 	# if no action done : we do "all" ...
 	if actionDone==False:
 		#load the target if needed :
 		if target == None:
-			target = lutinTarget.target_load(targetName, compilator, mode, generatePackage, externBuild, simulationMode)
+			target = lutinTarget.load_target(targetName, config)
 		target.build("all")
 	# stop all started threads 
 	lutinMultiprocess.un_init()
@@ -220,6 +229,7 @@ if __name__ == '__main__':
 				   and folder.lower()!="out" :
 					debug.debug("Automatic load path: '" + folder + "'")
 					lutinModule.import_path(folder)
+					lutinTarget.import_path(folder)
 	Start()
 
 
