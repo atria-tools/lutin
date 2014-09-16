@@ -74,13 +74,6 @@ class Target(lutinTarget.Target):
 				debug.info("Gcc x86 path does not exist !!!")
 		
 		arch = "ARMv7"
-		
-		if self.selectBus = "auto":
-			
-		
-		if self.selectArch = "auto":
-			lutinHost.BUS_SIZE
-		
 		# for gcc :
 		
 		# for clang :
@@ -102,7 +95,7 @@ class Target(lutinTarget.Target):
 			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
 		
 		if True:
-			if typeCompilator == "clang":
+			if self.config["compilator"] == "clang":
 				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
 				if arch == "ARMv5":
 					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi/"
@@ -206,7 +199,7 @@ class Target(lutinTarget.Target):
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		pkgNameApplicationName = pkgName
-		if "debug"==self.buildMode:
+		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
 		# FINAL_FOLDER_JAVA_PROJECT
 		self.folder_javaProject=   self.get_staging_folder(pkgName) \
@@ -370,7 +363,7 @@ class Target(lutinTarget.Target):
 				tmpFile.write( '	<application android:label="' + pkgNameApplicationName + '" \n')
 				if "ICON" in pkgProperties.keys():
 					tmpFile.write( '	             android:icon="@drawable/icon" \n')
-				if "debug"==self.buildMode:
+				if self.config["mode"] == "debug":
 					tmpFile.write( '	             android:debuggable="true" \n')
 				tmpFile.write( '	             >\n')
 				if "ADMOD_ID" in pkgProperties:
@@ -379,7 +372,7 @@ class Target(lutinTarget.Target):
 				
 				tmpFile.write( '		<activity android:name=".' + pkgNameApplicationName + '" \n')
 				tmpFile.write( '		          android:label="' + pkgProperties['NAME'])
-				if "debug"==self.buildMode:
+				if self.config["mode"] == "debug":
 					tmpFile.write("-debug")
 				tmpFile.write( '"\n')
 				if "ICON" in pkgProperties.keys():
@@ -404,7 +397,7 @@ class Target(lutinTarget.Target):
 				tmpFile.write( '	             >\n')
 				tmpFile.write( '		<service android:name=".' + pkgNameApplicationName + '" \n')
 				tmpFile.write( '		         android:label="' + pkgProperties['NAME'])
-				if "debug"==self.buildMode:
+				if self.config["mode"] == "debug":
 					tmpFile.write("-debug")
 				tmpFile.write( '"\n')
 				if "ICON" in pkgProperties.keys():
@@ -671,7 +664,7 @@ class Target(lutinTarget.Target):
 		# http://developer.android.com/tools/publishing/app-signing.html
 		# Create a key for signing your application:
 		# keytool -genkeypair -v -keystore AndroidKey.jks -storepass Pass__AndroidDebugKey -alias alias__AndroidDebugKey -keypass PassKey__AndroidDebugKey -keyalg RSA -validity 36500
-		if "debug"==self.buildMode:
+		if self.config["mode"] == "debug":
 			tmpFile = open("tmpPass.boo", 'w')
 			tmpFile.write("Pass__AndroidDebugKey\n")
 			tmpFile.write("PassKey__AndroidDebugKey\n")
@@ -725,7 +718,7 @@ class Target(lutinTarget.Target):
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		pkgNameApplicationName = pkgName
-		if "debug"==self.buildMode:
+		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
 		cmdLine = self.folder_sdk + "/platform-tools/adb install -r " \
 		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
@@ -736,7 +729,7 @@ class Target(lutinTarget.Target):
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		pkgNameApplicationName = pkgName
-		if "debug"==self.buildMode:
+		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
 		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
 		RlutinMultiprocess.unCommand(cmdLine)

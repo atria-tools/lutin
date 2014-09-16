@@ -43,7 +43,7 @@ class Target:
 		self.name=name
 		self.endGeneratePackage = config["generate-package"]
 		debug.info("=================================");
-		debug.info("== Target='" + self.name + "'");
+		debug.info("== Target='" + self.name + "' " + config["bus-size"] + " bits for arch '" + config["arch"] + "'");
 		debug.info("=================================");
 		
 		self.set_cross_base()

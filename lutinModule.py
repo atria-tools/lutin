@@ -326,7 +326,7 @@ class Module:
 		lutinTools.create_directory_of_file(file_dst)
 		debug.print_element("SharedLib", libName, "==>", file_dst)
 		lutinMultiprocess.run_command(cmdLine)
-		if    "release"==target.buildMode \
+		if    target.config["mode"] == "release" \
 		   or lutinEnv.get_force_strip_mode()==True:
 			# get the file size of the non strip file
 			originSize = lutinTools.file_size(file_dst);

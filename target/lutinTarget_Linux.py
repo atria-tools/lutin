@@ -25,6 +25,14 @@ class Target(lutinTarget.Target):
 		if config["bus-size"] == "auto":
 			config["bus-size"] = str(lutinHost.BUS_SIZE)
 		lutinTarget.Target.__init__(self, "Linux", config, "")
+		if self.config["bus-size"] == "64":
+			# 64 bits
+			if lutinHost.BUS_SIZE != 64:
+				self.global_flags_cc.append("-m64")
+		else:
+			# 32 bits
+			if lutinHost.BUS_SIZE != 32:
+				self.global_flags_cc.append("-m32")
 	
 	def generate_list_separate_coma(self, list):
 		result = ""

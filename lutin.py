@@ -163,9 +163,9 @@ def Start():
 			debug.warning("argument arch is not implemented")
 			config["arch"]=argument.get_arg()
 		elif argument.get_option_nName() == "compilator":
-			if compilator!=argument.get_arg():
+			if config["compilator"] != argument.get_arg():
 				debug.debug("change compilator ==> " + argument.get_arg())
-				config["compilator"]=argument.get_arg()
+				config["compilator"] = argument.get_arg()
 				#remove previous target
 				target = None
 		elif argument.get_option_nName() == "target":
