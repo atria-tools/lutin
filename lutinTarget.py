@@ -32,7 +32,7 @@ class Target:
 		if config["arch"] == "auto":
 			debug.error("system error ==> must generate the default 'bus-size' config")
 		
-		debug.info("config=" + str(config))
+		debug.debug("config=" + str(config))
 		if arch != "":
 			self.arch = "-arch " + arch
 		else:

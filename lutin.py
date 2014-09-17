@@ -157,10 +157,8 @@ def Start():
 		elif argument.get_option_nName() == "prj":
 			config["extern-build"]=True
 		elif argument.get_option_nName() == "bus":
-			debug.warning("argument bus is not implemented")
 			config["bus-size"]=argument.get_arg()
 		elif argument.get_option_nName() == "arch":
-			debug.warning("argument arch is not implemented")
 			config["arch"]=argument.get_arg()
 		elif argument.get_option_nName() == "compilator":
 			if config["compilator"] != argument.get_arg():
