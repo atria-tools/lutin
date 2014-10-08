@@ -29,6 +29,11 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
 	   and os.path.exists(dst) == False:
 		debug.verbose("			==> must rebuild (dst does not exist)")
 		return True
+	if     dst != "" \
+	   and dst != None \
+	   and os.path.exists(src) == False:
+		debug.warning("			==> unexistant file :'" + src + "'")
+		return True
 	# chek the basic date if the 2 files
 	if     dst != "" \
 	   and dst != None \
