@@ -483,7 +483,7 @@ class Module:
 				resFile = self.compile_m_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			else:
-				debug.verbose(" TODO : gcc " + self.originFolder + "/" + file)
+				debug.warning(" UN-SUPPORTED file format:  '" + self.originFolder + "/" + file + "'")
 		# when multiprocess availlable, we need to synchronize here ...
 		lutinMultiprocess.pool_synchrosize()
 		
