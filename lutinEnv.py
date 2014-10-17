@@ -29,7 +29,7 @@ printPrettyMode=False
 
 def set_print_pretty_mode(val):
 	global printPrettyMode
-	if val==True:
+	if val == True:
 		printPrettyMode = True
 	else:
 		printPrettyMode = False
@@ -38,9 +38,10 @@ def get_print_pretty_mode():
 	global printPrettyMode
 	return printPrettyMode
 
-def print_pretty(myString):
+def print_pretty(myString, force=False):
 	global printPrettyMode
-	if True==printPrettyMode:
+	if    printPrettyMode == True \
+	   or force == True:
 		if myString[len(myString)-1]==' ' : 
 			tmpcmdLine = myString[:len(myString)-1]
 		else :

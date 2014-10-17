@@ -11,6 +11,7 @@ import os
 import thread
 import lutinMultiprocess
 import threading
+import re
 
 debugLevel=3
 debugColor=False
@@ -49,58 +50,80 @@ def enable_color():
 	global color_cyan
 	color_cyan   = "\033[36m"
 
-def verbose(input):
+def verbose(input, force=False):
 	global debugLock
 	global debugLevel
-	if debugLevel >= 5:
+	if    debugLevel >= 5 \
+	   or force == True:
 		debugLock.acquire()
 		print(color_blue + input + color_default)
 		debugLock.release()
 
-def debug(input):
+def debug(input, force=False):
 	global debugLock
 	global debugLevel
-	if debugLevel >= 4:
+	if    debugLevel >= 4 \
+	   or force == True:
 		debugLock.acquire()
 		print(color_green + input + color_default)
 		debugLock.release()
 
-def info(input):
+def info(input, force=False):
 	global debugLock
 	global debugLevel
-	if debugLevel >= 3:
+	if    debugLevel >= 3 \
+	   or force == True:
 		debugLock.acquire()
 		print(input + color_default)
 		debugLock.release()
 
-def warning(input):
+def warning(input, force=False):
 	global debugLock
 	global debugLevel
-	if debugLevel >= 2:
+	if    debugLevel >= 2 \
+	   or force == True:
 		debugLock.acquire()
 		print(color_purple + "[WARNING] " + input + color_default)
 		debugLock.release()
 
-def error(input, threadID=-1):
+def error(input, threadID=-1, force=False, crash=True):
 	global debugLock
 	global debugLevel
-	if debugLevel >= 1:
+	if    debugLevel >= 1 \
+	   or force == True:
 		debugLock.acquire()
 		print(color_red + "[ERROR] " + input + color_default)
 		debugLock.release()
-	lutinMultiprocess.error_occured()
-	if threadID != -1:
-		thread.interrupt_main()
-	exit(-1)
-	#os_exit(-1)
-	#raise "error happend"
+	if crash==True:
+		lutinMultiprocess.error_occured()
+		if threadID != -1:
+			thread.interrupt_main()
+		exit(-1)
+		#os_exit(-1)
+		#raise "error happend"
 
-def print_element(type, lib, dir, name):
+def print_element(type, lib, dir, name, force=False):
 	global debugLock
 	global debugLevel
-	if debugLevel >= 3:
+	if    debugLevel >= 3 \
+	   or force == True:
 		debugLock.acquire()
 		print(color_cyan + type + color_default + " : " + color_yellow + lib + color_default + " " + dir + " " + color_blue + name + color_default)
 		debugLock.release()
 
-
+def print_compilator(myString):
+	global debugColor
+	global debugLock
+	if debugColor == True:
+		myString = myString.replace('\\n', '\n')
+		myString = myString.replace('\\t', '\t')
+		myString = myString.replace('error:', color_red+'error:'+color_default)
+		myString = myString.replace('warning:', color_purple+'warning:'+color_default)
+		myString = myString.replace('note:', color_green+'note:'+color_default)
+		myString = re.sub(r'([/\w_-]+\.\w+):', r'-COLORIN-\1-COLOROUT-:', myString)
+		myString = myString.replace('-COLORIN-', color_yellow)
+		myString = myString.replace('-COLOROUT-', color_default)
+	
+	debugLock.acquire()
+	print(myString)
+	debugLock.release()

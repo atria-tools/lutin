@@ -16,11 +16,21 @@ import os
 import subprocess
 import lutinTools
 import lutinEnv
+import shlex
 
 queueLock = threading.Lock()
 workQueue = Queue.Queue()
 currentThreadWorking = 0
 threads = []
+# To know the first error arrive in the pool ==> to display all the time the same error file when multiple compilation
+currentIdExecution = 0
+errorExecution = {
+	"id":-1,
+	"cmd":"",
+	"return":0,
+	"err":"",
+	"out":"",
+}
 
 exitFlag = False # resuest stop of the thread
 isinit = False # the thread are initialized
@@ -40,27 +50,62 @@ def store_command(cmdLine, file):
 		file2.close()
 
 
-def run_command(cmdLine, storeCmdLine=""):
-	debug.debug(lutinEnv.print_pretty(cmdLine))
+def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
+	global errorOccured
+	global exitFlag
+	global currentIdExecution
+	# prepare command line:
+	args = shlex.split(cmdLine)
+	#debug.verbose("cmd = " + str(args))
 	try:
-		retcode = subprocess.call(cmdLine, shell=True)
-	except OSError as e:
-		print >>sys.stderr, "Execution failed:", e
-	
-	if retcode != 0:
-		global errorOccured
+		# create the subprocess
+		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	except subprocess.CalledProcessError as e:
+		debug.error("subprocess.CalledProcessError : TODO ...")
+	# launch the subprocess:
+	output, err = p.communicate()
+	# Check error :
+	if p.returncode == 0:
+		debug.debug(lutinEnv.print_pretty(cmdLine))
+		queueLock.acquire()
+		# TODO : Print the output all the time .... ==> to show warnings ...
+		if buildId >= 0 and (output != "" or err != ""):
+			debug.warning("output in subprocess compiling: '" + file + "'")
+		if output != "":
+			debug.print_compilator(output)
+		if err != "":
+			debug.print_compilator(err)
+		queueLock.release()
+	else:
 		errorOccured = True
-		global exitFlag
 		exitFlag = True
-		if retcode == 2:
-			debug.error("can not compile file ... [keyboard interrrupt]")
+		# if No ID : Not in a multiprocess mode ==> just stop here
+		if buildId < 0:
+			debug.debug(lutinEnv.print_pretty(cmdLine), force=True)
+			debug.print_compilator(output)
+			debug.print_compilator(err)
+			if p.returncode == 2:
+				debug.error("can not compile file ... [keyboard interrrupt]")
+			else:
+				debug.error("can not compile file ... ret : " + str(p.returncode))
 		else:
-			debug.error("can not compile file ... ret : " + str(retcode))
+			# in multiprocess interface
+			queueLock.acquire()
+			# if an other write an error before, check if the current process is started before ==> then is the first error
+			if errorExecution["id"] >= buildId:
+				# nothing to do ...
+				queueLock.release()
+				return;
+			errorExecution["id"] = buildId
+			errorExecution["cmd"] = cmdLine
+			errorExecution["return"] = p.returncode
+			errorExecution["err"] = err,
+			errorExecution["out"] = output,
+			queueLock.release()
+		# not write the command file...
 		return
-	
 	# write cmd line only after to prevent errors ...
 	store_command(cmdLine, storeCmdLine)
-	
 
 
 
@@ -76,7 +121,7 @@ class myThread(threading.Thread):
 		global exitFlag
 		global currentThreadWorking
 		workingSet = False
-		while False==exitFlag:
+		while exitFlag == False:
 			self.lock.acquire()
 			if not self.queue.empty():
 				if workingSet==False:
@@ -89,8 +134,8 @@ class myThread(threading.Thread):
 					comment = data[2]
 					cmdLine = data[1]
 					cmdStoreFile = data[3]
-					debug.print_element( "[" + str(self.threadID) + "] " + comment[0], comment[1], comment[2], comment[3])
-					run_command(cmdLine, cmdStoreFile)
+					debug.print_element( "[" + str(data[4]) + "][" + str(self.threadID) + "] " + comment[0], comment[1], comment[2], comment[3])
+					run_command(cmdLine, cmdStoreFile, buildId=data[4], file=comment[3])
 				else:
 					debug.warning("unknow request command : " + data[0])
 			else:
@@ -146,21 +191,24 @@ def un_init():
 
 
 def run_in_pool(cmdLine, comment, storeCmdLine=""):
+	global currentIdExecution
 	if processorAvaillable <= 1:
 		debug.print_element(comment[0], comment[1], comment[2], comment[3])
-		run_command(cmdLine, storeCmdLine)
+		run_command(cmdLine, storeCmdLine, file=comment[3])
 		return
 	# multithreaded mode
 	init()
 	# Fill the queue
 	queueLock.acquire()
 	debug.verbose("add : in pool cmdLine")
-	workQueue.put(["cmdLine", cmdLine, comment, storeCmdLine])
+	workQueue.put(["cmdLine", cmdLine, comment, storeCmdLine, currentIdExecution])
+	currentIdExecution +=1;
 	queueLock.release()
 	
 
 def pool_synchrosize():
 	global errorOccured
+	global errorExecution
 	if processorAvaillable <= 1:
 		#in this case : nothing to synchronise
 		return
@@ -179,7 +227,17 @@ def pool_synchrosize():
 	if False==errorOccured:
 		debug.verbose("queue is empty")
 	else:
-		debug.debug("Thread return with error ... ==> stop all the pool")
 		un_init()
-		debug.error("Pool error occured ...")
+		debug.debug("Thread return with error ... ==> stop all the pool")
+		if errorExecution["id"] == -1:
+			debug.error("Pool error occured ... (No return information on Pool)")
+			return
+		debug.error("Error in an pool element : [" + str(errorExecution["id"]) + "]", crash=False)
+		debug.debug(lutinEnv.print_pretty(errorExecution["cmd"]), force=True)
+		debug.print_compilator(str(errorExecution["out"][0]))
+		debug.print_compilator(str(errorExecution["err"][0]))
+		if errorExecution["return"] == 2:
+			debug.error("can not compile file ... [keyboard interrrupt]")
+		else:
+			debug.error("can not compile file ... return value : " + str(errorExecution["return"]))
 	
