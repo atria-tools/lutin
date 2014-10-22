@@ -105,25 +105,34 @@ def copy_anything(src, dst):
 	tmpPath = os.path.dirname(os.path.realpath(src))
 	tmpRule = os.path.basename(src)
 	for root, dirnames, filenames in os.walk(tmpPath):
+		debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
 		tmpList = filenames
 		if len(tmpRule)>0:
 			tmpList = fnmatch.filter(filenames, tmpRule)
 		# Import the module :
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
-			#debug.info("Might copy : '" + tmpPath+cycleFile + "' ==> '" + dst + "'")
-			copy_file(tmpPath+"/"+cycleFile,dst+"/"+cycleFile)
+			debug.verbose("Might copy : '" + tmpPath+cycleFile + "' ==> '" + dst + "'")
+			copy_file(tmpPath+"/"+cycleFile, dst+"/"+cycleFile)
 
 
 def copy_anything_target(target, src, dst):
 	tmpPath = os.path.dirname(os.path.realpath(src))
 	tmpRule = os.path.basename(src)
 	for root, dirnames, filenames in os.walk(tmpPath):
+		debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
 		tmpList = filenames
 		if len(tmpRule)>0:
 			tmpList = fnmatch.filter(filenames, tmpRule)
 		# Import the module :
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
-			#debug.info("Might copy : '" + tmpPath+cycleFile + "' ==> '" + dst + "'")
-			target.add_file_staging(tmpPath+"/"+cycleFile,dst+"/"+cycleFile)
+			newDst = dst
+			if len(newDst) != 0 and newDst[-1] != "/":
+				newDst += "/"
+			if root[len(src)-1:] != "":
+				newDst += root[len(src)-1:]
+				if len(newDst) != 0 and newDst[-1] != "/":
+					newDst += "/"
+			debug.verbose("Might copy : '" + root+"/"+cycleFile + "' ==> '" + newDst+cycleFile + "'" )
+			target.add_file_staging(root+"/"+cycleFile, newDst+cycleFile)

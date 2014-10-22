@@ -428,7 +428,7 @@ class Module:
 	##
 	def folders_to_staging(self, binaryName, target):
 		for source, destination in self.folders:
-			debug.verbose("Might copy folder : " + source + "==>" + destination)
+			debug.debug("Might copy folder : " + source + "==>" + destination)
 			lutinTools.copy_anything_target(target, self.originFolder + "/" + source, destination)
 	
 	# call here to build the module
