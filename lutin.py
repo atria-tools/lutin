@@ -36,6 +36,7 @@ myLutinArg.add(lutinArg.ArgDefine("a", "arch", list=[["auto","Automatic choice"]
 myLutinArg.add(lutinArg.ArgDefine("b", "bus", list=[["auto","Automatic choice"],["32","32 bits"],["64","64 bits"]], desc="Adressing size (Bus size)"))
 myLutinArg.add(lutinArg.ArgDefine("r", "prj", desc="Use external project management (not build with lutin..."))
 myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
+myLutinArg.add(lutinArg.ArgDefine("g", "gcov", desc="Enable code coverage intrusion in code"))
 myLutinArg.add(lutinArg.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
 myLutinArg.add(lutinArg.ArgDefine("", "list-target", desc="list all availlables targets ==> for auto completion"))
 myLutinArg.add(lutinArg.ArgDefine("", "list-module", desc="list all availlables module ==> for auto completion"))
@@ -141,7 +142,8 @@ def Start():
 	             "arch":"auto",
 	             "generate-package":True,
 	             "simulation":False,
-	             "extern-build":False
+	             "extern-build":False,
+	             "gcov":False
 	          }
 	# load the default target :
 	target = None
@@ -154,6 +156,8 @@ def Start():
 			config["generate-package"]=False
 		elif argument.get_option_nName() == "simulation":
 			config["simulation"]=True
+		elif argument.get_option_nName() == "gcov":
+			config["gcov"]=True
 		elif argument.get_option_nName() == "prj":
 			config["extern-build"]=True
 		elif argument.get_option_nName() == "bus":
@@ -179,7 +183,8 @@ def Start():
 				             "arch":"auto",
 				             "generate-package":True,
 				             "simulation":False,
-				             "extern-build":False
+				             "extern-build":False,
+				             "gcov":False
 				          }
 				#remove previous target
 				target = None

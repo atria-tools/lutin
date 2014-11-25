@@ -471,7 +471,9 @@ class Module:
 			     or fileExt == "cxx" \
 			     or fileExt == "CXX" \
 			     or fileExt == "xx" \
-			     or fileExt == "XX":
+			     or fileExt == "XX" \
+			     or fileExt == "CC" \
+			     or fileExt == "cc":
 				resFile = self.compile_xx_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			elif    fileExt == "mm" \

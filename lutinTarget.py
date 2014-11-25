@@ -89,6 +89,14 @@ class Target:
 		else:
 			self.global_flags_cc.append("-DNDEBUG")
 			self.global_flags_cc.append("-O3")
+		
+		## To add code coverate on build result system
+		if self.config["gcov"] == True:
+			self.global_flags_cc.append("-fprofile-arcs")
+			self.global_flags_cc.append("-ftest-coverage")
+			self.global_flags_ld.append("-fprofile-arcs")
+			self.global_flags_ld.append("-ftest-coverage")
+		
 		self.update_folder_tree()
 		self.folder_bin="/usr/bin"
 		self.folder_lib="/usr/lib"
