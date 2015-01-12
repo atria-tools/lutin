@@ -13,7 +13,6 @@ import lutinTools
 import lutinImage
 import os
 import stat
-import lutinExtProjectGeneratorXCode
 import lutinMultiprocess
 import lutinHost
 import random
@@ -75,9 +74,6 @@ class Target(lutinTarget.Target):
 	
 		self.global_flags_m.append("-fobjc-arc")
 		#self.global_flags_m.append("-fmodules")
-		
-		#add a project generator:
-		self.externProjectManager = lutinExtProjectGeneratorXCode.ExtProjectGeneratorXCode()
 
 	def get_staging_folder(self, binaryName):
 		return lutinTools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/"

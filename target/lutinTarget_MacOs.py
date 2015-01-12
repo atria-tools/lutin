@@ -66,7 +66,7 @@ class Target(lutinTarget.Target):
 		tmpFile.write("        <string>"+pkgName+"</string>\n")
 		tmpFile.write("        <key>CFBundleIdentifier</key>\n")
 		tmpFile.write("        <string>" + pkgProperties["COMPAGNY_TYPE"] + "." + pkgProperties["COMPAGNY_NAME2"] + "." + pkgName + "</string>\n")
-		tmpFile.write("	       <key>CFBundleSignature</key>\n")
+		tmpFile.write("        <key>CFBundleSignature</key>\n")
 		tmpFile.write("        <string>????</string>\n")
 		tmpFile.write("        <key>CFBundleIconFile</key>\n")
 		tmpFile.write("        <string>icon.icns</string>\n")

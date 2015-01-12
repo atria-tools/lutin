@@ -34,7 +34,6 @@ myLutinArg.add(lutinArg.ArgDefine("c", "compilator", list=[["clang",""],["gcc","
 myLutinArg.add(lutinArg.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
 myLutinArg.add(lutinArg.ArgDefine("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile"))
 myLutinArg.add(lutinArg.ArgDefine("b", "bus", list=[["auto","Automatic choice"],["32","32 bits"],["64","64 bits"]], desc="Adressing size (Bus size)"))
-myLutinArg.add(lutinArg.ArgDefine("r", "prj", desc="Use external project management (not build with lutin..."))
 myLutinArg.add(lutinArg.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 myLutinArg.add(lutinArg.ArgDefine("g", "gcov", desc="Enable code coverage intrusion in code"))
 myLutinArg.add(lutinArg.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
@@ -50,6 +49,7 @@ localArgument = myLutinArg.parse()
 def usage():
 	# generic argument displayed : 
 	myLutinArg.display()
+	print "		All target can finish with '-clean' '-dump' ..."
 	print "		all"
 	print "			build all (only for the current selected board) (bynary and packages)"
 	print "		clean"
@@ -58,7 +58,7 @@ def usage():
 	print "			Dump all the module dependency and properties"
 	listOfAllModule = lutinModule.list_all_module_with_desc()
 	for mod in listOfAllModule:
-		print "		" + mod[0] + " / " + mod[0] + "-clean / " + mod[0] + "-dump"
+		print "		" + mod[0]
 		if mod[1] != "":
 			print "			" + mod[1]
 	print "	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all"
@@ -142,7 +142,6 @@ def Start():
 	             "arch":"auto",
 	             "generate-package":True,
 	             "simulation":False,
-	             "extern-build":False,
 	             "gcov":False
 	          }
 	# load the default target :
@@ -158,8 +157,6 @@ def Start():
 			config["simulation"]=True
 		elif argument.get_option_nName() == "gcov":
 			config["gcov"]=True
-		elif argument.get_option_nName() == "prj":
-			config["extern-build"]=True
 		elif argument.get_option_nName() == "bus":
 			config["bus-size"]=argument.get_arg()
 		elif argument.get_option_nName() == "arch":
@@ -183,7 +180,6 @@ def Start():
 				             "arch":"auto",
 				             "generate-package":True,
 				             "simulation":False,
-				             "extern-build":False,
 				             "gcov":False
 				          }
 				#remove previous target
