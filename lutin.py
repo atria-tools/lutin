@@ -126,6 +126,7 @@ if __name__ == "__main__":
 
 # now import other standard module (must be done here and not before ...
 import lutinTarget
+import lutinSystem
 import lutinHost
 import lutinTools
 
@@ -228,7 +229,9 @@ if __name__ == '__main__':
 				   and folder.lower()!="out" :
 					debug.debug("Automatic load path: '" + folder + "'")
 					lutinModule.import_path(folder)
+					lutinSystem.import_path(folder)
 					lutinTarget.import_path(folder)
+		#lutinSystem.display()
 	Start()
 
 

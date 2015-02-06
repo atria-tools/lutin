@@ -12,9 +12,11 @@ import os
 import inspect
 import fnmatch
 import lutinDebug as debug
+import lutinHeritage as heritage
 import datetime
 import lutinTools
 import lutinModule
+import lutinSystem
 import lutinImage
 import lutinHost
 
@@ -109,8 +111,6 @@ class Target:
 		self.listFinalFile=[]
 		
 		self.sysroot=""
-		
-		self.externProjectManager = None
 	
 	def update_folder_tree(self):
 		self.folder_out="/out/" + self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"] + "/" + self.config["mode"]
@@ -138,14 +138,6 @@ class Target:
 		self.strip = self.cross + "strip"
 		self.dlltool = self.cross + "dlltool"
 		self.update_folder_tree()
-	
-	def set_use_of_extern_build_tool(self, mode):
-		if mode == True:
-			if self.externProjectManager == None:
-				debug.error("This target does not support extern tool")
-		else:
-			# remove extern tool generator...
-			self.externProjectManager = None
 	
 	def get_build_mode(self):
 		return self.config["mode"]
@@ -256,7 +248,7 @@ class Target:
 		return False
 	
 	def add_module(self, newModule):
-		debug.debug("Import nodule for Taget : " + newModule.name)
+		debug.debug("Add nodule for Taget : " + newModule.name)
 		self.moduleList.append(newModule)
 	
 	
@@ -283,11 +275,22 @@ class Target:
 				return
 		debug.error("request to clean an un-existant module name : '" + name + "'")
 	
-	def load_if_needed(self, name):
+	def load_if_needed(self, name, optionnal=False):
 		for elem in self.moduleList:
 			if elem.name == name:
-				return
-		lutinModule.load_module(self, name)
+				return True
+		if optionnal == False:
+			lutinModule.load_module(self, name)
+			return True
+		else:
+			# TODO : Check internal module and system module ...
+			# need to import the module (or the system module ...)
+			exist = lutinSystem.exist(name, self.name)
+			if exist == True:
+				lutinSystem.load(self, name, self.name)
+				return True;
+			else:
+				return False;
 	
 	def load_all(self):
 		listOfAllTheModule = lutinModule.list_all_module()
@@ -300,73 +303,73 @@ class Target:
 				module.ext_project_add_module(self, projectMng, addedModule)
 				return
 	
+	def build_optionnal(self, moduleName, packagesName=None):
+		present = self.load_if_needed(moduleName, optionnal=True)
+		if present == False:
+			return [heritage.HeritageList(), False]
+		# clean requested
+		for mod in self.moduleList:
+			if mod.name == moduleName:
+				debug.debug("build module '" + moduleName + "'")
+				return [mod.build(self, None), True]
+		debug.warning("not know module name : '" + moduleName + "' to '" + "build" + "' it")
+		return [heritage.HeritageList(), False]
+	
 	def build(self, name, packagesName=None):
 		if name == "dump":
 			debug.info("dump all")
 			self.load_all()
 			for mod in self.moduleList:
 				mod.display(self)
-		elif self.externProjectManager != None:
-			# TODO : Do it only if needed:
-			debug.debug("generate project")
-			# TODO : Set an option to force Regeneration of the project or the oposite....
+			return
+		if name == "all":
+			debug.info("build all")
 			self.load_all()
 			for mod in self.moduleList:
-				if mod.name != "edn":
-					continue
-				if mod.type == "PACKAGE":
-					mod.create_project(self, self.externProjectManager)
-			# TODO : Run project or do something else ...
-			debug.error("stop here ...")
-		else:
-			if name == "all":
-				debug.info("build all")
-				self.load_all()
-				for mod in self.moduleList:
-					if self.name=="Android":
-						if mod.type == "PACKAGE":
-							mod.build(self, None)
-					else:
-						if    mod.type == "BINARY" \
-						   or mod.type == "PACKAGE":
-							mod.build(self, None)
-			elif name == "clean":
-				debug.info("clean all")
-				self.load_all()
-				for mod in self.moduleList:
-					mod.clean(self)
-			else:
-				# get the action an the module ....
-				gettedElement = name.split("-")
-				moduleName = gettedElement[0]
-				if len(gettedElement)>=2:
-					actionName = gettedElement[1]
-				else :
-					actionName = "build"
-				debug.verbose("requested : " + moduleName + "-" + actionName)
-				if actionName == "install":
-					self.build(moduleName + "-build")
-					self.install_package(moduleName)
-				elif actionName == "uninstall":
-					self.un_install_package(moduleName)
-				elif actionName == "log":
-					self.Log(moduleName)
+				if self.name=="Android":
+					if mod.type == "PACKAGE":
+						mod.build(self, None)
 				else:
-					self.load_if_needed(moduleName)
-					# clean requested
-					for mod in self.moduleList:
-						if mod.name == moduleName:
-							if actionName == "dump":
-								debug.info("dump module '" + moduleName + "'")
-								return mod.display(self)
-							elif actionName == "clean":
-								debug.info("clean module '" + moduleName + "'")
-								return mod.clean(self)
-							elif actionName == "build":
-								debug.debug("build module '" + moduleName + "'")
-								return mod.build(self, None)
-					debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
-	
+					if    mod.type == "BINARY" \
+					   or mod.type == "PACKAGE":
+						mod.build(self, None)
+		elif name == "clean":
+			debug.info("clean all")
+			self.load_all()
+			for mod in self.moduleList:
+				mod.clean(self)
+		else:
+			# get the action an the module ....
+			gettedElement = name.split("-")
+			moduleName = gettedElement[0]
+			if len(gettedElement)>=2:
+				actionName = gettedElement[1]
+			else :
+				actionName = "build"
+			debug.verbose("requested : " + moduleName + "-" + actionName)
+			if actionName == "install":
+				self.build(moduleName + "-build")
+				self.install_package(moduleName)
+			elif actionName == "uninstall":
+				self.un_install_package(moduleName)
+			elif actionName == "log":
+				self.Log(moduleName)
+			else:
+				self.load_if_needed(moduleName)
+				# clean requested
+				for mod in self.moduleList:
+					if mod.name == moduleName:
+						if actionName == "dump":
+							debug.info("dump module '" + moduleName + "'")
+							return mod.display(self)
+						elif actionName == "clean":
+							debug.info("clean module '" + moduleName + "'")
+							return mod.clean(self)
+						elif actionName == "build":
+							debug.debug("build module '" + moduleName + "'")
+							return mod.build(self, None)
+				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
+
 
 targetList=[]
 __startTargetName="lutinTarget_"
@@ -403,7 +406,6 @@ def load_target(name, config):
 			theTarget = __import__(__startTargetName + name)
 			#create the target
 			tmpTarget = theTarget.Target(config)
-			#tmpTarget.set_use_of_extern_build_tool(externBuild)
 			return tmpTarget
 
 def list_all_target():

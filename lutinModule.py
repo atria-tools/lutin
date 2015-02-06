@@ -33,6 +33,7 @@ class Module:
 	##
 	def __init__(self, file, moduleName, moduleType):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
+		debug.verbose("Create a new module : '" + moduleName + "' TYPE=" + moduleType)
 		self.originFile=''
 		self.originFolder=''
 		# type of the module:
@@ -41,6 +42,8 @@ class Module:
 		self.name=moduleName
 		# Dependency list:
 		self.depends = []
+		# Dependency list (optionnal module):
+		self.depends_optionnal = []
 		# Documentation list:
 		self.documentation = None
 		# export PATH
@@ -450,9 +453,18 @@ class Module:
 			# TODO : Set it better ...
 			None
 		
-		# build dependency befor
+		# build dependency before
 		listSubFileNeededTobuild = []
 		self.subHeritageList = heritage.HeritageList()
+		# optionnal dependency :
+		for dep, option in self.depends_optionnal:
+			inheritList, isBuilt = target.build_optionnal(dep, packageName)
+			if isBuilt == True:
+				# TODO : Add optionnal Flags ...
+				#     ==> do it really better ...
+				self.add_export_flag_CC("-D"+option);
+			# add at the heritage list :
+			self.subHeritageList.add_heritage_list(inheritList)
 		for dep in self.depends:
 			inheritList = target.build(dep, packageName)
 			# add at the heritage list :
@@ -462,26 +474,16 @@ class Module:
 		for file in self.src:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
-			if    fileExt == "c" \
-			   or fileExt == "C":
+			if    fileExt in ["c", "C"]:
 				resFile = self.compile_cc_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
-			elif    fileExt == "cpp" \
-			     or fileExt == "CPP" \
-			     or fileExt == "cxx" \
-			     or fileExt == "CXX" \
-			     or fileExt == "xx" \
-			     or fileExt == "XX" \
-			     or fileExt == "CC" \
-			     or fileExt == "cc":
+			elif    fileExt in ["cpp", "CPP", "cxx", "CXX", "xx", "XX", "CC", "cc"]:
 				resFile = self.compile_xx_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
-			elif    fileExt == "mm" \
-			     or fileExt == "MM":
+			elif    fileExt in ["mm", "MM"]:
 				resFile = self.compile_mm_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
-			elif    fileExt == "m" \
-			     or fileExt == "M":
+			elif    fileExt in ["m", "M"]:
 				resFile = self.compile_m_to_o(file, packageName, target, self.subHeritageList)
 				listSubFileNeededTobuild.append(resFile)
 			else:
@@ -491,8 +493,7 @@ class Module:
 		
 		# generate end point:
 		if self.type=='PREBUILD':
-			# nothing to add ==> just dependence
-			None
+			debug.print_element("Prebuild", self.name, "==>", "find")
 		elif self.type=='LIBRARY':
 			resFile = self.link_to_a(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
 			self.localHeritage.add_sources(resFile)
@@ -578,6 +579,9 @@ class Module:
 	def add_module_depend(self, list):
 		self.append_to_internalList(self.depends, list, True)
 	
+	def add_optionnal_module_depend(self, module_name, compilation_flags=""):
+		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags], True)
+	
 	def add_export_path(self, list):
 		self.append_to_internalList(self.export_path, list)
 	
@@ -644,6 +648,7 @@ class Module:
 		print '    file:"%s"' %self.originFile
 		print '    folder:"%s"' %self.originFolder
 		self.print_list('depends',self.depends)
+		self.print_list('depends_optionnal', self.depends_optionnal)
 		self.print_list('flags_ld',self.flags_ld)
 		self.print_list('flags_cc',self.flags_cc)
 		self.print_list('flags_xx',self.flags_xx)
