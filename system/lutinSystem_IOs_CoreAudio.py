@@ -16,16 +16,10 @@ class System(lutinSystem.System):
 	def __init__(self):
 		lutinSystem.System.__init__(self)
 		# create some HELP:
-		self.help="DirectSound : Direct sound API for windows audio interface"
-		# check if the library exist:
-		if     not os.path.isfile("/usr/i686-w64-mingw32/include/dsound.h"):
-			# we did not find the library reqiested (just return) (automaticly set at false)
-			return;
+		self.help="CoreAudio : Ios interface for audio (all time present, just system interface)"
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag_LD(["-ldsound",
-		                         "-lwinmm",
-		                         "-lole32"
-		                         ])
+		self.add_export_flag_LD("-framework CoreAudio")
+		self.add_export_flag_LD("-framework AudioToolbox")
 
 

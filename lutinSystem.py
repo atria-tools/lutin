@@ -71,7 +71,8 @@ class System:
 def createModuleFromSystem(target, dict):
 	myModule = module.Module(dict["path"], dict["name"], 'PREBUILD')
 	
-	myModule.add_export_flag_LD(dict["system"].export_flags_cc)
+	myModule.add_export_flag_CC(dict["system"].export_flags_cc)
+	myModule.add_export_flag_LD(dict["system"].export_flags_ld)
 	myModule.add_export_flag_XX(dict["system"].export_flags_xx)
 	myModule.add_export_flag_M(dict["system"].export_flags_m)
 	myModule.add_export_flag_MM(dict["system"].export_flags_mm)
@@ -137,8 +138,11 @@ def exist(lib_name, target_name) :
 				debug.verbose("import system : '" + data["name"] + "'")
 				theSystem = __import__(__startSystemName + target_name + "_" + data["name"])
 				#create the system module
-				data["system"] = theSystem.System()
-				data["exist"] = data["system"].valid
+				try:
+					data["system"] = theSystem.System()
+					data["exist"] = data["system"].valid
+				except:
+					debug.debug("Not find: '" + data["name"] + "'")
 			return data["exist"]
 	return False
 

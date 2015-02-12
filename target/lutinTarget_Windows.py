@@ -44,6 +44,10 @@ class Target(lutinTarget.Target):
 			else:
 				# 32 bits
 				self.set_cross_base("i686-w64-mingw32-")
+		# force static link to prenvent many errors ...
+		self.global_flags_ld.append(["-static-libgcc",
+		                             "-static-libstdc++",
+		                             "-static"])
 		
 		self.folder_bin=""
 		self.folder_lib="/lib"
