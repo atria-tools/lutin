@@ -20,4 +20,5 @@ class System(lutinSystem.System):
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag_LD("-framework CoreAudio")
+		self.add_export_flag_LD("-framework CoreFoundation")
 

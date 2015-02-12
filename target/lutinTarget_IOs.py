@@ -32,7 +32,7 @@ class Target(lutinTarget.Target):
 		
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
-		if sumulator == True:
+		if config["simulation"] == True:
 			arch = "i386"
 		else:
 			arch="arm64" # for ipad air
@@ -54,13 +54,13 @@ class Target(lutinTarget.Target):
 		self.suffix_binary=''
 		self.suffix_package=''
 		if self.sumulator == True:
-			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk"
-			self.global_flags_ld.append("-mios-simulator-version-min=7.0")
-			self.global_flags_cc.append("-mios-simulator-version-min=7.0")
+			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.1.sdk"
+			self.global_flags_ld.append("-mios-simulator-version-min=8.0")
+			self.global_flags_cc.append("-mios-simulator-version-min=8.0")
 		else:
-			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk"
-			self.global_flags_ld.append("-miphoneos-version-min=7.0")
-			self.global_flags_cc.append("-miphoneos-version-min=7.0")
+			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk"
+			self.global_flags_ld.append("-miphoneos-version-min=8.0")
+			self.global_flags_cc.append("-miphoneos-version-min=8.0")
 
 		self.global_flags_ld.append([
 			"-Xlinker",
