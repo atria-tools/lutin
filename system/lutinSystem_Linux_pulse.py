@@ -23,6 +23,6 @@ class System(lutinSystem.System):
 			return;
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag_CC(["-lpulse-simple", "-lpulse"])
+		self.add_export_flag_LD(["-lpulse-simple", "-lpulse"])
 
 
