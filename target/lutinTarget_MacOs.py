@@ -50,7 +50,7 @@ class Target(lutinTarget.Target):
 		
 		if    "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
-			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder_data(pkgName) + "/icon.icns", True)
+			lutinTools.copy_file(pkgProperties["ICON"], self.get_staging_folder_data(pkgName) + "/icon.icns", force=True)
 		
 		# http://www.sandroid.org/imcross/#Deployment
 		infoFile=self.get_staging_folder(pkgName) + "/Info.plist"
