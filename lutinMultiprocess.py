@@ -56,14 +56,16 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 	global currentIdExecution
 	# prepare command line:
 	args = shlex.split(cmdLine)
-	#debug.verbose("cmd = " + str(args))
+	debug.verbose("cmd = " + str(args))
 	try:
 		# create the subprocess
 		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except subprocess.CalledProcessError as e:
 		debug.error("subprocess.CalledProcessError : TODO ...")
+	debug.verbose("done 1")
 	# launch the subprocess:
 	output, err = p.communicate()
+	debug.verbose("done 2")
 	# Check error :
 	if p.returncode == 0:
 		debug.debug(lutinEnv.print_pretty(cmdLine))
@@ -104,6 +106,7 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 			queueLock.release()
 		# not write the command file...
 		return
+	debug.verbose("done 3")
 	# write cmd line only after to prevent errors ...
 	store_command(cmdLine, storeCmdLine)
 

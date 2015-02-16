@@ -50,7 +50,27 @@ def print_pretty(myString, force=False):
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
-		baseElementList = ["-o", "-D", "-I", "-L", "g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib", "-framework", "-isysroot", "-arch"]
+		baseElementList = ["-o",
+		                   "-D",
+		                   "-I",
+		                   "-L",
+		                   "g++",
+		                   "gcc",
+		                   "clang",
+		                   "clang++",
+		                   "ar",
+		                   "ld",
+		                   "ranlib",
+		                   "-framework",
+		                   "-isysroot",
+		                   "-arch",
+		                   "-keystore",
+		                   "-sigalg",
+		                   "-digestalg",
+		                   "<",
+		                   "<<",
+		                   ">",
+		                   ">>"]
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
 		baseElementList = ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]

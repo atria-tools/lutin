@@ -32,6 +32,10 @@ def set_level(id):
 	debugLevel = id
 	#print "SetDebug level at " + str(debugLevel)
 
+def get_level():
+	global debugLevel
+	return debugLevel
+
 def enable_color():
 	global debugColor
 	debugColor = True
@@ -49,6 +53,15 @@ def enable_color():
 	color_purple = "\033[35m"
 	global color_cyan
 	color_cyan   = "\033[36m"
+
+def extreme_verbose(input, force=False):
+	global debugLock
+	global debugLevel
+	if    debugLevel >= 6 \
+	   or force == True:
+		debugLock.acquire()
+		print(color_blue + input + color_default)
+		debugLock.release()
 
 def verbose(input, force=False):
 	global debugLock

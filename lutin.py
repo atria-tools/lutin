@@ -21,7 +21,7 @@ import lutinArg
 myLutinArg = lutinArg.LutinArg()
 myLutinArg.add(lutinArg.ArgDefine("h", "help", desc="display this help"))
 myLutinArg.add_section("option", "Can be set one time in all case")
-myLutinArg.add(lutinArg.ArgDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"]], desc="display makefile debug level (verbose) default =2"))
+myLutinArg.add(lutinArg.ArgDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"],["6","extreme_verbose"]], desc="display makefile debug level (verbose) default =2"))
 myLutinArg.add(lutinArg.ArgDefine("C", "color", desc="display makefile output in color"))
 myLutinArg.add(lutinArg.ArgDefine("f", "force", desc="Force the rebuild without checking the dependency"))
 myLutinArg.add(lutinArg.ArgDefine("P", "pretty", desc="print the debug has pretty display"))

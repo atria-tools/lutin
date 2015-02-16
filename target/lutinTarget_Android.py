@@ -10,7 +10,7 @@
 
 import lutinDebug as debug
 import lutinTarget
-import lutinTools
+import lutinTools as tools
 import lutinHost
 import lutinImage
 import lutinMultiprocess
@@ -39,7 +39,7 @@ class Target(lutinTarget.Target):
 					if folder=="android":
 						self.folder_ndk = folder + "/ndk"
 			if self.folder_ndk == "AUTO":
-				self.folder_ndk = lutinTools.get_run_folder() + "/../android/ndk"
+				self.folder_ndk = tools.get_run_folder() + "/../android/ndk"
 		# auto search SDK
 		if self.folder_sdk == "AUTO":
 			for folder in os.listdir("."):
@@ -47,7 +47,7 @@ class Target(lutinTarget.Target):
 					if folder=="android":
 						self.folder_sdk = folder + "/sdk"
 			if self.folder_sdk == "AUTO":
-				self.folder_sdk = lutinTools.get_run_folder() + "/../android/sdk"
+				self.folder_sdk = tools.get_run_folder() + "/../android/sdk"
 		
 		if not os.path.isdir(self.folder_ndk):
 			debug.error("NDK path not set !!! set env : PROJECT_NDK on the NDK path")
@@ -219,7 +219,7 @@ class Target(lutinTarget.Target):
 		
 		debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
 		# Create folder :
-		lutinTools.create_directory_of_file(self.file_finalAbstraction)
+		tools.create_directory_of_file(self.file_finalAbstraction)
 		# Create file :
 		tmpFile = open(self.file_finalAbstraction, 'w')
 		if pkgProperties["ANDROID_APPL_TYPE"]=="APPL":
@@ -331,7 +331,7 @@ class Target(lutinTarget.Target):
 		tmpFile.flush()
 		tmpFile.close()
 		
-		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/drawable/icon.png");
+		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/drawable/icon.png");
 		if     "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
 			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", 256, 256)
@@ -344,7 +344,7 @@ class Target(lutinTarget.Target):
 		
 		if pkgProperties["ANDROID_MANIFEST"]!="":
 			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkgProperties["ANDROID_MANIFEST"])
-			lutinTools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_folder(pkgName) + "/AndroidManifest.xml", force=True)
+			tools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_folder(pkgName) + "/AndroidManifest.xml", force=True)
 		else:
 			if "VERSION_CODE" not in pkgProperties:
 				pkgProperties["VERSION_CODE"] = "1"
@@ -470,7 +470,7 @@ class Target(lutinTarget.Target):
 			if pkgProperties["ANDROID_APPL_TYPE"]!="APPL":
 				#create the Wallpaper sub files : (main element for the application
 				debug.print_element("pkg", pkgNameApplicationName + "_resource.xml", "<==", "package configurations")
-				lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_resource.xml")
+				tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_resource.xml")
 				tmpFile = open(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_resource.xml", 'w')
 				tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 				tmpFile.write( "<wallpaper xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
@@ -483,7 +483,7 @@ class Target(lutinTarget.Target):
 				tmpFile.close()
 				# create wallpaper setting if needed (class and config file)
 				if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-					lutinTools.create_directory_of_file(self.folder_javaProject + pkgNameApplicationName + "Settings.java")
+					tools.create_directory_of_file(self.folder_javaProject + pkgNameApplicationName + "Settings.java")
 					debug.print_element("pkg", self.folder_javaProject + pkgNameApplicationName + "Settings.java", "<==", "package configurations")
 					tmpFile = open(self.folder_javaProject + pkgNameApplicationName + "Settings.java", 'w');
 					tmpFile.write( "package " + compleatePackageName + ";\n")
@@ -515,7 +515,7 @@ class Target(lutinTarget.Target):
 					tmpFile.close()
 					
 					debug.print_element("pkg", self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml", "<==", "package configurations")
-					lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml")
+					tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml")
 					tmpFile = open(self.get_staging_folder(pkgName) + "/res/xml/" + pkgNameApplicationName + "_settings.xml", 'w');
 					tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 					tmpFile.write( "<PreferenceScreen xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
@@ -546,7 +546,7 @@ class Target(lutinTarget.Target):
 						for WALL_type, WALL_key, WALL_title, WALL_summary, WALL_other in pkgProperties["ANDROID_WALLPAPER_PROPERTIES"]:
 							if WALL_type == "list":
 								debug.print_element("pkg", self.get_staging_folder(pkgName) + "/res/values/" + WALL_key + ".xml", "<==", "package configurations")
-								lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/values/" + WALL_key + ".xml")
+								tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/values/" + WALL_key + ".xml")
 								tmpFile = open(self.get_staging_folder(pkgName) + "/res/values/" + WALL_key + ".xml", 'w');
 								tmpFile.write( "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 								tmpFile.write( "<resources xmlns:xliff=\"urn:oasis:names:tc:xliff:document:1.2\">\n")
@@ -572,14 +572,20 @@ class Target(lutinTarget.Target):
 		for res_source, res_dest in pkgProperties["ANDROID_RESOURCES"]:
 			if res_source == "":
 				continue
-			lutinTools.copy_file(res_source , self.get_staging_folder(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
+			tools.copy_file(res_source , self.get_staging_folder(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
 		
 		
 		# Doc :
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
-		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/src/noFile")
-		androidToolPath = self.folder_sdk + "/build-tools/20.0.0/"
+		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/src/noFile")
+		androidToolPath = self.folder_sdk + "/build-tools/"
+		# find android tool version
+		dirnames = tools.get_list_sub_folder(androidToolPath)
+		if len(dirnames) != 1:
+			debug.error("an error occured when getting the tools for android")
+		androidToolPath += dirnames[0] + "/"
+		
 		adModResouceFolder = ""
 		if "ADMOD_ID" in pkgProperties:
 			adModResouceFolder = " -S " + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
@@ -594,7 +600,7 @@ class Target(lutinTarget.Target):
 		#aapt  package -f -M ${manifest.file} -F ${packaged.resource.file} -I ${path.to.android-jar.library} 
 		#      -S ${android-resource-directory} [-m -J ${folder.to.output.the.R.java}]
 		
-		lutinTools.create_directory_of_file(self.get_staging_folder(pkgName) + "/build/classes/noFile")
+		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/build/classes/noFile")
 		debug.print_element("pkg", "*.class", "<==", "*.java")
 		# more information with : -Xlint
 		#          + self.file_finalAbstraction + " "\ # this generate ex: out/Android/debug/staging/tethys/src/com/edouarddupin/tethys/edn.java
@@ -676,7 +682,7 @@ class Target(lutinTarget.Target):
 			debugOption = ""
 			cmdLine = "jarsigner " \
 			    + debugOption \
-			    + "-keystore " + lutinTools.get_current_path(__file__) + "/AndroidDebugKey.jks " \
+			    + "-keystore " + tools.get_current_path(__file__) + "/AndroidDebugKey.jks " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey < tmpPass.boo"
@@ -701,7 +707,7 @@ class Target(lutinTarget.Target):
 			lutinMultiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
-		lutinTools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk")
+		tools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk")
 		# verbose mode : -v
 		cmdLine = androidToolPath + "zipalign 4 " \
 		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
@@ -709,9 +715,9 @@ class Target(lutinTarget.Target):
 		lutinMultiprocess.run_command(cmdLine)
 		
 		# copy file in the final stage :
-		lutinTools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk",
-		                    self.get_final_folder() + "/" + pkgNameApplicationName + ".apk",
-		                    force=True)
+		tools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk",
+		                self.get_final_folder() + "/" + pkgNameApplicationName + ".apk",
+		                force=True)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")

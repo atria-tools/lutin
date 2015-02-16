@@ -35,6 +35,11 @@ def create_directory_of_file(file):
 	except:
 		os.makedirs(folder)
 
+def get_list_sub_folder(path):
+	# TODO : os.listdir(path)
+	for dirname, dirnames, filenames in os.walk(path):
+		return dirnames
+	return []
 
 def remove_folder_and_sub_folder(path):
 	if os.path.isdir(path):
