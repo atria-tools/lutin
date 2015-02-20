@@ -49,6 +49,28 @@ def store_command(cmdLine, file):
 		file2.flush()
 		file2.close()
 
+##
+## @brief Execute the command and ruturn generate data
+##
+def run_command_direct(cmdLine):
+	# prepare command line:
+	args = shlex.split(cmdLine)
+	debug.verbose("cmd = " + str(args))
+	try:
+		# create the subprocess
+		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	except subprocess.CalledProcessError as e:
+		debug.error("subprocess.CalledProcessError : " + str(args))
+	# launch the subprocess:
+	output, err = p.communicate()
+	# Check error :
+	if p.returncode == 0:
+		if output == None:
+			return err[:-1];
+		return output[:-1];
+	else:
+		return False
+
 
 def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 	global errorOccured
@@ -62,10 +84,8 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except subprocess.CalledProcessError as e:
 		debug.error("subprocess.CalledProcessError : TODO ...")
-	debug.verbose("done 1")
 	# launch the subprocess:
 	output, err = p.communicate()
-	debug.verbose("done 2")
 	# Check error :
 	if p.returncode == 0:
 		debug.debug(lutinEnv.print_pretty(cmdLine))

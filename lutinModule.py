@@ -112,7 +112,7 @@ class Module:
 			"-Wall",
 			"-Wsign-compare",
 			"-Wreturn-type",
-			"-Wint-to-pointer-cast",
+			#"-Wint-to-pointer-cast",
 			"-Wno-write-strings",
 			"-Woverloaded-virtual",
 			"-Wnon-virtual-dtor",

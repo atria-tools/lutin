@@ -19,6 +19,7 @@ import lutinModule
 import lutinSystem
 import lutinImage
 import lutinHost
+import lutinMultiprocess as multiprocess
 
 class Target:
 	def __init__(self, name, config, arch):
@@ -60,8 +61,13 @@ class Target:
 		                      '-D_REENTRANT']
 		
 		if self.name != "Windows":
-			self.global_flags_xx=['-std=c++11']
-			self.global_flags_mm=['-std=c++11']
+			if    self.config["compilator"] == "clang" \
+			   or self.xx_version > 4007000:
+				self.global_flags_xx=['-std=c++11']
+				self.global_flags_mm=['-std=c++11']
+			else:
+				self.global_flags_xx=['-std=c++0x']
+				self.global_flags_mm=['-std=c++0x']
 		else:
 			self.global_flags_xx=['-static-libgcc', '-static-libstdc++', '-std=c++11']
 			self.global_flags_mm=[]
@@ -118,6 +124,16 @@ class Target:
 		self.folder_staging="/staging/" + self.config["compilator"]
 		self.folder_build="/build/" + self.config["compilator"]
 	
+	def create_number_from_version_string(self, data):
+		list = data.split(".")
+		out = 0;
+		offset = 1000**(len(list)-1)
+		for elem in list:
+			out += offset*int(elem)
+			debug.verbose("get : " + str(int(elem)) + " tmp" + str(out))
+			offset /= 1000
+		return out
+	
 	def set_cross_base(self, cross=""):
 		self.cross = cross
 		debug.debug("== Target='" + self.cross + "'");
@@ -133,6 +149,14 @@ class Target:
 			self.xx = self.cross + "g++"
 			#self.ar=self.cross + "ar"
 			#self.ranlib=self.cross + "ranlib"
+		
+		#get g++ compilation version :
+		ret = multiprocess.run_command_direct(self.xx + " -dumpversion");
+		if ret == False:
+			debug.error("Can not get the g++/clang++ version ...")
+		self.xx_version = self.create_number_from_version_string(ret)
+		debug.debug(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
+		
 		self.ld = self.cross + "ld"
 		self.nm = self.cross + "nm"
 		self.strip = self.cross + "strip"
