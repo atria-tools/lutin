@@ -44,6 +44,7 @@ class Module:
 		self.depends = []
 		# Dependency list (optionnal module):
 		self.depends_optionnal = []
+		self.depends_find = []
 		# Documentation list:
 		self.documentation = None
 		# export PATH
@@ -457,12 +458,16 @@ class Module:
 		listSubFileNeededTobuild = []
 		self.subHeritageList = heritage.HeritageList()
 		# optionnal dependency :
-		for dep, option in self.depends_optionnal:
+		for dep, option, export in self.depends_optionnal:
 			inheritList, isBuilt = target.build_optionnal(dep, packageName)
 			if isBuilt == True:
+				self.localHeritage.add_depends(dep);
 				# TODO : Add optionnal Flags ...
 				#     ==> do it really better ...
-				self.add_export_flag_CC("-D"+option);
+				if export == False:
+					self.compile_flags_CC("-D"+option);
+				else:
+					self.add_export_flag_CC("-D"+option);
 			# add at the heritage list :
 			self.subHeritageList.add_heritage_list(inheritList)
 		for dep in self.depends:
@@ -579,8 +584,8 @@ class Module:
 	def add_module_depend(self, list):
 		self.append_to_internalList(self.depends, list, True)
 	
-	def add_optionnal_module_depend(self, module_name, compilation_flags=""):
-		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags], True)
+	def add_optionnal_module_depend(self, module_name, compilation_flags="", export=False):
+		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
 	def add_export_path(self, list):
 		self.append_to_internalList(self.export_path, list)
@@ -783,6 +788,13 @@ def import_path(path):
 			moduleName = moduleName.replace(__startModuleName, '')
 			debug.debug("integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
 			moduleList.append([moduleName,os.path.join(root, filename)])
+
+def exist(target, name):
+	global moduleList
+	for mod in moduleList:
+		if mod[0] == name:
+			return True
+	return False
 
 def load_module(target, name):
 	global moduleList

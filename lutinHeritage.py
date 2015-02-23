@@ -8,6 +8,7 @@
 ##
 
 import sys
+import copy
 import lutinDebug as debug
 
 
@@ -127,13 +128,16 @@ class heritage:
 		if type(module) != type(None):
 			# all the parameter that the upper classe need when build
 			self.name = module.name
-			self.depends = module.depends
+			self.depends = copy.deepcopy(module.depends)
 			self.flags_ld = module.export_flags_ld
 			self.flags_cc = module.export_flags_cc
 			self.flags_xx = module.export_flags_xx
 			self.flags_m = module.export_flags_m
 			self.flags_mm = module.export_flags_mm
 			self.path = module.export_path
+	
+	def add_depends(self, depend):
+		self.depends.append(depend)
 	
 	def add_flag_LD(self, list):
 		append_to_list(self.flags_ld, list)

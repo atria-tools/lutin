@@ -313,6 +313,11 @@ class Target:
 			if exist == True:
 				lutinSystem.load(self, name, self.name)
 				return True;
+			# try to find in the local Modules:
+			exist = lutinModule.exist(self, name)
+			if exist == True:
+				lutinModule.load_module(self, name)
+				return True;
 			else:
 				return False;
 	
