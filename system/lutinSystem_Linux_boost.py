@@ -23,7 +23,11 @@ class System(lutinSystem.System):
 			return;
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag_LD("-lboost")
+		self.add_export_flag_LD([
+		    "-lboost_system",
+		    "-lboost_thread",
+		    "-lboost_chrono"
+		    ])
 		
 
 
