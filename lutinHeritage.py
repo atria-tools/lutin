@@ -31,6 +31,7 @@ class HeritageList:
 		self.flags_xx=[]
 		self.flags_m=[]
 		self.flags_mm=[]
+		self.flags_xx_version=1999
 		# sources list:
 		self.src=[]
 		self.path=[]
@@ -64,6 +65,7 @@ class HeritageList:
 		self.flags_ld=[]
 		self.flags_cc=[]
 		self.flags_xx=[]
+		self.flags_xx_version=1999
 		self.flags_m=[]
 		self.flags_mm=[]
 		# sources list:
@@ -105,7 +107,8 @@ class HeritageList:
 			append_to_list(self.flags_mm, element.flags_mm)
 			append_to_list(self.path, element.path)
 			append_to_list(self.src, element.src)
-		
+			if self.flags_xx_version < element.flags_xx_version:
+				self.flags_xx_version = element.flags_xx_version
 
 
 class heritage:
@@ -117,6 +120,7 @@ class heritage:
 		self.flags_ld=[]
 		self.flags_cc=[]
 		self.flags_xx=[]
+		self.flags_xx_version=1999
 		self.flags_m=[]
 		self.flags_mm=[]
 		# sources list:
@@ -135,6 +139,7 @@ class heritage:
 			self.flags_m = module.export_flags_m
 			self.flags_mm = module.export_flags_mm
 			self.path = module.export_path
+			self.flags_xx_version = module.xx_version_api
 	
 	def add_depends(self, depend):
 		self.depends.append(depend)
@@ -176,3 +181,7 @@ class heritage:
 		self.add_flag_MM(other.flags_mm)
 		self.add_import_path(other.path)
 		self.add_sources(other.src)
+		if self.flags_xx_version < module.xx_version_api:
+			self.flags_xx_version = module.xx_version_api
+
+

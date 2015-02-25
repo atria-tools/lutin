@@ -62,18 +62,8 @@ class Target:
 		
 		self.global_flags_xx=[]
 		self.global_flags_mm=[]
-		if self.name != "Windows":
-			if    self.config["compilator"] == "clang" \
-			   or self.xx_version > 4007000:
-				#self.global_flags_xx=['-std=c++11']
-				#self.global_flags_mm=['-std=c++11']
-				pass
-			else:
-				#self.global_flags_xx=['-std=c++0x']
-				#self.global_flags_mm=['-std=c++0x']
-				pass
-		else:
-			self.global_flags_xx=['-static-libgcc', '-static-libstdc++', '-std=c++11']
+		if self.name == "Windows":
+			self.global_flags_xx=['-static-libgcc', '-static-libstdc++']
 			self.global_flags_mm=[]
 		self.global_flags_m=[]
 		self.global_flags_ar=['rcs']

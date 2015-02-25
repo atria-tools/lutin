@@ -70,6 +70,9 @@ class Module:
 		self.files = []
 		self.folders = []
 		self.isbuild = False
+		# CPP version:
+		self.xx_version = 1999
+		self.xx_version_api = 1999
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
 		   or moduleType == 'LIBRARY' \
@@ -137,6 +140,17 @@ class Module:
 	##
 	def compile_mm_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
+		xx_version = max(self.xx_version, depancy.flags_xx_version)
+		if xx_version == 2014:
+			debug.error("not supported flags for X14 ...");
+			local_xx_version_flags=["-std=c++14", "-D__CPP_VERSION__=2014"]
+		elif xx_version == 2011:
+			local_xx_version_flags=["-std=c++11", "-D__CPP_VERSION__=2011"]
+		elif xx_version == 2003:
+			local_xx_version_flags=["-std=c++03", "-D__CPP_VERSION__=2003"]
+		else:
+			local_xx_version_flags=["-D__CPP_VERSION__=1999"]
+		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
@@ -147,6 +161,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
+			local_xx_version_flags,
 			target.global_flags_cc,
 			target.global_flags_mm,
 			depancy.flags_cc,
@@ -207,6 +222,17 @@ class Module:
 	##
 	def compile_xx_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
+		xx_version = max(self.xx_version, depancy.flags_xx_version)
+		if xx_version == 2014:
+			debug.error("not supported flags for X14 ...");
+			local_xx_version_flags=["-std=c++14", "-D__CPP_VERSION__=2014"]
+		elif xx_version == 2011:
+			local_xx_version_flags=["-std=c++11", "-D__CPP_VERSION__=2011"]
+		elif xx_version == 2003:
+			local_xx_version_flags=["-std=c++03", "-D__CPP_VERSION__=2003"]
+		else:
+			local_xx_version_flags=["-D__CPP_VERSION__=1999"]
+		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
@@ -217,6 +243,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
+			local_xx_version_flags,
 			target.global_flags_cc,
 			target.global_flags_xx,
 			depancy.flags_cc,
@@ -626,6 +653,14 @@ class Module:
 	
 	def compile_flags_S(self, list):
 		self.append_to_internalList(self.flags_s, list)
+	
+	def compile_version_XX(self, version, same_as_api=True):
+		cpp_version_list = [1999, 2003, 2011, 2014]
+		if version not in cpp_version_list:
+			debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
+		self.xx_version = version
+		if same_as_api == True:
+			self.xx_version_api = self.xx_version
 	
 	def add_src_file(self, list):
 		self.append_to_internalList(self.src, list, True)
