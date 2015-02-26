@@ -73,6 +73,8 @@ class Module:
 		# CPP version:
 		self.xx_version = 1999
 		self.xx_version_api = 1999
+		self.cc_version = 1989
+		self.cc_version_api = 1989
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
 		   or moduleType == 'LIBRARY' \
@@ -187,6 +189,16 @@ class Module:
 	##
 	def compile_m_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
+		cc_version = max(self.cc_version, depancy.flags_cc_version)
+		if cc_version == 2011:
+			local_cc_version_flags=["-std=c11", "-D__C_VERSION__=2011"]
+		elif cc_version == 1999:
+			local_cc_version_flags=["-std=c99", "-D__C_VERSION__=1999"]
+		elif cc_version == 1990:
+			local_cc_version_flags=["-std=c90", "-D__C_VERSION__=1990"]
+		else:
+			local_cc_version_flags=["-std=c89", "-D__C_VERSION__=1989"]
+		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
@@ -197,6 +209,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
+			local_cc_version_flags,
 			target.global_flags_cc,
 			target.global_flags_m,
 			depancy.flags_cc,
@@ -268,6 +281,16 @@ class Module:
 	##
 	def compile_cc_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
+		cc_version = max(self.cc_version, depancy.flags_cc_version)
+		if cc_version == 2011:
+			local_cc_version_flags=["-std=c11", "-D__C_VERSION__=2011"]
+		elif cc_version == 1999:
+			local_cc_version_flags=["-std=c99", "-D__C_VERSION__=1999"]
+		elif cc_version == 1990:
+			local_cc_version_flags=["-std=c90", "-D__C_VERSION__=1990"]
+		else:
+			local_cc_version_flags=["-std=c89", "-D__C_VERSION__=1989"]
+		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
@@ -278,6 +301,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
+			local_cc_version_flags,
 			target.global_flags_cc,
 			depancy.flags_cc,
 			self.flags_cc,
@@ -661,6 +685,14 @@ class Module:
 		self.xx_version = version
 		if same_as_api == True:
 			self.xx_version_api = self.xx_version
+	
+	def compile_version_CC(self, version, same_as_api=True):
+		c_version_list = [1989, 1990, 1999, 2011]
+		if version not in c_version_list:
+			debug.error("can not select C version : " + str(version) + " not in " + str(c_version_list))
+		self.cc_version = version
+		if same_as_api == True:
+			self.cc_version_api = self.cc_version
 	
 	def add_src_file(self, list):
 		self.append_to_internalList(self.src, list, True)

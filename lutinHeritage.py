@@ -32,6 +32,7 @@ class HeritageList:
 		self.flags_m=[]
 		self.flags_mm=[]
 		self.flags_xx_version=1999
+		self.flags_cc_version=1989
 		# sources list:
 		self.src=[]
 		self.path=[]
@@ -66,6 +67,7 @@ class HeritageList:
 		self.flags_cc=[]
 		self.flags_xx=[]
 		self.flags_xx_version=1999
+		self.flags_xx_version=1989
 		self.flags_m=[]
 		self.flags_mm=[]
 		# sources list:
@@ -109,6 +111,8 @@ class HeritageList:
 			append_to_list(self.src, element.src)
 			if self.flags_xx_version < element.flags_xx_version:
 				self.flags_xx_version = element.flags_xx_version
+			if self.flags_cc_version < element.flags_cc_version:
+				self.flags_cc_version = element.flags_cc_version
 
 
 class heritage:
@@ -121,6 +125,7 @@ class heritage:
 		self.flags_cc=[]
 		self.flags_xx=[]
 		self.flags_xx_version=1999
+		self.flags_cc_version=1989
 		self.flags_m=[]
 		self.flags_mm=[]
 		# sources list:
@@ -140,6 +145,7 @@ class heritage:
 			self.flags_mm = module.export_flags_mm
 			self.path = module.export_path
 			self.flags_xx_version = module.xx_version_api
+			self.flags_cc_version = module.cc_version_api
 	
 	def add_depends(self, depend):
 		self.depends.append(depend)
@@ -183,5 +189,7 @@ class heritage:
 		self.add_sources(other.src)
 		if self.flags_xx_version < module.xx_version_api:
 			self.flags_xx_version = module.xx_version_api
+		if self.flags_cc_version < module.cc_version_api:
+			self.flags_cc_version = module.cc_version_api
 
 
