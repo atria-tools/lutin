@@ -72,9 +72,12 @@ class Module:
 		self.isbuild = False
 		# CPP version:
 		self.xx_version = 1999
+		self.xx_version_gnu = False
 		self.xx_version_api = 1999
 		self.cc_version = 1989
+		self.cc_version_gnu = False
 		self.cc_version_api = 1989
+		
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
 		   or moduleType == 'LIBRARY' \
@@ -137,22 +140,60 @@ class Module:
 			])
 		# only for gcc :"-Wno-unused-but-set-variable"
 	
+	def get_c_version_compilation_flags(self, dependency_version):
+		cc_version = max(self.cc_version, dependency_version)
+		if cc_version == 2011:
+			if self.cc_version_gnu ==True:
+				local_cc_version_flags=["-std=gnu11", "-D__C_VERSION__=2011"]
+			else:
+				local_cc_version_flags=["-std=c11", "-D__C_VERSION__=1989"]
+		elif cc_version == 1999:
+			if self.cc_version_gnu ==True:
+				local_cc_version_flags=["-std=gnu99", "-D__C_VERSION__=1999"]
+			else:
+				local_cc_version_flags=["-std=c99", "-D__C_VERSION__=1989"]
+		elif cc_version == 1990:
+			if self.cc_version_gnu ==True:
+				local_cc_version_flags=["-std=gnu90", "-D__C_VERSION__=1990"]
+			else:
+				local_cc_version_flags=["-std=c90", "-D__C_VERSION__=1989"]
+		else:
+			if self.cc_version_gnu ==True:
+				local_cc_version_flags=["-std=gnu89", "-D__C_VERSION__=1989"]
+			else:
+				local_cc_version_flags=["-std=c89", "-D__C_VERSION__=1989"]
+		return local_cc_version_flags
+	
+	
+	def get_xx_version_compilation_flags(self, dependency_version):
+		xx_version = max(self.xx_version, dependency_version)
+		if xx_version == 2014:
+			debug.error("not supported flags for X14 ...");
+			if self.xx_version_gnu == True:
+				local_xx_version_flags=["-std=gnu++14", "-D__CPP_VERSION__=2014"]
+			else:
+				local_xx_version_flags=["-std=c++14", "-D__CPP_VERSION__=2014"]
+		elif xx_version == 2011:
+			if self.xx_version_gnu == True:
+				local_xx_version_flags=["-std=gnu++11", "-D__CPP_VERSION__=2011"]
+			else:
+				local_xx_version_flags=["-std=c++11", "-D__CPP_VERSION__=2011"]
+		elif xx_version == 2003:
+			if self.xx_version_gnu == True:
+				local_xx_version_flags=["-std=gnu++03", "-D__CPP_VERSION__=2003"]
+			else:
+				local_xx_version_flags=["-std=c++03", "-D__CPP_VERSION__=2003"]
+		else:
+			if self.xx_version_gnu == True:
+				local_xx_version_flags=["-std=gnu++98", "-D__CPP_VERSION__=1999"]
+			else:
+				local_xx_version_flags=["-std=c++98", "-D__CPP_VERSION__=1999"]
+		return local_xx_version_flags
 	##
 	## @brief Commands for running gcc to compile a m++ file.
 	##
 	def compile_mm_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		xx_version = max(self.xx_version, depancy.flags_xx_version)
-		if xx_version == 2014:
-			debug.error("not supported flags for X14 ...");
-			local_xx_version_flags=["-std=c++14", "-D__CPP_VERSION__=2014"]
-		elif xx_version == 2011:
-			local_xx_version_flags=["-std=c++11", "-D__CPP_VERSION__=2011"]
-		elif xx_version == 2003:
-			local_xx_version_flags=["-std=c++03", "-D__CPP_VERSION__=2003"]
-		else:
-			local_xx_version_flags=["-D__CPP_VERSION__=1999"]
-		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.xx,
@@ -163,7 +204,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
-			local_xx_version_flags,
+			self.get_xx_version_compilation_flags(depancy.flags_xx_version),
 			target.global_flags_cc,
 			target.global_flags_mm,
 			depancy.flags_cc,
@@ -189,16 +230,6 @@ class Module:
 	##
 	def compile_m_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		cc_version = max(self.cc_version, depancy.flags_cc_version)
-		if cc_version == 2011:
-			local_cc_version_flags=["-std=c11", "-D__C_VERSION__=2011"]
-		elif cc_version == 1999:
-			local_cc_version_flags=["-std=c99", "-D__C_VERSION__=1999"]
-		elif cc_version == 1990:
-			local_cc_version_flags=["-std=c90", "-D__C_VERSION__=1990"]
-		else:
-			local_cc_version_flags=["-std=c89", "-D__C_VERSION__=1989"]
-		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
@@ -209,7 +240,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
-			local_cc_version_flags,
+			self.get_c_version_compilation_flags(depancy.flags_cc_version),
 			target.global_flags_cc,
 			target.global_flags_m,
 			depancy.flags_cc,
@@ -235,16 +266,6 @@ class Module:
 	##
 	def compile_xx_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		xx_version = max(self.xx_version, depancy.flags_xx_version)
-		if xx_version == 2014:
-			debug.error("not supported flags for X14 ...");
-			local_xx_version_flags=["-std=c++14", "-D__CPP_VERSION__=2014"]
-		elif xx_version == 2011:
-			local_xx_version_flags=["-std=c++11", "-D__CPP_VERSION__=2011"]
-		elif xx_version == 2003:
-			local_xx_version_flags=["-std=c++03", "-D__CPP_VERSION__=2003"]
-		else:
-			local_xx_version_flags=["-D__CPP_VERSION__=1999"]
 		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
@@ -256,7 +277,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
-			local_xx_version_flags,
+			self.get_xx_version_compilation_flags(depancy.flags_xx_version),
 			target.global_flags_cc,
 			target.global_flags_xx,
 			depancy.flags_cc,
@@ -281,16 +302,6 @@ class Module:
 	##
 	def compile_cc_to_o(self, file, binary, target, depancy):
 		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		cc_version = max(self.cc_version, depancy.flags_cc_version)
-		if cc_version == 2011:
-			local_cc_version_flags=["-std=c11", "-D__C_VERSION__=2011"]
-		elif cc_version == 1999:
-			local_cc_version_flags=["-std=c99", "-D__C_VERSION__=1999"]
-		elif cc_version == 1990:
-			local_cc_version_flags=["-std=c90", "-D__C_VERSION__=1990"]
-		else:
-			local_cc_version_flags=["-std=c89", "-D__C_VERSION__=1989"]
-		
 		# create the command line befor requesting start:
 		cmdLine=lutinTools.list_to_str([
 			target.cc,
@@ -301,7 +312,7 @@ class Module:
 			lutinTools.add_prefix("-I",self.export_path),
 			lutinTools.add_prefix("-I",self.local_path),
 			lutinTools.add_prefix("-I",depancy.path),
-			local_cc_version_flags,
+			self.get_c_version_compilation_flags(depancy.flags_cc_version),
 			target.global_flags_cc,
 			depancy.flags_cc,
 			self.flags_cc,
@@ -678,21 +689,27 @@ class Module:
 	def compile_flags_S(self, list):
 		self.append_to_internalList(self.flags_s, list)
 	
-	def compile_version_XX(self, version, same_as_api=True):
+	def compile_version_XX(self, version, same_as_api=True, gnu=False):
 		cpp_version_list = [1999, 2003, 2011, 2014]
 		if version not in cpp_version_list:
 			debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
 		self.xx_version = version
 		if same_as_api == True:
 			self.xx_version_api = self.xx_version
+		self.xx_version_gnu = gnu
+		if self.xx_version_gnu == True and same_as_api == True:
+			debug.warning("Can not propagate the gnu extention of the CPP vesion for API");
 	
-	def compile_version_CC(self, version, same_as_api=True):
+	def compile_version_CC(self, version, same_as_api=True, gnu=False):
 		c_version_list = [1989, 1990, 1999, 2011]
 		if version not in c_version_list:
 			debug.error("can not select C version : " + str(version) + " not in " + str(c_version_list))
 		self.cc_version = version
 		if same_as_api == True:
 			self.cc_version_api = self.cc_version
+		self.cc_version_gnu = gnu
+		if self.cc_version_gnu == True and same_as_api == True:
+			debug.warning("Can not propagate the gnu extention of the C vesion for API");
 	
 	def add_src_file(self, list):
 		self.append_to_internalList(self.src, list, True)
