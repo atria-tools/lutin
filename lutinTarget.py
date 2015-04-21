@@ -124,6 +124,8 @@ class Target:
 			list.append("0")
 		if len(list) == 2:
 			list.append("0")
+		if len(list) > 3:
+			list = list[:3]
 		out = 0;
 		offset = 1000**(len(list)-1)
 		for elem in list:
@@ -153,8 +155,7 @@ class Target:
 		if ret == False:
 			debug.error("Can not get the g++/clang++ version ...")
 		self.xx_version = self.create_number_from_version_string(ret)
-		debug.warning("plop " + self.xx)
-		debug.warning(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
+		debug.verbose(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
 		
 		self.ld = self.cross + "ld"
 		self.nm = self.cross + "nm"

@@ -671,11 +671,6 @@ class Target(lutinTarget.Target):
 		# Create a key for signing your application:
 		# keytool -genkeypair -v -keystore AndroidKey.jks -storepass Pass__AndroidDebugKey -alias alias__AndroidDebugKey -keypass PassKey__AndroidDebugKey -keyalg RSA -validity 36500
 		if self.config["mode"] == "debug":
-			tmpFile = open("tmpPass.boo", 'w')
-			tmpFile.write("Pass__AndroidDebugKey\n")
-			tmpFile.write("PassKey__AndroidDebugKey\n")
-			tmpFile.flush()
-			tmpFile.close()
 			debug.print_element("pkg", ".apk(signed debug)", "<==", ".apk (not signed)")
 			# verbose mode : 
 			#debugOption = "-verbose -certs "
@@ -684,8 +679,10 @@ class Target(lutinTarget.Target):
 			    + debugOption \
 			    + "-keystore " + tools.get_current_path(__file__) + "/AndroidDebugKey.jks " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
+			    + " -storepass Pass__AndroidDebugKey " \
+			    + " -keypass PassKey__AndroidDebugKey " \
 			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
-			    + " alias__AndroidDebugKey < tmpPass.boo"
+			    + " alias__AndroidDebugKey"
 			lutinMultiprocess.run_command(cmdLine)
 			tmpFile = open("tmpPass.boo", 'w')
 			tmpFile.write("\n")
@@ -744,6 +741,7 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("logcat of android board")
 		debug.debug("------------------------------------------------------------------------")
+		debug.info("cmd: " + self.folder_sdk + "/platform-tools/adb shell logcat ")
 		cmdLine = self.folder_sdk + "/platform-tools/adb shell logcat "
 		lutinMultiprocess.run_command(cmdLine)
 
