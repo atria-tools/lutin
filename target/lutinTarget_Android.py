@@ -56,7 +56,7 @@ class Target(lutinTarget.Target):
 		
 		
 		tmpOsVal = "64"
-		gccVersion = "4.8"
+		gccVersion = "4.9"
 		if lutinHost.BUS_SIZE==64:
 			tmpOsVal = "_64"
 		if self.config["compilator"] == "clang":
