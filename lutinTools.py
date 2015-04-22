@@ -56,10 +56,13 @@ def file_size(path):
 	statinfo = os.stat(path)
 	return statinfo.st_size
 
-def file_read_data(path):
+def file_read_data(path, binary=False):
 	if not os.path.isfile(path):
 		return ""
-	file = open(path, "r")
+	if binary == True:
+		file = open(path, "rb")
+	else:
+		file = open(path, "r")
 	data_file = file.read()
 	file.close()
 	return data_file

@@ -9,11 +9,12 @@
 
 import lutinDebug as debug
 import lutinTarget
-import lutinTools
+import lutinTools as tools
 import lutinHost
 import os
 import stat
 import sys
+import lutinZip as zip
 
 class Target(lutinTarget.Target):
 	def __init__(self, config):
@@ -67,7 +68,38 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.warning("    ==> TODO")
+		debug.print_element("zip", "data.zip", "<==", "data/*")
+		zipPath = self.get_staging_folder(pkgName) + "/data.zip"
+		zip.create_zip(self.get_staging_folder_data(pkgName), zipPath)
+		
+		binPath = self.get_staging_folder(pkgName) + "/" + self.folder_bin + "/" + pkgName + self.suffix_binary
+		binSize = tools.file_size(binPath)
+		debug.info("binarysize : " + str(binSize/1024) + " ko ==> " + str(binSize) + " octets")
+		
+		#now we create a simple bundle binary ==> all file is stored in one file ...
+		self.get_staging_folder(pkgName)
+		finalBin = self.get_final_folder() + "/" + pkgName + self.suffix_binary
+		tools.create_directory_of_file(finalBin);
+		debug.print_element("pkg", finalBin, "<==", pkgName + self.suffix_binary)
+		tmpFile = open(finalBin, 'wb')
+		dataExecutable = tools.file_read_data(binPath, binary=True)
+		tmpFile.write(dataExecutable)
+		residualToAllign = len(dataExecutable) - int(len(dataExecutable)/32)*32
+		for iii in range(1,residualToAllign):
+			tmpFile.write(b'j');
+		positionOfZip = len(dataExecutable) + residualToAllign;
+		
+		debug.print_element("pkg", finalBin, "<==", "data.zip")
+		dataData = tools.file_read_data(zipPath, binary=True)
+		tmpFile.write(dataData)
+		tmpLen = len(dataData) + positionOfZip
+		residualToAllign = tmpLen - int(tmpLen/32)*32
+		for iii in range(1,residualToAllign):
+			tmpFile.write(b'j');
+		tmpFile.write(bin(positionOfZip))
+		tmpFile.flush()
+		tmpFile.close()
+		debug.info("zip position=" + str(positionOfZip))
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
