@@ -8,7 +8,6 @@
 ##
 
 import os
-import thread
 import lutinMultiprocess
 import threading
 import re
@@ -110,7 +109,7 @@ def error(input, threadID=-1, force=False, crash=True):
 	if crash==True:
 		lutinMultiprocess.error_occured()
 		if threadID != -1:
-			thread.interrupt_main()
+			threading.interrupt_main()
 		exit(-1)
 		#os_exit(-1)
 		#raise "error happend"

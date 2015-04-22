@@ -725,17 +725,17 @@ class Module:
 	
 	def print_list(self, description, list):
 		if len(list) > 0:
-			print '        %s' %description
+			print('        ' + str(description))
 			for elem in list:
-				print '            %s' %elem
+				print('            ' + str(elem))
 	
 	def display(self, target):
-		print '-----------------------------------------------'
-		print ' package : "%s"' %self.name
-		print '-----------------------------------------------'
-		print '    type:"%s"' %self.type
-		print '    file:"%s"' %self.originFile
-		print '    folder:"%s"' %self.originFolder
+		print('-----------------------------------------------')
+		print(' package : "' + self.name + "'")
+		print('-----------------------------------------------')
+		print('    type:"' + str(self.type) + "'")
+		print('    file:"' + str(self.originFile) + "'")
+		print('    folder:"' + str(self.originFolder) + "'")
 		self.print_list('depends',self.depends)
 		self.print_list('depends_optionnal', self.depends_optionnal)
 		self.print_list('flags_ld',self.flags_ld)

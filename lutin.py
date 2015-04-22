@@ -49,19 +49,19 @@ localArgument = myLutinArg.parse()
 def usage():
 	# generic argument displayed : 
 	myLutinArg.display()
-	print "		All target can finish with '-clean' '-dump' ..."
-	print "		all"
-	print "			build all (only for the current selected board) (bynary and packages)"
-	print "		clean"
-	print "			clean all (same as previous)"
-	print "		dump"
-	print "			Dump all the module dependency and properties"
+	print("		All target can finish with '-clean' '-dump' ...")
+	print("		all")
+	print("			build all (only for the current selected board) (bynary and packages)")
+	print("		clean")
+	print("			clean all (same as previous)")
+	print("		dump")
+	print("			Dump all the module dependency and properties")
 	listOfAllModule = lutinModule.list_all_module_with_desc()
 	for mod in listOfAllModule:
-		print "		" + mod[0]
+		print("		" + mod[0])
 		if mod[1] != "":
-			print "			" + mod[1]
-	print "	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all"
+			print("			" + mod[1])
+	print("	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
 	exit(0)
 
 # preparse the argument to get the verbose element for debug mode
@@ -79,7 +79,7 @@ def parseGenericArg(argument,active):
 				if retValue != "":
 					retValue += " "
 				retValue += moduleName
-			print retValue
+			print(retValue)
 			exit(0)
 		return True
 	if argument.get_option_nName() == "list-target":
@@ -90,7 +90,7 @@ def parseGenericArg(argument,active):
 				if retValue != "":
 					retValue += " "
 				retValue += targetName
-			print retValue
+			print(retValue)
 			exit(0)
 		return True
 	elif argument.get_option_nName()=="jobs":

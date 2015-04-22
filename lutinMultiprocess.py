@@ -11,7 +11,11 @@ import sys
 import lutinDebug as debug
 import threading
 import time
-import Queue
+import sys
+if sys.version_info >= (3, 0):
+	import queue
+else:
+	import Queue as queue
 import os
 import subprocess
 import lutinTools
@@ -19,7 +23,7 @@ import lutinEnv
 import shlex
 
 queueLock = threading.Lock()
-workQueue = Queue.Queue()
+workQueue = queue.Queue()
 currentThreadWorking = 0
 threads = []
 # To know the first error arrive in the pool ==> to display all the time the same error file when multiple compilation
@@ -63,6 +67,9 @@ def run_command_direct(cmdLine):
 		debug.error("subprocess.CalledProcessError : " + str(args))
 	# launch the subprocess:
 	output, err = p.communicate()
+	if sys.version_info >= (3, 0):
+		output = output.decode("utf-8")
+		err = err.decode("utf-8")
 	# Check error :
 	if p.returncode == 0:
 		if output == None:
@@ -86,6 +93,9 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		debug.error("subprocess.CalledProcessError : TODO ...")
 	# launch the subprocess:
 	output, err = p.communicate()
+	if sys.version_info >= (3, 0):
+		output = output.decode("utf-8")
+		err = err.decode("utf-8")
 	# Check error :
 	if p.returncode == 0:
 		debug.debug(lutinEnv.print_pretty(cmdLine))
