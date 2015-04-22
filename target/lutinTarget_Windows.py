@@ -81,25 +81,41 @@ class Target(lutinTarget.Target):
 		finalBin = self.get_final_folder() + "/" + pkgName + self.suffix_binary
 		tools.create_directory_of_file(finalBin);
 		debug.print_element("pkg", finalBin, "<==", pkgName + self.suffix_binary)
+		#open output file
 		tmpFile = open(finalBin, 'wb')
+		# read all executable binary
 		dataExecutable = tools.file_read_data(binPath, binary=True)
+		# wrte binary to the output
 		tmpFile.write(dataExecutable)
-		residualToAllign = len(dataExecutable) - int(len(dataExecutable)/32)*32
-		for iii in range(1,residualToAllign):
-			tmpFile.write(b'j');
+		#align data in the 32 Bytes position (prevent zip align error)
+		residualToAllign = 32 + 32 - (len(dataExecutable) - int(len(dataExecutable)/32)*32)
+		for iii in range(0,residualToAllign):
+			tmpFile.write(b'\0');
 		positionOfZip = len(dataExecutable) + residualToAllign;
-		
+		# write a control TAG
+		tmpFile.write(b'***START DATA***');
+		# write all the zip file
 		debug.print_element("pkg", finalBin, "<==", "data.zip")
 		dataData = tools.file_read_data(zipPath, binary=True)
 		tmpFile.write(dataData)
+		#align data in the 32 Bytes position (to be fun"
 		tmpLen = len(dataData) + positionOfZip
-		residualToAllign = tmpLen - int(tmpLen/32)*32
-		for iii in range(1,residualToAllign):
-			tmpFile.write(b'j');
-		tmpFile.write(bin(positionOfZip))
+		residualToAllign = 32 + 32 - (tmpLen - int(tmpLen/32)*32)
+		for iii in range(0,residualToAllign):
+			tmpFile.write(b'\0');
+		# write a control TAG
+		tmpFile.write(b'*** END DATA ***');
+		# reserved AREA (can be use later for extra value ...)
+		for iii in range(0,8):
+			tmpFile.write(b'\0');
+		# write the position of the zip file (TAG position)
+		h = '{0:016x}'.format(positionOfZip)
+		s = ('0'*(len(h) % 2) + h).decode('hex')
+		tmpFile.write(s)
+		# package is done
 		tmpFile.flush()
 		tmpFile.close()
-		debug.info("zip position=" + str(positionOfZip))
+		debug.verbose("zip position=" + str(positionOfZip) + " = 0x" + h)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
