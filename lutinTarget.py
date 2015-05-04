@@ -257,14 +257,14 @@ class Target:
 	def get_doc_folder(self, moduleName):
 		return lutinTools.get_run_folder() + self.folder_out + self.folder_doc + "/" + moduleName
 	
-	def is_module_build(self,module):
+	def is_module_build(self, module):
 		for mod in self.buildDone:
 			if mod == module:
 				return True
 		self.buildDone.append(module)
 		return False
 	
-	def is_module_buildTree(self,module):
+	def is_module_buildTree(self, module):
 		for mod in self.buildTreeDone:
 			if mod == module:
 				return True
@@ -369,7 +369,7 @@ class Target:
 				mod.clean(self)
 		else:
 			# get the action an the module ....
-			gettedElement = name.split("-")
+			gettedElement = name.split("?")
 			moduleName = gettedElement[0]
 			if len(gettedElement)>=2:
 				actionName = gettedElement[1]
@@ -377,7 +377,7 @@ class Target:
 				actionName = "build"
 			debug.verbose("requested : " + moduleName + "-" + actionName)
 			if actionName == "install":
-				self.build(moduleName + "-build")
+				self.build(moduleName + "?build")
 				self.install_package(moduleName)
 			elif actionName == "uninstall":
 				self.un_install_package(moduleName)

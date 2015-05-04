@@ -49,7 +49,7 @@ localArgument = myLutinArg.parse()
 def usage():
 	# generic argument displayed : 
 	myLutinArg.display()
-	print("		All target can finish with '-clean' '-dump' ...")
+	print("		All target can finish with '?clean' '?dump' ... ?action")
 	print("		all")
 	print("			build all (only for the current selected board) (bynary and packages)")
 	print("		clean")

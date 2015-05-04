@@ -18,7 +18,7 @@ class System(lutinSystem.System):
 		# create some HELP:
 		self.help="Z : z library \n Can be install with the package:\n    - zlib1g-dev"
 		# check if the library exist:
-		if     not os.path.isfile("/usr/include/zlib.h"):
+		if not os.path.isfile("/usr/include/zlib.h"):
 			# we did not find the library reqiested (just return) (automaticly set at false)
 			return;
 		self.valid = True
