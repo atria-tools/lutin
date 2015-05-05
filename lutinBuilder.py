@@ -44,5 +44,26 @@ def import_path(path):
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			builder_name = filename.replace('.py', '')
 			the_builder = __import__(builder_name)
-			builder_list.append({"name":builder_name, "element":the_builder})
+			builder_list.append({"name":builder_name,
+			                     "element":the_builder
+			                    })
+			debug.debug('BUILDER:     type=' + the_builder.getType() + " in=" + str(the_builder.getInputType()) + " out=" + str(the_builder.getOutputType()))
+
+# we must have call all import before ...
+def init():
+	global builder_list
+	debug.debug('BUILDER: Initialize all ...')
+	for element in builder_list:
+		if element["element"] != None:
+			element["element"].init()
+
+def getBuilder(input_type):
+	global builder_list
+	for element in builder_list:
+		if element["element"] != None:
+			if input_type in element["element"].getInputType():
+				return element["element"]
+	# we can not find the builder ...
+	debug.error("Can not find builder for type : '" + str(input_type) + "'")
+	return None
 

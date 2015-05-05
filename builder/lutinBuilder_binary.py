@@ -3,6 +3,12 @@
 ##
 
 ##
+## Initialize the builder, if needed ... to get dependency between builder (for example)
+##
+def init():
+	pass
+
+##
 ## Get the current builder type.
 ## Return the type of builder
 ##
@@ -11,9 +17,24 @@ def getType():
 
 
 ##
+## @brief Get builder input file type
+## @return List of extention supported
+##
+def getInputType():
+	return ["o"]
+
+##
+## @brief Get builder output file type
+## @return List of extention supported
+##
+def getOutputType():
+	return ["", "exe"]
+
+
+##
 ## @brief Commands for running gcc to link an executable.
 ##
-def link(self, file, binary, target, depancy, libName=""):
+def link(file, binary, target, depancy, libName=""):
 	if libName=="":
 		libName = self.name
 	file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, libName,self.originFolder,file,"bin")

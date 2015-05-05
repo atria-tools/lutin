@@ -234,7 +234,7 @@ if __name__ == '__main__':
 					lutinSystem.import_path(folder)
 					lutinTarget.import_path(folder)
 		#lutinSystem.display()
-	exit(-1)
+	lutinBuilder.init()
 	Start()
 
 

@@ -26,13 +26,7 @@ def append_to_list(listout, list):
 
 class HeritageList:
 	def __init__(self, heritage = None):
-		self.flags_ld=[]
-		self.flags_cc=[]
-		self.flags_xx=[]
-		self.flags_m=[]
-		self.flags_mm=[]
-		self.flags_xx_version=1999
-		self.flags_cc_version=1989
+		self.flags={}
 		# sources list:
 		self.src=[]
 		self.path=[]
@@ -42,7 +36,8 @@ class HeritageList:
 			self.add_heritage(heritage)
 	
 	def add_heritage(self, heritage):
-		if type(heritage) == type(None) or heritage.name == "":
+		if    type(heritage) == type(None) \
+		   or heritage.name == "":
 			return
 		for element in self.listHeritage:
 			if element.name == heritage.name:
@@ -63,13 +58,7 @@ class HeritageList:
 		self.regenerateTree()
 	
 	def regenerateTree(self):
-		self.flags_ld=[]
-		self.flags_cc=[]
-		self.flags_xx=[]
-		self.flags_xx_version=1999
-		self.flags_xx_version=1989
-		self.flags_m=[]
-		self.flags_mm=[]
+		self.flags={}
 		# sources list:
 		self.src=[]
 		self.path=[]
@@ -102,17 +91,22 @@ class HeritageList:
 		for element in self.listHeritage:
 			debug.verbose("	" + element.name + " " + str(element.depends))
 		for element in reversed(self.listHeritage):
-			append_to_list(self.flags_ld, element.flags_ld)
-			append_to_list(self.flags_cc, element.flags_cc)
-			append_to_list(self.flags_xx, element.flags_xx)
-			append_to_list(self.flags_m, element.flags_m)
-			append_to_list(self.flags_mm, element.flags_mm)
+			debug.debug("elem : " + str(element.flags))
+			for flags in element.flags:
+				value = element.flags[flags]
+				debug.debug("    elem : " + str(flags))
+				if flags not in self.flags:
+					self.flags[flags] = value
+				else:
+					append_to_list(self.flags[flags], value)
 			append_to_list(self.path, element.path)
 			append_to_list(self.src, element.src)
+			"""
 			if self.flags_xx_version < element.flags_xx_version:
 				self.flags_xx_version = element.flags_xx_version
 			if self.flags_cc_version < element.flags_cc_version:
 				self.flags_cc_version = element.flags_cc_version
+			"""
 
 
 class heritage:
@@ -121,13 +115,7 @@ class heritage:
 		self.depends=[]
 		## Remove all variable to prevent error of multiple definition
 		# all the parameter that the upper classe need when build
-		self.flags_ld=[]
-		self.flags_cc=[]
-		self.flags_xx=[]
-		self.flags_xx_version=1999
-		self.flags_cc_version=1989
-		self.flags_m=[]
-		self.flags_mm=[]
+		self.flags={}
 		# sources list:
 		self.src=[]
 		self.path=[]
@@ -138,32 +126,16 @@ class heritage:
 			# all the parameter that the upper classe need when build
 			self.name = module.name
 			self.depends = copy.deepcopy(module.depends)
-			self.flags_ld = module.export_flags_ld
-			self.flags_cc = module.export_flags_cc
-			self.flags_xx = module.export_flags_xx
-			self.flags_m = module.export_flags_m
-			self.flags_mm = module.export_flags_mm
-			self.path = module.export_path
-			self.flags_xx_version = module.xx_version_api
-			self.flags_cc_version = module.cc_version_api
+			self.flags = module.flags["export"]
+			self.path = module.path["export"]
+			if "c++-version" in self.flags:
+				self.flags["c++-version"] = self.flags["c++-version"]["api-version"]
+			if "c-version" in self.flags:
+				self.flags["c-version"] = self.flags["c-version"]["api-version"]
+			
 	
 	def add_depends(self, depend):
 		self.depends.append(depend)
-	
-	def add_flag_LD(self, list):
-		append_to_list(self.flags_ld, list)
-	
-	def add_flag_CC(self, list):
-		append_to_list(self.flags_cc, list)
-	
-	def add_flag_XX(self, list):
-		append_to_list(self.flags_xx, list)
-	
-	def add_flag_M(self, list):
-		append_to_list(self.flags_m, list)
-	
-	def add_flag_MM(self, list):
-		append_to_list(self.flags_mm, list)
 	
 	def add_import_path(self, list):
 		append_to_list(self.path, list)
@@ -180,16 +152,19 @@ class heritage:
 			return
 		if other.hasBeenUpdated == True:
 			self.hasBeenUpdated = True
-		self.add_flag_LD(other.flags_ld)
-		self.add_flag_CC(other.flags_cc)
-		self.add_flag_XX(other.flags_xx)
-		self.add_flag_M(other.flags_m)
-		self.add_flag_MM(other.flags_mm)
+		for flags in other.flags:
+			value = other.flags[flags]
+			if flags not in self.flags:
+				self.flags[flags] = value
+			else:
+				append_to_list(self.flags[flags], value)
 		self.add_import_path(other.path)
 		self.add_sources(other.src)
+		"""
 		if self.flags_xx_version < module.xx_version_api:
 			self.flags_xx_version = module.xx_version_api
 		if self.flags_cc_version < module.cc_version_api:
 			self.flags_cc_version = module.cc_version_api
+		"""
 
 

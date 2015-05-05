@@ -17,6 +17,7 @@ import lutinTools
 import lutinDebug as debug
 import lutinHeritage as heritage
 import lutinDepend as dependency
+import lutinBuilder as builder
 import lutinMultiprocess
 import lutinEnv
 
@@ -48,8 +49,13 @@ class Module:
 		# Documentation list:
 		self.documentation = None
 		# export PATH
-		self.export_path = []
-		self.local_path = []
+		self.path = {"export":[],
+		             "local":[]
+		            }
+		self.flags = {"export":{},
+		              "local":{}
+		             }
+		"""
 		self.export_flags_ld = []
 		self.export_flags_cc = []
 		self.export_flags_xx = []
@@ -63,6 +69,7 @@ class Module:
 		self.flags_mm = []
 		self.flags_s = []
 		self.flags_ar = []
+		"""
 		# sources list:
 		self.src = []
 		# copy files and folders:
@@ -70,13 +77,6 @@ class Module:
 		self.files = []
 		self.folders = []
 		self.isbuild = False
-		# CPP version:
-		self.xx_version = 1999
-		self.xx_version_gnu = False
-		self.xx_version_api = 1999
-		self.cc_version = 1989
-		self.cc_version_gnu = False
-		self.cc_version_api = 1989
 		
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
@@ -139,60 +139,6 @@ class Module:
 			"-Wno-c++11-narrowing"
 			])
 		# only for gcc :"-Wno-unused-but-set-variable"
-	
-	def get_c_version_compilation_flags(self, dependency_version):
-		cc_version = max(self.cc_version, dependency_version)
-		if cc_version == 2011:
-			if self.cc_version_gnu ==True:
-				local_cc_version_flags=["-std=gnu11", "-D__C_VERSION__=2011"]
-			else:
-				local_cc_version_flags=["-std=c11", "-D__C_VERSION__=1989"]
-		elif cc_version == 1999:
-			if self.cc_version_gnu ==True:
-				local_cc_version_flags=["-std=gnu99", "-D__C_VERSION__=1999"]
-			else:
-				local_cc_version_flags=["-std=c99", "-D__C_VERSION__=1989"]
-		elif cc_version == 1990:
-			if self.cc_version_gnu ==True:
-				local_cc_version_flags=["-std=gnu90", "-D__C_VERSION__=1990"]
-			else:
-				local_cc_version_flags=["-std=c90", "-D__C_VERSION__=1989"]
-		else:
-			if self.cc_version_gnu ==True:
-				local_cc_version_flags=["-std=gnu89", "-D__C_VERSION__=1989"]
-			else:
-				local_cc_version_flags=["-std=c89", "-D__C_VERSION__=1989"]
-		return local_cc_version_flags
-	
-	
-	def get_xx_version_compilation_flags(self, dependency_version):
-		xx_version = max(self.xx_version, dependency_version)
-		if xx_version == 2014:
-			debug.error("not supported flags for X14 ...");
-			if self.xx_version_gnu == True:
-				local_xx_version_flags=["-std=gnu++14", "-D__CPP_VERSION__=2014"]
-			else:
-				local_xx_version_flags=["-std=c++14", "-D__CPP_VERSION__=2014"]
-		elif xx_version == 2011:
-			if self.xx_version_gnu == True:
-				local_xx_version_flags=["-std=gnu++11", "-D__CPP_VERSION__=2011"]
-			else:
-				local_xx_version_flags=["-std=c++11", "-D__CPP_VERSION__=2011"]
-		elif xx_version == 2003:
-			if self.xx_version_gnu == True:
-				local_xx_version_flags=["-std=gnu++03", "-D__CPP_VERSION__=2003"]
-			else:
-				local_xx_version_flags=["-std=c++03", "-D__CPP_VERSION__=2003"]
-		else:
-			if self.xx_version_gnu == True:
-				local_xx_version_flags=["-std=gnu++98", "-D__CPP_VERSION__=1999"]
-			else:
-				local_xx_version_flags=["-std=c++98", "-D__CPP_VERSION__=1999"]
-		return local_xx_version_flags
-	
-	
-	
-	
 	
 	##
 	## @brief Commands for copying files
@@ -285,20 +231,20 @@ class Module:
 		for file in self.src:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
-			if    fileExt in ["c", "C"]:
-				resFile = self.compile_cc_to_o(file, packageName, target, self.subHeritageList)
-				listSubFileNeededTobuild.append(resFile)
-			elif    fileExt in ["cpp", "CPP", "cxx", "CXX", "xx", "XX", "CC", "cc"]:
-				resFile = self.compile_xx_to_o(file, packageName, target, self.subHeritageList)
-				listSubFileNeededTobuild.append(resFile)
-			elif    fileExt in ["mm", "MM"]:
-				resFile = self.compile_mm_to_o(file, packageName, target, self.subHeritageList)
-				listSubFileNeededTobuild.append(resFile)
-			elif    fileExt in ["m", "M"]:
-				resFile = self.compile_m_to_o(file, packageName, target, self.subHeritageList)
+			tmpBuilder = builder.getBuilder(fileExt);
+			if tmpBuilder != None:
+				resFile = tmpBuilder.compile(file,
+				                             packageName,
+				                             target,
+				                             self.subHeritageList,
+				                             flags = self.flags,
+				                             path = self.path,
+				                             name = self.name,
+				                             basic_folder = self.originFolder)
 				listSubFileNeededTobuild.append(resFile)
 			else:
 				debug.warning(" UN-SUPPORTED file format:  '" + self.originFolder + "/" + file + "'")
+		
 		# when multiprocess availlable, we need to synchronize here ...
 		lutinMultiprocess.pool_synchrosize()
 		
@@ -379,6 +325,13 @@ class Module:
 		if True==order:
 			listout.sort()
 	
+	def append_to_internalList2(self, listout, module, list, order=False):
+		# add list in the Map
+		if module not in listout:
+			listout[module] = []
+		# add elements...
+		self.append_to_internalList(listout[module], list, order)
+	
 	def append_to_internalList(self, listout, list, order=False):
 		if type(list) == type(str()):
 			self.append_and_check(listout, list, order)
@@ -394,65 +347,73 @@ class Module:
 		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
 	def add_export_path(self, list):
-		self.append_to_internalList(self.export_path, list)
+		self.append_to_internalList(self.path["export"], list)
 	
 	def add_path(self, list):
-		self.append_to_internalList(self.local_path, list)
+		self.append_to_internalList(self.path["local"], list)
 	
 	def add_export_flag_LD(self, list):
-		self.append_to_internalList(self.export_flags_ld, list)
+		self.append_to_internalList2(self.flags["export"], "link", list)
 	
 	def add_export_flag_CC(self, list):
-		self.append_to_internalList(self.export_flags_cc, list)
+		self.append_to_internalList2(self.flags["export"], "c", list)
 	
 	def add_export_flag_XX(self, list):
-		self.append_to_internalList(self.export_flags_xx, list)
+		self.append_to_internalList2(self.flags["export"], "c++", list)
 	
 	def add_export_flag_M(self, list):
-		self.append_to_internalList(self.export_flags_m, list)
+		self.append_to_internalList2(self.flags["export"], "m", list)
 	
 	def add_export_flag_MM(self, list):
-		self.append_to_internalList(self.export_flags_mm, list)
+		self.append_to_internalList2(self.flags["export"], "mm", list)
 	
 	# add the link flag at the module
 	def compile_flags_LD(self, list):
-		self.append_to_internalList(self.flags_ld, list)
+		self.append_to_internalList2(self.flags["local"], "link", list)
 	
 	def compile_flags_CC(self, list):
-		self.append_to_internalList(self.flags_cc, list)
+		self.append_to_internalList2(self.flags["local"], "c", list)
 	
 	def compile_flags_XX(self, list):
-		self.append_to_internalList(self.flags_xx, list)
+		self.append_to_internalList2(self.flags["local"], "c++", list)
 	
 	def compile_flags_M(self, list):
-		self.append_to_internalList(self.flags_m, list)
+		self.append_to_internalList2(self.flags["local"], "m", list)
 	
 	def compile_flags_MM(self, list):
-		self.append_to_internalList(self.flags_mm, list)
+		self.append_to_internalList2(self.flags["local"], "mm", list)
 	
 	def compile_flags_S(self, list):
-		self.append_to_internalList(self.flags_s, list)
+		self.append_to_internalList2(self.flags["local"], "s", list)
 	
 	def compile_version_XX(self, version, same_as_api=True, gnu=False):
 		cpp_version_list = [1999, 2003, 2011, 2014]
 		if version not in cpp_version_list:
 			debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
-		self.xx_version = version
+		# select API version:
+		api_version = 1999
 		if same_as_api == True:
-			self.xx_version_api = self.xx_version
-		self.xx_version_gnu = gnu
-		if self.xx_version_gnu == True and same_as_api == True:
+			api_version = version
+		self.flags["local"]["c++-version"] = { "version":version,
+		                                       "api-version":api_version,
+		                                       "gnu":gnu
+		                                     }
+		if gnu == True and same_as_api == True:
 			debug.warning("Can not propagate the gnu extention of the CPP vesion for API");
 	
 	def compile_version_CC(self, version, same_as_api=True, gnu=False):
 		c_version_list = [1989, 1990, 1999, 2011]
 		if version not in c_version_list:
 			debug.error("can not select C version : " + str(version) + " not in " + str(c_version_list))
-		self.cc_version = version
+		# select API version:
+		api_version = 1999
 		if same_as_api == True:
-			self.cc_version_api = self.cc_version
-		self.cc_version_gnu = gnu
-		if self.cc_version_gnu == True and same_as_api == True:
+			api_version = version
+		self.flags["local"]["c-version"] = { "version":version,
+		                                     "api-version":api_version,
+		                                     "gnu":gnu
+		                                   }
+		if gnu == True and same_as_api == True:
 			debug.warning("Can not propagate the gnu extention of the C vesion for API");
 	
 	def add_src_file(self, list):
@@ -480,24 +441,21 @@ class Module:
 		print('    type:"' + str(self.type) + "'")
 		print('    file:"' + str(self.originFile) + "'")
 		print('    folder:"' + str(self.originFolder) + "'")
+		
 		self.print_list('depends',self.depends)
 		self.print_list('depends_optionnal', self.depends_optionnal)
-		self.print_list('flags_ld',self.flags_ld)
-		self.print_list('flags_cc',self.flags_cc)
-		self.print_list('flags_xx',self.flags_xx)
-		self.print_list('flags_m',self.flags_m)
-		self.print_list('flags_mm',self.flags_mm)
-		self.print_list('flags_s',self.flags_s)
+		
+		for element,value in self.flags["local"]:
+			self.print_list('flags ' + element, value)
+		
+		for element,value in self.flags["export"]:
+			self.print_list('flags export ' + element, value)
+		
 		self.print_list('src',self.src)
 		self.print_list('files',self.files)
 		self.print_list('folders',self.folders)
-		self.print_list('export_path',self.export_path)
-		self.print_list('export_flags_ld',self.export_flags_ld)
-		self.print_list('export_flags_cc',self.export_flags_cc)
-		self.print_list('export_flags_xx',self.export_flags_xx)
-		self.print_list('export_flags_m',self.export_flags_m)
-		self.print_list('export_flags_mm',self.export_flags_mm)
-		self.print_list('local_path',self.local_path)
+		self.print_list('export path',self.path["export"])
+		self.print_list('local  path',self.path["local"])
 	
 	def pkg_set(self, variable, value):
 		if "COMPAGNY_TYPE" == variable:
