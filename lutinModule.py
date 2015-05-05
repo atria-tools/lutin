@@ -189,266 +189,10 @@ class Module:
 			else:
 				local_xx_version_flags=["-std=c++98", "-D__CPP_VERSION__=1999"]
 		return local_xx_version_flags
-	##
-	## @brief Commands for running gcc to compile a m++ file.
-	##
-	def compile_mm_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		# create the command line befor requesting start:
-		cmdLine=lutinTools.list_to_str([
-			target.xx,
-			"-o", file_dst,
-			target.arch,
-			target.sysroot,
-			target.global_include_cc,
-			lutinTools.add_prefix("-I",self.export_path),
-			lutinTools.add_prefix("-I",self.local_path),
-			lutinTools.add_prefix("-I",depancy.path),
-			self.get_xx_version_compilation_flags(depancy.flags_xx_version),
-			target.global_flags_cc,
-			target.global_flags_mm,
-			depancy.flags_cc,
-			depancy.flags_mm,
-			self.flags_mm,
-			self.flags_cc,
-			self.export_flags_mm,
-			self.export_flags_cc,
-			"-c -MMD -MP",
-			"-x objective-c++",
-			file_src])
-		# check the dependency for this file :
-		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
-			return file_dst
-		lutinTools.create_directory_of_file(file_dst)
-		comment = ["m++", self.name, "<==", file]
-		#process element
-		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
-		return file_dst
-	
-	##
-	## @brief Commands for running gcc to compile a m file.
-	##
-	def compile_m_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		# create the command line befor requesting start:
-		cmdLine=lutinTools.list_to_str([
-			target.cc,
-			"-o", file_dst ,
-			target.arch,
-			target.sysroot,
-			target.global_include_cc,
-			lutinTools.add_prefix("-I",self.export_path),
-			lutinTools.add_prefix("-I",self.local_path),
-			lutinTools.add_prefix("-I",depancy.path),
-			self.get_c_version_compilation_flags(depancy.flags_cc_version),
-			target.global_flags_cc,
-			target.global_flags_m,
-			depancy.flags_cc,
-			depancy.flags_m,
-			self.flags_m,
-			self.flags_cc,
-			self.export_flags_m,
-			self.export_flags_cc,
-			"-c -MMD -MP",
-			"-x objective-c",
-			file_src])
-		# check the dependency for this file :
-		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
-			return file_dst
-		lutinTools.create_directory_of_file(file_dst)
-		comment = ["m", self.name, "<==", file]
-		#process element
-		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
-		return file_dst
-	
-	##
-	## @brief Commands for running gcc to compile a C++ file.
-	##
-	def compile_xx_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		
-		# create the command line befor requesting start:
-		cmdLine=lutinTools.list_to_str([
-			target.xx,
-			"-o", file_dst,
-			target.arch,
-			target.sysroot,
-			target.global_include_cc,
-			lutinTools.add_prefix("-I",self.export_path),
-			lutinTools.add_prefix("-I",self.local_path),
-			lutinTools.add_prefix("-I",depancy.path),
-			self.get_xx_version_compilation_flags(depancy.flags_xx_version),
-			target.global_flags_cc,
-			target.global_flags_xx,
-			depancy.flags_cc,
-			depancy.flags_xx,
-			self.flags_xx,
-			self.flags_cc,
-			self.export_flags_xx,
-			self.export_flags_cc,
-			" -c -MMD -MP",
-			file_src])
-		# check the dependency for this file :
-		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
-			return file_dst
-		lutinTools.create_directory_of_file(file_dst)
-		comment = ["c++", self.name, "<==", file]
-		#process element
-		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
-		return file_dst
-	
-	##
-	## @brief Commands for running gcc to compile a C file.
-	##
-	def compile_cc_to_o(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary,self.name,self.originFolder,file)
-		# create the command line befor requesting start:
-		cmdLine=lutinTools.list_to_str([
-			target.cc,
-			"-o", file_dst,
-			target.arch,
-			target.sysroot,
-			target.global_include_cc,
-			lutinTools.add_prefix("-I",self.export_path),
-			lutinTools.add_prefix("-I",self.local_path),
-			lutinTools.add_prefix("-I",depancy.path),
-			self.get_c_version_compilation_flags(depancy.flags_cc_version),
-			target.global_flags_cc,
-			depancy.flags_cc,
-			self.flags_cc,
-			self.export_flags_cc,
-			" -c -MMD -MP",
-			file_src])
-		
-		# check the dependency for this file :
-		if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
-			return file_dst
-		lutinTools.create_directory_of_file(file_dst)
-		comment = ["c", self.name, "<==", file]
-		# process element
-		lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
-		return file_dst
 	
 	
-	##
-	## @brief Commands for running ar.
-	##
-	def link_to_a(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, self.name,self.originFolder,file,"lib-static")
-		#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
-		cmdLine=lutinTools.list_to_str([
-			target.ar,
-			target.global_flags_ar,
-			self.flags_ar,
-			file_dst,
-			file_src])#,
-			#depancy.src])
-		
-		# check the dependency for this file :
-		if     False==dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) \
-		   and False==dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine):
-			return file_dst
-		lutinTools.create_directory_of_file(file_dst)
-		debug.print_element("StaticLib", self.name, "==>", file_dst)
-		# explicitly remove the destination to prevent error ...
-		if os.path.exists(file_dst) and os.path.isfile(file_dst):
-			os.remove(file_dst)
-		lutinMultiprocess.run_command(cmdLine)
-		#$(Q)$(TARGET_RANLIB) $@
-		if target.ranlib != "":
-			cmdLineRanLib=lutinTools.list_to_str([
-				target.ranlib,
-				file_dst ])
-			lutinMultiprocess.run_command(cmdLineRanLib)
-		# write cmd line only after to prevent errors ...
-		lutinMultiprocess.store_command(cmdLine, file_cmd)
-		return file_dst
 	
 	
-	##
-	## @brief Commands for running gcc to link a shared library.
-	##
-	def link_to_so(self, file, binary, target, depancy, libName=""):
-		if libName=="":
-			libName = self.name
-		file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, libName,self.originFolder,file,"lib-shared")
-		#create command Line
-		cmdLine=lutinTools.list_to_str([
-			target.xx,
-			"-o", file_dst,
-			target.global_sysroot,
-			target.arch,
-			"-shared",
-			file_src,
-			depancy.src,
-			self.flags_ld,
-			depancy.flags_ld,
-			target.global_flags_ld])
-		
-		# check the dependency for this file :
-		if     dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) == False \
-		   and dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
-			return tmpList[1]
-		lutinTools.create_directory_of_file(file_dst)
-		debug.print_element("SharedLib", libName, "==>", file_dst)
-		lutinMultiprocess.run_command(cmdLine)
-		if    target.config["mode"] == "release" \
-		   or lutinEnv.get_force_strip_mode()==True:
-			# get the file size of the non strip file
-			originSize = lutinTools.file_size(file_dst);
-			debug.print_element("SharedLib(strip)", libName, "", "")
-			cmdLineStrip=lutinTools.list_to_str([
-				target.strip,
-				file_dst])
-			lutinMultiprocess.run_command(cmdLineStrip)
-			# get the stip size of the binary
-			stripSize = lutinTools.file_size(file_dst)
-			debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
-		# write cmd line only after to prevent errors ...
-		lutinMultiprocess.store_command(cmdLine, file_cmd)
-		#debug.print_element("SharedLib", self.name, "==>", tmpList[1])
-	
-	
-	##
-	## @brief Commands for running gcc to link an executable.
-	##
-	def link_to_bin(self, file, binary, target, depancy):
-		file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, self.name,self.originFolder,file,"bin")
-		#create comdLine : 
-		cmdLine=lutinTools.list_to_str([
-			target.xx,
-			target.arch,
-			target.sysroot,
-			target.global_sysroot,
-			"-o", file_dst,
-			file_src,
-			depancy.src,
-			self.flags_ld,
-			depancy.flags_ld,
-			target.global_flags_ld])
-		# check the dependency for this file :
-		if False==dependency.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) \
-				and False==dependency.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine):
-			return file_dst
-		lutinTools.create_directory_of_file(file_dst)
-		debug.print_element("Executable", self.name, "==>", file_dst)
-		
-		lutinMultiprocess.run_command(cmdLine)
-		if    "release"==target.config["mode"] \
-		   or lutinEnv.get_force_strip_mode()==True:
-			# get the file size of the non strip file
-			originSize = lutinTools.file_size(file_dst);
-			debug.print_element("Executable(strip)", self.name, "", "")
-			cmdLineStrip=lutinTools.list_to_str([
-				target.strip,
-				file_dst])
-			lutinMultiprocess.run_command(cmdLineStrip)
-			# get the stip size of the binary
-			stripSize = lutinTools.file_size(file_dst)
-			debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
-		# write cmd line only after to prevent errors ...
-		lutinMultiprocess.store_command(cmdLine, file_cmd)
-		
 	
 	##
 	## @brief Commands for copying files
@@ -860,17 +604,17 @@ __startModuleName="lutin_"
 def import_path(path):
 	global moduleList
 	matches = []
-	debug.debug('Start find sub File : "%s"' %path)
+	debug.debug('MODULE: Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
 		tmpList = fnmatch.filter(filenames, __startModuleName + "*.py")
 		# Import the module :
 		for filename in tmpList:
-			debug.debug('    Find a file : "%s"' %os.path.join(root, filename))
+			debug.debug('Module:     Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			moduleName = filename.replace('.py', '')
 			moduleName = moduleName.replace(__startModuleName, '')
-			debug.debug("integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
+			debug.debug("MODULE:     Integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
 			moduleList.append([moduleName,os.path.join(root, filename)])
 
 def exist(target, name):

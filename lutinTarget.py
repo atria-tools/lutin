@@ -407,17 +407,17 @@ __startTargetName="lutinTarget_"
 def import_path(path):
 	global targetList
 	matches = []
-	debug.debug('Start find sub File : "%s"' %path)
+	debug.debug('TARGET: Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
 		tmpList = fnmatch.filter(filenames, __startTargetName + "*.py")
 		# Import the module :
 		for filename in tmpList:
-			debug.debug('    Find a file : "%s"' %os.path.join(root, filename))
+			debug.debug('TARGET:     Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			targetName = filename.replace('.py', '')
 			targetName = targetName.replace(__startTargetName, '')
-			debug.debug("integrate module: '" + targetName + "' from '" + os.path.join(root, filename) + "'")
+			debug.debug("TARGET:     integrate module: '" + targetName + "' from '" + os.path.join(root, filename) + "'")
 			targetList.append([targetName,os.path.join(root, filename)])
 
 
