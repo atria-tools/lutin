@@ -15,27 +15,27 @@ local_ref_on_builder_cpp = None
 def init():
 	global local_ref_on_builder_cpp
 	debug.debug("mm builder get dependency on the CPP builder")
-	local_ref_on_builder_cpp = lutinBuilder.getBuilder("cpp")
+	local_ref_on_builder_cpp = lutinBuilder.get_builder("cpp")
 
 ##
 ## Get the current builder type.
 ## Return the type of builder
 ##
-def getType():
+def get_type():
 	return "compiler"
 
 ##
 ## @brief Get builder input file type
 ## @return List of extention supported
 ##
-def getInputType():
+def get_input_type():
 	return ["mm", "MM"]
 
 ##
 ## @brief Get builder output file type
 ## @return List of extention supported
 ##
-def getOutputType():
+def get_output_type():
 	return ["o"]
 
 ##

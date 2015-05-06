@@ -43,7 +43,7 @@ class HeritageList:
 			if element.name == heritage.name:
 				return
 		self.listHeritage.append(heritage)
-		self.regenerateTree()
+		self.regenerate_tree()
 		
 	def add_heritage_list(self, heritage_list):
 		if type(heritage_list) == type(None):
@@ -55,9 +55,9 @@ class HeritageList:
 					find = True
 			if find == False:
 				self.listHeritage.append(herit)
-		self.regenerateTree()
+		self.regenerate_tree()
 	
-	def regenerateTree(self):
+	def regenerate_tree(self):
 		self.flags={}
 		# sources list:
 		self.src=[]
@@ -91,22 +91,28 @@ class HeritageList:
 		for element in self.listHeritage:
 			debug.verbose("	" + element.name + " " + str(element.depends))
 		for element in reversed(self.listHeritage):
-			debug.debug("elem : " + str(element.flags))
 			for flags in element.flags:
+				if flags in ["c-version", "c++-version"]:
+					continue
 				value = element.flags[flags]
-				debug.debug("    elem : " + str(flags))
 				if flags not in self.flags:
 					self.flags[flags] = value
 				else:
 					append_to_list(self.flags[flags], value)
 			append_to_list(self.path, element.path)
 			append_to_list(self.src, element.src)
-			"""
-			if self.flags_xx_version < element.flags_xx_version:
-				self.flags_xx_version = element.flags_xx_version
-			if self.flags_cc_version < element.flags_cc_version:
-				self.flags_cc_version = element.flags_cc_version
-			"""
+			if "c-version" in element.flags:
+				ver = element.flags["c-version"]
+				if "c-version" in self.flags:
+					if self.flags["c-version"] > ver:
+						ver = self.flags["c-version"]
+				self.flags["c-version"] = ver
+			if "c++-version" in element.flags:
+				ver = element.flags["c++-version"]
+				if "c++-version" in self.flags:
+					if self.flags["c++-version"] > ver:
+						ver = self.flags["c++-version"]
+				self.flags["c++-version"] = ver
 
 
 class heritage:
@@ -126,13 +132,9 @@ class heritage:
 			# all the parameter that the upper classe need when build
 			self.name = module.name
 			self.depends = copy.deepcopy(module.depends)
+			# keep reference because the flags can change in time
 			self.flags = module.flags["export"]
 			self.path = module.path["export"]
-			if "c++-version" in self.flags:
-				self.flags["c++-version"] = self.flags["c++-version"]["api-version"]
-			if "c-version" in self.flags:
-				self.flags["c-version"] = self.flags["c-version"]["api-version"]
-			
 	
 	def add_depends(self, depend):
 		self.depends.append(depend)
@@ -160,11 +162,17 @@ class heritage:
 				append_to_list(self.flags[flags], value)
 		self.add_import_path(other.path)
 		self.add_sources(other.src)
-		"""
-		if self.flags_xx_version < module.xx_version_api:
-			self.flags_xx_version = module.xx_version_api
-		if self.flags_cc_version < module.cc_version_api:
-			self.flags_cc_version = module.cc_version_api
-		"""
+		if "c-version" in module.flags["export"]:
+			ver = module.flags["export"]["c-version"]
+			if "c-version" in self.flags:
+				if self.flags["c-version"] > ver:
+					ver = self.flags["c-version"]
+			self.flags["c-version"] = ver
+		if "c++-version" in module.flags["export"]:
+			ver = module.flags["export"]["c++-version"]
+			if "c++-version" in self.flags:
+				if self.flags["c++-version"] > ver:
+					ver = self.flags["c++-version"]
+			self.flags["c++-version"] = ver
 
 

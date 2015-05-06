@@ -15,19 +15,19 @@ def init():
 ## Get the current builder type.
 ## Return the type of builder
 ##
-def getType():
+def get_type():
 	return "compiler"
 
 ##
 ## @brief Get builder input file type
 ## @return List of extention supported
 ##
-def getInputType():
+def get_input_type():
 	return ["s", "S"]
 
 ##
 ## @brief Get builder output file type
 ## @return List of extention supported
 ##
-def getOutputType():
+def get_output_type():
 	return ["o"]

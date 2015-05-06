@@ -47,7 +47,7 @@ def import_path(path):
 			builder_list.append({"name":builder_name,
 			                     "element":the_builder
 			                    })
-			debug.debug('BUILDER:     type=' + the_builder.getType() + " in=" + str(the_builder.getInputType()) + " out=" + str(the_builder.getOutputType()))
+			debug.debug('BUILDER:     type=' + the_builder.get_type() + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
 
 # we must have call all import before ...
 def init():
@@ -57,13 +57,23 @@ def init():
 		if element["element"] != None:
 			element["element"].init()
 
-def getBuilder(input_type):
+def get_builder(input_type):
 	global builder_list
 	for element in builder_list:
 		if element["element"] != None:
-			if input_type in element["element"].getInputType():
+			if input_type in element["element"].get_input_type():
 				return element["element"]
 	# we can not find the builder ...
 	debug.error("Can not find builder for type : '" + str(input_type) + "'")
-	return None
+	raise ValueError('type error :' + str(input_type))
 
+
+def get_builder_with_output(input_type):
+	global builder_list
+	for element in builder_list:
+		if element["element"] != None:
+			if input_type in element["element"].get_output_type():
+				return element["element"]
+	# we can not find the builder ...
+	debug.error("Can not find builder for type : '" + str(input_type) + "'")
+	raise ValueError('type error :' + str(input_type))

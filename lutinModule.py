@@ -35,8 +35,8 @@ class Module:
 	def __init__(self, file, moduleName, moduleType):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
 		debug.verbose("Create a new module : '" + moduleName + "' TYPE=" + moduleType)
-		self.originFile=''
-		self.originFolder=''
+		self.origin_file=''
+		self.origin_folder=''
 		# type of the module:
 		self.type='LIBRARY'
 		# Name of the module
@@ -88,30 +88,30 @@ class Module:
 			debug.error('for module "%s"' %moduleName)
 			debug.error('    ==> error : "%s" ' %moduleType)
 			raise 'Input value error'
-		self.originFile = file;
-		self.originFolder = lutinTools.get_current_path(self.originFile)
-		self.localHeritage = heritage.heritage(self)
+		self.origin_file = file;
+		self.origin_folder = lutinTools.get_current_path(self.origin_file)
+		self.local_heritage = heritage.heritage(self)
 		
-		self.packageProp = { "COMPAGNY_TYPE" : set(""),
-		                     "COMPAGNY_NAME" : set(""),
-		                     "COMPAGNY_NAME2" : set(""),
-		                     "MAINTAINER" : set([]),
-		                     #"ICON" : set(""),
-		                     "SECTION" : set([]),
-		                     "PRIORITY" : set(""),
-		                     "DESCRIPTION" : set(""),
-		                     "VERSION" : set("0.0.0"),
-		                     "VERSION_CODE" : "",
-		                     "NAME" : set("no-name"), # name of the application
-		                     "ANDROID_MANIFEST" : "", # By default generate the manifest
-		                     "ANDROID_JAVA_FILES" : ["DEFAULT"], # when user want to create his own services and activities
-		                     "ANDROID_RESOURCES" : [],
-		                     "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
-		                     "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
-		                     "RIGHT" : [],
-		                     "ADMOD_POSITION" : "top"
-		                    }
-		self.subHeritageList = None
+		self.package_prop = { "COMPAGNY_TYPE" : set(""),
+		                      "COMPAGNY_NAME" : set(""),
+		                      "COMPAGNY_NAME2" : set(""),
+		                      "MAINTAINER" : set([]),
+		                      #"ICON" : set(""),
+		                      "SECTION" : set([]),
+		                      "PRIORITY" : set(""),
+		                      "DESCRIPTION" : set(""),
+		                      "VERSION" : set("0.0.0"),
+		                      "VERSION_CODE" : "",
+		                      "NAME" : set("no-name"), # name of the application
+		                      "ANDROID_MANIFEST" : "", # By default generate the manifest
+		                      "ANDROID_JAVA_FILES" : ["DEFAULT"], # when user want to create his own services and activities
+		                      "ANDROID_RESOURCES" : [],
+		                      "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
+		                      "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
+		                      "RIGHT" : [],
+		                      "ADMOD_POSITION" : "top"
+		                     }
+		self.sub_heritage_list = None
 	
 	##
 	## @brief add Some copilation flags for this module (and only this one)
@@ -143,7 +143,7 @@ class Module:
 	##
 	## @brief Commands for copying files
 	##
-	def image_to_staging(self, binaryName, target):
+	def image_to_staging(self, binary_name, target):
 		for source, destination, sizeX, sizeY in self.imageToCopy:
 			extension = source[source.rfind('.'):]
 			if     extension != ".png" \
@@ -151,14 +151,14 @@ class Module:
 			   and sizeX > 0:
 				debug.error("Can not manage image other than .png and jpg to resize : " + source);
 			displaySource = source
-			source = self.originFolder + "/" + source
+			source = self.origin_folder + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
-			file_cmd = target.generate_file(binaryName, self.name, self.originFolder, destination, "image")[0]
+			file_cmd = target.generate_file(binary_name, self.name, self.origin_folder, destination, "image")[0]
 			if sizeX > 0:
 				debug.verbose("Image file : " + displaySource + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
-				fileName, fileExtension = os.path.splitext(self.originFolder+"/" + source)
+				fileName, fileExtension = os.path.splitext(self.origin_folder+"/" + source)
 				target.add_image_staging(source, destination, sizeX, sizeY, file_cmd)
 			else:
 				debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
@@ -167,14 +167,14 @@ class Module:
 	##
 	## @brief Commands for copying files
 	##
-	def files_to_staging(self, binaryName, target):
+	def files_to_staging(self, binary_name, target):
 		for source, destination in self.files:
 			displaySource = source
-			source = self.originFolder + "/" + source
+			source = self.origin_folder + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
-			file_cmd = target.generate_file(binaryName, self.name, self.originFolder, destination, "image")[0]
+			file_cmd = target.generate_file(binary_name, self.name, self.origin_folder, destination, "image")[0]
 			# TODO : when destination is missing ...
 			debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
 			target.add_file_staging(source, destination, file_cmd)
@@ -182,38 +182,38 @@ class Module:
 	##
 	## @brief Commands for copying files
 	##
-	def folders_to_staging(self, binaryName, target):
+	def folders_to_staging(self, binary_name, target):
 		for source, destination in self.folders:
 			debug.debug("Might copy folder : " + source + "==>" + destination)
-			lutinTools.copy_anything_target(target, self.originFolder + "/" + source, destination)
+			lutinTools.copy_anything_target(target, self.origin_folder + "/" + source, destination)
 	
 	# call here to build the module
-	def build(self, target, packageName):
+	def build(self, target, package_name):
 		# ckeck if not previously build
 		if target.is_module_build(self.name)==True:
-			if self.subHeritageList == None:
-				self.localHeritage = heritage.heritage(self)
-			return self.subHeritageList
-		# create the packege heritage
-		self.localHeritage = heritage.heritage(self)
+			if self.sub_heritage_list == None:
+				self.local_heritage = heritage.heritage(self)
+			return self.sub_heritage_list
+		# create the package heritage
+		self.local_heritage = heritage.heritage(self)
 		
-		if     packageName==None \
+		if     package_name==None \
 		   and (    self.type=="BINARY" \
 		         or self.type=="PACKAGE" ) :
 			# this is the endpoint binary ...
-			packageName = self.name
+			package_name = self.name
 		else :
 			# TODO : Set it better ...
 			None
 		
 		# build dependency before
-		listSubFileNeededTobuild = []
-		self.subHeritageList = heritage.HeritageList()
+		list_sub_file_needed_to_build = []
+		self.sub_heritage_list = heritage.HeritageList()
 		# optionnal dependency :
 		for dep, option, export in self.depends_optionnal:
-			inheritList, isBuilt = target.build_optionnal(dep, packageName)
+			inherit_list, isBuilt = target.build_optionnal(dep, package_name)
 			if isBuilt == True:
-				self.localHeritage.add_depends(dep);
+				self.local_heritage.add_depends(dep);
 				# TODO : Add optionnal Flags ...
 				#     ==> do it really better ...
 				if export == False:
@@ -221,29 +221,29 @@ class Module:
 				else:
 					self.add_export_flag_CC("-D"+option);
 			# add at the heritage list :
-			self.subHeritageList.add_heritage_list(inheritList)
+			self.sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self.depends:
-			inheritList = target.build(dep, packageName)
+			inherit_list = target.build(dep, package_name)
 			# add at the heritage list :
-			self.subHeritageList.add_heritage_list(inheritList)
+			self.sub_heritage_list.add_heritage_list(inherit_list)
 		
 		# build local sources
 		for file in self.src:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
-			tmpBuilder = builder.getBuilder(fileExt);
-			if tmpBuilder != None:
-				resFile = tmpBuilder.compile(file,
-				                             packageName,
+			try:
+				tmp_builder = builder.get_builder(fileExt);
+				resFile = tmp_builder.compile(file,
+				                             package_name,
 				                             target,
-				                             self.subHeritageList,
+				                             self.sub_heritage_list,
 				                             flags = self.flags,
 				                             path = self.path,
 				                             name = self.name,
-				                             basic_folder = self.originFolder)
-				listSubFileNeededTobuild.append(resFile)
-			else:
-				debug.warning(" UN-SUPPORTED file format:  '" + self.originFolder + "/" + file + "'")
+				                             basic_folder = self.origin_folder)
+				list_sub_file_needed_to_build.append(resFile)
+			except ValueError:
+				debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
 		
 		# when multiprocess availlable, we need to synchronize here ...
 		lutinMultiprocess.pool_synchrosize()
@@ -252,10 +252,28 @@ class Module:
 		if self.type=='PREBUILD':
 			debug.print_element("Prebuild", self.name, "==>", "find")
 		elif self.type=='LIBRARY':
-			resFile = self.link_to_a(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
-			self.localHeritage.add_sources(resFile)
+			try:
+				tmp_builder = builder.get_builder_with_output("a");
+				resFile = tmp_builder.link(list_sub_file_needed_to_build,
+				                           package_name,
+				                           target,
+				                           self.sub_heritage_list,
+				                           name = self.name,
+				                           basic_folder = self.origin_folder)
+				self.local_heritage.add_sources(resFile)
+			except ValueError:
+				debug.error(" UN-SUPPORTED link format:  '.a'")
 		elif self.type=='BINARY':
-			resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
+			try:
+				tmp_builder = builder.get_builder_with_output("bin");
+				resFile = tmp_builder.link(list_sub_file_needed_to_build,
+				                           package_name,
+				                           target,
+				                           self.sub_heritage_list,
+				                           name = self.name,
+				                           basic_folder = self.origin_folder)
+			except ValueError:
+				debug.error(" UN-SUPPORTED link format:  '.bin'")
 			# generate tree for this special binary
 			target.clean_module_tree()
 			self.build_tree(target, self.name)
@@ -263,36 +281,54 @@ class Module:
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
 				# special case for android wrapper :
-				resFile = self.link_to_so(listSubFileNeededTobuild, packageName, target, self.subHeritageList, "libewol")
+				try:
+					tmp_builder = builder.get_builder_with_output("so");
+					resFile = tmp_builder.link(list_sub_file_needed_to_build,
+					                           package_name,
+					                           target,
+					                           self.sub_heritage_list,
+					                           name = "libewol",
+					                           basic_folder = self.origin_folder)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.so'")
 			else:
-				resFile = self.link_to_bin(listSubFileNeededTobuild, packageName, target, self.subHeritageList)
+				try:
+					tmp_builder = builder.get_builder_with_output("bin");
+					resFile = tmp_builder.link(list_sub_file_needed_to_build,
+					                           package_name,
+					                           target,
+					                           self.sub_heritage_list,
+					                           name = self.name,
+					                           basic_folder = self.origin_folder)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  'binary'")
 			target.clean_module_tree()
 			# generate tree for this special binary
 			self.build_tree(target, self.name)
 			target.copy_to_staging(self.name)
 			if target.endGeneratePackage==True:
 				# generate the package with his properties ...
-				target.make_package(self.name, self.packageProp, self.originFolder + "/..")
+				target.make_package(self.name, self.package_prop, self.origin_folder + "/..")
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			
-		self.subHeritageList.add_heritage(self.localHeritage)
+		self.sub_heritage_list.add_heritage(self.local_heritage)
 		# return local dependency ...
-		return self.subHeritageList
+		return self.sub_heritage_list
 	
 	# call here to build the module
-	def build_tree(self, target, packageName):
+	def build_tree(self, target, package_name):
 		# ckeck if not previously build
 		if target.is_module_buildTree(self.name)==True:
 			return
 		debug.verbose("build tree of " + self.name)
 		# add all the elements (first added only one keep ==> permit to everload sublib element)
-		self.image_to_staging(packageName, target)
-		self.files_to_staging(packageName, target)
-		self.folders_to_staging(packageName, target)
+		self.image_to_staging(package_name, target)
+		self.files_to_staging(package_name, target)
+		self.folders_to_staging(package_name, target)
 		#build tree of all submodules
 		for dep in self.depends:
-			inherit = target.build_tree(dep, packageName)
+			inherit = target.build_tree(dep, package_name)
 	
 	
 	# call here to clean the module
@@ -395,9 +431,9 @@ class Module:
 		if same_as_api == True:
 			api_version = version
 		self.flags["local"]["c++-version"] = { "version":version,
-		                                       "api-version":api_version,
 		                                       "gnu":gnu
 		                                     }
+		self.flags["export"]["c++-version"] = api_version
 		if gnu == True and same_as_api == True:
 			debug.warning("Can not propagate the gnu extention of the CPP vesion for API");
 	
@@ -410,9 +446,9 @@ class Module:
 		if same_as_api == True:
 			api_version = version
 		self.flags["local"]["c-version"] = { "version":version,
-		                                     "api-version":api_version,
 		                                     "gnu":gnu
 		                                   }
+		self.flags["export"]["c-version"] = api_version
 		if gnu == True and same_as_api == True:
 			debug.warning("Can not propagate the gnu extention of the C vesion for API");
 	
@@ -439,8 +475,8 @@ class Module:
 		print(' package : "' + self.name + "'")
 		print('-----------------------------------------------')
 		print('    type:"' + str(self.type) + "'")
-		print('    file:"' + str(self.originFile) + "'")
-		print('    folder:"' + str(self.originFolder) + "'")
+		print('    file:"' + str(self.origin_file) + "'")
+		print('    folder:"' + str(self.origin_folder) + "'")
 		
 		self.print_list('depends',self.depends)
 		self.print_list('depends_optionnal', self.depends_optionnal)
@@ -470,18 +506,18 @@ class Module:
 			if value not in ["com", "net", "org", "gov", "mil", "edu", "pri", "museum"]:
 				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
 			else:
-				self.packageProp[variable] = value
+				self.package_prop[variable] = value
 		elif "COMPAGNY_NAME" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 			val2 = value.lower()
 			val2 = val2.replace(' ', '')
 			val2 = val2.replace('-', '')
 			val2 = val2.replace('_', '')
-			self.packageProp["COMPAGNY_NAME2"] = val2
+			self.package_prop["COMPAGNY_NAME2"] = val2
 		elif "ICON" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "MAINTAINER" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "SECTION" == variable:
 			# project section : (must be separate by coma
 			#    refer to : http://packages.debian.org/sid/
@@ -493,39 +529,39 @@ class Module:
 			#        mail math misc net news ocaml oldlibs otherosfs
 			#        perl php python ruby science shells sound tex
 			#        text utils vcs video virtual web x11 xfce zope ...
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "PRIORITY" == variable:
 			#list = ["required","important","standard","optional","extra"]
 			#if isinstance(value, list):
 			if value not in ["required", "important", "standard", "optional", "extra"]:
 				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
 			else:
-				self.packageProp[variable] = value
+				self.package_prop[variable] = value
 		elif "DESCRIPTION" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "VERSION" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "VERSION_CODE" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "NAME" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "ANDROID_MANIFEST" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "ANDROID_JAVA_FILES" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "RIGHT" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "ANDROID_RESOURCES" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "ANDROID_APPL_TYPE" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "ADMOD_ID" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "APPLE_APPLICATION_IOS_ID" == variable:
-			self.packageProp[variable] = value
+			self.package_prop[variable] = value
 		elif "ADMOD_POSITION" == variable:
 			if value in ["top", "bottom"]:
-				self.packageProp[variable] = value
+				self.package_prop[variable] = value
 			else:
 				debug.error("not know pkg element : '" + variable + "' with value : '" + value + "' must be [top|bottom]")
 		else:
@@ -533,20 +569,20 @@ class Module:
 	
 	def pkg_add(self, variable, value):
 		# TODO : Check values...
-		self.packageProp[variable].append(value)
+		self.package_prop[variable].append(value)
 	
-	def ext_project_add_module(self, target, projectMng, addedModule = []):
-		if self.name in addedModule:
+	def ext_project_add_module(self, target, projectMng, added_module = []):
+		if self.name in added_module:
 			return
-		addedModule.append(self.name)
+		added_module.append(self.name)
 		debug.verbose("add a module to the project generator :" + self.name)
-		debug.verbose("local path :" + self.originFolder)
-		projectMng.add_files(self.name, self.originFolder, self.src)
-		#projectMng.add_data_file(self.originFolder, self.files)
-		#projectMng.add_data_folder(self.originFolder, self.folders)
+		debug.verbose("local path :" + self.origin_folder)
+		projectMng.add_files(self.name, self.origin_folder, self.src)
+		#projectMng.add_data_file(self.origin_folder, self.files)
+		#projectMng.add_data_folder(self.origin_folder, self.folders)
 		"""
 		for depend in self.depends:
-			target.project_add_module(depend, projectMng, addedModule)
+			target.project_add_module(depend, projectMng, added_module)
 		"""
 	
 	def create_project(self, target, projectMng):

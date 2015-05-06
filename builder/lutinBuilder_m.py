@@ -15,27 +15,27 @@ local_ref_on_builder_c = None
 def init():
 	global local_ref_on_builder_c
 	debug.debug("m builder get dependency on the C builder")
-	local_ref_on_builder_c = lutinBuilder.getBuilder("c")
+	local_ref_on_builder_c = lutinBuilder.get_builder("c")
 
 ##
 ## Get the current builder type.
 ## Return the type of builder
 ##
-def getType():
+def get_type():
 	return "compiler"
 
 ##
 ## @brief Get builder input file type
 ## @return List of extention supported
 ##
-def getInputType():
+def get_input_type():
 	return ["m", "M"]
 
 ##
 ## @brief Get builder output file type
 ## @return List of extention supported
 ##
-def getOutputType():
+def get_output_type():
 	return ["o"]
 
 ##
