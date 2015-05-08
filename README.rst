@@ -1,29 +1,43 @@
-build
+Lutin
 =====
 
-`lutin` is a generic package maker is a FREE software tool.
+`lutin` is a generic builder and package maker is a FREE software tool.
 
 Instructions
-============
+------------
 
 This is a tool to generate the binary, shared library, static library and package independently of the OS
+
+This software builds C, C++, m, m++, to object file and generate associated libraries (.so & .a) end create final Executable file
+
 This tool can generate package for Linux, MacOs, Android
 
 
-Create a lutin module
-=====================
+Lutin is under a FREE license that can be found in the COPYING file.
+Any contribution is more than welcome ;)
 
-Set the lutin module maker with the name :
-	lutin_xxxxx.py
-	xxx : represent the name of the module/binary/package and must be lower case and no special characters
+git repository
+--------------
 
-you can see exemple for some type in :
-	ewol : library
-	edn : package
-	glew : prebuild
+http://github.com/HeeroYui/lutin/
+
+Documentation
+-------------
+
+http://github.io/HeeroYui/lutin/
+
+Installation
+------------
+
+Requirements: ``Python >= 2.7`` and ``pip``
+
+Just run::
+
+  pip install lutin
+
 
 License (APACHE v2.0)
-=====================
+---------------------
 
 Copyright lutin Edouard DUPIN
 

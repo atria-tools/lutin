@@ -18,9 +18,10 @@ else:
 import os
 import subprocess
 import shlex
+# Local import
 from . import debug
-from . import tools as lutinTools
-from . import env as lutinEnv
+import tools
+from . import env
 
 queueLock = threading.Lock()
 workQueue = queue.Queue()
@@ -46,7 +47,7 @@ def store_command(cmdLine, file):
 	if     file != "" \
 	   and file != None:
 		# Create directory:
-		lutinTools.create_directory_of_file(file)
+		tools.create_directory_of_file(file)
 		# Store the command Line:
 		file2 = open(file, "w")
 		file2.write(cmdLine)
@@ -98,7 +99,7 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		err = err.decode("utf-8")
 	# Check error :
 	if p.returncode == 0:
-		debug.debug(lutinEnv.print_pretty(cmdLine))
+		debug.debug(env.print_pretty(cmdLine))
 		queueLock.acquire()
 		# TODO : Print the output all the time .... ==> to show warnings ...
 		if buildId >= 0 and (output != "" or err != ""):
@@ -113,7 +114,7 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		exitFlag = True
 		# if No ID : Not in a multiprocess mode ==> just stop here
 		if buildId < 0:
-			debug.debug(lutinEnv.print_pretty(cmdLine), force=True)
+			debug.debug(env.print_pretty(cmdLine), force=True)
 			debug.print_compilator(output)
 			debug.print_compilator(err)
 			if p.returncode == 2:
@@ -266,7 +267,7 @@ def pool_synchrosize():
 			debug.error("Pool error occured ... (No return information on Pool)")
 			return
 		debug.error("Error in an pool element : [" + str(errorExecution["id"]) + "]", crash=False)
-		debug.debug(lutinEnv.print_pretty(errorExecution["cmd"]), force=True)
+		debug.debug(env.print_pretty(errorExecution["cmd"]), force=True)
 		debug.print_compilator(str(errorExecution["out"][0]))
 		debug.print_compilator(str(errorExecution["err"][0]))
 		if errorExecution["return"] == 2:

@@ -1,9 +1,14 @@
 #!/usr/bin/python
-
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
 import os
 import sys
-
-# now import other standard module (must be done here and not before ...
+# Local import
 from . import target
 from . import builder
 from . import system
@@ -15,11 +20,12 @@ from . import module
 is_init = False
 
 if is_init == False:
-	"""
-		When the user use with make.py we initialise ourself
-	"""
 	debug.verbose("Use Make as a make stadard")
 	sys.path.append(tools.get_run_folder())
+	builder.import_path(tools.get_current_path(__file__))
+	module.import_path(tools.get_current_path(__file__))
+	system.import_path(tools.get_current_path(__file__))
+	target.import_path(tools.get_current_path(__file__))
 	
 	debug.debug("missing file lutinBase.py ==> loading subPath...");
 	# Import all sub path without out and archive

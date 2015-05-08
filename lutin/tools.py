@@ -10,11 +10,11 @@
 import os
 import shutil
 import errno
-from . import debug
 import fnmatch
-from . import multiprocess as lutinMultiprocess
-from . import depend as dependency
-
+# Local import
+from . import debug
+from . import depend
+import multiprocess
 
 """
 	
@@ -101,12 +101,12 @@ def copy_file(src, dst, cmd_file=None, force=False):
 		debug.error("Request a copy a file that does not existed : '" + src + "'")
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
 	if     force == False \
-	   and dependency.need_re_build(dst, src, file_cmd=cmd_file , cmdLine=cmd_line) == False:
+	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmdLine=cmd_line) == False:
 		return
 	debug.print_element("copy file", src, "==>", dst)
 	create_directory_of_file(dst)
 	shutil.copyfile(src, dst)
-	lutinMultiprocess.store_command(cmd_line, cmd_file)
+	multiprocess.store_command(cmd_line, cmd_file)
 
 
 def copy_anything(src, dst):

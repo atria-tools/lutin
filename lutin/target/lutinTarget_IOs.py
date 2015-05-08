@@ -7,18 +7,18 @@
 ## @license APACHE v2.0 (see license file)
 ##
 
-import lutinDebug as debug
-import lutinTarget
-import lutinTools
-import lutinImage
+from lutin import debug
+from lutin import target
+from lutin import tools
+from lutin import image
 import os
 import stat
-import lutinMultiprocess
-import lutinHost
+from lutin import multiprocess
+from lutin import host
 import random
 import re
 
-class Target(lutinTarget.Target):
+class Target(target.Target):
 	def __init__(self, config):
 		if config["compilator"] == "gcc":
 			debug.info("compile only with clang for IOs");
@@ -37,7 +37,7 @@ class Target(lutinTarget.Target):
 		else:
 			arch="arm64" # for ipad air
 			#arch="armv7" # for Iphone 4
-		lutinTarget.Target.__init__(self, "IOs", config, arch)
+		target.Target.__init__(self, "IOs", config, arch)
 		if self.config["simulation"] == True:
 			self.set_cross_base("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/")
 		else:
@@ -76,7 +76,7 @@ class Target(lutinTarget.Target):
 		#self.global_flags_m.append("-fmodules")
 
 	def get_staging_folder(self, binaryName):
-		return lutinTools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/"
+		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/"
 	
 	def get_staging_folder_data(self, binaryName):
 		return self.get_staging_folder(binaryName) + self.folder_data + "/"
@@ -92,23 +92,23 @@ class Target(lutinTarget.Target):
 			# TODO : Do not regenerate if source resource is not availlable
 			# TODO : Add a colored background ...
 			debug.print_element("pkg", "iTunesArtwork.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork.png", 512, 512)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork.png", 512, 512)
 			debug.print_element("pkg", "iTunesArtwork@2x.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork@2x.png", 1024, 1024)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork@2x.png", 1024, 1024)
 			debug.print_element("pkg", "Icon-60@2x.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-60@2x.png", 120, 120)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-60@2x.png", 120, 120)
 			debug.print_element("pkg", "Icon-76.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76.png", 76, 76)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76.png", 76, 76)
 			debug.print_element("pkg", "Icon-76@2x.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76@2x.png", 152, 152)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76@2x.png", 152, 152)
 			debug.print_element("pkg", "Icon-Small-40.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40.png", 40, 40)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40.png", 40, 40)
 			debug.print_element("pkg", "Icon-Small-40@2x.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40@2x.png", 80, 80)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40@2x.png", 80, 80)
 			debug.print_element("pkg", "Icon-Small.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small.png", 29, 29)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small.png", 29, 29)
 			debug.print_element("pkg", "Icon-Small@2x.png", "<==", pkgProperties["ICON"])
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small@2x.png", 58, 58)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small@2x.png", 58, 58)
 		
 		debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
 		infoFile = self.get_staging_folder(pkgName) + "/PkgInfo"
@@ -227,7 +227,7 @@ class Target(lutinTarget.Target):
 		else:
 			cmdLine += " -platform iphoneos "
 		cmdLine += " -o " + self.get_staging_folder(pkgName) + "/" + "Info.plist"
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 		"""
 		"""
 		
@@ -329,16 +329,16 @@ class Target(lutinTarget.Target):
 			# application signing :
 			debug.print_element("pkg(signed)", "pkg", "<==", "Signing application")
 			iosDevelopperKeyFile = ".iosKey.txt"
-			if lutinTools.file_size(iosDevelopperKeyFile) < 10:
+			if tools.file_size(iosDevelopperKeyFile) < 10:
 				debug.error("To sign an application we need to have a signing key in the file '" + iosDevelopperKeyFile + "' \n it is represented like: 'iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)'\n you can obtain it with : 'certtool y | grep \"Developer\"'")
-			signatureKey = lutinTools.file_read_data(iosDevelopperKeyFile)
+			signatureKey = tools.file_read_data(iosDevelopperKeyFile)
 			signatureKey = re.sub('\n', '', signatureKey)
 			cmdLine  = 'codesign  --force --sign '
 			# to get this key ;    certtool y | grep "Developer"
 			cmdLine += ' "' + signatureKey + '" '
 			cmdLine += ' --entitlements ' + self.get_build_folder(pkgName) + '/worddown.xcent'
 			cmdLine += ' ' + self.get_staging_folder(pkgName)
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 			
 			# --force --sign "iPhone Developer: Edouard DUPIN (SDFGSDFGSDFG)"
 			#		  --resource-rules=/Users/edouarddupin/Library/Developer/Xcode/DerivedData/worddown-cmuvjchgtiteexdiacyqoexsyadg/Build/Products/Debug-iphoneos/worddown.app/ResourceRules.plist
@@ -357,18 +357,18 @@ class Target(lutinTarget.Target):
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		if self.sumulator == False:
-			if lutinTools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
 				cmdLine = 'cd ewol/ios-deploy ; make ; cd ../.. '
-				lutinMultiprocess.run_command(cmdLine)
-			if lutinTools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+				multiprocess.run_command(cmdLine)
+			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
 			cmdLine = './ewol/ios-deploy/ios-deploy --bundle ' + self.get_staging_folder(pkgName)
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 		else:
 			simulatorIdFile = ".iosSimutatorId_" + pkgName + ".txt"
-			if lutinTools.file_size(simulatorIdFile) < 10:
+			if tools.file_size(simulatorIdFile) < 10:
 				#create the file:
 				tmpFile = open(simulatorIdFile, 'w')
 				tmpFile.write(self.createRandomNumber(8))
@@ -382,17 +382,17 @@ class Target(lutinTarget.Target):
 				tmpFile.write(self.createRandomNumber(12))
 				tmpFile.flush()
 				tmpFile.close()
-			simulatorId = lutinTools.file_read_data(simulatorIdFile)
+			simulatorId = tools.file_read_data(simulatorIdFile)
 			home = os.path.expanduser("~")
 			destinationFolderBase = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.1/Applications/" + simulatorId
 			destinationFolder = home + "/Library/Application Support/iPhone Simulator/7.1/Applications/" + simulatorId + "/" + pkgName + ".app"
 			destinationFolder2 = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.1/Applications/" + simulatorId + "/" + pkgName + ".app"
 			debug.info("install in simulator : " + destinationFolder)
-			lutinTools.create_directory_of_file(destinationFolder + "/plop.txt")
+			tools.create_directory_of_file(destinationFolder + "/plop.txt")
 			cmdLine = "cp -rf " + self.get_staging_folder(pkgName) + " " + destinationFolder2
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 			cmdLine = "touch " + destinationFolderBase
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 			
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
@@ -404,7 +404,7 @@ class Target(lutinTarget.Target):
 			debug.warning("not implemented")
 		else:
 			simulatorIdFile = ".iosSimutatorId_" + pkgName + ".txt"
-			if lutinTools.file_size(simulatorIdFile) < 10:
+			if tools.file_size(simulatorIdFile) < 10:
 				debug.warning("Can not get simulation O_ID : " + simulatorIdFile)
 		
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
@@ -414,18 +414,18 @@ class Target(lutinTarget.Target):
 		debug.info("log of iOs board")
 		debug.debug("------------------------------------------------------------------------")
 		if self.sumulator == False:
-			if lutinTools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
 				cmdLine = 'cd ewol/ios-deploy ; make ; cd ../.. '
-				lutinMultiprocess.run_command(cmdLine)
-			if lutinTools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+				multiprocess.run_command(cmdLine)
+			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
 			cmdLine = './ewol/ios-deploy/ios-deploy --debug --bundle ' + self.get_staging_folder(pkgName)
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 		else:
 			cmdLine = "tail -f ~/Library/Logs/iOS\ Simulator/7.1/system.log"
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 
 
 

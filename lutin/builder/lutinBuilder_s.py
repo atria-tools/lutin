@@ -1,9 +1,9 @@
 ##
 ## ASM builder
 ##
-import lutinMultiprocess
-import lutinTools
-import lutinDepend as dependency
+from lutin import multiprocess
+from lutin import tools
+from lutin import depend
 
 ##
 ## Initialize the builder, if needed ... to get dependency between builder (for example)

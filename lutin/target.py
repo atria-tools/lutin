@@ -11,14 +11,14 @@ import sys
 import os
 import inspect
 import fnmatch
+import datetime
+# Local import
 from . import debug
 from . import heritage
-import datetime
-from . import tools as lutinTools
-from . import module as lutinModule
-from . import system as lutinSystem
-from . import image as lutinImage
-from . import host as lutinHost
+from . import tools
+from . import module
+from . import system
+from . import image
 from . import multiprocess
 
 class Target:
@@ -190,10 +190,10 @@ class Target:
 				debug.verbose("cmd file " + cmdFile)
 			if x == -1:
 				debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
-				lutinTools.copy_file(source, baseFolder+"/"+dst, cmdFile)
+				tools.copy_file(source, baseFolder+"/"+dst, cmdFile)
 			else:
 				debug.verbose("resize image : '" + source + "' ==> '" + dst + "' size=(" + str(x) + "," + str(y) + ")");
-				lutinImage.resize(source, baseFolder+"/"+dst, x, y, cmdFile)
+				image.resize(source, baseFolder+"/"+dst, x, y, cmdFile)
 	
 	
 	def clean_module_tree(self):
@@ -243,32 +243,32 @@ class Target:
 		return list
 	
 	def get_final_folder(self):
-		return lutinTools.get_run_folder() + self.folder_out + self.folder_final
+		return tools.get_run_folder() + self.folder_out + self.folder_final
 	
 	def get_staging_folder(self, binaryName):
-		return lutinTools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName
+		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName
 	
 	def get_staging_folder_data(self, binaryName):
 		return self.get_staging_folder(binaryName) + self.folder_data + "/" + binaryName
 	
 	def get_build_folder(self, moduleName):
-		return lutinTools.get_run_folder() + self.folder_out + self.folder_build + "/" + moduleName
+		return tools.get_run_folder() + self.folder_out + self.folder_build + "/" + moduleName
 	
 	def get_doc_folder(self, moduleName):
-		return lutinTools.get_run_folder() + self.folder_out + self.folder_doc + "/" + moduleName
+		return tools.get_run_folder() + self.folder_out + self.folder_doc + "/" + moduleName
 	
-	def is_module_build(self, module):
+	def is_module_build(self, my_module):
 		for mod in self.buildDone:
-			if mod == module:
+			if mod == my_module:
 				return True
-		self.buildDone.append(module)
+		self.buildDone.append(my_module)
 		return False
 	
-	def is_module_buildTree(self, module):
+	def is_module_buildTree(self, my_module):
 		for mod in self.buildTreeDone:
-			if mod == module:
+			if mod == my_module:
 				return True
-		self.buildTreeDone.append(module)
+		self.buildTreeDone.append(my_module)
 		return False
 	
 	def add_module(self, newModule):
@@ -286,16 +286,16 @@ class Target:
 	"""
 	
 	def build_tree(self, name, packagesName):
-		for module in self.moduleList:
-			if module.name == name:
-				module.build_tree(self, packagesName)
+		for mod in self.moduleList:
+			if mod.name == name:
+				mod.build_tree(self, packagesName)
 				return
 		debug.error("request to build tree on un-existant module name : '" + name + "'")
 	
 	def clean(self, name):
-		for module in self.moduleList:
-			if module.name == name:
-				module.clean(self)
+		for mod in self.moduleList:
+			if mod.name == name:
+				mod.clean(self)
 				return
 		debug.error("request to clean an un-existant module name : '" + name + "'")
 	
@@ -304,32 +304,32 @@ class Target:
 			if elem.name == name:
 				return True
 		if optionnal == False:
-			lutinModule.load_module(self, name)
+			module.load_module(self, name)
 			return True
 		else:
 			# TODO : Check internal module and system module ...
 			# need to import the module (or the system module ...)
-			exist = lutinSystem.exist(name, self.name)
+			exist = system.exist(name, self.name)
 			if exist == True:
-				lutinSystem.load(self, name, self.name)
+				system.load(self, name, self.name)
 				return True;
 			# try to find in the local Modules:
-			exist = lutinModule.exist(self, name)
+			exist = module.exist(self, name)
 			if exist == True:
-				lutinModule.load_module(self, name)
+				module.load_module(self, name)
 				return True;
 			else:
 				return False;
 	
 	def load_all(self):
-		listOfAllTheModule = lutinModule.list_all_module()
+		listOfAllTheModule = module.list_all_module()
 		for modName in listOfAllTheModule:
 			self.load_if_needed(modName)
 	
 	def project_add_module(self, name, projectMng, addedModule):
-		for module in self.moduleList:
-			if module.name == name:
-				module.ext_project_add_module(self, projectMng, addedModule)
+		for mod in self.moduleList:
+			if mod.name == name:
+				mod.ext_project_add_module(self, projectMng, addedModule)
 				return
 	
 	def build_optionnal(self, moduleName, packagesName=None):

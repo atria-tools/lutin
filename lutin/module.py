@@ -11,15 +11,13 @@ import sys
 import os
 import inspect
 import fnmatch
-from . import module
+# Local import
 from . import host
-from . import tools as lutinTools
+from . import tools
 from . import debug
 from . import heritage
-from . import depend as dependency
 from . import builder
-from . import multiprocess as lutinMultiprocess
-from . import env as lutinEnv
+from . import multiprocess
 
 class Module:
 	
@@ -89,7 +87,7 @@ class Module:
 			debug.error('    ==> error : "%s" ' %moduleType)
 			raise 'Input value error'
 		self.origin_file = file;
-		self.origin_folder = lutinTools.get_current_path(self.origin_file)
+		self.origin_folder = tools.get_current_path(self.origin_file)
 		self.local_heritage = heritage.heritage(self)
 		
 		self.package_prop = { "COMPAGNY_TYPE" : set(""),
@@ -185,7 +183,7 @@ class Module:
 	def folders_to_staging(self, binary_name, target):
 		for source, destination in self.folders:
 			debug.debug("Might copy folder : " + source + "==>" + destination)
-			lutinTools.copy_anything_target(target, self.origin_folder + "/" + source, destination)
+			tools.copy_anything_target(target, self.origin_folder + "/" + source, destination)
 	
 	# call here to build the module
 	def build(self, target, package_name):
@@ -246,7 +244,7 @@ class Module:
 				debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
 		
 		# when multiprocess availlable, we need to synchronize here ...
-		lutinMultiprocess.pool_synchrosize()
+		multiprocess.pool_synchrosize()
 		
 		# generate end point:
 		if self.type=='PREBUILD':
@@ -340,16 +338,16 @@ class Module:
 			# remove folder of the lib ... for this targer
 			folderbuild = target.get_build_folder(self.name)
 			debug.info("remove folder : '" + folderbuild + "'")
-			lutinTools.remove_folder_and_sub_folder(folderbuild)
+			tools.remove_folder_and_sub_folder(folderbuild)
 		elif    self.type=='BINARY' \
 		     or self.type=='PACKAGE':
 			# remove folder of the lib ... for this targer
 			folderbuild = target.get_build_folder(self.name)
 			debug.info("remove folder : '" + folderbuild + "'")
-			lutinTools.remove_folder_and_sub_folder(folderbuild)
+			tools.remove_folder_and_sub_folder(folderbuild)
 			folderStaging = target.get_staging_folder(self.name)
 			debug.info("remove folder : '" + folderStaging + "'")
-			lutinTools.remove_folder_and_sub_folder(folderStaging)
+			tools.remove_folder_and_sub_folder(folderStaging)
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	

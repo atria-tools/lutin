@@ -8,17 +8,16 @@
 ##
 
 
-import lutinDebug as debug
-import lutinTarget
-import lutinTools as tools
-import lutinHost
-import lutinImage
-import lutinMultiprocess
-import lutinHost
+from lutin import debug
+from lutin import target
+from lutin import tools
+from lutin import image
+from lutin import multiprocess
+from lutin import host
 import os
 import sys
 
-class Target(lutinTarget.Target):
+class Target(target.Target):
 	def __init__(self, config):
 		#processor type selection (auto/arm/ppc/x86)
 		if config["arch"] == "auto":
@@ -28,7 +27,7 @@ class Target(lutinTarget.Target):
 			config["bus-size"] = "32"
 		
 		arch = ""#"ARMv7"
-		lutinTarget.Target.__init__(self, "Android", config, arch)
+		target.Target.__init__(self, "Android", config, arch)
 		
 		self.folder_ndk = os.getenv('PROJECT_NDK', "AUTO")
 		self.folder_sdk = os.getenv('PROJECT_SDK', "AUTO")
@@ -57,7 +56,7 @@ class Target(lutinTarget.Target):
 		
 		tmpOsVal = "64"
 		gccVersion = "4.9"
-		if lutinHost.BUS_SIZE==64:
+		if host.BUS_SIZE==64:
 			tmpOsVal = "_64"
 		if self.config["compilator"] == "clang":
 			self.set_cross_base(self.folder_ndk + "/toolchains/llvm-3.3/prebuilt/linux-x86_64/bin/")
@@ -334,7 +333,7 @@ class Target(lutinTarget.Target):
 		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/drawable/icon.png");
 		if     "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
-			lutinImage.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", 256, 256)
+			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", 256, 256)
 		else:
 			# to be sure that we have all time a resource ...
 			tmpFile = open(self.get_staging_folder(pkgName) + "/res/drawable/plop.txt", 'w')
@@ -596,7 +595,7 @@ class Target(lutinTarget.Target):
 		          + "-S " + self.get_staging_folder(pkgName) + "/res/ " \
 		          + adModResouceFolder \
 		          + "-J " + self.get_staging_folder(pkgName) + "/src/ "
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 		#aapt  package -f -M ${manifest.file} -F ${packaged.resource.file} -I ${path.to.android-jar.library} 
 		#      -S ${android-resource-directory} [-m -J ${folder.to.output.the.R.java}]
 		
@@ -637,7 +636,7 @@ class Target(lutinTarget.Target):
 		          + filesString \
 		          + self.file_finalAbstraction + " "  \
 		          + self.get_staging_folder(pkgName) + "/src/R.java "
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".dex", "<==", "*.class")
 		cmdLine = androidToolPath + "dx " \
@@ -648,7 +647,7 @@ class Target(lutinTarget.Target):
 		if "ADMOD_ID" in pkgProperties:
 			cmdLine += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 		
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk", "<==", ".dex, assets, .so, res")
 		#builderDebug="-agentlib:jdwp=transport=dt_socket,server=y,address=8050,suspend=y "
@@ -664,7 +663,7 @@ class Target(lutinTarget.Target):
 		          + " -z " + self.get_staging_folder(pkgName) + "/resources.res " \
 		          + " -f " + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
 		          + " -rf " + self.get_staging_folder(pkgName) + "/data "
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 		
 		# doc :
 		# http://developer.android.com/tools/publishing/app-signing.html
@@ -683,7 +682,7 @@ class Target(lutinTarget.Target):
 			    + " -keypass PassKey__AndroidDebugKey " \
 			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey"
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 			tmpFile = open("tmpPass.boo", 'w')
 			tmpFile.write("\n")
 			tmpFile.flush()
@@ -696,12 +695,12 @@ class Target(lutinTarget.Target):
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 			    + " " + pkgNameApplicationName
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 			cmdLine = "jarsigner " \
 			    + " -verify -verbose -certs " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk "
-			lutinMultiprocess.run_command(cmdLine)
+			multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
 		tools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk")
@@ -709,7 +708,7 @@ class Target(lutinTarget.Target):
 		cmdLine = androidToolPath + "zipalign 4 " \
 		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 		
 		# copy file in the final stage :
 		tools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk",
@@ -725,7 +724,7 @@ class Target(lutinTarget.Target):
 			pkgNameApplicationName += "debug"
 		cmdLine = self.folder_sdk + "/platform-tools/adb install -r " \
 		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 	
 	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
@@ -735,7 +734,7 @@ class Target(lutinTarget.Target):
 		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
 		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
-		RlutinMultiprocess.unCommand(cmdLine)
+		Rmultiprocess.unCommand(cmdLine)
 	
 	def Log(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
@@ -743,6 +742,6 @@ class Target(lutinTarget.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("cmd: " + self.folder_sdk + "/platform-tools/adb shell logcat ")
 		cmdLine = self.folder_sdk + "/platform-tools/adb shell logcat "
-		lutinMultiprocess.run_command(cmdLine)
+		multiprocess.run_command(cmdLine)
 
 

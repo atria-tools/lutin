@@ -6,9 +6,9 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-
 import sys
 import copy
+# Local import
 from . import debug
 
 

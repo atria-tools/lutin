@@ -6,8 +6,8 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-
 import sys
+# Local import
 from . import debug
 
 class ArgElement:

@@ -6,13 +6,13 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-
-from . import debug
-from . import tools
 import platform
 import os
-from . import multiprocess as lutinMultiprocess
-from . import depend as dependency
+# Local import
+from . import debug
+from . import tools
+from . import multiprocess
+from . import depend
 
 enableResizeImage = True
 try:
@@ -40,7 +40,7 @@ def resize(srcFile, destFile, x, y, cmd_file=None):
 	if os.path.exists(srcFile) == False:
 		debug.error("Request a resize an image that does not existed : '" + srcFile + "'")
 	cmd_line = "resize Image : " + srcFile + " ==> " + destFile + " newSize=(" + str(x) + "x" + str(y) + ")"
-	if False==dependency.need_re_build(destFile, srcFile, file_cmd=cmd_file , cmdLine=cmd_line):
+	if False==depend.need_re_build(destFile, srcFile, file_cmd=cmd_file , cmdLine=cmd_line):
 		return
 	# add cmdLine ...
 	x = get_pow_2_multiple(x)
@@ -90,4 +90,4 @@ def resize(srcFile, destFile, x, y, cmd_file=None):
 			tmpImage = im1.resize((x, y), Image.ANTIALIAS)
 			tools.create_directory_of_file(destFile)
 			tmpImage.save(destFile)
-	lutinMultiprocess.store_command(cmd_line, cmd_file)
+	multiprocess.store_command(cmd_line, cmd_file)

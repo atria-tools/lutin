@@ -7,14 +7,14 @@
 ## @license APACHE v2.0 (see license file)
 ##
 
-import lutinDebug as debug
-import lutinSystem
-import lutinTools as tools
+from lutin import debug
+from lutin import system
+from lutin import tools
 import os
 
-class System(lutinSystem.System):
+class System(system.System):
 	def __init__(self):
-		lutinSystem.System.__init__(self)
+		system.System.__init__(self)
 		# create some HELP:
 		self.help="PULSE : The Linux PulseAudio\n Can be install with the package:\n    - libpulse-dev"
 		# check if the library exist:

@@ -7,31 +7,30 @@
 ## @license APACHE v2.0 (see license file)
 ##
 
-import lutinDebug as debug
-import lutinTarget
-import lutinTools as tools
+from lutin import debug
+from lutin import target
+from lutin import tools
 import os
 import stat
 import re
-import lutinMultiprocess
-import lutinHost
+from lutin import host
 
-class Target(lutinTarget.Target):
+class Target(target.Target):
 	def __init__(self, config):
 		#processor type selection (auto/arm/ppc/x86)
 		if config["arch"] == "auto":
 			config["arch"] = "x86"
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
-			config["bus-size"] = str(lutinHost.BUS_SIZE)
-		lutinTarget.Target.__init__(self, "Linux", config, "")
+			config["bus-size"] = str(host.BUS_SIZE)
+		target.Target.__init__(self, "Linux", config, "")
 		if self.config["bus-size"] == "64":
 			# 64 bits
-			if lutinHost.BUS_SIZE != 64:
+			if host.BUS_SIZE != 64:
 				self.global_flags_cc.append("-m64")
 		else:
 			# 32 bits
-			if lutinHost.BUS_SIZE != 32:
+			if host.BUS_SIZE != 32:
 				self.global_flags_cc.append("-m32")
 	
 	def generate_list_separate_coma(self, list):

@@ -6,9 +6,9 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-
 import platform
 import sys
+# Local import
 from . import debug
 
 # print os.name # ==> 'posix'

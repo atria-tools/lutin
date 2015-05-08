@@ -1,10 +1,10 @@
 ##
 ## C builder
 ##
-import lutinMultiprocess
-import lutinTools
-import lutinDebug as debug
-import lutinDepend as dependency
+from lutin import multiprocess
+from lutin import tools
+from lutin import debug
+from lutin import depend
 
 # C version:
 default_version = 1989
@@ -51,15 +51,15 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 		target.sysroot,
 		target.global_include_cc]
 	try:
-		cmd.append(lutinTools.add_prefix("-I", path["export"]))
+		cmd.append(tools.add_prefix("-I", path["export"]))
 	except:
 		pass
 	try:
-		cmd.append(lutinTools.add_prefix("-I", path["local"]))
+		cmd.append(tools.add_prefix("-I", path["local"]))
 	except:
 		pass
 	try:
-		cmd.append(lutinTools.add_prefix("-I", depancy.path))
+		cmd.append(tools.add_prefix("-I", depancy.path))
 	except:
 		pass
 	try:
@@ -87,14 +87,14 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	cmd.append("-MP")
 	cmd.append(file_src)
 	# Create cmd line
-	cmdLine=lutinTools.list_to_str(cmd)
+	cmdLine=tools.list_to_str(cmd)
 	# check the dependency for this file :
-	if dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
+	if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
 		return file_dst
-	lutinTools.create_directory_of_file(file_dst)
+	tools.create_directory_of_file(file_dst)
 	comment = ["c", name, "<==", file]
 	# process element
-	lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
+	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
 	return file_dst
 
 

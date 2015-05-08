@@ -8,7 +8,6 @@
 ##
 
 import os
-from . import multiprocess as lutinMultiprocess
 import threading
 import re
 
@@ -107,7 +106,8 @@ def error(input, threadID=-1, force=False, crash=True):
 		print(color_red + "[ERROR] " + input + color_default)
 		debugLock.release()
 	if crash==True:
-		lutinMultiprocess.error_occured()
+		from . import multiprocess
+		multiprocess.error_occured()
 		if threadID != -1:
 			threading.interrupt_main()
 		exit(-1)

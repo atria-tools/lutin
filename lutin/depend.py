@@ -6,11 +6,10 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-
 import os
+# Local import
 from . import debug
-from . import env as environement
-
+from . import env
 
 def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
 	debug.extreme_verbose("Resuest check of dependency of :")
@@ -19,7 +18,7 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
 	debug.extreme_verbose("		dept='" + str(dependFile) + "'")
 	debug.extreme_verbose("		cmd='" + str(file_cmd) + "'")
 	# if force mode selected ==> just force rebuild ...
-	if environement.get_force_mode():
+	if env.get_force_mode():
 		debug.extreme_verbose("			==> must rebuild (force mode)")
 		return True
 	
@@ -118,7 +117,7 @@ def need_re_package(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
 		return False
 	
 	# if force mode selected ==> just force rebuild ...
-	if environement.get_force_mode():
+	if env.get_force_mode():
 		debug.extreme_verbose("			==> must re-package (force mode)")
 		return True
 	

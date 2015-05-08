@@ -1,11 +1,11 @@
 ##
 ## Objective-C builder
 ##
-import lutinMultiprocess
-import lutinTools
-import lutinBuilder
-import lutinDebug as debug
-import lutinDepend as dependency
+from lutin import multiprocess
+from lutin import tools
+from lutin import builder
+from lutin import debug
+from lutin import depend
 
 local_ref_on_builder_c = None
 
@@ -15,7 +15,7 @@ local_ref_on_builder_c = None
 def init():
 	global local_ref_on_builder_c
 	debug.debug("m builder get dependency on the C builder")
-	local_ref_on_builder_c = lutinBuilder.get_builder("c")
+	local_ref_on_builder_c = builder.get_builder("c")
 
 ##
 ## Get the current builder type.
@@ -51,15 +51,15 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 		target.sysroot,
 		target.global_include_cc]
 	try:
-		cmd.append(lutinTools.add_prefix("-I",path["export"]))
+		cmd.append(tools.add_prefix("-I",path["export"]))
 	except:
 		pass
 	try:
-		cmd.append(lutinTools.add_prefix("-I",path["local"]))
+		cmd.append(tools.add_prefix("-I",path["local"]))
 	except:
 		pass
 	try:
-		cmd.append(lutinTools.add_prefix("-I",depancy.path))
+		cmd.append(tools.add_prefix("-I",depancy.path))
 	except:
 		pass
 	try:
@@ -102,13 +102,13 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	cmd.append("-x objective-c")
 	cmd.append(file_src)
 	# Create cmd line
-	cmdLine=lutinTools.list_to_str(cmd)
+	cmdLine=tools.list_to_str(cmd)
 	# check the dependency for this file :
-	if False==dependency.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
+	if False==depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
 		return file_dst
-	lutinTools.create_directory_of_file(file_dst)
+	tools.create_directory_of_file(file_dst)
 	comment = ["m", name, "<==", file]
 	#process element
-	lutinMultiprocess.run_in_pool(cmdLine, comment, file_cmd)
+	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
 	return file_dst
 

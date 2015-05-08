@@ -7,16 +7,16 @@
 ## @license APACHE v2.0 (see license file)
 ##
 
-import lutinDebug as debug
-import lutinTarget
-import lutinTools as tools
-import lutinHost
+from lutin import debug
+from lutin import target
+from lutin import tools
+from lutin import host
 import os
 import stat
 import sys
-import lutinZip as zip
+from lutin import zip
 
-class Target(lutinTarget.Target):
+class Target(target.Target):
 	def __init__(self, config):
 		if config["compilator"] != "gcc":
 			debug.error("Windows does not support '" + config["compilator"] + "' compilator ... availlable : [gcc]")
@@ -27,14 +27,14 @@ class Target(lutinTarget.Target):
 			config["arch"] = "x86"
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
-			config["bus-size"] = str(lutinHost.BUS_SIZE)
+			config["bus-size"] = str(host.BUS_SIZE)
 		
-		lutinTarget.Target.__init__(self, "Windows", config, "")
+		target.Target.__init__(self, "Windows", config, "")
 		
 		# on windows board the basic path is not correct 
 		# TODO : get external PATH for the minGW path
 		# TODO : Set the cyngwin path ...
-		if lutinHost.OS == "Windows":
+		if host.OS == "Windows":
 			self.set_cross_base("c:\\MinGW\\bin\\")
 			sys.path.append("c:\\MinGW\\bin" )
 			os.environ['PATH'] += ";c:\\MinGW\\bin\\"
