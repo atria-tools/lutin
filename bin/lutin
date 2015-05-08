@@ -94,7 +94,7 @@ def parseGenericArg(argument, active):
 		return True
 	elif argument.get_option_nName()=="jobs":
 		if active==True:
-			lutinMultiprocess.set_core_number(int(argument.get_arg()))
+			multiprocess.set_core_number(int(argument.get_arg()))
 		return True
 	elif argument.get_option_nName() == "verbose":
 		if active==True:

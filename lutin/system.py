@@ -69,11 +69,11 @@ class System:
 def createModuleFromSystem(target, dict):
 	myModule = module.Module(dict["path"], dict["name"], 'PREBUILD')
 	
-	myModule.add_export_flag_CC(dict["system"].export_flags_cc)
-	myModule.add_export_flag_LD(dict["system"].export_flags_ld)
-	myModule.add_export_flag_XX(dict["system"].export_flags_xx)
-	myModule.add_export_flag_M(dict["system"].export_flags_m)
-	myModule.add_export_flag_MM(dict["system"].export_flags_mm)
+	myModule.add_export_flag('c', dict["system"].export_flags_cc)
+	myModule.add_export_flag('link', dict["system"].export_flags_ld)
+	myModule.add_export_flag('c++', dict["system"].export_flags_xx)
+	myModule.add_export_flag('m', dict["system"].export_flags_m)
+	myModule.add_export_flag('mm', dict["system"].export_flags_mm)
 	# add the currrent module at the 
 	return myModule
 

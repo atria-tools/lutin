@@ -115,7 +115,7 @@ class Module:
 	## @brief add Some copilation flags for this module (and only this one)
 	##
 	def add_extra_compile_flags(self):
-		self.compile_flags_CC([
+		self.compile_flags('c', [
 			"-Wall",
 			"-Wsign-compare",
 			"-Wreturn-type",
@@ -130,10 +130,10 @@ class Module:
 	## @brief remove all unneeded warning on compilation ==> for extern libs ...
 	##
 	def remove_compile_warning(self):
-		self.compile_flags_CC([
+		self.compile_flags('c', [
 			"-Wno-int-to-pointer-cast"
 			]);
-		self.compile_flags_XX([
+		self.compile_flags('c++', [
 			"-Wno-c++11-narrowing"
 			])
 		# only for gcc :"-Wno-unused-but-set-variable"
@@ -215,9 +215,9 @@ class Module:
 				# TODO : Add optionnal Flags ...
 				#     ==> do it really better ...
 				if export == False:
-					self.compile_flags_CC("-D"+option);
+					self.compile_flags(option[0], option[1]);
 				else:
-					self.add_export_flag_CC("-D"+option);
+					self.add_export_flag(option[0], option[1]);
 			# add at the heritage list :
 			self.sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self.depends:
@@ -377,7 +377,7 @@ class Module:
 	def add_module_depend(self, list):
 		self.append_to_internalList(self.depends, list, True)
 	
-	def add_optionnal_module_depend(self, module_name, compilation_flags="", export=False):
+	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
 		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
 	def add_export_path(self, list):
@@ -386,39 +386,12 @@ class Module:
 	def add_path(self, list):
 		self.append_to_internalList(self.path["local"], list)
 	
-	def add_export_flag_LD(self, list):
-		self.append_to_internalList2(self.flags["export"], "link", list)
-	
-	def add_export_flag_CC(self, list):
-		self.append_to_internalList2(self.flags["export"], "c", list)
-	
-	def add_export_flag_XX(self, list):
-		self.append_to_internalList2(self.flags["export"], "c++", list)
-	
-	def add_export_flag_M(self, list):
-		self.append_to_internalList2(self.flags["export"], "m", list)
-	
-	def add_export_flag_MM(self, list):
-		self.append_to_internalList2(self.flags["export"], "mm", list)
+	def add_export_flag(self, type, list):
+		self.append_to_internalList2(self.flags["export"], type, list)
 	
 	# add the link flag at the module
-	def compile_flags_LD(self, list):
-		self.append_to_internalList2(self.flags["local"], "link", list)
-	
-	def compile_flags_CC(self, list):
-		self.append_to_internalList2(self.flags["local"], "c", list)
-	
-	def compile_flags_XX(self, list):
-		self.append_to_internalList2(self.flags["local"], "c++", list)
-	
-	def compile_flags_M(self, list):
-		self.append_to_internalList2(self.flags["local"], "m", list)
-	
-	def compile_flags_MM(self, list):
-		self.append_to_internalList2(self.flags["local"], "mm", list)
-	
-	def compile_flags_S(self, list):
-		self.append_to_internalList2(self.flags["local"], "s", list)
+	def compile_flags(self, type, list):
+		self.append_to_internalList2(self.flags["local"], type, list)
 	
 	def compile_version_XX(self, version, same_as_api=True, gnu=False):
 		cpp_version_list = [1999, 2003, 2011, 2014]
