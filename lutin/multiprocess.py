@@ -8,7 +8,6 @@
 ##
 
 import sys
-import lutinDebug as debug
 import threading
 import time
 import sys
@@ -18,9 +17,10 @@ else:
 	import Queue as queue
 import os
 import subprocess
-import lutinTools
-import lutinEnv
 import shlex
+from . import debug
+from . import tools as lutinTools
+from . import env as lutinEnv
 
 queueLock = threading.Lock()
 workQueue = queue.Queue()

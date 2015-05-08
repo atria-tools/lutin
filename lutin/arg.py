@@ -8,7 +8,7 @@
 ##
 
 import sys
-import lutinDebug as debug
+from . import debug
 
 class ArgElement:
 	def __init__(self, option, value=""):

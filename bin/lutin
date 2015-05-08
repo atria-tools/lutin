@@ -1,0 +1,210 @@
+#!/usr/bin/python
+##
+## @author Edouard DUPIN
+##
+## @copyright 2012, Edouard DUPIN, all right reserved
+##
+## @license APACHE v2.0 (see license file)
+##
+
+# for path inspection:
+import sys
+import os
+import lutin.debug as debug
+import lutin.arg as arguments
+import lutin.host as host
+import lutin.module as module
+import lutin.target as target
+import lutin.multiprocess as multiprocess
+
+myArgs = arguments.LutinArg()
+myArgs.add(arguments.ArgDefine("h", "help", desc="display this help"))
+myArgs.add_section("option", "Can be set one time in all case")
+myArgs.add(arguments.ArgDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"],["6","extreme_verbose"]], desc="display makefile debug level (verbose) default =2"))
+myArgs.add(arguments.ArgDefine("C", "color", desc="display makefile output in color"))
+myArgs.add(arguments.ArgDefine("f", "force", desc="Force the rebuild without checking the dependency"))
+myArgs.add(arguments.ArgDefine("P", "pretty", desc="print the debug has pretty display"))
+myArgs.add(arguments.ArgDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
+myArgs.add(arguments.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
+
+myArgs.add_section("properties", "keep in the sequency of the cible")
+myArgs.add(arguments.ArgDefine("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'"))
+myArgs.add(arguments.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
+myArgs.add(arguments.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
+myArgs.add(arguments.ArgDefine("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile"))
+myArgs.add(arguments.ArgDefine("b", "bus", list=[["auto","Automatic choice"],["32","32 bits"],["64","64 bits"]], desc="Adressing size (Bus size)"))
+myArgs.add(arguments.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
+myArgs.add(arguments.ArgDefine("g", "gcov", desc="Enable code coverage intrusion in code"))
+myArgs.add(arguments.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
+myArgs.add(arguments.ArgDefine("", "list-target", desc="list all availlables targets ==> for auto completion"))
+myArgs.add(arguments.ArgDefine("", "list-module", desc="list all availlables module ==> for auto completion"))
+
+myArgs.add_section("cible", "generate in order set")
+localArgument = myArgs.parse()
+
+"""
+	display the help of this makefile
+"""
+def usage():
+	# generic argument displayed : 
+	myArgs.display()
+	print("		All target can finish with '?clean' '?dump' ... ?action")
+	print("		all")
+	print("			build all (only for the current selected board) (bynary and packages)")
+	print("		clean")
+	print("			clean all (same as previous)")
+	print("		dump")
+	print("			Dump all the module dependency and properties")
+	listOfAllModule = module.list_all_module_with_desc()
+	for mod in listOfAllModule:
+		print("		" + mod[0])
+		if mod[1] != "":
+			print("			" + mod[1])
+	print("	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
+	exit(0)
+
+# preparse the argument to get the verbose element for debug mode
+def parseGenericArg(argument, active):
+	if argument.get_option_nName() == "help":
+		#display help
+		if active==False:
+			usage()
+		return True
+	if argument.get_option_nName() == "list-module":
+		if active==False:
+			listOfModule = module.list_all_module()
+			retValue = ""
+			for moduleName in listOfModule:
+				if retValue != "":
+					retValue += " "
+				retValue += moduleName
+			print(retValue)
+			exit(0)
+		return True
+	if argument.get_option_nName() == "list-target":
+		if active==False:
+			listOfTarget = target.list_all_target()
+			retValue = ""
+			for targetName in listOfTarget:
+				if retValue != "":
+					retValue += " "
+				retValue += targetName
+			print(retValue)
+			exit(0)
+		return True
+	elif argument.get_option_nName()=="jobs":
+		if active==True:
+			lutinMultiprocess.set_core_number(int(argument.get_arg()))
+		return True
+	elif argument.get_option_nName() == "verbose":
+		if active==True:
+			debug.set_level(int(argument.get_arg()))
+		return True
+	elif argument.get_option_nName() == "color":
+		if active==True:
+			debug.enable_color()
+		return True
+	elif argument.get_option_nName() == "force":
+		if active==True:
+			lutinEnv.set_force_mode(True)
+		return True
+	elif argument.get_option_nName() == "pretty":
+		if active==True:
+			lutinEnv.set_print_pretty_mode(True)
+		return True
+	elif argument.get_option_nName() == "force-strip":
+		if active==True:
+			lutinEnv.set_force_strip_mode(True)
+		return True
+	return False
+
+# parse default unique argument:
+for argument in localArgument:
+	parseGenericArg(argument, True)
+
+
+import lutin
+
+
+import lutin.host as lutinHost
+import lutin.tools as lutinTools
+
+#available target : Linux / MacOs / Windows / Android ...
+targetName = host.OS
+config = {
+	"compilator":"gcc",
+	"mode":"release",
+	"bus-size":"auto",
+	"arch":"auto",
+	"generate-package":True,
+	"simulation":False,
+	"gcov":False
+	}
+# load the default target :
+my_target = None
+actionDone=False
+# parse all argument
+for argument in localArgument:
+	if parseGenericArg(argument, False) == True:
+		continue
+	elif argument.get_option_nName() == "package":
+		config["generate-package"]=False
+	elif argument.get_option_nName() == "simulation":
+		config["simulation"]=True
+	elif argument.get_option_nName() == "gcov":
+		config["gcov"]=True
+	elif argument.get_option_nName() == "bus":
+		config["bus-size"]=argument.get_arg()
+	elif argument.get_option_nName() == "arch":
+		config["arch"]=argument.get_arg()
+	elif argument.get_option_nName() == "compilator":
+		if config["compilator"] != argument.get_arg():
+			debug.debug("change compilator ==> " + argument.get_arg())
+			config["compilator"] = argument.get_arg()
+			#remove previous target
+			my_target = None
+	elif argument.get_option_nName() == "target":
+		# No check input ==> this will be verify automaticly chen the target will be loaded
+		if targetName != argument.get_arg():
+			targetName = argument.get_arg()
+			debug.debug("change target ==> '" + targetName + "' & reset mode : gcc&release")
+			#reset properties by defauult:
+			config = {
+			             "compilator":"gcc",
+			             "mode":"release",
+			             "bus-size":"auto",
+			             "arch":"auto",
+			             "generate-package":True,
+			             "simulation":False,
+			             "gcov":False
+			          }
+			#remove previous target
+			my_target = None
+	elif argument.get_option_nName() == "mode":
+		if config["mode"] != argument.get_arg():
+			config["mode"] = argument.get_arg()
+			debug.debug("change mode ==> " + config["mode"])
+			#remove previous target
+			my_target = None
+	else:
+		if argument.get_option_nName() != "":
+			debug.warning("Can not understand argument : '" + argument.get_option_nName() + "'")
+			usage()
+		else:
+			#load the target if needed :
+			if my_target == None:
+				my_target = target.load_target(targetName, config)
+			my_target.build(argument.get_arg())
+			actionDone=True
+
+# if no action done : we do "all" ...
+if actionDone==False:
+	#load the target if needed :
+	if my_target == None:
+		my_target = target.load_target(targetName, config)
+	my_target.build("all")
+
+# stop all started threads;
+multiprocess.un_init()
+
+

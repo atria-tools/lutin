@@ -7,7 +7,7 @@
 ## @license APACHE v2.0 (see license file)
 ##
 
-import lutinDebug as debug
+from . import debug
 
 
 

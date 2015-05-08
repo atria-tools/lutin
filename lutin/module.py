@@ -11,15 +11,15 @@ import sys
 import os
 import inspect
 import fnmatch
-import lutinModule as module
-import lutinHost as host
-import lutinTools
-import lutinDebug as debug
-import lutinHeritage as heritage
-import lutinDepend as dependency
-import lutinBuilder as builder
-import lutinMultiprocess
-import lutinEnv
+from . import module
+from . import host
+from . import tools as lutinTools
+from . import debug
+from . import heritage
+from . import depend as dependency
+from . import builder
+from . import multiprocess as lutinMultiprocess
+from . import env as lutinEnv
 
 class Module:
 	

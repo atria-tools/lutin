@@ -9,7 +9,7 @@
 
 import sys
 import copy
-import lutinDebug as debug
+from . import debug
 
 
 def append_to_list(listout, list):

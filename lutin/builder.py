@@ -11,14 +11,14 @@ import sys
 import os
 import inspect
 import fnmatch
-import lutinDebug as debug
-import lutinHeritage as heritage
+from . import debug
+from . import heritage
 import datetime
-import lutinTools
-import lutinModule
-import lutinSystem
-import lutinImage
-import lutinHost
+from . import tools as lutinTools
+from . import module as lutinModule
+from . import system as lutinSystem
+from . import image as lutinImage
+from . import host as lutinHost
 
 ##
 ## constitution of dictionnary:

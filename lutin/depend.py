@@ -8,8 +8,8 @@
 ##
 
 import os
-import lutinDebug as debug
-import lutinEnv as environement
+from . import debug
+from . import env as environement
 
 
 def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):

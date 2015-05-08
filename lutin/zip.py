@@ -6,11 +6,12 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-import lutinDebug as debug
-import lutinTools as tools
 import platform
 import os
 import zipfile
+
+from . import debug
+from . import tools
 
 
 def create_zip(path, outputFile):
@@ -26,14 +27,4 @@ def create_zip(path, outputFile):
 			zf.write(file, file[basePathlen:])
 	zf.close()
 	
-"""
-print('creating archive')
-zf = zipfile.ZipFile('zipfile_write.zip', mode='w')
-try:
-	print('adding README.md')
-	zf.write('README.md')
-finally:
-	print('closing')
-	zf.close()
-"""
 

@@ -7,12 +7,13 @@
 ## @license APACHE v2.0 (see license file)
 ##
 
-import lutinDebug as debug
-import lutinTools as tools
+from . import debug
+from . import tools
 import platform
 import os
-import lutinMultiprocess
-import lutinDepend as dependency
+from . import multiprocess as lutinMultiprocess
+from . import depend as dependency
+
 enableResizeImage = True
 try:
 	if platform.system() == "Darwin":

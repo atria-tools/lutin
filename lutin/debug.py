@@ -8,7 +8,7 @@
 ##
 
 import os
-import lutinMultiprocess
+from . import multiprocess as lutinMultiprocess
 import threading
 import re
 

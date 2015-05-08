@@ -11,12 +11,12 @@ import sys
 import os
 import inspect
 import fnmatch
-import lutinDebug as debug
+from . import debug
 import datetime
-import lutinTools
-import lutinModule as module
-import lutinImage
-import lutinHost
+from . import tools as lutinTools
+from . import module
+from . import image as lutinImage
+from . import host as lutinHost
 
 class System:
 	def __init__(self):

@@ -10,10 +10,10 @@
 import os
 import shutil
 import errno
-import lutinDebug as debug
+from . import debug
 import fnmatch
-import lutinMultiprocess
-import lutinDepend as dependency
+from . import multiprocess as lutinMultiprocess
+from . import depend as dependency
 
 
 """
