@@ -15,6 +15,7 @@ import lutin.arg as arguments
 import lutin.host as host
 import lutin.module as module
 import lutin.target as target
+import lutin.env as env
 import lutin.multiprocess as multiprocess
 
 myArgs = arguments.LutinArg()
@@ -106,15 +107,15 @@ def parseGenericArg(argument, active):
 		return True
 	elif argument.get_option_nName() == "force":
 		if active==True:
-			lutinEnv.set_force_mode(True)
+			env.set_force_mode(True)
 		return True
 	elif argument.get_option_nName() == "pretty":
 		if active==True:
-			lutinEnv.set_print_pretty_mode(True)
+			env.set_print_pretty_mode(True)
 		return True
 	elif argument.get_option_nName() == "force-strip":
 		if active==True:
-			lutinEnv.set_force_strip_mode(True)
+			env.set_force_strip_mode(True)
 		return True
 	return False
 
