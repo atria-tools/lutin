@@ -35,6 +35,10 @@ Just run::
 
   pip install lutin
 
+On mac-os you may install pip before:
+
+  sudo easy_install pip
+
 
 License (APACHE v2.0)
 ---------------------
