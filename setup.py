@@ -29,3 +29,7 @@ setup(name='lutin',
       scripts=['bin/lutin'],
       include_package_data = True,
       zip_safe=False)
+
+#To developp: ./setup.py install/develop
+#TO register all in pip: ./setup.py register sdist upload
+
