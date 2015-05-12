@@ -315,7 +315,10 @@ class Target(target.Target):
 			tmpFile.write("<plist version=\"1.0\">\n")
 			tmpFile.write("    <dict>\n")
 			tmpFile.write("        <key>application-identifier</key>\n")
-			tmpFile.write("        <string>" + pkgProperties["APPLE_APPLICATION_IOS_ID"] + "." + pkgProperties["COMPAGNY_TYPE"] + "." + pkgProperties["COMPAGNY_NAME2"] + "." + pkgName + "</string>\n")
+			try:
+				tmpFile.write("        <string>" + pkgProperties["APPLE_APPLICATION_IOS_ID"] + "." + pkgProperties["COMPAGNY_TYPE"] + "." + pkgProperties["COMPAGNY_NAME2"] + "." + pkgName + "</string>\n")
+			except:
+				debug.error("Missing package property : APPLE_APPLICATION_IOS_ID")
 			tmpFile.write("        <key>get-task-allow</key>\n")
 			tmpFile.write("        <true/>\n")
 			tmpFile.write("        <key>keychain-access-groups</key>\n")
