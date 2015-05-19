@@ -11,8 +11,10 @@ from lutin import debug
 from lutin import target
 from lutin import tools
 from lutin import host
+from lutin import multiprocess
 import os
 import stat
+import shutil
 
 class Target(target.Target):
 	def __init__(self, config):
@@ -82,23 +84,36 @@ class Target(target.Target):
 		tmpFile.flush()
 		tmpFile.close()
 		
-		# Must create the tarball of the application 
-		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
-		#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
+		# Must create the disk image of the application 
+		debug.info("Generate disk image for '" + pkgName + "'")
+		output_file_name = self.get_final_folder() + "/" + pkgName + ".dmg"
+		cmd = "hdiutil create -volname "
+		cmd += pkgName + " -srcfolder "
+		cmd += tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + pkgName + ".app"
+		cmd += " -ov -format UDZO "
+		cmd += output_file_name
+		tools.create_directory_of_file(output_file_name)
+		multiprocess.run_command_direct(cmd)
+		debug.info("disk image: " + output_file_name)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.warning("    ==> TODO")
-		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
+		debug.info("copy " + tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + pkgName + ".app in /Applications/")
+		if os.path.exists("/Applications/" + pkgName + ".app") == True:
+			shutil.rmtree("/Applications/" + pkgName + ".app")
+		# copy the application in the basic application folder : /Applications/xxx.app
+		shutil.copytree(tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + pkgName + ".app", "/Applications/" + pkgName + ".app")
 	
 	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.warning("    ==> TODO")
-		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
+		debug.info("remove OLD application /Applications/" + pkgName + ".app")
+		# Remove the application in the basic application folder : /Applications/xxx.app
+		if os.path.exists("/Applications/" + pkgName + ".app") == True:
+			shutil.rmtree("/Applications/" + pkgName + ".app")
 
 
 
