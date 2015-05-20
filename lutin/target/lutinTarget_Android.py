@@ -608,14 +608,14 @@ class Target(target.Target):
 		filesString=""
 		for element in pkgProperties["ANDROID_JAVA_FILES"]:
 			if element=="DEFAULT":
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolAudioTask.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolCallback.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolConstants.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/Ewol.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolRendererGL.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolSurfaceViewGL.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolActivity.java "
-				filesString += self.folder_ewol + "/sources/android/src/org/ewol/EwolWallpaper.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolAudioTask.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolCallback.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolConstants.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/Ewol.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolRendererGL.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolSurfaceViewGL.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolActivity.java "
+				filesString += self.folder_ewol + "/android/src/org/ewol/EwolWallpaper.java "
 			else:
 				filesString += element + " "
 		
