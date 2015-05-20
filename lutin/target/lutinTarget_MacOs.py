@@ -84,6 +84,19 @@ class Target(target.Target):
 		tmpFile.flush()
 		tmpFile.close()
 		
+		# Create a simple interface to localy install the aplication for the shell (a shell command line interface)
+		shell_file_name=self.get_staging_folder(pkgName) + "/shell/" + pkgName
+		# Create the info file
+		tools.create_directory_of_file(shell_file_name)
+		tmpFile = open(shell_file_name, 'w')
+		tmpFile.write("#!/bin/bash\n")
+		tmpFile.write("# Simply open the real application in the correct way (a link does not work ...)\n")
+		tmpFile.write("/Applications/" + pkgName + ".app/Contents/MacOS/" + pkgName + " $*\n")
+		#tmpFile.write("open -n /Applications/edn.app --args -AppCommandLineArg $*\n")
+		tmpFile.flush()
+		tmpFile.close()
+		
+		
 		# Must create the disk image of the application 
 		debug.info("Generate disk image for '" + pkgName + "'")
 		output_file_name = self.get_final_folder() + "/" + pkgName + ".dmg"
@@ -95,6 +108,9 @@ class Target(target.Target):
 		tools.create_directory_of_file(output_file_name)
 		multiprocess.run_command_direct(cmd)
 		debug.info("disk image: " + output_file_name)
+		
+		debug.info("You can have an shell interface by executing : ")
+		debug.info("    sudo cp " + shell_file_name + " /usr/local/bin")
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
