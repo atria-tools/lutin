@@ -7,7 +7,7 @@ def readme():
 
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='0.5.7',
+      version='0.5.8',
       description='Lutin generic builder',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
@@ -28,6 +28,9 @@ setup(name='lutin',
       keywords='builder c++ c android ios macos makefile cmake',
       scripts=['bin/lutin'],
       include_package_data = True,
+      data_file=[
+          ('/etc/bash_completion.d', ['bash-autocompletion/lutin']),
+      ],
       zip_safe=False)
 
 #To developp: ./setup.py install/develop
