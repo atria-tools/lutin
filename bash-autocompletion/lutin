@@ -61,7 +61,7 @@ _lutin()
 			return 0
 			;;
 		--target)
-			local names=`lutin.py --list-target`
+			local names=`lutin --list-target`
 			COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
 			return 0
 			;;
@@ -82,9 +82,9 @@ _lutin()
 		COMPREPLY=( $(compgen -W "${optshorts}" -- ${cur}) )
 		return 0
 	fi
-	listmodule=`lutin.py --list-module`
+	listmodule=`lutin --list-module`
 	COMPREPLY=( $(compgen -W "${listmodule}" -- ${cur}) )
 	return 0
 }
 
-complete -F _lutin lutin.py
+complete -F _lutin lutin

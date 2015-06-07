@@ -1,6 +1,6 @@
 
 to install autocompletion for lutin :
 
-sudo cp bash-autocompletion/lutin.py /etc/bash_completion.d
+sudo cp bash-autocompletion/lutin /etc/bash_completion.d
 
 ==> and restart bash ...
