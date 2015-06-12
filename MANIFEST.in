@@ -1,5 +1,2 @@
 include README.rst
 include bash-autocompletion/lutin
-recursive-include lutin/builder
-recursive-include lutin/system
-recursive-include lutin/target

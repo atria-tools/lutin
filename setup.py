@@ -7,19 +7,17 @@ def readme():
 
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='0.5.9',
+      version='0.5.12',
       description='Lutin generic builder',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
       author='Edouard DUPIN',
       author_email='yui.heero@gmail.com',
       license='APACHE-2',
-      packages=['lutin'],
-      package_data={
-          'lutin.builder': ['lutin/builder/*'],
-          'lutin.system': ['lutin/system/*'],
-          'lutin.target': ['lutin/target/*']
-      },
+      packages=['lutin',
+                'lutin/z_builder',
+                'lutin/z_system',
+                'lutin/z_target'],
       classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: Apache Software License',
@@ -28,10 +26,10 @@ setup(name='lutin',
       ],
       keywords='builder c++ c android ios macos makefile cmake',
       scripts=['bin/lutin'],
-      include_package_data = True,
       data_file=[
           ('/etc/bash_completion.d', ['bash-autocompletion/lutin']),
       ],
+      include_package_data = True,
       install_requires=[
           'PIL>=1.0.0'
       ],
