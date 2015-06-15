@@ -7,7 +7,7 @@ def readme():
 
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='0.5.12',
+      version='0.5.13',
       description='Lutin generic builder',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
@@ -30,9 +30,6 @@ setup(name='lutin',
           ('/etc/bash_completion.d', ['bash-autocompletion/lutin']),
       ],
       include_package_data = True,
-      install_requires=[
-          'PIL>=1.0.0'
-      ],
       zip_safe=False)
 
 #To developp: ./setup.py install/develop
