@@ -138,6 +138,7 @@ class Target:
 		self.cross = cross
 		debug.debug("== Target='" + self.cross + "'");
 		self.java = "javac"
+		self.javah = "javah"
 		self.jar = "jar"
 		self.ar = self.cross + "ar"
 		self.ranlib = self.cross + "ranlib"
