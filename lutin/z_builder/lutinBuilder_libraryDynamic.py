@@ -26,7 +26,7 @@ def get_type():
 ## @return List of extention supported
 ##
 def get_input_type():
-	return ["o"]
+	return ["o", "a"]
 
 ##
 ## @brief Get builder output file type
@@ -59,7 +59,8 @@ def link(file, binary, target, depancy, name, basic_folder):
 	except:
 		pass
 	try:
-		cmd.append(depancy.src)
+		# keep only compilated files ...
+		cmd.append(tools.filter_extention(depancy.src, get_input_type()))
 	except:
 		pass
 	try:

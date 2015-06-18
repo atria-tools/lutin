@@ -47,8 +47,8 @@ class Module:
 		# Documentation list:
 		self.documentation = None
 		# export PATH
-		self.path = {"export":[],
-		             "local":[]
+		self.path = {"export":{},
+		             "local":{}
 		            }
 		self.flags = {"export":{},
 		              "local":{}
@@ -242,7 +242,6 @@ class Module:
 				list_sub_file_needed_to_build.append(resFile)
 			except ValueError:
 				debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
-		
 		# when multiprocess availlable, we need to synchronize here ...
 		multiprocess.pool_synchrosize()
 		
@@ -252,15 +251,30 @@ class Module:
 		elif self.type=='LIBRARY':
 			try:
 				tmp_builder = builder.get_builder_with_output("a");
-				resFile = tmp_builder.link(list_sub_file_needed_to_build,
-				                           package_name,
-				                           target,
-				                           self.sub_heritage_list,
-				                           name = self.name,
-				                           basic_folder = self.origin_folder)
-				self.local_heritage.add_sources(resFile)
+				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+				if len(list_file) > 0:
+					resFile = tmp_builder.link(list_file,
+					                           package_name,
+					                           target,
+					                           self.sub_heritage_list,
+					                           name = self.name,
+					                           basic_folder = self.origin_folder)
+					self.local_heritage.add_sources(resFile)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.a'")
+			try:
+				tmp_builder = builder.get_builder_with_output("jar");
+				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+				if len(list_file) > 0:
+					resFile = tmp_builder.link(list_file,
+					                           package_name,
+					                           target,
+					                           self.sub_heritage_list,
+					                           name = self.name,
+					                           basic_folder = self.origin_folder)
+					self.local_heritage.add_sources(resFile)
+			except ValueError:
+				debug.error(" UN-SUPPORTED link format:  '.jat'")
 		elif self.type=='BINARY':
 			try:
 				tmp_builder = builder.get_builder_with_output("bin");
@@ -278,10 +292,12 @@ class Module:
 			target.copy_to_staging(self.name)
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
-				# special case for android wrapper :
+				# special case for android wrapper:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
-					resFile = tmp_builder.link(list_sub_file_needed_to_build,
+					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+					debug.info("plopppp " + str(list_file))
+					resFile = tmp_builder.link(list_file,
 					                           package_name,
 					                           target,
 					                           self.sub_heritage_list,
@@ -380,11 +396,11 @@ class Module:
 	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
 		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
-	def add_export_path(self, list):
-		self.append_to_internalList(self.path["export"], list)
+	def add_export_path(self, list, type='c'):
+		self.append_to_internalList2(self.path["export"], type, list)
 	
-	def add_path(self, list):
-		self.append_to_internalList(self.path["local"], list)
+	def add_path(self, list, type='c'):
+		self.append_to_internalList2(self.path["local"], type, list)
 	
 	def add_export_flag(self, type, list):
 		self.append_to_internalList2(self.flags["export"], type, list)
@@ -452,17 +468,25 @@ class Module:
 		self.print_list('depends',self.depends)
 		self.print_list('depends_optionnal', self.depends_optionnal)
 		
-		for element,value in self.flags["local"]:
+		for element in self.flags["local"]:
+			value = self.flags["local"][element]
 			self.print_list('flags ' + element, value)
 		
-		for element,value in self.flags["export"]:
+		for element in self.flags["export"]:
+			value = self.flags["export"][element]
 			self.print_list('flags export ' + element, value)
 		
 		self.print_list('src',self.src)
 		self.print_list('files',self.files)
 		self.print_list('folders',self.folders)
-		self.print_list('export path',self.path["export"])
-		self.print_list('local  path',self.path["local"])
+		for element in self.path["local"]:
+			value = self.path["local"][element]
+			self.print_list('local path ' + element, value)
+		
+		for element in self.path["export"]:
+			value = self.path["export"][element]
+			self.print_list('export path ' + element, value)
+		
 	
 	def pkg_set(self, variable, value):
 		if "COMPAGNY_TYPE" == variable:

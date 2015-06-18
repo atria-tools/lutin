@@ -144,3 +144,15 @@ def copy_anything_target(target, src, dst):
 					newDst += "/"
 			debug.verbose("Might copy : '" + root+"/"+cycleFile + "' ==> '" + newDst+cycleFile + "'" )
 			target.add_file_staging(root+"/"+cycleFile, newDst+cycleFile)
+
+
+def filter_extention(list_files, extentions):
+	out = []
+	for ext in extentions:
+		for file in list_files:
+			if file[-len(ext):] == ext:
+				out.append(file)
+	return out
+
+
+

@@ -137,6 +137,8 @@ class Target:
 	def set_cross_base(self, cross=""):
 		self.cross = cross
 		debug.debug("== Target='" + self.cross + "'");
+		self.java = "javac"
+		self.jar = "jar"
 		self.ar = self.cross + "ar"
 		self.ranlib = self.cross + "ranlib"
 		if self.config["compilator"] == "clang":
@@ -206,13 +208,32 @@ class Target:
 		self.folder_ewol = folder
 	
 	
-	def file_generate_object(self,binaryName,moduleName,basePath,file):
-		list=[]
-		list.append(basePath + "/" + file)
-		list.append(self.get_build_folder(moduleName) + "/" + file + self.suffix_obj)
-		list.append(self.get_build_folder(moduleName) + "/" + file + self.suffix_dependence)
-		list.append(self.get_build_folder(moduleName) + "/" + file + self.suffix_cmdLine)
-		return list
+	def get_full_name_source(self, basePath, file):
+		return basePath + "/" + file
+	
+	def get_full_name_cmd(self, moduleName, basePath, file):
+		return self.get_build_folder(moduleName) + "/" + file + self.suffix_cmdLine
+	
+	def get_full_name_destination(self, moduleName, basePath, file, suffix, remove_suffix=False):
+		# special patch for java file:
+		if file[-4:] == "java":
+			for elem in ["org/", "com/"]:
+				pos = file.find(elem);
+				if pos > 0:
+					file = file[pos:]
+		if remove_suffix == True:
+			file = file[:file.rfind(".")] + '.'
+		else:
+			file += "."
+		if len(suffix) >= 1:
+			suffix = suffix[0]
+		else:
+			suffix = ""
+		return self.get_build_folder(moduleName) + "/" + file + suffix
+	
+	def get_full_dependency(self, moduleName, basePath, file):
+		return self.get_build_folder(moduleName) + "/" + file + self.suffix_dependence
+	
 	"""
 		return a list of 3 elements :
 			0 : sources files (can be a list)
@@ -225,17 +246,22 @@ class Target:
 			list.append(file)
 			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary + self.suffix_cmdLine)
 		elif (type=="lib-shared"):
 			list.append(file)
 			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic + self.suffix_cmdLine)
 		elif (type=="lib-static"):
 			list.append(file)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_cmdLine)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static + self.suffix_cmdLine)
+		elif (type=="jar"):
+			list.append(file)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar")
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_dependence)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_cmdLine)
 		elif (type=="image"):
 			list.append(self.get_build_folder(binaryName) + "/data/" + file + self.suffix_cmdLine)
 		else:

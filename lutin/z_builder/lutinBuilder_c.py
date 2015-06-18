@@ -41,7 +41,10 @@ def get_output_type():
 ## @brief Commands for running gcc to compile a C file in object file.
 ##
 def compile(file, binary, target, depancy, flags, path, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary, name, basic_folder,file)
+	file_src = target.get_full_name_source(basic_folder, file)
+	file_cmd = target.get_full_name_cmd(name, basic_folder, file)
+	file_dst = target.get_full_name_destination(name, basic_folder, file, get_output_type())
+	file_depend = target.get_full_dependency(name, basic_folder, file)
 	
 	# create the command line befor requesting start:
 	cmd = [
@@ -50,16 +53,13 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 		target.arch,
 		target.sysroot,
 		target.global_include_cc]
+	for view in ["export", "local"]:
+		try:
+			cmd.append(tools.add_prefix("-I", path[view]["c"]))
+		except:
+			pass
 	try:
-		cmd.append(tools.add_prefix("-I", path["export"]))
-	except:
-		pass
-	try:
-		cmd.append(tools.add_prefix("-I", path["local"]))
-	except:
-		pass
-	try:
-		cmd.append(tools.add_prefix("-I", depancy.path))
+		cmd.append(tools.add_prefix("-I", depancy.path["c"]))
 	except:
 		pass
 	try:
@@ -74,14 +74,11 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 		cmd.append(depancy.flags["c"])
 	except:
 		pass
-	try:
-		cmd.append(flags["local"]["c"])
-	except:
-		pass
-	try:
-		cmd.append(flags["export"]["c"])
-	except:
-		pass
+	for view in ["local", "export"]:
+		try:
+			cmd.append(flags[view]["c"])
+		except:
+			pass
 	cmd.append("-c")
 	cmd.append("-MMD")
 	cmd.append("-MP")

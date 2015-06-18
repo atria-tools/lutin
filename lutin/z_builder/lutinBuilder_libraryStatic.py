@@ -26,7 +26,7 @@ def get_type():
 ## @return List of extention supported
 ##
 def get_input_type():
-	return ["o"]
+	return ["o", "a"]
 
 ##
 ## @brief Get builder output file type

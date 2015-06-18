@@ -40,7 +40,10 @@ def get_output_type():
 ## @brief Commands for running gcc to compile a C++ file in object file.
 ##
 def compile(file, binary, target, depancy, flags, path, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd = target.file_generate_object(binary, name, basic_folder, file)
+	file_src = target.get_full_name_source(basic_folder, file)
+	file_cmd = target.get_full_name_cmd(name, basic_folder, file)
+	file_dst = target.get_full_name_destination(name, basic_folder, file, get_output_type())
+	file_depend = target.get_full_dependency(name, basic_folder, file)
 	
 	# create the command line befor requesting start:
 	cmd = [
@@ -50,18 +53,17 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 		target.sysroot,
 		target.global_include_cc
 		]
-	try:
-		cmd.append(tools.add_prefix("-I",path["export"]))
-	except:
-		pass
-	try:
-		cmd.append(tools.add_prefix("-I",path["local"]))
-	except:
-		pass
-	try:
-		cmd.append(tools.add_prefix("-I",depancy.path))
-	except:
-		pass
+	for view in ["export", "local"]:
+		for type in ["c", "c++"]:
+			try:
+				cmd.append(tools.add_prefix("-I",path[view][type]))
+			except:
+				pass
+	for type in ["c", "c++"]:
+		try:
+			cmd.append(tools.add_prefix("-I",depancy.path[type]))
+		except:
+			pass
 	try:
 		cmd.append(get_version_compilation_flags(flags, depancy.flags))
 	except:
@@ -74,30 +76,17 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 		cmd.append(target.global_flags_xx)
 	except:
 		pass
-	try:
-		cmd.append(depancy.flags["c"])
-	except:
-		pass
-	try:
-		cmd.append(depancy.flags["c++"])
-	except:
-		pass
-	try:
-		cmd.append(flags["local"]["c"])
-	except:
-		pass
-	try:
-		cmd.append(flags["local"]["c++"])
-	except:
-		pass
-	try:
-		cmd.append(flags["export"]["c"])
-	except:
-		pass
-	try:
-		cmd.append(flags["export"]["c++"])
-	except:
-		pass
+	for type in ["c", "c++"]:
+		try:
+			cmd.append(depancy.flags[type])
+		except:
+			pass
+	for view in ["local", "export"]:
+		for type in ["c", "c++"]:
+			try:
+				cmd.append(flags[view][type])
+			except:
+				pass
 	cmd.append(["-c", "-MMD", "-MP"])
 	cmd.append(file_src)
 	# Create cmd line

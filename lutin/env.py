@@ -39,44 +39,54 @@ def get_print_pretty_mode():
 	global printPrettyMode
 	return printPrettyMode
 
+def end_with(name, list):
+	for appl in list:
+		if name[len(name)-len(appl):] == appl:
+			return True
+	return False
+
+
 def print_pretty(myString, force=False):
 	global printPrettyMode
 	if    printPrettyMode == True \
 	   or force == True:
-		if myString[len(myString)-1]==' ' : 
+		if myString[len(myString)-1] == ' ':
 			tmpcmdLine = myString[:len(myString)-1]
-		else :
+		else:
 			tmpcmdLine = myString
+		cmdApplication = tmpcmdLine.split(' ')[0]
 		tmpcmdLine = tmpcmdLine.replace(' ', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
-		baseElementList = ["-o",
-		                   "-D",
-		                   "-I",
-		                   "-L",
-		                   "g++",
-		                   "gcc",
-		                   "clang",
-		                   "clang++",
-		                   "ar",
-		                   "ld",
-		                   "ranlib",
-		                   "-framework",
-		                   "-isysroot",
-		                   "-arch",
-		                   "-keystore",
-		                   "-sigalg",
-		                   "-digestalg",
-		                   "<",
-		                   "<<",
-		                   ">",
-		                   ">>"]
+		baseElementList = []
+		if end_with(cmdApplication, ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]) == True:
+			baseElementList = [
+				"-o",
+				"-D",
+				"-I",
+				"-L",
+				"-framework",
+				"-isysroot",
+				"-arch",
+				"-keystore",
+				"-sigalg",
+				"-digestalg"]
+		elif end_with(cmdApplication, ["javac"]) == True:
+			baseElementList = [
+				"-d",
+				"-D",
+				"-classpath",
+				"-sourcepath"
+				]
+		elif end_with(cmdApplication, ["jar"]) == True:
+			baseElementList = [
+				"cf"
+				]
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
-		baseElementList = ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]
-		for element in baseElementList:
-			tmpcmdLine = tmpcmdLine.replace('/'+element+' ', '/'+element+'\n\t')
+		for element in ["<", "<<", ">", ">>"]:
+			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
 		tmpcmdLine = tmpcmdLine.replace('\n\t', ' \\\n\t')
 		
 		return tmpcmdLine

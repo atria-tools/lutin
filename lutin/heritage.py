@@ -29,7 +29,7 @@ class HeritageList:
 		self.flags={}
 		# sources list:
 		self.src=[]
-		self.path=[]
+		self.path={}
 		
 		self.listHeritage=[]
 		if heritage != None:
@@ -61,7 +61,7 @@ class HeritageList:
 		self.flags={}
 		# sources list:
 		self.src=[]
-		self.path=[]
+		self.path={}
 		# reorder heritage list :
 		listHeritage = self.listHeritage
 		self.listHeritage = []
@@ -99,7 +99,12 @@ class HeritageList:
 					self.flags[flags] = value
 				else:
 					append_to_list(self.flags[flags], value)
-			append_to_list(self.path, element.path)
+			for ppp in element.path:
+				value = element.path[ppp]
+				if ppp not in self.path:
+					self.path[ppp] = value
+				else:
+					append_to_list(self.path[ppp], value)
 			append_to_list(self.src, element.src)
 			if "c-version" in element.flags:
 				ver = element.flags["c-version"]
@@ -124,7 +129,7 @@ class heritage:
 		self.flags={}
 		# sources list:
 		self.src=[]
-		self.path=[]
+		self.path={}
 		# update is set at true when data are newly created ==> force upper element to update
 		self.hasBeenUpdated=False
 		
@@ -143,6 +148,8 @@ class heritage:
 		append_to_list(self.path, list)
 	
 	def add_sources(self, list):
+		if type(list) == type(None):
+			debug.error("try add element none in a list ...")
 		append_to_list(self.src, list)
 	
 	def need_update(self, list):
