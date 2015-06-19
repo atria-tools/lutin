@@ -146,13 +146,35 @@ def copy_anything_target(target, src, dst):
 			target.add_file_staging(root+"/"+cycleFile, newDst+cycleFile)
 
 
-def filter_extention(list_files, extentions):
+def filter_extention(list_files, extentions, invert=False):
 	out = []
-	for ext in extentions:
-		for file in list_files:
+	for file in list_files:
+		in_list = False
+		for ext in extentions:
 			if file[-len(ext):] == ext:
-				out.append(file)
+				in_list = True
+		if     in_list == True \
+		   and invert == False:
+			out.append(file)
+		elif     in_list == False \
+		     and invert == True:
+			out.append(file)
 	return out
+
+
+def move_if_needed(src, dst):
+	if not os.path.isfile(src):
+		debug.error("request move if needed, but file does not exist: '" + str(src) + "' to '" + str(dst) + "'")
+		return
+	src_data = file_read_data(src)
+	if os.path.isfile(dst):
+		# file exist ==> must check ...
+		dst_data = file_read_data(dst)
+		if src_data == dst_data:
+			# nothing to do ...
+			return
+	file_write_data(dst, src_data)
+	remove_file(src)
 
 
 

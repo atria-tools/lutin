@@ -94,9 +94,9 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	cmdLine=tools.list_to_str(cmd)
 	# check the dependency for this file :
 	if False==depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
-		return file_dst
+		return {"action":"add", "file":file_dst}
 	tools.create_directory_of_file(file_dst)
 	comment = ["m++", name, "<==", file]
 	#process element
 	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
-	return file_dst
+	return {"action":"add", "file":file_dst}

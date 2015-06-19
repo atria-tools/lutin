@@ -81,7 +81,8 @@ def print_pretty(myString, force=False):
 				]
 		elif end_with(cmdApplication, ["jar"]) == True:
 			baseElementList = [
-				"cf"
+				"cf",
+				"-C"
 				]
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')

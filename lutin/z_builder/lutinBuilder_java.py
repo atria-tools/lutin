@@ -65,19 +65,31 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 				out += ":"
 			out += elem
 		cmd.append(out)
-		
-	# dependency : + "-classpath " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
-	cmd.append("-classpath " + target.folder_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar")
+	# todo : Remplace this with class_extern = [] and add a dependency with android framework ...
+	class_extern = [target.folder_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar"]
+	upper_jar = tools.filter_extention(depancy.src, ["jar"])
+	#debug.warning("ploppppp = " + str(upper_jar))
+	for elem in upper_jar:
+		class_extern.append(elem)
+	if len(class_extern) > 0:
+		cmd.append("-classpath")
+		out = ""
+		for elem in class_extern:
+			if len(out) > 0:
+				out += ":"
+			out += elem
+		cmd.append(out)
+	
 	cmd.append(file_src)
 	# Create cmd line
 	cmdLine=tools.list_to_str(cmd)
 	
 	# check the dependency for this file :
 	if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
-		return file_dst
+		return {"action":"add", "file":file_dst}
 	tools.create_directory_of_file(file_dst)
 	comment = ["java", name, "<==", file]
 	#process element
 	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
-	return file_dst
+	return {"action":"add", "file":file_dst}
 

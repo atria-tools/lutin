@@ -82,6 +82,7 @@ class Target:
 		self.suffix_binary=''
 		self.suffix_package='.deb'
 		
+		self.folder_generate_code="/generate_header"
 		self.folder_arch="/" + self.name
 		
 		if "debug" == self.config["mode"]:
@@ -111,6 +112,8 @@ class Target:
 		self.listFinalFile=[]
 		
 		self.sysroot=""
+		
+		self.action_on_state={}
 	
 	def update_folder_tree(self):
 		self.folder_out="/out/" + self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"] + "/" + self.config["mode"]
@@ -210,9 +213,15 @@ class Target:
 	
 	
 	def get_full_name_source(self, basePath, file):
+		if file[0] == '/':
+			if tools.os.path.isfile(file):
+				return file
 		return basePath + "/" + file
 	
 	def get_full_name_cmd(self, moduleName, basePath, file):
+		if file[0] == '/':
+			if tools.os.path.isfile(file):
+				return file + self.suffix_cmdLine
 		return self.get_build_folder(moduleName) + "/" + file + self.suffix_cmdLine
 	
 	def get_full_name_destination(self, moduleName, basePath, file, suffix, remove_suffix=False):
@@ -302,6 +311,12 @@ class Target:
 		debug.debug("Add nodule for Taget : " + newModule.name)
 		self.moduleList.append(newModule)
 	
+	def get_module(self, name):
+		for mod in self.buildDone:
+			if mod.name == name:
+				return mod
+		debug.error("the module '" + str(name) + "'does not exist/already build")
+		return None
 	
 	# return inherit packages ...
 	"""
@@ -425,6 +440,12 @@ class Target:
 							debug.debug("build module '" + moduleName + "'")
 							return mod.build(self, None)
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
+	
+	def add_action(self, name_of_state="PACKAGE", action=None):
+		if name_of_state not in self.action_on_state:
+			self.action_on_state[name_of_state] = [action]
+		else:
+			self.action_on_state[name_of_state].append(action)
 
 
 targetList=[]

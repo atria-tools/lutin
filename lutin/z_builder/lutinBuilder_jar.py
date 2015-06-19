@@ -43,12 +43,18 @@ def link(file, binary, target, depancy, name, basic_folder):
 	#create command Line
 	cmd = [
 		target.jar,
-		"cf", file_dst
+		"cf", file_dst,
 		]
-	try:
-		cmd.append(file_src)
-	except:
-		pass
+	for file in file_src:
+		path = ""
+		for elem in ["org/", "com/"]:
+			pos = file.find(elem);
+			if pos > 0:
+				path = file[:pos]
+				file = file[pos:]
+		cmd.append("-C")
+		cmd.append(path)
+		cmd.append(file)
 	cmdLine=tools.list_to_str(cmd)
 	"""
 	# check the dependency for this file :

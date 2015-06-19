@@ -94,12 +94,12 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	
 	# check the dependency for this file :
 	if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
-		return file_dst
+		return {"action":"add", "file":file_dst}
 	tools.create_directory_of_file(file_dst)
 	comment = ["c++", name, "<==", file]
 	#process element
 	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
-	return file_dst
+	return {"action":"add", "file":file_dst}
 
 def get_version_compilation_flags(flags, dependency_flags):
 	try:

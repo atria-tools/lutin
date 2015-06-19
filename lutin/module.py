@@ -53,21 +53,7 @@ class Module:
 		self.flags = {"export":{},
 		              "local":{}
 		             }
-		"""
-		self.export_flags_ld = []
-		self.export_flags_cc = []
-		self.export_flags_xx = []
-		self.export_flags_m = []
-		self.export_flags_mm = []
-		# list of all flags:
-		self.flags_ld = []
-		self.flags_cc = []
-		self.flags_xx = []
-		self.flags_m = []
-		self.flags_mm = []
-		self.flags_s = []
-		self.flags_ar = []
-		"""
+		self.extention_order_build = ["java", "javah"] # all is not set here is done in the provided order ...
 		# sources list:
 		self.src = []
 		# copy files and folders:
@@ -203,7 +189,6 @@ class Module:
 		else :
 			# TODO : Set it better ...
 			None
-		
 		# build dependency before
 		list_sub_file_needed_to_build = []
 		self.sub_heritage_list = heritage.HeritageList()
@@ -224,9 +209,40 @@ class Module:
 			inherit_list = target.build(dep, package_name)
 			# add at the heritage list :
 			self.sub_heritage_list.add_heritage_list(inherit_list)
+		# do sub library action for automatic generating ...
+		if self.type in target.action_on_state:
+			for action in target.action_on_state[self.type]:
+				elem = action(target, self, package_name);
+				
 		
-		# build local sources
-		for file in self.src:
+		
+		# build local sources in a specific order :
+		for extention_local in self.extention_order_build:
+			list_file = tools.filter_extention(self.src, [extention_local])
+			for file in list_file:
+				#debug.info(" " + self.name + " <== " + file);
+				fileExt = file.split(".")[-1]
+				try:
+					tmp_builder = builder.get_builder(fileExt);
+					resFile = tmp_builder.compile(file,
+					                             package_name,
+					                             target,
+					                             self.sub_heritage_list,
+					                             flags = self.flags,
+					                             path = self.path,
+					                             name = self.name,
+					                             basic_folder = self.origin_folder)
+					if resFile["action"] == "add":
+						list_sub_file_needed_to_build.append(resFile["file"])
+					elif resFile["action"] == "path":
+						self.add_path(resFile["path"], type='c')
+					else:
+						debug.error("an not do action for : " + str(resFile))
+				except ValueError:
+					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
+		# now build the other :
+		list_file = tools.filter_extention(self.src, self.extention_order_build, invert=True)
+		for file in list_file:
 			#debug.info(" " + self.name + " <== " + file);
 			fileExt = file.split(".")[-1]
 			try:
@@ -239,7 +255,12 @@ class Module:
 				                             path = self.path,
 				                             name = self.name,
 				                             basic_folder = self.origin_folder)
-				list_sub_file_needed_to_build.append(resFile)
+				if resFile["action"] == "add":
+					list_sub_file_needed_to_build.append(resFile["file"])
+				elif resFile["action"] == "path":
+					self.add_path(resFile["path"], type='c')
+				else:
+					debug.error("an not do action for : " + str(resFile))
 			except ValueError:
 				debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
 		# when multiprocess availlable, we need to synchronize here ...
@@ -274,7 +295,7 @@ class Module:
 					                           basic_folder = self.origin_folder)
 					self.local_heritage.add_sources(resFile)
 			except ValueError:
-				debug.error(" UN-SUPPORTED link format:  '.jat'")
+				debug.error(" UN-SUPPORTED link format:  '.jar'")
 		elif self.type=='BINARY':
 			try:
 				tmp_builder = builder.get_builder_with_output("bin");
@@ -296,15 +317,27 @@ class Module:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
 					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
-					debug.info("plopppp " + str(list_file))
 					resFile = tmp_builder.link(list_file,
 					                           package_name,
 					                           target,
 					                           self.sub_heritage_list,
-					                           name = "libewol",
+					                           name = "lib" + self.name,
 					                           basic_folder = self.origin_folder)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'")
+				try:
+					tmp_builder = builder.get_builder_with_output("jar");
+					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+					if len(list_file) > 0:
+						resFile = tmp_builder.link(list_file,
+						                           package_name,
+						                           target,
+						                           self.sub_heritage_list,
+						                           name = self.name,
+						                           basic_folder = self.origin_folder)
+						self.local_heritage.add_sources(resFile)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.jar'")
 			else:
 				try:
 					tmp_builder = builder.get_builder_with_output("bin");
