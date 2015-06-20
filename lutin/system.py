@@ -30,6 +30,7 @@ class System:
 		self.export_flags_ld_shared=[]
 		self.export_libs_ld=[]
 		self.export_libs_ld_shared=[]
+		self.export_src=[]
 		
 	def append_and_check(self, listout, newElement, order):
 		for element in listout:
@@ -62,6 +63,9 @@ class System:
 	def add_export_flag_MM(self, list):
 		self.append_to_internalList(self.export_flags_mm, list)
 	
+	def add_export_SRC(self, list):
+		self.append_to_internalList(self.export_src, list)
+	
 	
 
 
@@ -74,6 +78,7 @@ def createModuleFromSystem(target, dict):
 	myModule.add_export_flag('c++', dict["system"].export_flags_xx)
 	myModule.add_export_flag('m', dict["system"].export_flags_m)
 	myModule.add_export_flag('mm', dict["system"].export_flags_mm)
+	myModule.add_src_file(dict["system"].export_src)
 	# add the currrent module at the 
 	return myModule
 
@@ -114,6 +119,7 @@ def import_path(path):
 				                           "loaded":False,
 				                           "exist":False,
 				                           "module":None}]
+	debug.debug("list system=" + str(systemList))
 
 def display():
 	global systemList
@@ -123,8 +129,9 @@ def display():
 			debug.info("    '" + data["name"] +"' in " + data["path"])
 
 
-def exist(lib_name, target_name) :
+def exist(lib_name, target_name, target) :
 	global systemList
+	debug.verbose("exist= " + lib_name + " in " + target_name)
 	if target_name not in systemList:
 		return False
 	for data in systemList[target_name]:
@@ -137,7 +144,8 @@ def exist(lib_name, target_name) :
 				theSystem = __import__(__startSystemName + target_name + "_" + data["name"])
 				#create the system module
 				try:
-					data["system"] = theSystem.System()
+					debug.info("call : " + data["name"])
+					data["system"] = theSystem.System(target)
 					data["exist"] = data["system"].valid
 				except:
 					debug.debug("Not find: '" + data["name"] + "'")

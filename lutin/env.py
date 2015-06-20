@@ -84,6 +84,14 @@ def print_pretty(myString, force=False):
 				"cf",
 				"-C"
 				]
+		elif end_with(cmdApplication, ["aapt"]) == True:
+			baseElementList = [
+				"-M",
+				"-F",
+				"-I",
+				"-S",
+				"-J"
+				]
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
 		for element in ["<", "<<", ">", ">>"]:

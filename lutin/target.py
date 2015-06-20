@@ -345,23 +345,19 @@ class Target:
 		for elem in self.moduleList:
 			if elem.name == name:
 				return True
-		if optionnal == False:
+		# TODO : Check internal module and system module ...
+		# need to import the module (or the system module ...)
+		exist = system.exist(name, self.name, self)
+		if exist == True:
+			system.load(self, name, self.name)
+			return True;
+		# try to find in the local Modules:
+		exist = module.exist(self, name)
+		if exist == True:
 			module.load_module(self, name)
-			return True
+			return True;
 		else:
-			# TODO : Check internal module and system module ...
-			# need to import the module (or the system module ...)
-			exist = system.exist(name, self.name)
-			if exist == True:
-				system.load(self, name, self.name)
-				return True;
-			# try to find in the local Modules:
-			exist = module.exist(self, name)
-			if exist == True:
-				module.load_module(self, name)
-				return True;
-			else:
-				return False;
+			return False;
 	
 	def load_all(self):
 		listOfAllTheModule = module.list_all_module()
@@ -374,19 +370,7 @@ class Target:
 				mod.ext_project_add_module(self, projectMng, addedModule)
 				return
 	
-	def build_optionnal(self, moduleName, packagesName=None):
-		present = self.load_if_needed(moduleName, optionnal=True)
-		if present == False:
-			return [heritage.HeritageList(), False]
-		# clean requested
-		for mod in self.moduleList:
-			if mod.name == moduleName:
-				debug.debug("build module '" + moduleName + "'")
-				return [mod.build(self, None), True]
-		debug.warning("not know module name : '" + moduleName + "' to '" + "build" + "' it")
-		return [heritage.HeritageList(), False]
-	
-	def build(self, name, packagesName=None):
+	def build(self, name, packagesName=None, optionnal=False):
 		if name == "dump":
 			debug.info("dump all")
 			self.load_all()
@@ -417,7 +401,7 @@ class Target:
 				actionName = gettedElement[1]
 			else :
 				actionName = "build"
-			debug.verbose("requested : " + moduleName + "-" + actionName)
+			debug.verbose("requested : " + moduleName + "?" + actionName)
 			if actionName == "install":
 				self.build(moduleName + "?build")
 				self.install_package(moduleName)
@@ -426,7 +410,10 @@ class Target:
 			elif actionName == "log":
 				self.Log(moduleName)
 			else:
-				self.load_if_needed(moduleName)
+				present = self.load_if_needed(moduleName, optionnal=optionnal)
+				if     present == False \
+				   and optionnal == True:
+					return [heritage.HeritageList(), False]
 				# clean requested
 				for mod in self.moduleList:
 					if mod.name == moduleName:
@@ -438,7 +425,11 @@ class Target:
 							return mod.clean(self)
 						elif actionName == "build":
 							debug.debug("build module '" + moduleName + "'")
+							if optionnal == True:
+								return [mod.build(self, None), True]
 							return mod.build(self, None)
+				if optionnal == True:
+					return [heritage.HeritageList(), False]
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
 	def add_action(self, name_of_state="PACKAGE", action=None):

@@ -192,7 +192,7 @@ class Target(target.Target):
 	def get_staging_folder_data(self, binaryName):
 		return self.get_staging_folder(binaryName) + self.folder_data
 	
-	def make_package(self, pkgName, pkgProperties, basePkgPath):
+	def make_package(self, pkgName, pkgProperties, basePkgPath, heritage):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
@@ -262,6 +262,7 @@ class Target(target.Target):
 			debug.error("an error occured when getting the tools for android")
 		androidToolPath += dirnames[0] + "/"
 		
+		# this is to create resource file for android ... (we did not use aset in jar with ewol ...
 		adModResouceFolder = ""
 		if "ADMOD_ID" in pkgProperties:
 			adModResouceFolder = " -S " + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
@@ -273,25 +274,17 @@ class Target(target.Target):
 		          + adModResouceFolder \
 		          + "-J " + self.get_staging_folder(pkgName) + "/src/ "
 		multiprocess.run_command(cmdLine)
-		#aapt  package -f -M ${manifest.file} -F ${packaged.resource.file} -I ${path.to.android-jar.library} 
-		#      -S ${android-resource-directory} [-m -J ${folder.to.output.the.R.java}]
 		
 		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/build/classes/noFile")
 		debug.print_element("pkg", "*.class", "<==", "*.java")
-		# more information with : -Xlint
-		#          + self.file_finalAbstraction + " "\ # this generate ex: out/Android/debug/staging/tethys/src/com/edouarddupin/tethys/edn.java
-		
 		#generate android java files:
 		filesString=""
-		for element in pkgProperties["ANDROID_JAVA_FILES"]:
-			if element=="DEFAULT":
-				# this is deprecated ...
-			else:
-				filesString += element + " "
 		
+		"""
+		old : 
 		if "ADMOD_ID" in pkgProperties:
+			# TODO : check this I do not think it is really usefull ... ==> write for IDE only ...
 			filesString += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
-			
 		if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
 			filesString += self.folder_javaProject + pkgNameApplicationName + "Settings.java "
 		
@@ -307,6 +300,23 @@ class Target(target.Target):
 		          + self.file_finalAbstraction + " "  \
 		          + self.get_staging_folder(pkgName) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
+		"""
+		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage.src, ["so"])))
+		debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage.src, ["jar"])))
+		
+		class_extern = ""
+		upper_jar = tools.filter_extention(heritage.src, ["jar"])
+		#debug.warning("ploppppp = " + str(upper_jar))
+		for elem in upper_jar:
+			if len(class_extern) > 0:
+				class_extern += ":"
+			class_extern += elem
+		# create enpoint element :
+		cmdLine = "javac " \
+		          + "-d " + self.get_staging_folder(pkgName) + "/build/classes " \
+		          + "-classpath " + class_extern + " " \
+		          + self.get_staging_folder(pkgName) + "/src/R.java "
+		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".dex", "<==", "*.class")
 		cmdLine = androidToolPath + "dx " \
@@ -316,6 +326,11 @@ class Target(target.Target):
 		
 		if "ADMOD_ID" in pkgProperties:
 			cmdLine += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
+		# add element to dexification:
+		for elem in upper_jar:
+			# remove android sdk:
+			if elem[-len("android.jar"):] != "android.jar":
+				cmdLine += elem + " "
 		
 		multiprocess.run_command(cmdLine)
 		
@@ -404,7 +419,7 @@ class Target(target.Target):
 		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
 		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
-		Rmultiprocess.unCommand(cmdLine)
+		Rmultiprocess.run_command(cmdLine)
 	
 	def Log(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")

@@ -65,8 +65,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 				out += ":"
 			out += elem
 		cmd.append(out)
-	# todo : Remplace this with class_extern = [] and add a dependency with android framework ...
-	class_extern = [target.folder_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar"]
+	class_extern = []
 	upper_jar = tools.filter_extention(depancy.src, ["jar"])
 	#debug.warning("ploppppp = " + str(upper_jar))
 	for elem in upper_jar:

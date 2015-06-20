@@ -88,7 +88,6 @@ class Module:
 		                      "VERSION_CODE" : "",
 		                      "NAME" : set("no-name"), # name of the application
 		                      "ANDROID_MANIFEST" : "", # By default generate the manifest
-		                      "ANDROID_JAVA_FILES" : ["DEFAULT"], # when user want to create his own services and activities
 		                      "ANDROID_RESOURCES" : [],
 		                      "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
 		                      "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
@@ -194,7 +193,7 @@ class Module:
 		self.sub_heritage_list = heritage.HeritageList()
 		# optionnal dependency :
 		for dep, option, export in self.depends_optionnal:
-			inherit_list, isBuilt = target.build_optionnal(dep, package_name)
+			inherit_list, isBuilt = target.build(dep, package_name, True)
 			if isBuilt == True:
 				self.local_heritage.add_depends(dep);
 				# TODO : Add optionnal Flags ...
@@ -206,7 +205,8 @@ class Module:
 			# add at the heritage list :
 			self.sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self.depends:
-			inherit_list = target.build(dep, package_name)
+			debug.debug("module: '" + str(self.name) + "'   request: '" + dep + "'")
+			inherit_list = target.build(dep, package_name, False)
 			# add at the heritage list :
 			self.sub_heritage_list.add_heritage_list(inherit_list)
 		# do sub library action for automatic generating ...
@@ -215,10 +215,33 @@ class Module:
 				elem = action(target, self, package_name);
 				
 		
-		
-		# build local sources in a specific order :
-		for extention_local in self.extention_order_build:
-			list_file = tools.filter_extention(self.src, [extention_local])
+		if self.type != 'PREBUILD':
+			# build local sources in a specific order :
+			for extention_local in self.extention_order_build:
+				list_file = tools.filter_extention(self.src, [extention_local])
+				for file in list_file:
+					#debug.info(" " + self.name + " <== " + file);
+					fileExt = file.split(".")[-1]
+					try:
+						tmp_builder = builder.get_builder(fileExt);
+						resFile = tmp_builder.compile(file,
+						                             package_name,
+						                             target,
+						                             self.sub_heritage_list,
+						                             flags = self.flags,
+						                             path = self.path,
+						                             name = self.name,
+						                             basic_folder = self.origin_folder)
+						if resFile["action"] == "add":
+							list_sub_file_needed_to_build.append(resFile["file"])
+						elif resFile["action"] == "path":
+							self.add_path(resFile["path"], type='c')
+						else:
+							debug.error("an not do action for : " + str(resFile))
+					except ValueError:
+						debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
+			# now build the other :
+			list_file = tools.filter_extention(self.src, self.extention_order_build, invert=True)
 			for file in list_file:
 				#debug.info(" " + self.name + " <== " + file);
 				fileExt = file.split(".")[-1]
@@ -240,35 +263,13 @@ class Module:
 						debug.error("an not do action for : " + str(resFile))
 				except ValueError:
 					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
-		# now build the other :
-		list_file = tools.filter_extention(self.src, self.extention_order_build, invert=True)
-		for file in list_file:
-			#debug.info(" " + self.name + " <== " + file);
-			fileExt = file.split(".")[-1]
-			try:
-				tmp_builder = builder.get_builder(fileExt);
-				resFile = tmp_builder.compile(file,
-				                             package_name,
-				                             target,
-				                             self.sub_heritage_list,
-				                             flags = self.flags,
-				                             path = self.path,
-				                             name = self.name,
-				                             basic_folder = self.origin_folder)
-				if resFile["action"] == "add":
-					list_sub_file_needed_to_build.append(resFile["file"])
-				elif resFile["action"] == "path":
-					self.add_path(resFile["path"], type='c')
-				else:
-					debug.error("an not do action for : " + str(resFile))
-			except ValueError:
-				debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
-		# when multiprocess availlable, we need to synchronize here ...
-		multiprocess.pool_synchrosize()
+			# when multiprocess availlable, we need to synchronize here ...
+			multiprocess.pool_synchrosize()
 		
 		# generate end point:
 		if self.type=='PREBUILD':
 			debug.print_element("Prebuild", self.name, "==>", "find")
+			self.local_heritage.add_sources(self.src)
 		elif self.type=='LIBRARY':
 			try:
 				tmp_builder = builder.get_builder_with_output("a");
@@ -323,6 +324,7 @@ class Module:
 					                           self.sub_heritage_list,
 					                           name = "lib" + self.name,
 					                           basic_folder = self.origin_folder)
+					self.local_heritage.add_sources(resFile)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'")
 				try:
@@ -355,7 +357,11 @@ class Module:
 			target.copy_to_staging(self.name)
 			if target.endGeneratePackage==True:
 				# generate the package with his properties ...
-				target.make_package(self.name, self.package_prop, self.origin_folder + "/..")
+				if target.name=="Android":
+					self.sub_heritage_list.add_heritage(self.local_heritage)
+					target.make_package(self.name, self.package_prop, self.origin_folder + "/..", self.sub_heritage_list)
+				else:
+					target.make_package(self.name, self.package_prop, self.origin_folder + "/..")
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			

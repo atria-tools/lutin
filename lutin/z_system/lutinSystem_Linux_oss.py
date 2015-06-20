@@ -13,7 +13,7 @@ from lutin import tools
 import os
 
 class System(system.System):
-	def __init__(self):
+	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
 		self.help="OSS : Linux Open Sound System\n Can be install with the package:\n    - ... TODO ..."

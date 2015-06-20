@@ -16,13 +16,9 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="PULSE : The Linux PulseAudio\n Can be install with the package:\n    - libpulse-dev"
-		# check if the library exist:
-		if     not os.path.isfile("/usr/include/pulse/pulseaudio.h"):
-			# we did not find the library reqiested (just return) (automaticly set at false)
-			return;
+		self.help="SDK: Android SDK basic interface java\n"
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag_LD(["-lpulse-simple", "-lpulse"])
+		self.add_export_SRC(target.folder_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar")
 
 

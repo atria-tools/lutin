@@ -13,7 +13,7 @@ from lutin import tools
 import os
 
 class System(system.System):
-	def __init__(self):
+	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
 		self.help="JACK : Jack Low-Latency Audio Server\n Can be install with the package:\n    - libjack-jackd2-dev (new)\n    - libjack-dev (old)"

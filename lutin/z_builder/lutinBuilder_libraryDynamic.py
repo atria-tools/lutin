@@ -99,3 +99,4 @@ def link(file, binary, target, depancy, name, basic_folder):
 	# write cmd line only after to prevent errors ...
 	multiprocess.store_command(cmdLine, file_cmd)
 	#debug.print_element("SharedLib", self.name, "==>", tmpList[1])
+	return file_dst
