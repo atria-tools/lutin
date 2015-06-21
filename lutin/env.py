@@ -41,7 +41,8 @@ def get_print_pretty_mode():
 
 def end_with(name, list):
 	for appl in list:
-		if name[len(name)-len(appl):] == appl:
+		#debug.info("pppppppp : " + str([name[-len(appl):], appl]))
+		if name[-len(appl):] == appl:
 			return True
 	return False
 
@@ -60,19 +61,7 @@ def print_pretty(myString, force=False):
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
 		baseElementList = []
-		if end_with(cmdApplication, ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]) == True:
-			baseElementList = [
-				"-o",
-				"-D",
-				"-I",
-				"-L",
-				"-framework",
-				"-isysroot",
-				"-arch",
-				"-keystore",
-				"-sigalg",
-				"-digestalg"]
-		elif end_with(cmdApplication, ["javac"]) == True:
+		if end_with(cmdApplication, ["javac"]) == True:
 			baseElementList = [
 				"-d",
 				"-D",
@@ -92,6 +81,18 @@ def print_pretty(myString, force=False):
 				"-S",
 				"-J"
 				]
+		elif end_with(cmdApplication, ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]) == True:
+			baseElementList = [
+				"-o",
+				"-D",
+				"-I",
+				"-L",
+				"-framework",
+				"-isysroot",
+				"-arch",
+				"-keystore",
+				"-sigalg",
+				"-digestalg"]
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
 		for element in ["<", "<<", ">", ">>"]:
