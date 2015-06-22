@@ -432,11 +432,12 @@ class Target:
 					return [heritage.HeritageList(), False]
 				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
 	
-	def add_action(self, name_of_state="PACKAGE", action=None):
+	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
+		debug.verbose("add action : " + name)
 		if name_of_state not in self.action_on_state:
-			self.action_on_state[name_of_state] = [action]
+			self.action_on_state[name_of_state] = [[level, name, action]]
 		else:
-			self.action_on_state[name_of_state].append(action)
+			self.action_on_state[name_of_state].append([level, name, action])
 
 
 targetList=[]

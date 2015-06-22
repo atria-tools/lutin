@@ -31,6 +31,7 @@ class System:
 		self.export_libs_ld=[]
 		self.export_libs_ld_shared=[]
 		self.export_src=[]
+		self.action_on_state={}
 		
 	def append_and_check(self, listout, newElement, order):
 		for element in listout:
@@ -66,6 +67,11 @@ class System:
 	def add_export_SRC(self, list):
 		self.append_to_internalList(self.export_src, list)
 	
+	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
+		if name_of_state not in self.action_on_state:
+			self.action_on_state[name_of_state] = [[level, name, action]]
+		else:
+			self.action_on_state[name_of_state].append([level, name, action])
 	
 
 
@@ -79,7 +85,11 @@ def createModuleFromSystem(target, dict):
 	myModule.add_export_flag('m', dict["system"].export_flags_m)
 	myModule.add_export_flag('mm', dict["system"].export_flags_mm)
 	myModule.add_src_file(dict["system"].export_src)
-	# add the currrent module at the 
+	
+	for elem in dict["system"].action_on_state:
+		level, name, action = dict["system"].action_on_state[elem]
+		target.add_action(elem, level, name, action)
+	
 	return myModule
 
 

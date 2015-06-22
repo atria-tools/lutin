@@ -211,9 +211,11 @@ class Module:
 			self.sub_heritage_list.add_heritage_list(inherit_list)
 		# do sub library action for automatic generating ...
 		if self.type in target.action_on_state:
-			for action in target.action_on_state[self.type]:
-				elem = action(target, self, package_name);
-				
+			for lvl in range(0,100):
+				for level, action_name, action in target.action_on_state[self.type]:
+					if level == lvl:
+						debug.debug("level=" + str(level) + " Do Action : " + action_name)
+						elem = action(target, self, package_name);
 		
 		if self.type != 'PREBUILD':
 			# build local sources in a specific order :
@@ -602,8 +604,10 @@ class Module:
 			debug.error("not know pkg element : '" + variable + "'")
 	
 	def pkg_add(self, variable, value):
-		# TODO : Check values...
-		self.package_prop[variable].append(value)
+		if variable in self.package_prop:
+			self.package_prop[variable].append(value)
+		else:
+			self.package_prop[variable] = [value]
 	
 	def ext_project_add_module(self, target, projectMng, added_module = []):
 		if self.name in added_module:
