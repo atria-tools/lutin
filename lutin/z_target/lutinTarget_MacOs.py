@@ -38,6 +38,8 @@ class Target(target.Target):
 		self.suffix_binary=''
 		self.suffix_package=''
 		
+		self.global_flags_cc.append("-D__STDCPP_LLVM__")
+		
 	
 	def get_staging_folder(self, binaryName):
 		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/Contents/"

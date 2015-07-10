@@ -59,6 +59,7 @@ class Target(target.Target):
 		self.suffix_lib_dynamic='.dll'
 		self.suffix_binary='.exe'
 		self.suffix_package=''
+		self.global_flags_cc.append("-D__STDCPP_GNU__")
 	
 	
 	def get_staging_folder_data(self, binaryName):

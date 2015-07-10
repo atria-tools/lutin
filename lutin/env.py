@@ -92,7 +92,9 @@ def print_pretty(myString, force=False):
 				"-arch",
 				"-keystore",
 				"-sigalg",
-				"-digestalg"]
+				"-digestalg",
+				"-target",
+				"-gcc-toolchain"]
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
 		for element in ["<", "<<", ">", ">>"]:

@@ -61,7 +61,8 @@ class Target(target.Target):
 			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.3.sdk"
 			self.global_flags_ld.append("-miphoneos-version-min=8.0")
 			self.global_flags_cc.append("-miphoneos-version-min=8.0")
-
+		
+		self.global_flags_cc.append("-D__STDCPP_LLVM__")
 		self.global_flags_ld.append([
 			"-Xlinker",
 			"-objc_abi_version",
@@ -71,10 +72,10 @@ class Target(target.Target):
 			"-stdlib=libc++",
 			"-fobjc-arc",
 			"-fobjc-link-runtime"])
-	
+		
 		self.global_flags_m.append("-fobjc-arc")
 		#self.global_flags_m.append("-fmodules")
-
+	
 	def get_staging_folder(self, binaryName):
 		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/"
 	

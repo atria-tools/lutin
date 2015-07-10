@@ -66,6 +66,8 @@ def run_command_direct(cmdLine):
 		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except subprocess.CalledProcessError as e:
 		debug.error("subprocess.CalledProcessError : " + str(args))
+	except:
+		debug.error("Exception on : " + str(args))
 	# launch the subprocess:
 	output, err = p.communicate()
 	if sys.version_info >= (3, 0):
@@ -92,6 +94,8 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except subprocess.CalledProcessError as e:
 		debug.error("subprocess.CalledProcessError : TODO ...")
+	except:
+		debug.error("Exception on : " + str(args))
 	# launch the subprocess:
 	output, err = p.communicate()
 	if sys.version_info >= (3, 0):

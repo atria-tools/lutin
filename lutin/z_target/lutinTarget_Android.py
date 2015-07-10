@@ -25,9 +25,13 @@ class Target(target.Target):
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
 			config["bus-size"] = "32"
-		
-		arch = ""#"ARMv7"
+		arch = ""
 		target.Target.__init__(self, "Android", config, arch)
+		
+		if config["bus-size"] == "32":
+			arch="armv7"
+		else:
+			arch="arm64"
 		
 		self.folder_ndk = os.getenv('PROJECT_NDK', "AUTO")
 		self.folder_sdk = os.getenv('PROJECT_SDK', "AUTO")
@@ -59,7 +63,7 @@ class Target(target.Target):
 		if host.BUS_SIZE==64:
 			tmpOsVal = "_64"
 		if self.config["compilator"] == "clang":
-			self.set_cross_base(self.folder_ndk + "/toolchains/llvm-3.3/prebuilt/linux-x86_64/bin/")
+			self.set_cross_base(self.folder_ndk + "/toolchains/llvm-3.6/prebuilt/linux-x86" + tmpOsVal + "/bin/")
 		else:
 			baseFolderArm = self.folder_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
 			baseFolderMips = self.folder_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
@@ -72,12 +76,6 @@ class Target(target.Target):
 			if not os.path.isdir(baseFolderX86):
 				debug.info("Gcc x86 path does not exist !!!")
 		
-		arch = "ARMv7"
-		# for gcc :
-		
-		# for clang :
-		
-		
 		self.folder_bin="/mustNotCreateBinary"
 		self.folder_lib="/data/lib/armeabi"
 		self.folder_data="/data/assets"
@@ -86,7 +84,8 @@ class Target(target.Target):
 		
 		# board id at 14 is for android 4.0 and more ...
 		self.boardId = 14
-		if arch == "ARMv5" or arch == "ARMv7":
+		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.boardId))
+		if arch == "armv5" or arch == "armv7":
 			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
 		elif arch == "mips":
 			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
@@ -95,15 +94,29 @@ class Target(target.Target):
 		
 		if True:
 			if self.config["compilator"] == "clang":
+				if self.boardId < 21:
+					debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")
+				self.global_flags_cc.append("-D__STDCPP_LLVM__")
+				# llvm-libc++ : BSD | MIT
+				self.global_include_cc.append("-gcc-toolchain " + self.folder_ndk +"/sources/android/support/include")
+				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/android/support/include")
 				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
-				if arch == "ARMv5":
+				if arch == "armv5":
 					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
-				elif arch == "ARMv7":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi-v7a/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+				elif arch == "armv7":
+					# The only one tested ... ==> but we have link error ...
+					self.global_flags_cc.append("-target armv7-none-linux-androideabi")
+					self.global_flags_cc.append("-march=armv7-a")
+					self.global_flags_cc.append("-mfpu=vfpv3-d16")
+					self.global_flags_cc.append("-mhard-float")
+					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/"
+					self.global_flags_ld.append(         stdCppBasePath + "thumb/libc++_static.a")
+					self.global_flags_ld.append("-target armv7-none-linux-androideabi")
+					self.global_flags_ld.append("-Wl,--fix-cortex-a8")
+					self.global_flags_ld.append("-Wl,--no-warn-mismatch")
+					self.global_flags_ld.append("-lm_hard")
 				elif arch == "mips":
 					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/mips/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
@@ -113,13 +126,16 @@ class Target(target.Target):
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
 			else:
+				self.global_flags_cc.append("-D__STDCPP_GNU__")
+				# GPL v3 (+ exception link for gcc compilator)
 				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/include/")
-				if arch == "ARMv5":
+				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/android/support/include/")
+				if arch == "armv5":
 					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
-				elif arch == "ARMv7":
+				elif arch == "armv7":
 					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
@@ -145,22 +161,23 @@ class Target(target.Target):
 		self.global_flags_cc.append("-D__ARM_ARCH_5T__")
 		self.global_flags_cc.append("-D__ARM_ARCH_5E__")
 		self.global_flags_cc.append("-D__ARM_ARCH_5TE__")
-		if self.arch == "ARM":
-			# -----------------------
-			# -- arm V5 :
-			# -----------------------
-			self.global_flags_cc.append("-march=armv5te")
-			self.global_flags_cc.append("-msoft-float")
-		else:
-			# -----------------------
-			# -- arm V7 (Neon) :
-			# -----------------------
-			self.global_flags_cc.append("-mfpu=neon")
-			self.global_flags_cc.append("-mfloat-abi=softfp")
-			self.global_flags_ld.append("-mfpu=neon")
-			self.global_flags_ld.append("-mfloat-abi=softfp")
-			self.global_flags_cc.append("-D__ARM_ARCH_7__")
-			self.global_flags_cc.append("-D__ARM_NEON__")
+		if self.config["compilator"] != "clang":
+			if self.arch == "armv5":
+				# -----------------------
+				# -- arm V5 :
+				# -----------------------
+				self.global_flags_cc.append("-march=armv5te")
+				self.global_flags_cc.append("-msoft-float")
+			else:
+				# -----------------------
+				# -- arm V7 (Neon) :
+				# -----------------------
+				self.global_flags_cc.append("-mfpu=neon")
+				self.global_flags_cc.append("-mfloat-abi=softfp")
+				self.global_flags_ld.append("-mfpu=neon")
+				self.global_flags_ld.append("-mfloat-abi=softfp")
+				self.global_flags_cc.append("-D__ARM_ARCH_7__")
+				self.global_flags_cc.append("-D__ARM_NEON__")
 		
 		# the -mthumb must be set for all the android produc, some ot the not work coretly without this one ... (all android code is generated with this flags)
 		self.global_flags_cc.append("-mthumb")
@@ -168,20 +185,17 @@ class Target(target.Target):
 		# -- Common flags :
 		# -----------------------
 		self.global_flags_cc.append("-fpic")
-		self.global_flags_cc.append("-ffunction-sections")
-		self.global_flags_cc.append("-funwind-tables")
-		self.global_flags_cc.append("-fstack-protector")
-		self.global_flags_cc.append("-Wno-psabi")
-		self.global_flags_cc.append("-mtune=xscale")
-		self.global_flags_cc.append("-fexceptions")
-		##self.global_flags_cc.append("-fno-exceptions")
-		self.global_flags_cc.append("-fomit-frame-pointer")
-		self.global_flags_cc.append("-fno-strict-aliasing")
-		
+		if self.config["compilator"] != "clang":
+			self.global_flags_cc.append("-ffunction-sections")
+			self.global_flags_cc.append("-funwind-tables")
+			self.global_flags_cc.append("-fstack-protector")
+			self.global_flags_cc.append("-Wno-psabi")
+			self.global_flags_cc.append("-mtune=xscale")
+			self.global_flags_cc.append("-fomit-frame-pointer")
+			self.global_flags_cc.append("-fno-strict-aliasing")
 		self.global_flags_xx.append("-frtti")
+		self.global_flags_cc.append("-fexceptions")
 		self.global_flags_xx.append("-Wa,--noexecstack")
-		
-		
 	
 	def check_right_package(self, pkgProperties, value):
 		for val in pkgProperties["RIGHT"]:
