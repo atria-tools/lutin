@@ -31,6 +31,7 @@ myArgs.add(arguments.ArgDefine("s", "force-strip", desc="Force the stripping of 
 myArgs.add_section("properties", "keep in the sequency of the cible")
 myArgs.add(arguments.ArgDefine("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'"))
 myArgs.add(arguments.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
+myArgs.add(arguments.ArgDefine("", "compilator-version", haveParam=True, desc="with travis we need to specify the name of the version if we want to compile with gcc 4.9 ==> --compilator-version=4.9"))
 myArgs.add(arguments.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
 myArgs.add(arguments.ArgDefine("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile"))
 myArgs.add(arguments.ArgDefine("b", "bus", list=[["auto","Automatic choice"],["32","32 bits"],["64","64 bits"]], desc="Adressing size (Bus size)"))
@@ -140,7 +141,8 @@ config = {
 	"arch":"auto",
 	"generate-package":True,
 	"simulation":False,
-	"gcov":False
+	"gcov":False,
+	"compilator-version":""
 	}
 # load the default target :
 my_target = None
@@ -149,6 +151,8 @@ actionDone=False
 for argument in localArgument:
 	if parseGenericArg(argument, False) == True:
 		continue
+	elif argument.get_option_nName() == "compilator-version":
+		config["compilator-version"] = argument.get_arg()
 	elif argument.get_option_nName() == "package":
 		config["generate-package"]=False
 	elif argument.get_option_nName() == "simulation":
@@ -178,7 +182,8 @@ for argument in localArgument:
 			             "arch":"auto",
 			             "generate-package":True,
 			             "simulation":False,
-			             "gcov":False
+			             "gcov":False,
+			             "compilator-version":""
 			          }
 			#remove previous target
 			my_target = None

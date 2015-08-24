@@ -155,6 +155,9 @@ class Target:
 			self.xx = self.cross + "g++"
 			#self.ar=self.cross + "ar"
 			#self.ranlib=self.cross + "ranlib"
+		if self.config["compilator-version"] != "":
+			self.cc = self.cc + "-" + self.config["compilator-version"]
+			self.xx = self.xx + "-" + self.config["compilator-version"]
 		
 		#get g++ compilation version :
 		ret = multiprocess.run_command_direct(self.xx + " -dumpversion");
