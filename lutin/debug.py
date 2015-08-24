@@ -139,3 +139,21 @@ def print_compilator(myString):
 	debugLock.acquire()
 	print(myString)
 	debugLock.release()
+
+def get_color_set() :
+	global color_default
+	global color_red
+	global color_green
+	global color_yellow
+	global color_blue
+	global color_purple
+	global color_cyan
+	return {
+	    "default": color_default,
+	    "red": color_red,
+	    "green": color_green,
+	    "yellow": color_yellow,
+	    "blue": color_blue,
+	    "purple": color_purple,
+	    "cyan": color_cyan,
+	    }

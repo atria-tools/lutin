@@ -47,18 +47,19 @@ localArgument = myArgs.parse()
 	display the help of this makefile
 """
 def usage():
+	color = debug.get_color_set()
 	# generic argument displayed : 
 	myArgs.display()
 	print("		All target can finish with '?clean' '?dump' ... ?action")
-	print("		all")
+	print("		" + color['green'] + "all" + color['default'])
 	print("			build all (only for the current selected board) (bynary and packages)")
-	print("		clean")
+	print("		" + color['green'] + "clean" + color['default'])
 	print("			clean all (same as previous)")
-	print("		dump")
+	print("		" + color['green'] + "dump" + color['default'])
 	print("			Dump all the module dependency and properties")
 	listOfAllModule = module.list_all_module_with_desc()
 	for mod in listOfAllModule:
-		print("		" + mod[0])
+		print("		" + color['green'] + mod[0] + color['default'])
 		if mod[1] != "":
 			print("			" + mod[1])
 	print("	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")

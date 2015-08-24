@@ -70,12 +70,13 @@ class ArgDefine:
 		return False
 	
 	def display(self):
+		color = debug.get_color_set()
 		if self.m_optionSmall != "" and self.m_optionBig != "":
-			print("		-" + self.m_optionSmall + " / --" + self.m_optionBig)
+			print("		" + color['red'] + "-" + self.m_optionSmall + "" + color['default'] + " / " + color['red'] + "--" + self.m_optionBig + color['default'])
 		elif self.m_optionSmall != "":
-			print("		-" + self.m_optionSmall)
+			print("		" + color['red'] + "-" + self.m_optionSmall + color['default'])
 		elif self.m_optionBig != "":
-			print("		--" + self.m_optionBig)
+			print("		" + color['red'] + "--" + self.m_optionBig + color['default'])
 		else:
 			print("		???? ==> internal error ...")
 		if self.m_description != "":
@@ -115,10 +116,12 @@ class ArgSection:
 		return ""
 		
 	def get_porperties(self):
-		return " [" + self.m_section + "]"
+		color = debug.get_color_set()
+		return " [" + color['blue'] + self.m_section + color['default'] + "]"
 	
 	def display(self):
-		print("	[" + self.m_section + "] : " + self.m_description)
+		color = debug.get_color_set()
+		print("	[" + color['blue'] + self.m_section + color['default'] + "] : " + self.m_description)
 	
 	def parse(self, argList, currentID):
 		return currentID;
