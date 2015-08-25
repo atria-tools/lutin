@@ -188,6 +188,7 @@ class Module:
 		debug.extreme_verbose("      " + cmd);
 		ret = multiprocess.run_command_direct(cmd)
 		# parsing ret :
+		debug.extreme_verbose("result: " + str(ret));
 		ret = ret.split('\n');
 		debug.verbose("*** Gcov result parsing ...");
 		useful_list = []
