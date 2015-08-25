@@ -181,7 +181,11 @@ class Module:
 			debug.verbose(" gcov : " + self.name + " <== " + file);
 			file_dst = target.get_full_name_destination(self.name, self.origin_folder, file, "o")
 			global_list_file += file_dst + " "
-		cmd = "gcov --branch-counts --preserve-paths "
+		cmd = "gcov"
+		# specify the version of gcov we need to use
+		if target.config["compilator-version"] != "":
+			cmd += "-" + target.config["compilator-version"] + " "
+		cmd += " --branch-counts --preserve-paths "
 		if generate_output == False:
 			cmd += "--no-output "
 		cmd += global_list_file
