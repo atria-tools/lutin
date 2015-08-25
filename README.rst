@@ -4,6 +4,7 @@ Lutin
 `lutin` is a generic builder and package maker is a FREE software tool.
 
 .. image:: https://badge.fury.io/py/lutin.png
+    :target: https://pypi.python.org/pypi/lutin
 
 Instructions
 ------------
