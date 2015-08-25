@@ -170,6 +170,104 @@ class Module:
 			debug.debug("Might copy folder : " + source + "==>" + destination)
 			tools.copy_anything_target(target, self.origin_folder + "/" + source, destination)
 	
+	def gcov(self, target, generate_output=False):
+		if self.type == 'PREBUILD':
+			debug.error("Can not generate gcov on prebuid system ... : '" + self.name + "'");
+			return
+		# remove uncompilable elements:
+		list_file = tools.filter_extention(self.src, self.extention_order_build, True)
+		global_list_file = ""
+		for file in list_file:
+			debug.verbose(" gcov : " + self.name + " <== " + file);
+			file_dst = target.get_full_name_destination(self.name, self.origin_folder, file, "o")
+			global_list_file += file_dst + " "
+		cmd = "gcov --branch-counts --preserve-paths "
+		if generate_output == False:
+			cmd += "--no-output "
+		cmd += global_list_file
+		debug.extreme_verbose("      " + cmd);
+		ret = multiprocess.run_command_direct(cmd)
+		# parsing ret :
+		ret = ret.split('\n');
+		debug.verbose("*** Gcov result parsing ...");
+		useful_list = []
+		remove_next = False
+		last_file = ""
+		executed_lines = 0
+		executable_lines = 0
+		for elem in ret:
+			if remove_next == True:
+				remove_next = False
+				continue;
+			if    elem[:10] == "Creating '" \
+			   or elem[:10] == "Removing '":
+				remove_next = True
+				continue
+			if     elem[:6] == "File '" \
+			   and self.origin_folder != elem[6:len(self.origin_folder)+6]:
+				remove_next = True
+				continue
+			if elem[:6] == "File '":
+				last_file = elem[6+len(self.origin_folder)+1:-1]
+				continue
+			start_with = "Lines executed:"
+			if elem[:len(start_with)] != start_with:
+				debug.warning("    gcov ret : " + str(elem));
+				debug.warning("         ==> does not start with : " + start_with);
+				debug.warning("         Parsing error");
+				continue
+			out = elem[len(start_with):].split("% of ")
+			if len(out) != 2:
+				debug.warning("    gcov ret : " + str(elem));
+				debug.warning("         Parsing error of '% of '");
+				continue
+			pourcent = float(out[0])
+			total_line_count = int(out[1])
+			total_executed_line = int(float(total_line_count)*pourcent/100.0)
+			useful_list.append([last_file, pourcent, total_executed_line, total_line_count])
+			executed_lines += total_executed_line
+			executable_lines += total_line_count
+			last_file = ""
+		ret = useful_list[:-1]
+		#for elem in ret:
+		#	debug.info("    " + str(elem));
+		for elem in ret:
+			if elem[1]<10.0:
+				debug.info("   %   " + str(elem[1]) + "\r\t\t" + str(elem[0]));
+			elif elem[1]<100.0:
+				debug.info("   %  " + str(elem[1]) + "\r\t\t" + str(elem[0]));
+			else:
+				debug.info("   % " + str(elem[1]) + "\r\t\t" + str(elem[0]));
+		pourcent = 100.0*float(executed_lines)/float(executable_lines)
+		# generate json file:
+		json_file_name = target.get_build_folder(self.name) + "/" + self.name + "_coverage.json"
+		debug.debug("generate json file : " + json_file_name)
+		tmp_file = open(json_file_name, 'w')
+		tmp_file.write('{\n')
+		tmp_file.write('	"lib-name":"' + self.name + '",\n')
+		#tmp_file.write('	"coverage":"' + str(pourcent) + '",\n')
+		tmp_file.write('	"executed":"' + str(executed_lines) + '",\n')
+		tmp_file.write('	"executable":"' + str(executable_lines) + '",\n')
+		tmp_file.write('	"list":[\n')
+		val = 0
+		for elem in ret:
+			if val == 0 :
+				tmp_file.write('		{\n')
+			else:
+				tmp_file.write('		}, {\n')
+			val += 1
+			tmp_file.write('			"file":"' + elem[0] + '",\n')
+			#tmp_file.write('			"coverage":' + str(elem[1]) + ',\n')
+			tmp_file.write('			"executed":' + str(elem[2]) + ',\n')
+			tmp_file.write('			"executable":' + str(elem[3]) + '\n')
+		tmp_file.write('		}\n')
+		tmp_file.write('	]\n')
+		tmp_file.write('}\n')
+		tmp_file.flush()
+		tmp_file.close()
+		# print debug:
+		debug.print_element("coverage", self.name, ":", str(pourcent) + "%  " + str(executed_lines) + "/" + str(executable_lines))
+	
 	# call here to build the module
 	def build(self, target, package_name):
 		# ckeck if not previously build

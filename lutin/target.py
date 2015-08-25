@@ -374,6 +374,9 @@ class Target:
 				return
 	
 	def build(self, name, packagesName=None, optionnal=False):
+		if name == "gcov":
+			debug.info("gcov all")
+			debug.error("must set the gcov parsig on a specific library or binary ==> not supported now for all")
 		if name == "dump":
 			debug.info("dump all")
 			self.load_all()
@@ -400,6 +403,10 @@ class Target:
 			# get the action an the module ....
 			gettedElement = name.split("?")
 			moduleName = gettedElement[0]
+			if len(gettedElement)>=3:
+				sub_action_name = gettedElement[2]
+			else:
+				sub_action_name = ""
 			if len(gettedElement)>=2:
 				actionName = gettedElement[1]
 			else :
@@ -426,6 +433,11 @@ class Target:
 						elif actionName == "clean":
 							debug.info("clean module '" + moduleName + "'")
 							return mod.clean(self)
+						elif actionName == "gcov":
+							debug.debug("gcov on module '" + moduleName + "'")
+							if sub_action_name == "output":
+								return mod.gcov(self, generate_output=True)
+							return mod.gcov(self, generate_output=False)
 						elif actionName == "build":
 							debug.debug("build module '" + moduleName + "'")
 							if optionnal == True:

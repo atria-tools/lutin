@@ -51,13 +51,15 @@ def usage():
 	color = debug.get_color_set()
 	# generic argument displayed : 
 	myArgs.display()
-	print("		All target can finish with '?clean' '?dump' ... ?action")
+	print("		All target can finish with '?clean' '?dump' '?gcov' ... ?action")
 	print("		" + color['green'] + "all" + color['default'])
 	print("			build all (only for the current selected board) (bynary and packages)")
 	print("		" + color['green'] + "clean" + color['default'])
 	print("			clean all (same as previous)")
 	print("		" + color['green'] + "dump" + color['default'])
 	print("			Dump all the module dependency and properties")
+	print("		" + color['green'] + "gcov" + color['default'])
+	print("			Parse all the code of the library with the gcov resolution")
 	listOfAllModule = module.list_all_module_with_desc()
 	for mod in listOfAllModule:
 		print("		" + color['green'] + mod[0] + color['default'])
