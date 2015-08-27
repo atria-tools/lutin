@@ -12,32 +12,45 @@ from . import debug
 
 
 
-forceMode=False
+force_mode=False
 
 def set_force_mode(val):
-	global forceMode
+	global force_mode
 	if val==1:
-		forceMode = 1
+		force_mode = 1
 	else:
-		forceMode = 0
+		force_mode = 0
 
 def get_force_mode():
-	global forceMode
-	return forceMode
+	global force_mode
+	return force_mode
 
 
-printPrettyMode=False
+print_pretty_mode=False
 
 def set_print_pretty_mode(val):
-	global printPrettyMode
+	global print_pretty_mode
 	if val == True:
-		printPrettyMode = True
+		print_pretty_mode = True
 	else:
-		printPrettyMode = False
+		print_pretty_mode = False
 
 def get_print_pretty_mode():
-	global printPrettyMode
-	return printPrettyMode
+	global print_pretty_mode
+	return print_pretty_mode
+
+store_warning=False
+def set_warning_mode(val):
+	global store_warning
+	if val == True:
+		store_warning = True
+	else:
+		store_warning = False
+
+def get_warning_mode():
+	global store_warning
+	return store_warning
+
 
 def end_with(name, list):
 	for appl in list:
@@ -47,14 +60,14 @@ def end_with(name, list):
 	return False
 
 
-def print_pretty(myString, force=False):
-	global printPrettyMode
-	if    printPrettyMode == True \
+def print_pretty(my_string, force=False):
+	global print_pretty_mode
+	if    print_pretty_mode == True \
 	   or force == True:
-		if myString[len(myString)-1] == ' ':
-			tmpcmdLine = myString[:len(myString)-1]
+		if my_string[len(my_string)-1] == ' ':
+			tmpcmdLine = my_string[:len(my_string)-1]
 		else:
-			tmpcmdLine = myString
+			tmpcmdLine = my_string
 		cmdApplication = tmpcmdLine.split(' ')[0]
 		tmpcmdLine = tmpcmdLine.replace(' ', '\n\t')
 		tmpcmdLine = tmpcmdLine.replace('\n\t\n\t', '\n\t')
@@ -103,18 +116,18 @@ def print_pretty(myString, force=False):
 		
 		return tmpcmdLine
 	else:
-		return myString
+		return my_string
 
-forceStripMode=False
+force_strip_mode=False
 
 def set_force_strip_mode(val):
-	global forceStripMode
-	if val==True:
-		forceStripMode = True
+	global force_strip_mode
+	if val == True:
+		force_strip_mode = True
 	else:
-		forceStripMode = False
+		force_strip_mode = False
 
 def get_force_strip_mode():
-	global forceStripMode
-	return forceStripMode
+	global force_strip_mode
+	return force_strip_mode
 

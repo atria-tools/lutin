@@ -57,7 +57,7 @@ class Module:
 		# sources list:
 		self.src = []
 		# copy files and folders:
-		self.imageToCopy = []
+		self.image_to_copy = []
 		self.files = []
 		self.folders = []
 		self.isbuild = False
@@ -127,7 +127,7 @@ class Module:
 	## @brief Commands for copying files
 	##
 	def image_to_staging(self, binary_name, target):
-		for source, destination, sizeX, sizeY in self.imageToCopy:
+		for source, destination, sizeX, sizeY in self.image_to_copy:
 			extension = source[source.rfind('.'):]
 			if     extension != ".png" \
 			   and extension != ".jpg" \
@@ -329,7 +329,7 @@ class Module:
 					fileExt = file.split(".")[-1]
 					try:
 						tmp_builder = builder.get_builder(fileExt);
-						resFile = tmp_builder.compile(file,
+						res_file = tmp_builder.compile(file,
 						                             package_name,
 						                             target,
 						                             self.sub_heritage_list,
@@ -337,12 +337,12 @@ class Module:
 						                             path = self.path,
 						                             name = self.name,
 						                             basic_folder = self.origin_folder)
-						if resFile["action"] == "add":
-							list_sub_file_needed_to_build.append(resFile["file"])
-						elif resFile["action"] == "path":
-							self.add_path(resFile["path"], type='c')
+						if res_file["action"] == "add":
+							list_sub_file_needed_to_build.append(res_file["file"])
+						elif res_file["action"] == "path":
+							self.add_path(res_file["path"], type='c')
 						else:
-							debug.error("an not do action for : " + str(resFile))
+							debug.error("an not do action for : " + str(res_file))
 					except ValueError:
 						debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
 			# now build the other :
@@ -352,7 +352,7 @@ class Module:
 				fileExt = file.split(".")[-1]
 				try:
 					tmp_builder = builder.get_builder(fileExt);
-					resFile = tmp_builder.compile(file,
+					res_file = tmp_builder.compile(file,
 					                             package_name,
 					                             target,
 					                             self.sub_heritage_list,
@@ -360,12 +360,12 @@ class Module:
 					                             path = self.path,
 					                             name = self.name,
 					                             basic_folder = self.origin_folder)
-					if resFile["action"] == "add":
-						list_sub_file_needed_to_build.append(resFile["file"])
-					elif resFile["action"] == "path":
-						self.add_path(resFile["path"], type='c')
+					if res_file["action"] == "add":
+						list_sub_file_needed_to_build.append(res_file["file"])
+					elif res_file["action"] == "path":
+						self.add_path(res_file["path"], type='c')
 					else:
-						debug.error("an not do action for : " + str(resFile))
+						debug.error("an not do action for : " + str(res_file))
 				except ValueError:
 					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
 			# when multiprocess availlable, we need to synchronize here ...
@@ -380,37 +380,37 @@ class Module:
 				tmp_builder = builder.get_builder_with_output("a");
 				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
 				if len(list_file) > 0:
-					resFile = tmp_builder.link(list_file,
-					                           package_name,
-					                           target,
-					                           self.sub_heritage_list,
-					                           name = self.name,
-					                           basic_folder = self.origin_folder)
-					self.local_heritage.add_sources(resFile)
+					res_file = tmp_builder.link(list_file,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = self.name,
+					                            basic_folder = self.origin_folder)
+					self.local_heritage.add_sources(res_file)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.a'")
 			try:
 				tmp_builder = builder.get_builder_with_output("jar");
 				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
 				if len(list_file) > 0:
-					resFile = tmp_builder.link(list_file,
-					                           package_name,
-					                           target,
-					                           self.sub_heritage_list,
-					                           name = self.name,
-					                           basic_folder = self.origin_folder)
-					self.local_heritage.add_sources(resFile)
+					res_file = tmp_builder.link(list_file,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = self.name,
+					                            basic_folder = self.origin_folder)
+					self.local_heritage.add_sources(res_file)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.jar'")
 		elif self.type=='BINARY':
 			try:
 				tmp_builder = builder.get_builder_with_output("bin");
-				resFile = tmp_builder.link(list_sub_file_needed_to_build,
-				                           package_name,
-				                           target,
-				                           self.sub_heritage_list,
-				                           name = self.name,
-				                           basic_folder = self.origin_folder)
+				res_file = tmp_builder.link(list_sub_file_needed_to_build,
+				                            package_name,
+				                            target,
+				                            self.sub_heritage_list,
+				                            name = self.name,
+				                            basic_folder = self.origin_folder)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.bin'")
 			# generate tree for this special binary
@@ -423,37 +423,37 @@ class Module:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
 					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
-					resFile = tmp_builder.link(list_file,
-					                           package_name,
-					                           target,
-					                           self.sub_heritage_list,
-					                           name = "lib" + self.name,
-					                           basic_folder = self.origin_folder)
-					self.local_heritage.add_sources(resFile)
+					res_file = tmp_builder.link(list_file,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = "lib" + self.name,
+					                            basic_folder = self.origin_folder)
+					self.local_heritage.add_sources(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'")
 				try:
 					tmp_builder = builder.get_builder_with_output("jar");
 					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
 					if len(list_file) > 0:
-						resFile = tmp_builder.link(list_file,
-						                           package_name,
-						                           target,
-						                           self.sub_heritage_list,
-						                           name = self.name,
-						                           basic_folder = self.origin_folder)
-						self.local_heritage.add_sources(resFile)
+						res_file = tmp_builder.link(list_file,
+						                            package_name,
+						                            target,
+						                            self.sub_heritage_list,
+						                            name = self.name,
+						                            basic_folder = self.origin_folder)
+						self.local_heritage.add_sources(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.jar'")
 			else:
 				try:
 					tmp_builder = builder.get_builder_with_output("bin");
-					resFile = tmp_builder.link(list_sub_file_needed_to_build,
-					                           package_name,
-					                           target,
-					                           self.sub_heritage_list,
-					                           name = self.name,
-					                           basic_folder = self.origin_folder)
+					res_file = tmp_builder.link(list_sub_file_needed_to_build,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = self.name,
+					                            basic_folder = self.origin_folder)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
 			target.clean_module_tree()
@@ -477,7 +477,7 @@ class Module:
 	# call here to build the module
 	def build_tree(self, target, package_name):
 		# ckeck if not previously build
-		if target.is_module_buildTree(self.name)==True:
+		if target.is_module_build_tree(self.name)==True:
 			return
 		debug.verbose("build tree of " + self.name)
 		# add all the elements (first added only one keep ==> permit to everload sublib element)
@@ -519,14 +519,14 @@ class Module:
 		if True==order:
 			listout.sort()
 	
-	def append_to_internalList2(self, listout, module, list, order=False):
+	def append_to_internal_list2(self, listout, module, list, order=False):
 		# add list in the Map
 		if module not in listout:
 			listout[module] = []
 		# add elements...
-		self.append_to_internalList(listout[module], list, order)
+		self.append_to_internal_list(listout[module], list, order)
 	
-	def append_to_internalList(self, listout, list, order=False):
+	def append_to_internal_list(self, listout, list, order=False):
 		if type(list) == type(str()):
 			self.append_and_check(listout, list, order)
 		else:
@@ -535,23 +535,23 @@ class Module:
 				self.append_and_check(listout, elem, order)
 	
 	def add_module_depend(self, list):
-		self.append_to_internalList(self.depends, list, True)
+		self.append_to_internal_list(self.depends, list, True)
 	
 	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
 		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
 	def add_export_path(self, list, type='c'):
-		self.append_to_internalList2(self.path["export"], type, list)
+		self.append_to_internal_list2(self.path["export"], type, list)
 	
 	def add_path(self, list, type='c'):
-		self.append_to_internalList2(self.path["local"], type, list)
+		self.append_to_internal_list2(self.path["local"], type, list)
 	
 	def add_export_flag(self, type, list):
-		self.append_to_internalList2(self.flags["export"], type, list)
+		self.append_to_internal_list2(self.flags["export"], type, list)
 	
 	# add the link flag at the module
 	def compile_flags(self, type, list):
-		self.append_to_internalList2(self.flags["local"], type, list)
+		self.append_to_internal_list2(self.flags["local"], type, list)
 	
 	def compile_version_XX(self, version, same_as_api=True, gnu=False):
 		cpp_version_list = [1999, 2003, 2011, 2014]
@@ -584,10 +584,10 @@ class Module:
 			debug.warning("Can not propagate the gnu extention of the C vesion for API");
 	
 	def add_src_file(self, list):
-		self.append_to_internalList(self.src, list, True)
+		self.append_to_internal_list(self.src, list, True)
 	
 	def copy_image(self, source, destination='', sizeX=-1, sizeY=-1):
-		self.imageToCopy.append([source, destination, sizeX, sizeY])
+		self.image_to_copy.append([source, destination, sizeX, sizeY])
 	
 	def copy_file(self, source, destination=''):
 		self.files.append([source, destination])
@@ -734,21 +734,21 @@ class Module:
 
 
 moduleList=[]
-__startModuleName="lutin_"
+__start_module_name="lutin_"
 
 def import_path(path):
 	global moduleList
 	matches = []
 	debug.debug('MODULE: Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, __startModuleName + "*.py")
+		tmpList = fnmatch.filter(filenames, __start_module_name + "*.py")
 		# Import the module :
 		for filename in tmpList:
 			debug.debug('Module:     Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			moduleName = filename.replace('.py', '')
-			moduleName = moduleName.replace(__startModuleName, '')
+			moduleName = moduleName.replace(__start_module_name, '')
 			debug.debug("MODULE:     Integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
 			moduleList.append([moduleName,os.path.join(root, filename)])
 
@@ -764,8 +764,8 @@ def load_module(target, name):
 	for mod in moduleList:
 		if mod[0] == name:
 			sys.path.append(os.path.dirname(mod[1]))
-			debug.verbose("import module : '" + __startModuleName + name + "'")
-			theModule = __import__(__startModuleName + name)
+			debug.verbose("import module : '" + __start_module_name + name + "'")
+			theModule = __import__(__start_module_name + name)
 			#try:
 			tmpElement = theModule.create(target)
 			#except:

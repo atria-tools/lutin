@@ -41,7 +41,7 @@ def get_output_type():
 ## @brief Commands for running gcc to link an executable.
 ##
 def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, name, basic_folder, file, "bin")
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "bin")
 	#create comdLine :
 	cmd = [
 		target.xx
@@ -90,7 +90,7 @@ def link(file, binary, target, depancy, name, basic_folder):
 	tools.create_directory_of_file(file_dst)
 	debug.print_element("Executable", name, "==>", file_dst)
 	
-	multiprocess.run_command(cmdLine)
+	multiprocess.run_command(cmdLine, store_output_file=file_warning)
 	if    target.config["mode"] == "release"\
 	   or env.get_force_strip_mode() == True:
 		# get the file size of the non strip file
@@ -99,7 +99,7 @@ def link(file, binary, target, depancy, name, basic_folder):
 		cmdLineStrip=tools.list_to_str([
 			target.strip,
 			file_dst])
-		multiprocess.run_command(cmdLineStrip)
+		multiprocess.run_command(cmdLineStrip, store_output_file=file_warning)
 		# get the stip size of the binary
 		stripSize = tools.file_size(file_dst)
 		debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")

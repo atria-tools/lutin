@@ -45,6 +45,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	file_cmd = target.get_full_name_cmd(name, basic_folder, file)
 	file_dst = target.get_full_name_destination(name, basic_folder, file, get_output_type())
 	file_depend = target.get_full_dependency(name, basic_folder, file)
+	file_warning = target.get_full_name_warning(name, basic_folder, file)
 	
 	# create the command line befor requesting start:
 	cmd = [
@@ -91,7 +92,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	tools.create_directory_of_file(file_dst)
 	comment = ["c", name, "<==", file]
 	# process element
-	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
+	multiprocess.run_in_pool(cmdLine, comment, file_cmd, store_output_file=file_warning)
 	return {"action":"add", "file":file_dst}
 
 

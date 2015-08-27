@@ -42,24 +42,50 @@ isinit = False # the thread are initialized
 errorOccured = False # a thread have an error
 processorAvaillable = 1 # number of CPU core availlable
 
-def store_command(cmdLine, file):
+def store_command(cmd_line, file):
 	# write cmd line only after to prevent errors ...
-	if     file != "" \
-	   and file != None:
-		# Create directory:
-		tools.create_directory_of_file(file)
-		# Store the command Line:
-		file2 = open(file, "w")
-		file2.write(cmdLine)
-		file2.flush()
-		file2.close()
+	if    file != "" \
+	   or file != None:
+		return;
+	debug.verbose("create cmd file: " + file)
+	# Create directory:
+	tools.create_directory_of_file(file)
+	# Store the command Line:
+	file2 = open(file, "w")
+	file2.write(cmd_line)
+	file2.flush()
+	file2.close()
+
+def store_warning(file, output, err):
+	# write warning line only after to prevent errors ...
+	if    file == "" \
+	   or file == None:
+		return;
+	if env.get_warning_mode() == False:
+		debug.verbose("remove warning file: " + file)
+		# remove file if exist...
+		tools.remove_file(file);
+		return;
+	debug.verbose("create warning file: " + file)
+	# Create directory:
+	tools.create_directory_of_file(file)
+	# Store the command Line:
+	file2 = open(file, "w")
+	file2.write("===== output =====\n")
+	file2.write(output)
+	file2.write("\n\n")
+	file2.write("===== error =====\n")
+	file2.write(err)
+	file2.write("\n\n")
+	file2.flush()
+	file2.close()
 
 ##
 ## @brief Execute the command and ruturn generate data
 ##
-def run_command_direct(cmdLine):
+def run_command_direct(cmd_line):
 	# prepare command line:
-	args = shlex.split(cmdLine)
+	args = shlex.split(cmd_line)
 	debug.verbose("cmd = " + str(args))
 	try:
 		# create the subprocess
@@ -82,12 +108,12 @@ def run_command_direct(cmdLine):
 		return False
 
 
-def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
+def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_file=""):
 	global errorOccured
 	global exitFlag
 	global currentIdExecution
 	# prepare command line:
-	args = shlex.split(cmdLine)
+	args = shlex.split(cmd_line)
 	debug.verbose("cmd = " + str(args))
 	try:
 		# create the subprocess
@@ -101,12 +127,14 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 	if sys.version_info >= (3, 0):
 		output = output.decode("utf-8")
 		err = err.decode("utf-8")
+	# store error if needed:
+	store_warning(store_output_file, output, err)
 	# Check error :
 	if p.returncode == 0:
-		debug.debug(env.print_pretty(cmdLine))
+		debug.debug(env.print_pretty(cmd_line))
 		queueLock.acquire()
 		# TODO : Print the output all the time .... ==> to show warnings ...
-		if buildId >= 0 and (output != "" or err != ""):
+		if build_id >= 0 and (output != "" or err != ""):
 			debug.warning("output in subprocess compiling: '" + file + "'")
 		if output != "":
 			debug.print_compilator(output)
@@ -117,8 +145,8 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		errorOccured = True
 		exitFlag = True
 		# if No ID : Not in a multiprocess mode ==> just stop here
-		if buildId < 0:
-			debug.debug(env.print_pretty(cmdLine), force=True)
+		if build_id < 0:
+			debug.debug(env.print_pretty(cmd_line), force=True)
 			debug.print_compilator(output)
 			debug.print_compilator(err)
 			if p.returncode == 2:
@@ -129,12 +157,12 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 			# in multiprocess interface
 			queueLock.acquire()
 			# if an other write an error before, check if the current process is started before ==> then is the first error
-			if errorExecution["id"] >= buildId:
+			if errorExecution["id"] >= build_id:
 				# nothing to do ...
 				queueLock.release()
 				return;
-			errorExecution["id"] = buildId
-			errorExecution["cmd"] = cmdLine
+			errorExecution["id"] = build_id
+			errorExecution["cmd"] = cmd_line
 			errorExecution["return"] = p.returncode
 			errorExecution["err"] = err,
 			errorExecution["out"] = output,
@@ -143,14 +171,14 @@ def run_command(cmdLine, storeCmdLine="", buildId=-1, file=""):
 		return
 	debug.verbose("done 3")
 	# write cmd line only after to prevent errors ...
-	store_command(cmdLine, storeCmdLine)
+	store_command(cmd_line, store_cmd_line)
 
 
 
 class myThread(threading.Thread):
 	def __init__(self, threadID, lock, queue):
 		threading.Thread.__init__(self)
-		self.threadID = threadID
+		self.thread_id = threadID
 		self.name = "Thread " + str(threadID)
 		self.queue = queue
 		self.lock = lock
@@ -172,8 +200,8 @@ class myThread(threading.Thread):
 					comment = data[2]
 					cmdLine = data[1]
 					cmdStoreFile = data[3]
-					debug.print_element( "[" + str(data[4]) + "][" + str(self.threadID) + "] " + comment[0], comment[1], comment[2], comment[3])
-					run_command(cmdLine, cmdStoreFile, buildId=data[4], file=comment[3])
+					debug.print_element( "[" + str(data[4]) + "][" + str(self.thread_id) + "] " + comment[0], comment[1], comment[2], comment[3])
+					run_command(cmdLine, cmdStoreFile, build_id=data[4], file=comment[3], store_output_file=data[5])
 				else:
 					debug.warning("unknow request command : " + data[0])
 			else:
@@ -228,18 +256,18 @@ def un_init():
 
 
 
-def run_in_pool(cmdLine, comment, storeCmdLine=""):
+def run_in_pool(cmd_line, comment, store_cmd_line="", store_output_file=""):
 	global currentIdExecution
 	if processorAvaillable <= 1:
 		debug.print_element(comment[0], comment[1], comment[2], comment[3])
-		run_command(cmdLine, storeCmdLine, file=comment[3])
+		run_command(cmd_line, store_cmd_line, file=comment[3], store_output_file=store_output_file)
 		return
 	# multithreaded mode
 	init()
 	# Fill the queue
 	queueLock.acquire()
 	debug.verbose("add : in pool cmdLine")
-	workQueue.put(["cmdLine", cmdLine, comment, storeCmdLine, currentIdExecution])
+	workQueue.put(["cmdLine", cmd_line, comment, store_cmd_line, currentIdExecution, store_output_file])
 	currentIdExecution +=1;
 	queueLock.release()
 	

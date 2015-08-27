@@ -39,7 +39,7 @@ def get_output_type():
 ## @brief Commands for running gcc to link a shared library.
 ##
 def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, name, basic_folder, file, "jar")
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "jar")
 	#create command Line
 	cmd = [
 		target.jar,
@@ -63,7 +63,7 @@ def link(file, binary, target, depancy, name, basic_folder):
 	"""
 	tools.create_directory_of_file(file_dst)
 	debug.print_element("jar", name, "==>", file_dst)
-	multiprocess.run_command(cmdLine)
+	multiprocess.run_command(cmdLine, store_output_file=file_warning)
 	# write cmd line only after to prevent errors ...
 	multiprocess.store_command(cmdLine, file_cmd)
 	#debug.print_element("SharedLib", self.name, "==>", tmpList[1])

@@ -31,7 +31,7 @@ class HeritageList:
 		self.src=[]
 		self.path={}
 		
-		self.listHeritage=[]
+		self.list_heritage=[]
 		if heritage != None:
 			self.add_heritage(heritage)
 	
@@ -39,22 +39,22 @@ class HeritageList:
 		if    type(heritage) == type(None) \
 		   or heritage.name == "":
 			return
-		for element in self.listHeritage:
+		for element in self.list_heritage:
 			if element.name == heritage.name:
 				return
-		self.listHeritage.append(heritage)
+		self.list_heritage.append(heritage)
 		self.regenerate_tree()
 		
 	def add_heritage_list(self, heritage_list):
 		if type(heritage_list) == type(None):
 			return
-		for herit in heritage_list.listHeritage:
+		for herit in heritage_list.list_heritage:
 			find = False
-			for element in self.listHeritage:
+			for element in self.list_heritage:
 				if element.name == herit.name:
 					find = True
 			if find == False:
-				self.listHeritage.append(herit)
+				self.list_heritage.append(herit)
 		self.regenerate_tree()
 	
 	def regenerate_tree(self):
@@ -63,34 +63,34 @@ class HeritageList:
 		self.src=[]
 		self.path={}
 		# reorder heritage list :
-		listHeritage = self.listHeritage
-		self.listHeritage = []
+		listHeritage = self.list_heritage
+		self.list_heritage = []
 		# first step : add all lib with no dependency:
 		for herit in listHeritage:
 			if len(herit.depends) == 0:
-				self.listHeritage.append(herit)
+				self.list_heritage.append(herit)
 				listHeritage.remove(herit)
 		while len(listHeritage) > 0:
 			currentHeritageSize = len(listHeritage)
 			debug.verbose("list heritage = " + str([[x.name, x.depends] for x in listHeritage]))
 			# Add element only when all dependence are resolved
 			for herit in listHeritage:
-				listDependsName = [y.name for y in self.listHeritage]
+				listDependsName = [y.name for y in self.list_heritage]
 				if all(x in listDependsName for x in herit.depends) == True:
 					listHeritage.remove(herit)
-					self.listHeritage.append(herit)
+					self.list_heritage.append(herit)
 			if currentHeritageSize == len(listHeritage):
 				debug.warning("Not resolve dependency between the library ==> can be a cyclic dependency !!!")
 				for herit in listHeritage:
-					self.listHeritage.append(herit)
+					self.list_heritage.append(herit)
 				listHeritage = []
 				debug.warning("new heritage list:")
-				for element in self.listHeritage:
+				for element in self.list_heritage:
 					debug.warning("	" + element.name + " " + str(element.depends))
 		debug.verbose("new heritage list:")
-		for element in self.listHeritage:
+		for element in self.list_heritage:
 			debug.verbose("	" + element.name + " " + str(element.depends))
-		for element in reversed(self.listHeritage):
+		for element in reversed(self.list_heritage):
 			for flags in element.flags:
 				if flags in ["c-version", "c++-version"]:
 					continue

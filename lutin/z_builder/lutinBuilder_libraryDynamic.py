@@ -39,7 +39,7 @@ def get_output_type():
 ## @brief Commands for running gcc to link a shared library.
 ##
 def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, name, basic_folder, file, "lib-shared")
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "lib-shared")
 	#create command Line
 	cmd = [
 		target.xx,
@@ -82,7 +82,7 @@ def link(file, binary, target, depancy, name, basic_folder):
 		return tmpList[1]
 	tools.create_directory_of_file(file_dst)
 	debug.print_element("SharedLib", name, "==>", file_dst)
-	multiprocess.run_command(cmdLine)
+	multiprocess.run_command(cmdLine, store_output_file=file_warning)
 	# strip the output file:
 	if    target.config["mode"] == "release" \
 	   or env.get_force_strip_mode() == True:
@@ -92,7 +92,7 @@ def link(file, binary, target, depancy, name, basic_folder):
 		cmdLineStrip=tools.list_to_str([
 			target.strip,
 			file_dst])
-		multiprocess.run_command(cmdLineStrip)
+		multiprocess.run_command(cmdLineStrip, store_output_file=file_warning)
 		# get the stip size of the binary
 		stripSize = tools.file_size(file_dst)
 		debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")

@@ -98,7 +98,7 @@ def createModuleFromSystem(target, dict):
 # Dictionnaire of Target name
 #   inside table of ["Name of the lib", "path of the lib", boolean loaded, module loaded]
 systemList={}
-__startSystemName="lutinSystem_"
+__start_system_name="lutinSystem_"
 
 
 def import_path(path):
@@ -106,13 +106,13 @@ def import_path(path):
 	matches = []
 	debug.debug('Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, __startSystemName + "*.py")
+		tmpList = fnmatch.filter(filenames, __start_system_name + "*.py")
 		# Import the module :
 		for filename in tmpList:
 			debug.verbose('    Find a file : "%s"' %os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			systemName = filename.replace('.py', '')
-			systemName = systemName.replace(__startSystemName, '')
+			systemName = systemName.replace(__start_system_name, '')
 			targetType, systemName = systemName.split('_')
 			debug.debug("integrate system: '" + targetType + "':'" + systemName + "' from '" + os.path.join(root, filename) + "'")
 			if targetType in systemList:
@@ -151,7 +151,7 @@ def exist(lib_name, target_name, target) :
 				debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
 				sys.path.append(os.path.dirname(data["path"]))
 				debug.verbose("import system : '" + data["name"] + "'")
-				theSystem = __import__(__startSystemName + target_name + "_" + data["name"])
+				theSystem = __import__(__start_system_name + target_name + "_" + data["name"])
 				#create the system module
 				try:
 					debug.info("call : " + data["name"])

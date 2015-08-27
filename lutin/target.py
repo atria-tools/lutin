@@ -26,9 +26,9 @@ class Target:
 		self.config = config
 		
 		#processor type selection (auto/arm/ppc/x86)
-		self.selectArch = config["arch"]; # TODO : Remove THIS ...
+		self.select_arch = config["arch"]; # TODO : Remove THIS ...
 		#bus size selection (auto/32/64)
-		self.selectBus = config["bus-size"]; # TODO : Remove THIS ...
+		self.select_bus = config["bus-size"]; # TODO : Remove THIS ...
 		
 		if config["bus-size"] == "auto":
 			debug.error("system error ==> must generate the default 'bus-size' config")
@@ -44,7 +44,7 @@ class Target:
 		# todo : remove this :
 		self.sumulator = config["simulation"]
 		self.name=name
-		self.endGeneratePackage = config["generate-package"]
+		self.end_generate_package = config["generate-package"]
 		debug.info("=================================");
 		debug.info("== Target='" + self.name + "' " + config["bus-size"] + " bits for arch '" + config["arch"] + "'");
 		debug.info("=================================");
@@ -56,8 +56,8 @@ class Target:
 		###############################################################################
 		self.global_include_cc=[]
 		self.global_flags_cc=['-D__TARGET_OS__'+self.name,
-		                      '-D__TARGET_ARCH__'+self.selectArch,
-		                      '-D__TARGET_ADDR__'+self.selectBus + 'BITS',
+		                      '-D__TARGET_ARCH__'+self.select_arch,
+		                      '-D__TARGET_ADDR__'+self.select_bus + 'BITS',
 		                      '-D_REENTRANT']
 		
 		self.global_flags_xx=[]
@@ -74,7 +74,8 @@ class Target:
 		
 		self.global_sysroot=""
 		
-		self.suffix_cmdLine='.cmd'
+		self.suffix_cmd_line='.cmd'
+		self.suffix_warning='.warning'
 		self.suffix_dependence='.d'
 		self.suffix_obj='.o'
 		self.suffix_lib_static='.a'
@@ -105,11 +106,11 @@ class Target:
 		self.folder_lib="/usr/lib"
 		self.folder_data="/usr/share"
 		self.folder_doc="/usr/share/doc"
-		self.buildDone=[]
-		self.buildTreeDone=[]
-		self.moduleList=[]
+		self.build_done=[]
+		self.build_tree_done=[]
+		self.module_list=[]
 		# output staging files list :
-		self.listFinalFile=[]
+		self.list_final_file=[]
 		
 		self.sysroot=""
 		
@@ -176,24 +177,24 @@ class Target:
 		return self.config["mode"]
 	
 	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY, cmdFile=None):
-		for source, dst, x, y, cmdFile2 in self.listFinalFile:
+		for source, dst, x, y, cmdFile2 in self.list_final_file:
 			if dst == outputFile :
 				debug.verbose("already added : " + outputFile)
 				return
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'")
-		self.listFinalFile.append([inputFile,outputFile, sizeX, sizeY, cmdFile])
+		self.list_final_file.append([inputFile,outputFile, sizeX, sizeY, cmdFile])
 	
 	def add_file_staging(self, inputFile, outputFile, cmdFile=None):
-		for source, dst, x, y, cmdFile2 in self.listFinalFile:
+		for source, dst, x, y, cmdFile2 in self.list_final_file:
 			if dst == outputFile :
 				debug.verbose("already added : " + outputFile)
 				return
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
-		self.listFinalFile.append([inputFile, outputFile, -1, -1, cmdFile])
+		self.list_final_file.append([inputFile, outputFile, -1, -1, cmdFile])
 	
 	def copy_to_staging(self, binaryName):
 		baseFolder = self.get_staging_folder_data(binaryName)
-		for source, dst, x, y, cmdFile in self.listFinalFile:
+		for source, dst, x, y, cmdFile in self.list_final_file:
 			if     cmdFile != None \
 			   and cmdFile != "":
 				debug.verbose("cmd file " + cmdFile)
@@ -206,8 +207,8 @@ class Target:
 	
 	
 	def clean_module_tree(self):
-		self.buildTreeDone = []
-		self.listFinalFile = []
+		self.build_tree_done = []
+		self.list_final_file = []
 	
 	
 	# TODO : Remove this hack ... ==> really bad ... but usefull
@@ -224,8 +225,11 @@ class Target:
 	def get_full_name_cmd(self, moduleName, basePath, file):
 		if file[0] == '/':
 			if tools.os.path.isfile(file):
-				return file + self.suffix_cmdLine
-		return self.get_build_folder(moduleName) + "/" + file + self.suffix_cmdLine
+				return file + self.suffix_cmd_line
+		return self.get_build_folder(moduleName) + "/" + file + self.suffix_cmd_line
+	
+	def get_full_name_warning(self, moduleName, basePath, file):
+		return self.get_build_folder(moduleName) + "/" + file + self.suffix_warning;
 	
 	def get_full_name_destination(self, moduleName, basePath, file, suffix, remove_suffix=False):
 		# special patch for java file:
@@ -259,24 +263,28 @@ class Target:
 			list.append(file)
 			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary + self.suffix_cmd_line)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary + self.suffix_warning)
 		elif (type=="lib-shared"):
 			list.append(file)
 			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic + self.suffix_cmd_line)
+			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic + self.suffix_warning)
 		elif (type=="lib-static"):
 			list.append(file)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static + self.suffix_cmdLine)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static + self.suffix_cmd_line)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static + self.suffix_warning)
 		elif (type=="jar"):
 			list.append(file)
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar")
 			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_dependence)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_cmdLine)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_cmd_line)
+			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_warning)
 		elif (type=="image"):
-			list.append(self.get_build_folder(binaryName) + "/data/" + file + self.suffix_cmdLine)
+			list.append(self.get_build_folder(binaryName) + "/data/" + file + self.suffix_cmd_line)
 		else:
 			debug.error("unknow type : " + type)
 		return list
@@ -297,25 +305,25 @@ class Target:
 		return tools.get_run_folder() + self.folder_out + self.folder_doc + "/" + moduleName
 	
 	def is_module_build(self, my_module):
-		for mod in self.buildDone:
+		for mod in self.build_done:
 			if mod == my_module:
 				return True
-		self.buildDone.append(my_module)
+		self.build_done.append(my_module)
 		return False
 	
-	def is_module_buildTree(self, my_module):
-		for mod in self.buildTreeDone:
+	def is_module_build_tree(self, my_module):
+		for mod in self.build_tree_done:
 			if mod == my_module:
 				return True
-		self.buildTreeDone.append(my_module)
+		self.build_tree_done.append(my_module)
 		return False
 	
 	def add_module(self, newModule):
 		debug.debug("Add nodule for Taget : " + newModule.name)
-		self.moduleList.append(newModule)
+		self.module_list.append(newModule)
 	
 	def get_module(self, name):
-		for mod in self.buildDone:
+		for mod in self.build_done:
 			if mod.name == name:
 				return mod
 		debug.error("the module '" + str(name) + "'does not exist/already build")
@@ -324,28 +332,28 @@ class Target:
 	# return inherit packages ...
 	"""
 	def build(self, name, packagesName):
-		for module in self.moduleList:
+		for module in self.module_list:
 			if module.name == name:
 				return module.build(self, packagesName)
 		debug.error("request to build an un-existant module name : '" + name + "'")
 	"""
 	
 	def build_tree(self, name, packagesName):
-		for mod in self.moduleList:
+		for mod in self.module_list:
 			if mod.name == name:
 				mod.build_tree(self, packagesName)
 				return
 		debug.error("request to build tree on un-existant module name : '" + name + "'")
 	
 	def clean(self, name):
-		for mod in self.moduleList:
+		for mod in self.module_list:
 			if mod.name == name:
 				mod.clean(self)
 				return
 		debug.error("request to clean an un-existant module name : '" + name + "'")
 	
 	def load_if_needed(self, name, optionnal=False):
-		for elem in self.moduleList:
+		for elem in self.module_list:
 			if elem.name == name:
 				return True
 		# TODO : Check internal module and system module ...
@@ -368,7 +376,7 @@ class Target:
 			self.load_if_needed(modName)
 	
 	def project_add_module(self, name, projectMng, addedModule):
-		for mod in self.moduleList:
+		for mod in self.module_list:
 			if mod.name == name:
 				mod.ext_project_add_module(self, projectMng, addedModule)
 				return
@@ -380,13 +388,13 @@ class Target:
 		if name == "dump":
 			debug.info("dump all")
 			self.load_all()
-			for mod in self.moduleList:
+			for mod in self.module_list:
 				mod.display(self)
 			return
 		if name == "all":
 			debug.info("build all")
 			self.load_all()
-			for mod in self.moduleList:
+			for mod in self.module_list:
 				if self.name=="Android":
 					if mod.type == "PACKAGE":
 						mod.build(self, None)
@@ -397,7 +405,7 @@ class Target:
 		elif name == "clean":
 			debug.info("clean all")
 			self.load_all()
-			for mod in self.moduleList:
+			for mod in self.module_list:
 				mod.clean(self)
 		else:
 			# get the action an the module ....
@@ -425,7 +433,7 @@ class Target:
 				   and optionnal == True:
 					return [heritage.HeritageList(), False]
 				# clean requested
-				for mod in self.moduleList:
+				for mod in self.module_list:
 					if mod.name == moduleName:
 						if actionName == "dump":
 							debug.info("dump module '" + moduleName + "'")

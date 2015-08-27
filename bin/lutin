@@ -27,6 +27,7 @@ myArgs.add(arguments.ArgDefine("f", "force", desc="Force the rebuild without che
 myArgs.add(arguments.ArgDefine("P", "pretty", desc="print the debug has pretty display"))
 myArgs.add(arguments.ArgDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
 myArgs.add(arguments.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
+myArgs.add(arguments.ArgDefine("w", "warning", desc="Store warning in a file build file"))
 
 myArgs.add_section("properties", "keep in the sequency of the cible")
 myArgs.add(arguments.ArgDefine("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'"))
@@ -70,12 +71,12 @@ def usage():
 
 # preparse the argument to get the verbose element for debug mode
 def parseGenericArg(argument, active):
-	if argument.get_option_nName() == "help":
+	if argument.get_option_name() == "help":
 		#display help
 		if active==False:
 			usage()
 		return True
-	if argument.get_option_nName() == "list-module":
+	if argument.get_option_name() == "list-module":
 		if active==False:
 			listOfModule = module.list_all_module()
 			retValue = ""
@@ -86,7 +87,7 @@ def parseGenericArg(argument, active):
 			print(retValue)
 			exit(0)
 		return True
-	if argument.get_option_nName() == "list-target":
+	if argument.get_option_name() == "list-target":
 		if active==False:
 			listOfTarget = target.list_all_target()
 			retValue = ""
@@ -97,29 +98,33 @@ def parseGenericArg(argument, active):
 			print(retValue)
 			exit(0)
 		return True
-	elif argument.get_option_nName()=="jobs":
+	elif argument.get_option_name()=="jobs":
 		if active==True:
 			multiprocess.set_core_number(int(argument.get_arg()))
 		return True
-	elif argument.get_option_nName() == "verbose":
+	elif argument.get_option_name() == "verbose":
 		if active==True:
 			debug.set_level(int(argument.get_arg()))
 		return True
-	elif argument.get_option_nName() == "color":
+	elif argument.get_option_name() == "color":
 		if active==True:
 			debug.enable_color()
 		return True
-	elif argument.get_option_nName() == "force":
+	elif argument.get_option_name() == "force":
 		if active==True:
 			env.set_force_mode(True)
 		return True
-	elif argument.get_option_nName() == "pretty":
+	elif argument.get_option_name() == "pretty":
 		if active==True:
 			env.set_print_pretty_mode(True)
 		return True
-	elif argument.get_option_nName() == "force-strip":
+	elif argument.get_option_name() == "force-strip":
 		if active==True:
 			env.set_force_strip_mode(True)
+		return True
+	elif argument.get_option_name() == "warning":
+		if active==True:
+			env.set_warning_mode(True)
 		return True
 	return False
 
@@ -153,25 +158,25 @@ actionDone=False
 for argument in localArgument:
 	if parseGenericArg(argument, False) == True:
 		continue
-	elif argument.get_option_nName() == "compilator-version":
+	elif argument.get_option_name() == "compilator-version":
 		config["compilator-version"] = argument.get_arg()
-	elif argument.get_option_nName() == "package":
+	elif argument.get_option_name() == "package":
 		config["generate-package"]=False
-	elif argument.get_option_nName() == "simulation":
+	elif argument.get_option_name() == "simulation":
 		config["simulation"]=True
-	elif argument.get_option_nName() == "gcov":
+	elif argument.get_option_name() == "gcov":
 		config["gcov"]=True
-	elif argument.get_option_nName() == "bus":
+	elif argument.get_option_name() == "bus":
 		config["bus-size"]=argument.get_arg()
-	elif argument.get_option_nName() == "arch":
+	elif argument.get_option_name() == "arch":
 		config["arch"]=argument.get_arg()
-	elif argument.get_option_nName() == "compilator":
+	elif argument.get_option_name() == "compilator":
 		if config["compilator"] != argument.get_arg():
 			debug.debug("change compilator ==> " + argument.get_arg())
 			config["compilator"] = argument.get_arg()
 			#remove previous target
 			my_target = None
-	elif argument.get_option_nName() == "target":
+	elif argument.get_option_name() == "target":
 		# No check input ==> this will be verify automaticly chen the target will be loaded
 		if targetName != argument.get_arg():
 			targetName = argument.get_arg()
@@ -189,14 +194,14 @@ for argument in localArgument:
 			          }
 			#remove previous target
 			my_target = None
-	elif argument.get_option_nName() == "mode":
+	elif argument.get_option_name() == "mode":
 		if config["mode"] != argument.get_arg():
 			config["mode"] = argument.get_arg()
 			debug.debug("change mode ==> " + config["mode"])
 			#remove previous target
 			my_target = None
 	else:
-		if argument.get_option_nName() != "":
+		if argument.get_option_name() != "":
 			debug.warning("Can not understand argument : '" + argument.get_option_nName() + "'")
 			usage()
 		else:

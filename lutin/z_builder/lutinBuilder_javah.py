@@ -41,8 +41,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	file_cmd = target.get_full_name_cmd(name, basic_folder, file)
 	# file_dst = target.get_full_name_destination(name, basic_folder, file, get_output_type())
 	file_depend = target.get_full_dependency(name, basic_folder, file)
-	
-	
+	file_warning = target.get_full_name_warning(name, basic_folder, file)
 	# create the command line befor requesting start:
 	cmd = [
 		target.javah,
@@ -66,7 +65,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	#tools.create_directory_of_file(file_dst)
 	comment = ["javah", class_to_build.replace(".", "_") + ".h", "<==", class_to_build]
 	#process element
-	multiprocess.run_in_pool(cmdLine, comment, file_cmd)
+	multiprocess.run_in_pool(cmdLine, comment, file_cmd, store_output_file=file_warning)
 	debug.verbose("file= " + file_dst)
 	#return file_dst
 	return {"action":"path", "path":target.get_build_folder(name) + target.folder_generate_code}

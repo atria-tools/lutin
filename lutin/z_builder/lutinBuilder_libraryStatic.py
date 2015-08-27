@@ -39,7 +39,7 @@ def get_output_type():
 ## @brief Commands for running ar.
 ##
 def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd = target.generate_file(binary, name, basic_folder, file, "lib-static")
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "lib-static")
 	#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
 	cmd = [
 		target.ar
@@ -70,13 +70,13 @@ def link(file, binary, target, depancy, name, basic_folder):
 	# explicitly remove the destination to prevent error ...
 	if os.path.exists(file_dst) and os.path.isfile(file_dst):
 		os.remove(file_dst)
-	multiprocess.run_command(cmdLine)
+	multiprocess.run_command(cmdLine, store_output_file=file_warning)
 	#$(Q)$(TARGET_RANLIB) $@
 	if target.ranlib != "":
 		cmdLineRanLib=tools.list_to_str([
 			target.ranlib,
 			file_dst ])
-		multiprocess.run_command(cmdLineRanLib)
+		multiprocess.run_command(cmdLineRanLib, store_output_file=file_warning)
 	# write cmd line only after to prevent errors ...
 	multiprocess.store_command(cmdLine, file_cmd)
 	return file_dst
