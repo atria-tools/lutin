@@ -44,8 +44,8 @@ processorAvaillable = 1 # number of CPU core availlable
 
 def store_command(cmd_line, file):
 	# write cmd line only after to prevent errors ...
-	if    file != "" \
-	   or file != None:
+	if    file == "" \
+	   or file == None:
 		return;
 	debug.verbose("create cmd file: " + file)
 	# Create directory:

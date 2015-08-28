@@ -43,7 +43,7 @@ class Target:
 		
 		# todo : remove this :
 		self.sumulator = config["simulation"]
-		self.name=name
+		self.name = name
 		self.end_generate_package = config["generate-package"]
 		debug.info("=================================");
 		debug.info("== Target='" + self.name + "' " + config["bus-size"] + " bits for arch '" + config["arch"] + "'");
@@ -464,7 +464,7 @@ class Target:
 
 
 targetList=[]
-__startTargetName="lutinTarget_"
+__start_target_name="lutinTarget_"
 
 
 def import_path(path):
@@ -472,14 +472,14 @@ def import_path(path):
 	matches = []
 	debug.debug('TARGET: Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, __startTargetName + "*.py")
+		tmpList = fnmatch.filter(filenames, __start_target_name + "*.py")
 		# Import the module :
 		for filename in tmpList:
 			debug.debug('TARGET:     Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
 			targetName = filename.replace('.py', '')
-			targetName = targetName.replace(__startTargetName, '')
+			targetName = targetName.replace(__start_target_name, '')
 			debug.debug("TARGET:     integrate module: '" + targetName + "' from '" + os.path.join(root, filename) + "'")
 			targetList.append([targetName,os.path.join(root, filename)])
 
@@ -494,8 +494,8 @@ def load_target(name, config):
 		if mod[0] == name:
 			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
 			sys.path.append(os.path.dirname(mod[1]))
-			debug.verbose("import target : '" + __startTargetName + name + "'")
-			theTarget = __import__(__startTargetName + name)
+			debug.verbose("import target : '" + __start_target_name + name + "'")
+			theTarget = __import__(__start_target_name + name)
 			#create the target
 			tmpTarget = theTarget.Target(config)
 			return tmpTarget
@@ -513,7 +513,7 @@ def list_all_target_with_desc():
 	tmpList = []
 	for mod in targetList:
 		sys.path.append(os.path.dirname(mod[1]))
-		theTarget = __import__(__startTargetName + mod[0])
+		theTarget = __import__(__start_target_name + mod[0])
 		try:
 			tmpdesc = theTarget.get_desc()
 			tmpList.append([mod[0], tmpdesc])

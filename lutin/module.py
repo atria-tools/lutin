@@ -460,7 +460,7 @@ class Module:
 			# generate tree for this special binary
 			self.build_tree(target, self.name)
 			target.copy_to_staging(self.name)
-			if target.endGeneratePackage==True:
+			if target.end_generate_package == True:
 				# generate the package with his properties ...
 				if target.name=="Android":
 					self.sub_heritage_list.add_heritage(self.local_heritage)
