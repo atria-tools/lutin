@@ -104,5 +104,5 @@ def link(file, binary, target, depancy, name, basic_folder):
 		stripSize = tools.file_size(file_dst)
 		debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(stripSize/1024) + "ko")
 	# write cmd line only after to prevent errors ...
-	multiprocess.store_command(cmdLine, file_cmd)
+	tools.store_command(cmdLine, file_cmd)
 	

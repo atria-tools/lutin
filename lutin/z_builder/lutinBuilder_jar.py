@@ -65,7 +65,7 @@ def link(file, binary, target, depancy, name, basic_folder):
 	debug.print_element("jar", name, "==>", file_dst)
 	multiprocess.run_command(cmdLine, store_output_file=file_warning)
 	# write cmd line only after to prevent errors ...
-	multiprocess.store_command(cmdLine, file_cmd)
+	tools.store_command(cmdLine, file_cmd)
 	#debug.print_element("SharedLib", self.name, "==>", tmpList[1])
 	return file_dst
 

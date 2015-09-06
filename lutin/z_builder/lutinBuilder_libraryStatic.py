@@ -78,5 +78,5 @@ def link(file, binary, target, depancy, name, basic_folder):
 			file_dst ])
 		multiprocess.run_command(cmdLineRanLib, store_output_file=file_warning)
 	# write cmd line only after to prevent errors ...
-	multiprocess.store_command(cmdLine, file_cmd)
+	tools.store_command(cmdLine, file_cmd)
 	return file_dst

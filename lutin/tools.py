@@ -14,7 +14,7 @@ import fnmatch
 # Local import
 from . import debug
 from . import depend
-import multiprocess
+from . import env
 
 """
 	
@@ -106,7 +106,7 @@ def copy_file(src, dst, cmd_file=None, force=False):
 	debug.print_element("copy file", src, "==>", dst)
 	create_directory_of_file(dst)
 	shutil.copyfile(src, dst)
-	multiprocess.store_command(cmd_line, cmd_file)
+	store_command(cmd_line, cmd_file)
 
 
 def copy_anything(src, dst):
@@ -176,5 +176,42 @@ def move_if_needed(src, dst):
 	file_write_data(dst, src_data)
 	remove_file(src)
 
+def store_command(cmd_line, file):
+	# write cmd line only after to prevent errors ...
+	if    file == "" \
+	   or file == None:
+		return;
+	debug.verbose("create cmd file: " + file)
+	# Create directory:
+	create_directory_of_file(file)
+	# Store the command Line:
+	file2 = open(file, "w")
+	file2.write(cmd_line)
+	file2.flush()
+	file2.close()
+
+def store_warning(file, output, err):
+	# write warning line only after to prevent errors ...
+	if    file == "" \
+	   or file == None:
+		return;
+	if env.get_warning_mode() == False:
+		debug.verbose("remove warning file: " + file)
+		# remove file if exist...
+		remove_file(file);
+		return;
+	debug.verbose("create warning file: " + file)
+	# Create directory:
+	create_directory_of_file(file)
+	# Store the command Line:
+	file2 = open(file, "w")
+	file2.write("===== output =====\n")
+	file2.write(output)
+	file2.write("\n\n")
+	file2.write("===== error =====\n")
+	file2.write(err)
+	file2.write("\n\n")
+	file2.flush()
+	file2.close()
 
 

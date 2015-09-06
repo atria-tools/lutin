@@ -20,7 +20,7 @@ import subprocess
 import shlex
 # Local import
 from . import debug
-import tools
+from . import tools
 from . import env
 
 queueLock = threading.Lock()
@@ -41,44 +41,6 @@ exitFlag = False # resuest stop of the thread
 isinit = False # the thread are initialized
 errorOccured = False # a thread have an error
 processorAvaillable = 1 # number of CPU core availlable
-
-def store_command(cmd_line, file):
-	# write cmd line only after to prevent errors ...
-	if    file == "" \
-	   or file == None:
-		return;
-	debug.verbose("create cmd file: " + file)
-	# Create directory:
-	tools.create_directory_of_file(file)
-	# Store the command Line:
-	file2 = open(file, "w")
-	file2.write(cmd_line)
-	file2.flush()
-	file2.close()
-
-def store_warning(file, output, err):
-	# write warning line only after to prevent errors ...
-	if    file == "" \
-	   or file == None:
-		return;
-	if env.get_warning_mode() == False:
-		debug.verbose("remove warning file: " + file)
-		# remove file if exist...
-		tools.remove_file(file);
-		return;
-	debug.verbose("create warning file: " + file)
-	# Create directory:
-	tools.create_directory_of_file(file)
-	# Store the command Line:
-	file2 = open(file, "w")
-	file2.write("===== output =====\n")
-	file2.write(output)
-	file2.write("\n\n")
-	file2.write("===== error =====\n")
-	file2.write(err)
-	file2.write("\n\n")
-	file2.flush()
-	file2.close()
 
 ##
 ## @brief Execute the command and ruturn generate data
@@ -128,7 +90,7 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 		output = output.decode("utf-8")
 		err = err.decode("utf-8")
 	# store error if needed:
-	store_warning(store_output_file, output, err)
+	tools.store_warning(store_output_file, output, err)
 	# Check error :
 	if p.returncode == 0:
 		debug.debug(env.print_pretty(cmd_line))
@@ -171,7 +133,7 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 		return
 	debug.verbose("done 3")
 	# write cmd line only after to prevent errors ...
-	store_command(cmd_line, store_cmd_line)
+	tools.store_command(cmd_line, store_cmd_line)
 
 
 
