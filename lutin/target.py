@@ -102,10 +102,18 @@ class Target:
 			self.global_flags_ld.append("-ftest-coverage")
 		
 		self.update_folder_tree()
+		"""
 		self.folder_bin="/usr/bin"
 		self.folder_lib="/usr/lib"
 		self.folder_data="/usr/share"
 		self.folder_doc="/usr/share/doc"
+		"""
+		self.folder_bin="/bin"
+		self.folder_lib="/lib"
+		self.folder_data="/share"
+		self.folder_doc="/doc"
+		
+		
 		self.build_done=[]
 		self.build_tree_done=[]
 		self.module_list=[]

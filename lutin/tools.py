@@ -11,6 +11,7 @@ import os
 import shutil
 import errno
 import fnmatch
+import stat
 # Local import
 from . import debug
 from . import depend
@@ -96,7 +97,7 @@ def add_prefix(prefix,list):
 				result.append(prefix+elem)
 			return result
 
-def copy_file(src, dst, cmd_file=None, force=False):
+def copy_file(src, dst, cmd_file=None, force=False, executable=False):
 	if os.path.exists(src) == False:
 		debug.error("Request a copy a file that does not existed : '" + src + "'")
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
@@ -106,22 +107,33 @@ def copy_file(src, dst, cmd_file=None, force=False):
 	debug.print_element("copy file", src, "==>", dst)
 	create_directory_of_file(dst)
 	shutil.copyfile(src, dst)
+	if executable == True:
+		os.chmod(dst, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
 	store_command(cmd_line, cmd_file)
 
 
-def copy_anything(src, dst):
+def copy_anything(src, dst, recursive = False, executable=False):
+	debug.verbose(" copy anything : '" + str(src) + "'")
+	debug.verbose("            to : '" + str(dst) + "'")
 	tmpPath = os.path.dirname(os.path.realpath(src))
 	tmpRule = os.path.basename(src)
+	debug.verbose("    " + str(tmpPath) + ":")
 	for root, dirnames, filenames in os.walk(tmpPath):
-		debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
+		deltaRoot = root[len(tmpPath):]
+		if recursive == False and deltaRoot != "":
+			return
+		debug.verbose("     root='" + str(deltaRoot) + "'") # dir='" + str(dirnames) + "' filenames=" + str(filenames))
 		tmpList = filenames
 		if len(tmpRule)>0:
 			tmpList = fnmatch.filter(filenames, tmpRule)
 		# Import the module :
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
-			debug.verbose("Might copy : '" + tmpPath+cycleFile + "' ==> '" + dst + "'")
-			copy_file(tmpPath+"/"+cycleFile, dst+"/"+cycleFile)
+			debug.verbose("        '" + cycleFile + "'")
+			debug.extreme_verbose("Might copy : '" + tmpPath + "/" + deltaRoot + "/" + cycleFile + "' ==> '" + dst + "'")
+			copy_file(tmpPath + "/" + deltaRoot + "/" + cycleFile,
+			          dst     + "/" + deltaRoot + "/" + cycleFile,
+			          executable=True)
 
 
 def copy_anything_target(target, src, dst):
