@@ -36,29 +36,29 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to compile a C++ file in object file.
 ##
-def compile(file, binary, target, depancy, flags, path, name, basic_folder):
-	# file_src = target.get_full_name_source(basic_folder, file)
-	file_cmd = target.get_full_name_cmd(name, basic_folder, file)
-	# file_dst = target.get_full_name_destination(name, basic_folder, file, get_output_type())
-	file_depend = target.get_full_dependency(name, basic_folder, file)
-	file_warning = target.get_full_name_warning(name, basic_folder, file)
+def compile(file, binary, target, depancy, flags, path, name, basic_path):
+	# file_src = target.get_full_name_source(basic_path, file)
+	file_cmd = target.get_full_name_cmd(name, basic_path, file)
+	# file_dst = target.get_full_name_destination(name, basic_path, file, get_output_type())
+	file_depend = target.get_full_dependency(name, basic_path, file)
+	file_warning = target.get_full_name_warning(name, basic_path, file)
 	# create the command line befor requesting start:
 	cmd = [
 		target.javah,
-		"-d", target.get_build_folder(name) + target.folder_generate_code
+		"-d", target.get_build_path(name) + target.path_generate_code
 		]
 	
 	if debug.get_level() >= 5:
 		cmd.append("-verbose")
 	
 	cmd.append("-classpath")
-	cmd.append(target.get_build_folder(name))
+	cmd.append(target.get_build_path(name))
 	class_to_build = file[:-6]
 	cmd.append(class_to_build)
 	# Create cmd line
 	cmdLine=tools.list_to_str(cmd)
 	
-	file_dst = target.get_build_folder(name) + "/tmp_header/" + class_to_build.replace(".", "_") + ".h"
+	file_dst = target.get_build_path(name) + "/tmp_header/" + class_to_build.replace(".", "_") + ".h"
 	# check the dependency for this file :
 	#if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
 	#	return file_dst
@@ -68,5 +68,5 @@ def compile(file, binary, target, depancy, flags, path, name, basic_folder):
 	multiprocess.run_in_pool(cmdLine, comment, file_cmd, store_output_file=file_warning)
 	debug.verbose("file= " + file_dst)
 	#return file_dst
-	return {"action":"path", "path":target.get_build_folder(name) + target.folder_generate_code}
+	return {"action":"path", "path":target.get_build_path(name) + target.path_generate_code}
 

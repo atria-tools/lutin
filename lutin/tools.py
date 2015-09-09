@@ -20,7 +20,7 @@ from . import env
 """
 	
 """
-def get_run_folder():
+def get_run_path():
 	return os.getcwd()
 
 """
@@ -30,21 +30,21 @@ def get_current_path(file):
 	return os.path.dirname(os.path.realpath(file))
 
 def create_directory_of_file(file):
-	folder = os.path.dirname(file)
+	path = os.path.dirname(file)
 	try:
-		os.stat(folder)
+		os.stat(path)
 	except:
-		os.makedirs(folder)
+		os.makedirs(path)
 
-def get_list_sub_folder(path):
+def get_list_sub_path(path):
 	# TODO : os.listdir(path)
 	for dirname, dirnames, filenames in os.walk(path):
 		return dirnames
 	return []
 
-def remove_folder_and_sub_folder(path):
+def remove_path_and_sub_path(path):
 	if os.path.isdir(path):
-		debug.verbose("remove folder : '" + path + "'")
+		debug.verbose("remove path : '" + path + "'")
 		shutil.rmtree(path)
 
 def remove_file(path):

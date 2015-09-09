@@ -34,7 +34,7 @@ class Module:
 		## Remove all variable to prevent error of multiple deffinition of the module ...
 		debug.verbose("Create a new module : '" + moduleName + "' TYPE=" + moduleType)
 		self.origin_file=''
-		self.origin_folder=''
+		self.origin_path=''
 		# type of the module:
 		self.type='LIBRARY'
 		# Name of the module
@@ -56,10 +56,10 @@ class Module:
 		self.extention_order_build = ["java", "javah"] # all is not set here is done in the provided order ...
 		# sources list:
 		self.src = []
-		# copy files and folders:
+		# copy files and paths:
 		self.image_to_copy = []
 		self.files = []
-		self.folders = []
+		self.paths = []
 		self.isbuild = False
 		
 		## end of basic INIT ...
@@ -73,7 +73,7 @@ class Module:
 			debug.error('    ==> error : "%s" ' %moduleType)
 			raise 'Input value error'
 		self.origin_file = file;
-		self.origin_folder = tools.get_current_path(self.origin_file)
+		self.origin_path = tools.get_current_path(self.origin_file)
 		self.local_heritage = heritage.heritage(self)
 		
 		self.package_prop = { "COMPAGNY_TYPE" : set(""),
@@ -134,14 +134,14 @@ class Module:
 			   and sizeX > 0:
 				debug.error("Can not manage image other than .png and jpg to resize : " + source);
 			displaySource = source
-			source = self.origin_folder + "/" + source
+			source = self.origin_path + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
-			file_cmd = target.generate_file(binary_name, self.name, self.origin_folder, destination, "image")[0]
+			file_cmd = target.generate_file(binary_name, self.name, self.origin_path, destination, "image")[0]
 			if sizeX > 0:
 				debug.verbose("Image file : " + displaySource + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
-				fileName, fileExtension = os.path.splitext(self.origin_folder+"/" + source)
+				fileName, fileExtension = os.path.splitext(self.origin_path+"/" + source)
 				target.add_image_staging(source, destination, sizeX, sizeY, file_cmd)
 			else:
 				debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
@@ -153,11 +153,11 @@ class Module:
 	def files_to_staging(self, binary_name, target):
 		for source, destination in self.files:
 			displaySource = source
-			source = self.origin_folder + "/" + source
+			source = self.origin_path + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
-			file_cmd = target.generate_file(binary_name, self.name, self.origin_folder, destination, "image")[0]
+			file_cmd = target.generate_file(binary_name, self.name, self.origin_path, destination, "image")[0]
 			# TODO : when destination is missing ...
 			debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
 			target.add_file_staging(source, destination, file_cmd)
@@ -165,10 +165,10 @@ class Module:
 	##
 	## @brief Commands for copying files
 	##
-	def folders_to_staging(self, binary_name, target):
-		for source, destination in self.folders:
-			debug.debug("Might copy folder : " + source + "==>" + destination)
-			tools.copy_anything_target(target, self.origin_folder + "/" + source, destination)
+	def paths_to_staging(self, binary_name, target):
+		for source, destination in self.paths:
+			debug.debug("Might copy path : " + source + "==>" + destination)
+			tools.copy_anything_target(target, self.origin_path + "/" + source, destination)
 	
 	def gcov(self, target, generate_output=False):
 		if self.type == 'PREBUILD':
@@ -179,7 +179,7 @@ class Module:
 		global_list_file = ""
 		for file in list_file:
 			debug.verbose(" gcov : " + self.name + " <== " + file);
-			file_dst = target.get_full_name_destination(self.name, self.origin_folder, file, "o")
+			file_dst = target.get_full_name_destination(self.name, self.origin_path, file, "o")
 			global_list_file += file_dst + " "
 		cmd = "gcov"
 		# specify the version of gcov we need to use
@@ -209,11 +209,11 @@ class Module:
 				remove_next = True
 				continue
 			if     elem[:6] == "File '" \
-			   and self.origin_folder != elem[6:len(self.origin_folder)+6]:
+			   and self.origin_path != elem[6:len(self.origin_path)+6]:
 				remove_next = True
 				continue
 			if elem[:6] == "File '":
-				last_file = elem[6+len(self.origin_folder)+1:-1]
+				last_file = elem[6+len(self.origin_path)+1:-1]
 				continue
 			start_with = "Lines executed:"
 			if elem[:len(start_with)] != start_with:
@@ -245,7 +245,7 @@ class Module:
 				debug.info("   % " + str(elem[1]) + "\r\t\t" + str(elem[0]));
 		pourcent = 100.0*float(executed_lines)/float(executable_lines)
 		# generate json file:
-		json_file_name = target.get_build_folder(self.name) + "/" + self.name + "_coverage.json"
+		json_file_name = target.get_build_path(self.name) + "/" + self.name + "_coverage.json"
 		debug.debug("generate json file : " + json_file_name)
 		tmp_file = open(json_file_name, 'w')
 		tmp_file.write('{\n')
@@ -336,7 +336,7 @@ class Module:
 						                             flags = self.flags,
 						                             path = self.path,
 						                             name = self.name,
-						                             basic_folder = self.origin_folder)
+						                             basic_path = self.origin_path)
 						if res_file["action"] == "add":
 							list_sub_file_needed_to_build.append(res_file["file"])
 						elif res_file["action"] == "path":
@@ -344,7 +344,7 @@ class Module:
 						else:
 							debug.error("an not do action for : " + str(res_file))
 					except ValueError:
-						debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
+						debug.warning(" UN-SUPPORTED file format:  '" + self.origin_path + "/" + file + "'")
 			# now build the other :
 			list_file = tools.filter_extention(self.src, self.extention_order_build, invert=True)
 			for file in list_file:
@@ -359,7 +359,7 @@ class Module:
 					                             flags = self.flags,
 					                             path = self.path,
 					                             name = self.name,
-					                             basic_folder = self.origin_folder)
+					                             basic_path = self.origin_path)
 					if res_file["action"] == "add":
 						list_sub_file_needed_to_build.append(res_file["file"])
 					elif res_file["action"] == "path":
@@ -367,7 +367,7 @@ class Module:
 					else:
 						debug.error("an not do action for : " + str(res_file))
 				except ValueError:
-					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_folder + "/" + file + "'")
+					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_path + "/" + file + "'")
 			# when multiprocess availlable, we need to synchronize here ...
 			multiprocess.pool_synchrosize()
 		
@@ -385,8 +385,18 @@ class Module:
 					                            target,
 					                            self.sub_heritage_list,
 					                            name = self.name,
-					                            basic_folder = self.origin_folder)
+					                            basic_path = self.origin_path)
 					self.local_heritage.add_sources(res_file)
+				tmp_builder = builder.get_builder_with_output("so");
+				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+				if len(list_file) > 0:
+					res_file = tmp_builder.link(list_file,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = self.name,
+					                            basic_path = self.origin_path)
+					# TODO : self.local_heritage.add_sources(res_file)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.a'")
 			try:
@@ -398,7 +408,7 @@ class Module:
 					                            target,
 					                            self.sub_heritage_list,
 					                            name = self.name,
-					                            basic_folder = self.origin_folder)
+					                            basic_path = self.origin_path)
 					self.local_heritage.add_sources(res_file)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.jar'")
@@ -410,7 +420,7 @@ class Module:
 				                            target,
 				                            self.sub_heritage_list,
 				                            name = self.name,
-				                            basic_folder = self.origin_folder)
+				                            basic_path = self.origin_path)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.bin'")
 			# generate tree for this special binary
@@ -428,7 +438,7 @@ class Module:
 					                            target,
 					                            self.sub_heritage_list,
 					                            name = "lib" + self.name,
-					                            basic_folder = self.origin_folder)
+					                            basic_path = self.origin_path)
 					self.local_heritage.add_sources(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'")
@@ -441,7 +451,7 @@ class Module:
 						                            target,
 						                            self.sub_heritage_list,
 						                            name = self.name,
-						                            basic_folder = self.origin_folder)
+						                            basic_path = self.origin_path)
 						self.local_heritage.add_sources(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.jar'")
@@ -453,7 +463,7 @@ class Module:
 					                            target,
 					                            self.sub_heritage_list,
 					                            name = self.name,
-					                            basic_folder = self.origin_folder)
+					                            basic_path = self.origin_path)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
 			target.clean_module_tree()
@@ -464,9 +474,9 @@ class Module:
 				# generate the package with his properties ...
 				if target.name=="Android":
 					self.sub_heritage_list.add_heritage(self.local_heritage)
-					target.make_package(self.name, self.package_prop, self.origin_folder + "/..", self.sub_heritage_list)
+					target.make_package(self.name, self.package_prop, self.origin_path + "/..", self.sub_heritage_list)
 				else:
-					target.make_package(self.name, self.package_prop, self.origin_folder + "/..")
+					target.make_package(self.name, self.package_prop, self.origin_path + "/..")
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 			
@@ -483,7 +493,7 @@ class Module:
 		# add all the elements (first added only one keep ==> permit to everload sublib element)
 		self.image_to_staging(package_name, target)
 		self.files_to_staging(package_name, target)
-		self.folders_to_staging(package_name, target)
+		self.paths_to_staging(package_name, target)
 		#build tree of all submodules
 		for dep in self.depends:
 			inherit = target.build_tree(dep, package_name)
@@ -495,19 +505,19 @@ class Module:
 			# nothing to add ==> just dependence
 			None
 		elif self.type=='LIBRARY':
-			# remove folder of the lib ... for this targer
-			folderbuild = target.get_build_folder(self.name)
-			debug.info("remove folder : '" + folderbuild + "'")
-			tools.remove_folder_and_sub_folder(folderbuild)
+			# remove path of the lib ... for this targer
+			pathbuild = target.get_build_path(self.name)
+			debug.info("remove path : '" + pathbuild + "'")
+			tools.remove_path_and_sub_path(pathbuild)
 		elif    self.type=='BINARY' \
 		     or self.type=='PACKAGE':
-			# remove folder of the lib ... for this targer
-			folderbuild = target.get_build_folder(self.name)
-			debug.info("remove folder : '" + folderbuild + "'")
-			tools.remove_folder_and_sub_folder(folderbuild)
-			folderStaging = target.get_staging_folder(self.name)
-			debug.info("remove folder : '" + folderStaging + "'")
-			tools.remove_folder_and_sub_folder(folderStaging)
+			# remove path of the lib ... for this targer
+			pathbuild = target.get_build_path(self.name)
+			debug.info("remove path : '" + pathbuild + "'")
+			tools.remove_path_and_sub_path(pathbuild)
+			pathStaging = target.get_staging_path(self.name)
+			debug.info("remove path : '" + pathStaging + "'")
+			tools.remove_path_and_sub_path(pathStaging)
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
@@ -592,8 +602,8 @@ class Module:
 	def copy_file(self, source, destination=''):
 		self.files.append([source, destination])
 	
-	def copy_folder(self, source, destination=''):
-		self.folders.append([source, destination])
+	def copy_path(self, source, destination=''):
+		self.paths.append([source, destination])
 	
 	def print_list(self, description, list):
 		if len(list) > 0:
@@ -607,7 +617,7 @@ class Module:
 		print('-----------------------------------------------')
 		print('    type:"' + str(self.type) + "'")
 		print('    file:"' + str(self.origin_file) + "'")
-		print('    folder:"' + str(self.origin_folder) + "'")
+		print('    path:"' + str(self.origin_path) + "'")
 		
 		self.print_list('depends',self.depends)
 		self.print_list('depends_optionnal', self.depends_optionnal)
@@ -622,7 +632,7 @@ class Module:
 		
 		self.print_list('src',self.src)
 		self.print_list('files',self.files)
-		self.print_list('folders',self.folders)
+		self.print_list('paths',self.paths)
 		for element in self.path["local"]:
 			value = self.path["local"][element]
 			self.print_list('local path ' + element, value)
@@ -717,10 +727,10 @@ class Module:
 			return
 		added_module.append(self.name)
 		debug.verbose("add a module to the project generator :" + self.name)
-		debug.verbose("local path :" + self.origin_folder)
-		projectMng.add_files(self.name, self.origin_folder, self.src)
-		#projectMng.add_data_file(self.origin_folder, self.files)
-		#projectMng.add_data_folder(self.origin_folder, self.folders)
+		debug.verbose("local path :" + self.origin_path)
+		projectMng.add_files(self.name, self.origin_path, self.src)
+		#projectMng.add_data_file(self.origin_path, self.files)
+		#projectMng.add_data_path(self.origin_path, self.paths)
 		"""
 		for depend in self.depends:
 			target.project_add_module(depend, projectMng, added_module)

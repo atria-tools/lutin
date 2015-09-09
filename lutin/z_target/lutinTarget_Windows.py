@@ -50,10 +50,10 @@ class Target(target.Target):
 		                             "-static-libstdc++",
 		                             "-static"])
 		
-		self.folder_bin=""
-		self.folder_lib="/lib"
-		self.folder_data="/data"
-		self.folder_doc="/doc"
+		self.path_bin=""
+		self.path_lib="lib"
+		self.path_data="data"
+		self.path_doc="doc"
 		
 		self.suffix_lib_static='.a'
 		self.suffix_lib_dynamic='.dll'
@@ -62,24 +62,24 @@ class Target(target.Target):
 		self.global_flags_cc.append("-D__STDCPP_GNU__")
 	
 	
-	def get_staging_folder_data(self, binaryName):
-		return self.get_staging_folder(binaryName) + self.folder_data
+	def get_staging_path_data(self, binaryName):
+		return self.get_staging_path(binaryName) + self.path_data
 	
 	def make_package(self, pkgName, pkgProperties, basePkgPath):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		debug.print_element("zip", "data.zip", "<==", "data/*")
-		zipPath = self.get_staging_folder(pkgName) + "/data.zip"
-		zip.create_zip(self.get_staging_folder_data(pkgName), zipPath)
+		zipPath = self.get_staging_path(pkgName) + "/data.zip"
+		zip.create_zip(self.get_staging_path_data(pkgName), zipPath)
 		
-		binPath = self.get_staging_folder(pkgName) + "/" + self.folder_bin + "/" + pkgName + self.suffix_binary
+		binPath = self.get_staging_path(pkgName) + "/" + self.path_bin + "/" + pkgName + self.suffix_binary
 		binSize = tools.file_size(binPath)
 		debug.info("binarysize : " + str(binSize/1024) + " ko ==> " + str(binSize) + " octets")
 		
 		#now we create a simple bundle binary ==> all file is stored in one file ...
-		self.get_staging_folder(pkgName)
-		finalBin = self.get_final_folder() + "/" + pkgName + self.suffix_binary
+		self.get_staging_path(pkgName)
+		finalBin = self.get_final_path() + "/" + pkgName + self.suffix_binary
 		tools.create_directory_of_file(finalBin);
 		debug.print_element("pkg", finalBin, "<==", pkgName + self.suffix_binary)
 		#open output file

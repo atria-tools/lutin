@@ -28,10 +28,10 @@ class Target(target.Target):
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
 		target.Target.__init__(self, "MacOs", config, "")
 		
-		self.folder_bin="/MacOS"
-		self.folder_lib="/lib"
-		self.folder_data="/Resources"
-		self.folder_doc="/doc"
+		self.path_bin="MacOS"
+		self.path_lib="lib"
+		self.path_data="Resources"
+		self.path_doc="doc"
 		
 		self.suffix_lib_static='.a'
 		self.suffix_lib_dynamic='.dylib'
@@ -41,11 +41,11 @@ class Target(target.Target):
 		self.global_flags_cc.append("-D__STDCPP_LLVM__")
 		
 	
-	def get_staging_folder(self, binaryName):
-		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/Contents/"
+	def get_staging_path(self, binaryName):
+		return tools.get_run_path() + self.path_out + self.path_staging + "/" + binaryName + ".app/Contents/"
 	
-	def get_staging_folder_data(self, binaryName):
-		return self.get_staging_folder(binaryName) + self.folder_data + "/"
+	def get_staging_path_data(self, binaryName):
+		return self.get_staging_path(binaryName) + self.path_data + "/"
 	
 	def make_package(self, pkgName, pkgProperties, basePkgPath):
 		debug.debug("------------------------------------------------------------------------")
@@ -54,10 +54,10 @@ class Target(target.Target):
 		
 		if    "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
-			tools.copy_file(pkgProperties["ICON"], self.get_staging_folder_data(pkgName) + "/icon.icns", force=True)
+			tools.copy_file(pkgProperties["ICON"], self.get_staging_path_data(pkgName) + "/icon.icns", force=True)
 		
 		# http://www.sandroid.org/imcross/#Deployment
-		infoFile=self.get_staging_folder(pkgName) + "/Info.plist"
+		infoFile=self.get_staging_path(pkgName) + "/Info.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
@@ -79,7 +79,7 @@ class Target(target.Target):
 		tmpFile.write("\n\n")
 		tmpFile.flush()
 		tmpFile.close()
-		infoFile=self.get_staging_folder(pkgName) + "/PkgInfo"
+		infoFile=self.get_staging_path(pkgName) + "/PkgInfo"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write("APPL????")
@@ -87,7 +87,7 @@ class Target(target.Target):
 		tmpFile.close()
 		
 		# Create a simple interface to localy install the aplication for the shell (a shell command line interface)
-		shell_file_name=self.get_staging_folder(pkgName) + "/shell/" + pkgName
+		shell_file_name=self.get_staging_path(pkgName) + "/shell/" + pkgName
 		# Create the info file
 		tools.create_directory_of_file(shell_file_name)
 		tmpFile = open(shell_file_name, 'w')
@@ -101,10 +101,10 @@ class Target(target.Target):
 		
 		# Must create the disk image of the application 
 		debug.info("Generate disk image for '" + pkgName + "'")
-		output_file_name = self.get_final_folder() + "/" + pkgName + ".dmg"
+		output_file_name = self.get_final_path() + "/" + pkgName + ".dmg"
 		cmd = "hdiutil create -volname "
-		cmd += pkgName + " -srcfolder "
-		cmd += tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + pkgName + ".app"
+		cmd += pkgName + " -srcpath "
+		cmd += tools.get_run_path() + self.path_out + self.path_staging + "/" + pkgName + ".app"
 		cmd += " -ov -format UDZO "
 		cmd += output_file_name
 		tools.create_directory_of_file(output_file_name)
@@ -118,18 +118,18 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("copy " + tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + pkgName + ".app in /Applications/")
+		debug.info("copy " + tools.get_run_path() + self.path_out + self.path_staging + "/" + pkgName + ".app in /Applications/")
 		if os.path.exists("/Applications/" + pkgName + ".app") == True:
 			shutil.rmtree("/Applications/" + pkgName + ".app")
-		# copy the application in the basic application folder : /Applications/xxx.app
-		shutil.copytree(tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + pkgName + ".app", "/Applications/" + pkgName + ".app")
+		# copy the application in the basic application path : /Applications/xxx.app
+		shutil.copytree(tools.get_run_path() + self.path_out + self.path_staging + "/" + pkgName + ".app", "/Applications/" + pkgName + ".app")
 	
 	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("remove OLD application /Applications/" + pkgName + ".app")
-		# Remove the application in the basic application folder : /Applications/xxx.app
+		# Remove the application in the basic application path : /Applications/xxx.app
 		if os.path.exists("/Applications/" + pkgName + ".app") == True:
 			shutil.rmtree("/Applications/" + pkgName + ".app")
 

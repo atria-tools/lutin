@@ -45,9 +45,9 @@ class Target(target.Target):
 		
 		# remove unneeded ranlib ...
 		self.ranlib=""
-		self.folder_bin=""
-		self.folder_data="/share"
-		self.folder_doc="/doc"
+		self.path_bin=""
+		self.path_data="share"
+		self.path_doc="doc"
 		
 		self.suffix_lib_static='.a'
 		self.suffix_lib_dynamic='.dylib'
@@ -76,11 +76,11 @@ class Target(target.Target):
 		self.global_flags_m.append("-fobjc-arc")
 		#self.global_flags_m.append("-fmodules")
 	
-	def get_staging_folder(self, binaryName):
-		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName + ".app/"
+	def get_staging_path(self, binaryName):
+		return tools.get_run_path() + self.path_out + self.path_staging + "/" + binaryName + ".app/"
 	
-	def get_staging_folder_data(self, binaryName):
-		return self.get_staging_folder(binaryName) + self.folder_data + "/"
+	def get_staging_path_data(self, binaryName):
+		return self.get_staging_path(binaryName) + self.path_data + "/"
 	
 	def make_package(self, pkgName, pkgProperties, basePkgPath):
 		debug.debug("------------------------------------------------------------------------")
@@ -93,26 +93,26 @@ class Target(target.Target):
 			# TODO : Do not regenerate if source resource is not availlable
 			# TODO : Add a colored background ...
 			debug.print_element("pkg", "iTunesArtwork.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork.png", 512, 512)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/iTunesArtwork.png", 512, 512)
 			debug.print_element("pkg", "iTunesArtwork@2x.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/iTunesArtwork@2x.png", 1024, 1024)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/iTunesArtwork@2x.png", 1024, 1024)
 			debug.print_element("pkg", "Icon-60@2x.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-60@2x.png", 120, 120)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-60@2x.png", 120, 120)
 			debug.print_element("pkg", "Icon-76.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76.png", 76, 76)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-76.png", 76, 76)
 			debug.print_element("pkg", "Icon-76@2x.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-76@2x.png", 152, 152)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-76@2x.png", 152, 152)
 			debug.print_element("pkg", "Icon-Small-40.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40.png", 40, 40)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-Small-40.png", 40, 40)
 			debug.print_element("pkg", "Icon-Small-40@2x.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small-40@2x.png", 80, 80)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-Small-40@2x.png", 80, 80)
 			debug.print_element("pkg", "Icon-Small.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small.png", 29, 29)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-Small.png", 29, 29)
 			debug.print_element("pkg", "Icon-Small@2x.png", "<==", pkgProperties["ICON"])
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/Icon-Small@2x.png", 58, 58)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/Icon-Small@2x.png", 58, 58)
 		
 		debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
-		infoFile = self.get_staging_folder(pkgName) + "/PkgInfo"
+		infoFile = self.get_staging_path(pkgName) + "/PkgInfo"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write("APPL????")
@@ -205,29 +205,29 @@ class Target(target.Target):
 		dataFile += "</plist>\n"
 		dataFile += "\n\n"
 		
-		infoFile = self.get_staging_folder(pkgName) + "/Info.plist"
+		infoFile = self.get_staging_path(pkgName) + "/Info.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
 		tmpFile.flush()
 		tmpFile.close()
 		"""
-		infoFile = self.get_staging_folder(pkgName) + "/" + pkgName + "-Info.plist"
+		infoFile = self.get_staging_path(pkgName) + "/" + pkgName + "-Info.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
 		tmpFile.flush()
 		tmpFile.close()
 		cmdLine  = "builtin-infoPlistUtility "
-		cmdLine += " " + self.get_staging_folder(pkgName) + "/" + pkgName + "-Info.plist "
-		cmdLine += " -genpkginfo " + self.get_staging_folder(pkgName) + "/PkgInfo"
+		cmdLine += " " + self.get_staging_path(pkgName) + "/" + pkgName + "-Info.plist "
+		cmdLine += " -genpkginfo " + self.get_staging_path(pkgName) + "/PkgInfo"
 		cmdLine += " -expandbuildsettings "
 		cmdLine += " -format binary "
 		if self.sumulator == False:
 			cmdLine += " -platform iphonesimulator "
 		else:
 			cmdLine += " -platform iphoneos "
-		cmdLine += " -o " + self.get_staging_folder(pkgName) + "/" + "Info.plist"
+		cmdLine += " -o " + self.get_staging_path(pkgName) + "/" + "Info.plist"
 		multiprocess.run_command(cmdLine)
 		"""
 		"""
@@ -273,7 +273,7 @@ class Target(target.Target):
 		dataFile += "</plist>\n"
 		dataFile += "\n\n"
 
-		infoFile = self.get_staging_folder(pkgName) + "/ResourceRules.plist"
+		infoFile = self.get_staging_path(pkgName) + "/ResourceRules.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
@@ -291,14 +291,14 @@ class Target(target.Target):
 		dataFile += "</plist>\n"
 		dataFile += "\n\n"
 
-		infoFile = self.get_staging_folder(pkgName) + "/Entitlements.plist"
+		infoFile = self.get_staging_path(pkgName) + "/Entitlements.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
 		tmpFile.flush()
 		tmpFile.close()
 
-		# Simulateur folder :
+		# Simulateur path :
 		#~/Library/Application\ Support/iPhone\ Simulator/7.0.3/Applications/
 		# must have a 'uuidgen' UID generate value with this elemennt ...
 		# get the bundle path : ==> maybe usefull in MocOS ...
@@ -310,7 +310,7 @@ class Target(target.Target):
 		
 		if self.sumulator == False:
 			# Create the info file
-			tmpFile = open(self.get_build_folder(pkgName) + "/worddown.xcent", 'w')
+			tmpFile = open(self.get_build_path(pkgName) + "/worddown.xcent", 'w')
 			tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 			tmpFile.write("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n")
 			tmpFile.write("<plist version=\"1.0\">\n")
@@ -340,8 +340,8 @@ class Target(target.Target):
 			cmdLine  = 'codesign  --force --sign '
 			# to get this key ;    certtool y | grep "Developer"
 			cmdLine += ' "' + signatureKey + '" '
-			cmdLine += ' --entitlements ' + self.get_build_folder(pkgName) + '/worddown.xcent'
-			cmdLine += ' ' + self.get_staging_folder(pkgName)
+			cmdLine += ' --entitlements ' + self.get_build_path(pkgName) + '/worddown.xcent'
+			cmdLine += ' ' + self.get_staging_path(pkgName)
 			multiprocess.run_command(cmdLine)
 			
 			# --force --sign "iPhone Developer: Edouard DUPIN (SDFGSDFGSDFG)"
@@ -368,7 +368,7 @@ class Target(target.Target):
 			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
-			cmdLine = './ewol/ios-deploy/ios-deploy --bundle ' + self.get_staging_folder(pkgName)
+			cmdLine = './ewol/ios-deploy/ios-deploy --bundle ' + self.get_staging_path(pkgName)
 			multiprocess.run_command(cmdLine)
 		else:
 			simulatorIdFile = ".iosSimutatorId_" + pkgName + ".txt"
@@ -388,14 +388,14 @@ class Target(target.Target):
 				tmpFile.close()
 			simulatorId = tools.file_read_data(simulatorIdFile)
 			home = os.path.expanduser("~")
-			destinationFolderBase = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.1/Applications/" + simulatorId
-			destinationFolder = home + "/Library/Application Support/iPhone Simulator/7.1/Applications/" + simulatorId + "/" + pkgName + ".app"
-			destinationFolder2 = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.1/Applications/" + simulatorId + "/" + pkgName + ".app"
-			debug.info("install in simulator : " + destinationFolder)
-			tools.create_directory_of_file(destinationFolder + "/plop.txt")
-			cmdLine = "cp -rf " + self.get_staging_folder(pkgName) + " " + destinationFolder2
+			destinationpathBase = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.1/Applications/" + simulatorId
+			destinationpath = home + "/Library/Application Support/iPhone Simulator/7.1/Applications/" + simulatorId + "/" + pkgName + ".app"
+			destinationpath2 = home + "/Library/Application\\ Support/iPhone\\ Simulator/7.1/Applications/" + simulatorId + "/" + pkgName + ".app"
+			debug.info("install in simulator : " + destinationpath)
+			tools.create_directory_of_file(destinationpath + "/plop.txt")
+			cmdLine = "cp -rf " + self.get_staging_path(pkgName) + " " + destinationpath2
 			multiprocess.run_command(cmdLine)
-			cmdLine = "touch " + destinationFolderBase
+			cmdLine = "touch " + destinationpathBase
 			multiprocess.run_command(cmdLine)
 			
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
@@ -425,7 +425,7 @@ class Target(target.Target):
 			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
-			cmdLine = './ewol/ios-deploy/ios-deploy --debug --bundle ' + self.get_staging_folder(pkgName)
+			cmdLine = './ewol/ios-deploy/ios-deploy --debug --bundle ' + self.get_staging_path(pkgName)
 			multiprocess.run_command(cmdLine)
 		else:
 			cmdLine = "tail -f ~/Library/Logs/iOS\ Simulator/7.1/system.log"

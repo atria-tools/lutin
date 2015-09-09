@@ -83,8 +83,8 @@ class Target:
 		self.suffix_binary=''
 		self.suffix_package='.deb'
 		
-		self.folder_generate_code="/generate_header"
-		self.folder_arch="/" + self.name
+		self.path_generate_code="/generate_header"
+		self.path_arch="/" + self.name
 		
 		if "debug" == self.config["mode"]:
 			self.global_flags_cc.append("-g")
@@ -101,17 +101,18 @@ class Target:
 			self.global_flags_ld.append("-fprofile-arcs")
 			self.global_flags_ld.append("-ftest-coverage")
 		
-		self.update_folder_tree()
+		self.update_path_tree()
 		"""
-		self.folder_bin="/usr/bin"
-		self.folder_lib="/usr/lib"
-		self.folder_data="/usr/share"
-		self.folder_doc="/usr/share/doc"
+		self.path_bin="usr/bin"
+		self.path_lib="usr/lib"
+		self.path_data="usr/share"
+		self.path_doc="usr/share/doc"
 		"""
-		self.folder_bin="/bin"
-		self.folder_lib="/lib"
-		self.folder_data="/share"
-		self.folder_doc="/doc"
+		self.path_bin="bin"
+		self.path_lib="lib"
+		self.path_data="share"
+		self.path_doc="doc"
+		self.path_doc="include"
 		
 		
 		self.build_done=[]
@@ -124,11 +125,11 @@ class Target:
 		
 		self.action_on_state={}
 	
-	def update_folder_tree(self):
-		self.folder_out="/out/" + self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"] + "/" + self.config["mode"]
-		self.folder_final="/final/" + self.config["compilator"]
-		self.folder_staging="/staging/" + self.config["compilator"]
-		self.folder_build="/build/" + self.config["compilator"]
+	def update_path_tree(self):
+		self.path_out = os.path.join("out", self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
+		self.path_final = os.path.join("final", self.config["compilator"])
+		self.path_staging = os.path.join("staging", self.config["compilator"])
+		self.path_build = os.path.join("build", self.config["compilator"])
 	
 	def create_number_from_version_string(self, data):
 		list = data.split(".")
@@ -179,7 +180,7 @@ class Target:
 		self.nm = self.cross + "nm"
 		self.strip = self.cross + "strip"
 		self.dlltool = self.cross + "dlltool"
-		self.update_folder_tree()
+		self.update_path_tree()
 	
 	def get_build_mode(self):
 		return self.config["mode"]
@@ -200,29 +201,23 @@ class Target:
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
 		self.list_final_file.append([inputFile, outputFile, -1, -1, cmdFile])
 	
-	def copy_to_staging(self, binaryName):
-		baseFolder = self.get_staging_folder_data(binaryName)
+	def copy_to_staging(self, binary_name):
+		base_path = self.get_staging_path_data(binary_name)
 		for source, dst, x, y, cmdFile in self.list_final_file:
 			if     cmdFile != None \
 			   and cmdFile != "":
 				debug.verbose("cmd file " + cmdFile)
 			if x == -1:
 				debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
-				tools.copy_file(source, baseFolder+"/"+dst, cmdFile)
+				tools.copy_file(source, os.path.join(base_path, dst), cmdFile)
 			else:
 				debug.verbose("resize image : '" + source + "' ==> '" + dst + "' size=(" + str(x) + "," + str(y) + ")");
-				image.resize(source, baseFolder+"/"+dst, x, y, cmdFile)
+				image.resize(source, os.path.join(base_path, dst), x, y, cmdFile)
 	
 	
 	def clean_module_tree(self):
 		self.build_tree_done = []
 		self.list_final_file = []
-	
-	
-	# TODO : Remove this hack ... ==> really bad ... but usefull
-	def set_ewol_folder(self, folder):
-		self.folder_ewol = folder
-	
 	
 	def get_full_name_source(self, basePath, file):
 		if file[0] == '/':
@@ -230,16 +225,16 @@ class Target:
 				return file
 		return basePath + "/" + file
 	
-	def get_full_name_cmd(self, moduleName, basePath, file):
+	def get_full_name_cmd(self, module_name, basePath, file):
 		if file[0] == '/':
 			if tools.os.path.isfile(file):
 				return file + self.suffix_cmd_line
-		return self.get_build_folder(moduleName) + "/" + file + self.suffix_cmd_line
+		return self.get_build_path(module_name) + "/" + file + self.suffix_cmd_line
 	
-	def get_full_name_warning(self, moduleName, basePath, file):
-		return self.get_build_folder(moduleName) + "/" + file + self.suffix_warning;
+	def get_full_name_warning(self, module_name, basePath, file):
+		return self.get_build_path(module_name) + "/" + file + self.suffix_warning;
 	
-	def get_full_name_destination(self, moduleName, basePath, file, suffix, remove_suffix=False):
+	def get_full_name_destination(self, module_name, basePath, file, suffix, remove_suffix=False):
 		# special patch for java file:
 		if file[-4:] == "java":
 			for elem in ["org/", "com/"]:
@@ -254,10 +249,10 @@ class Target:
 			suffix = suffix[0]
 		else:
 			suffix = ""
-		return self.get_build_folder(moduleName) + "/" + file + suffix
+		return self.get_build_path(module_name) + "/" + file + suffix
 	
-	def get_full_dependency(self, moduleName, basePath, file):
-		return self.get_build_folder(moduleName) + "/" + file + self.suffix_dependence
+	def get_full_dependency(self, module_name, basePath, file):
+		return self.get_build_path(module_name) + "/" + file + self.suffix_dependence
 	
 	"""
 		return a list of 3 elements :
@@ -265,52 +260,87 @@ class Target:
 			1 : destination file
 			2 : dependence files module (*.d)
 	"""
-	def generate_file(self,binaryName,moduleName,basePath,file,type):
+	def generate_file(self,
+	                  binary_name,
+	                  module_name,
+	                  basePath,
+	                  file,
+	                  type):
 		list=[]
 		if (type=="bin"):
 			list.append(file)
-			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary + self.suffix_cmd_line)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_bin + "/" + moduleName + self.suffix_binary + self.suffix_warning)
+			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
+			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_cmd_line))
+			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_warning))
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(self.get_staging_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic + self.suffix_cmd_line)
-			list.append(self.get_build_folder(binaryName) + "/" + self.folder_lib + "/" + moduleName + self.suffix_lib_dynamic + self.suffix_warning)
+			list.append(os.path.join(self.get_build_path(binary_name), self.path_lib, module_name + self.suffix_lib_dynamic))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
+			list.append(os.path.join(self.get_build_path(binary_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_cmd_line))
+			list.append(os.path.join(self.get_build_path(binary_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_warning))
 		elif (type=="lib-static"):
 			list.append(file)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_dependence)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static + self.suffix_cmd_line)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + self.suffix_lib_static + self.suffix_warning)
+			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_lib_static))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_lib_static + self.suffix_cmd_line))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_lib_static + self.suffix_warning))
 		elif (type=="jar"):
 			list.append(file)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar")
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_dependence)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_cmd_line)
-			list.append(self.get_build_folder(moduleName) + "/" + moduleName + ".jar" + self.suffix_warning)
+			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar"))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar" + self.suffix_dependence))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar" + self.suffix_cmd_line))
+			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar" + self.suffix_warning))
 		elif (type=="image"):
-			list.append(self.get_build_folder(binaryName) + "/data/" + file + self.suffix_cmd_line)
+			list.append(os.path.join(self.get_build_path(binary_name), "data", file + self.suffix_cmd_line))
 		else:
 			debug.error("unknow type : " + type)
 		return list
 	
-	def get_final_folder(self):
-		return tools.get_run_folder() + self.folder_out + self.folder_final
+	##
+	## @brief Get the fianal path ==> contain all the generated packages
+	## @return The path of the pa
+	##
+	def get_final_path(self):
+		return os.path.join(tools.get_run_path(), self.path_out, self.path_final)
 	
-	def get_staging_folder(self, binaryName):
-		return tools.get_run_folder() + self.folder_out + self.folder_staging + "/" + binaryName
+	def get_staging_path(self, binary_name):
+		return os.path.join(tools.get_run_path(), self.path_out, self.path_staging, binary_name)
 	
-	def get_staging_folder_data(self, binaryName):
-		return self.get_staging_folder(binaryName) + self.folder_data + "/" + binaryName
+	def get_build_path(self, module_name):
+		debug.warning("A=" + str(tools.get_run_path()) + " " + str(self.path_out) + " " + str(self.path_build) + " " + str(module_name))
+		return os.path.join(tools.get_run_path(), self.path_out, self.path_build, module_name)
 	
-	def get_build_folder(self, moduleName):
-		return tools.get_run_folder() + self.folder_out + self.folder_build + "/" + moduleName
 	
-	def get_doc_folder(self, moduleName):
-		return tools.get_run_folder() + self.folder_out + self.folder_doc + "/" + moduleName
+	def get_build_path_bin(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_bin, binary_name)
+	
+	def get_build_path_lib(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_lib, binary_name)
+	
+	def get_build_path_data(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_data, binary_name)
+	
+	def get_build_path_include(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_include, binary_name)
+	
+	
+	def get_staging_path_bin(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_bin, binary_name)
+	
+	def get_staging_path_lib(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_lib, binary_name)
+	
+	def get_staging_path_data(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_data, binary_name)
+	
+	def get_staging_path_include(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), self.path_include, binary_name)
+	
+	
+	def get_doc_path(self, module_name):
+		return os.path.join(tools.get_run_path(), self.path_out, self.path_doc, module_name)
+	
 	
 	def is_module_build(self, my_module):
 		for mod in self.build_done:
@@ -418,7 +448,7 @@ class Target:
 		else:
 			# get the action an the module ....
 			gettedElement = name.split("?")
-			moduleName = gettedElement[0]
+			module_name = gettedElement[0]
 			if len(gettedElement)>=3:
 				sub_action_name = gettedElement[2]
 			else:
@@ -427,41 +457,41 @@ class Target:
 				actionName = gettedElement[1]
 			else :
 				actionName = "build"
-			debug.verbose("requested : " + moduleName + "?" + actionName)
+			debug.verbose("requested : " + module_name + "?" + actionName)
 			if actionName == "install":
-				self.build(moduleName + "?build")
-				self.install_package(moduleName)
+				self.build(module_name + "?build")
+				self.install_package(module_name)
 			elif actionName == "uninstall":
-				self.un_install_package(moduleName)
+				self.un_install_package(module_name)
 			elif actionName == "log":
-				self.Log(moduleName)
+				self.Log(module_name)
 			else:
-				present = self.load_if_needed(moduleName, optionnal=optionnal)
+				present = self.load_if_needed(module_name, optionnal=optionnal)
 				if     present == False \
 				   and optionnal == True:
 					return [heritage.HeritageList(), False]
 				# clean requested
 				for mod in self.module_list:
-					if mod.name == moduleName:
+					if mod.name == module_name:
 						if actionName == "dump":
-							debug.info("dump module '" + moduleName + "'")
+							debug.info("dump module '" + module_name + "'")
 							return mod.display(self)
 						elif actionName == "clean":
-							debug.info("clean module '" + moduleName + "'")
+							debug.info("clean module '" + module_name + "'")
 							return mod.clean(self)
 						elif actionName == "gcov":
-							debug.debug("gcov on module '" + moduleName + "'")
+							debug.debug("gcov on module '" + module_name + "'")
 							if sub_action_name == "output":
 								return mod.gcov(self, generate_output=True)
 							return mod.gcov(self, generate_output=False)
 						elif actionName == "build":
-							debug.debug("build module '" + moduleName + "'")
+							debug.debug("build module '" + module_name + "'")
 							if optionnal == True:
 								return [mod.build(self, None), True]
 							return mod.build(self, None)
 				if optionnal == True:
 					return [heritage.HeritageList(), False]
-				debug.error("not know module name : '" + moduleName + "' to '" + actionName + "' it")
+				debug.error("not know module name : '" + module_name + "' to '" + actionName + "' it")
 	
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
 		debug.verbose("add action : " + name)

@@ -40,8 +40,8 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to link an executable.
 ##
-def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "bin")
+def link(file, binary, target, depancy, name, basic_path):
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "bin")
 	#create comdLine :
 	cmd = [
 		target.xx

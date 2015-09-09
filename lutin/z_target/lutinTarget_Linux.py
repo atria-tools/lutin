@@ -59,11 +59,11 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + debianPkgName + "' v"+pkgProperties["VERSION"])
 		debug.debug("------------------------------------------------------------------------")
-		self.get_staging_folder(pkgName)
-		targetOutFolderDebian = self.get_staging_folder(pkgName) + "/DEBIAN/"
-		finalFileControl = targetOutFolderDebian + "control"
-		finalFilepostRm = targetOutFolderDebian + "postrm"
-		# create the folders :
+		self.get_staging_path(pkgName)
+		targetOutpathDebian = self.get_staging_path(pkgName) + "/DEBIAN/"
+		finalFileControl = targetOutpathDebian + "control"
+		finalFilepostRm = targetOutpathDebian + "postrm"
+		# create the paths :
 		tools.create_directory_of_file(finalFileControl)
 		tools.create_directory_of_file(finalFilepostRm)
 		## Create the control file
@@ -93,7 +93,7 @@ class Target(target.Target):
 		## Enable Execution in script
 		os.chmod(finalFilepostRm, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
 		## Readme donumentation
-		readmeFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ debianPkgName + "/README"
+		readmeFileDest = self.get_staging_path(pkgName) + "/usr/share/doc/"+ debianPkgName + "/README"
 		tools.create_directory_of_file(readmeFileDest)
 		if os.path.exists(basePkgPath + "/os-Linux/README")==True:
 			tools.copy_file(basePkgPath + "/os-Linux/README", readmeFileDest)
@@ -108,7 +108,7 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		## licence file
-		licenseFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ debianPkgName + "/copyright"
+		licenseFileDest = self.get_staging_path(pkgName) + "/usr/share/doc/"+ debianPkgName + "/copyright"
 		tools.create_directory_of_file(licenseFileDest)
 		if os.path.exists(basePkgPath + "/license.txt")==True:
 			tools.copy_file(basePkgPath + "/license.txt", licenseFileDest)
@@ -119,7 +119,7 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		##changeLog file
-		changeLogFileDest = self.get_staging_folder(pkgName) + "/usr/share/doc/"+ debianPkgName + "/changelog"
+		changeLogFileDest = self.get_staging_path(pkgName) + "/usr/share/doc/"+ debianPkgName + "/changelog"
 		tools.create_directory_of_file(changeLogFileDest)
 		if os.path.exists(basePkgPath + "/changelog")==True:
 			tools.copy_file(basePkgPath + "/changelog", changeLogFileDest)
@@ -130,22 +130,22 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		## create the package :
-		debug.debug("package : " + self.get_staging_folder(pkgName) + "/" + debianPkgName + ".deb")
-		os.system("cd " + self.get_staging_folder("") + " ; dpkg-deb --build " + pkgName)
-		tools.create_directory_of_file(self.get_final_folder())
-		tools.copy_file(self.get_staging_folder("") + "/" + pkgName + self.suffix_package, self.get_final_folder() + "/" + pkgName + self.suffix_package)
+		debug.debug("package : " + self.get_staging_path(pkgName) + "/" + debianPkgName + ".deb")
+		os.system("cd " + self.get_staging_path("") + " ; dpkg-deb --build " + pkgName)
+		tools.create_directory_of_file(self.get_final_path())
+		tools.copy_file(self.get_staging_path("") + "/" + pkgName + self.suffix_package, self.get_final_path() + "/" + pkgName + self.suffix_package)
 	
 	def install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		os.system("sudo dpkg -i " + self.get_final_folder() + "/" + pkgName + self.suffix_package)
+		os.system("sudo dpkg -i " + self.get_final_path() + "/" + pkgName + self.suffix_package)
 	
 	def un_install_package(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkgName + "'")
 		debug.debug("------------------------------------------------------------------------")
-		os.system("sudo dpkg -r " + self.get_final_folder() + "/" + pkgName + self.suffix_package)
+		os.system("sudo dpkg -r " + self.get_final_path() + "/" + pkgName + self.suffix_package)
 	
 	"""
 	.local/application
@@ -182,30 +182,30 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate generic '" + debianPkgName + "' v"+pkgProperties["VERSION"])
 		debug.debug("------------------------------------------------------------------------")
-		targetOutFolder = self.get_staging_folder(pkgName) + "/edn.app/"
-		tools.create_directory_of_file(targetOutFolder)
+		targetOutpath = self.get_staging_path(pkgName) + "/edn.app/"
+		tools.create_directory_of_file(targetOutpath)
 		## Create version file
-		tmpFile = open(targetOutFolder + "/version.txt", 'w')
+		tmpFile = open(targetOutpath + "/version.txt", 'w')
 		tmpFile.write(pkgProperties["VERSION"])
 		tmpFile.flush()
 		tmpFile.close()
 		## Create maintainer file
-		tmpFile = open(targetOutFolder + "/maintainer.txt", 'w')
+		tmpFile = open(targetOutpath + "/maintainer.txt", 'w')
 		tmpFile.write(self.generate_list_separate_coma(pkgProperties["MAINTAINER"]))
 		tmpFile.flush()
 		tmpFile.close()
 		## Create appl_name file
-		tmpFile = open(targetOutFolder + "/appl_name.txt", 'w')
+		tmpFile = open(targetOutpath + "/appl_name.txt", 'w')
 		tmpFile.write("en_EN:" + pkgProperties["NAME"])
 		tmpFile.flush()
 		tmpFile.close()
 		## Create appl_description file
-		tmpFile = open(targetOutFolder + "/appl_description.txt", 'w')
+		tmpFile = open(targetOutpath + "/appl_description.txt", 'w')
 		tmpFile.write("en_EN:" + pkgProperties["DESCRIPTION"])
 		tmpFile.flush()
 		tmpFile.close()
 		## Create Readme file
-		readmeFileDest = targetOutFolder + "/readme.txt"
+		readmeFileDest = targetOutpath + "/readme.txt"
 		if os.path.exists(basePkgPath + "/os-Linux/README")==True:
 			tools.copy_file(basePkgPath + "/os-Linux/README", readmeFileDest)
 		elif os.path.exists(basePkgPath + "/README")==True:
@@ -219,7 +219,7 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		## Create licence file
-		licenseFileDest = targetOutFolder + "/license/"+ debianPkgName + ".txt"
+		licenseFileDest = targetOutpath + "/license/"+ debianPkgName + ".txt"
 		tools.create_directory_of_file(licenseFileDest)
 		if os.path.exists(basePkgPath + "/license.txt")==True:
 			tools.copy_file(basePkgPath + "/license.txt", licenseFileDest)
@@ -230,7 +230,7 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		## Create changeLog file
-		changeLogFileDest = targetOutFolder + "/changelog.txt"
+		changeLogFileDest = targetOutpath + "/changelog.txt"
 		if os.path.exists(basePkgPath + "/changelog") == True:
 			tools.copy_file(basePkgPath + "/changelog", changeLogFileDest)
 		else:
@@ -239,24 +239,24 @@ class Target(target.Target):
 			tmpFile.write("No changelog data " + pkgName + "\n")
 			tmpFile.flush()
 			tmpFile.close()
-		## copy share folder
-		#debug.info("plop:" + self.get_staging_folder(pkgName) + self.folder_data)
-		if os.path.exists(self.get_staging_folder(pkgName) + self.folder_data) == True:
-			tools.copy_anything(self.get_staging_folder(pkgName) + self.folder_data + "/*", targetOutFolder + self.folder_data, recursive=True)
+		## copy share path
+		#debug.info("plop:" + self.get_staging_path(pkgName) + self.path_data)
+		if os.path.exists(self.get_staging_path(pkgName) + self.path_data) == True:
+			tools.copy_anything(self.get_staging_path(pkgName) + self.path_data + "/*", targetOutpath + self.path_data, recursive=True)
 		
-		## Create binary folder:
-		bin_folder = targetOutFolder + self.folder_bin
-		#tools.create_directory_of_file(bin_folder)
-		tools.copy_anything(self.get_staging_folder(pkgName) + self.folder_bin + "/*",
-		                    bin_folder,
+		## Create binary path:
+		bin_path = targetOutpath + self.path_bin
+		#tools.create_directory_of_file(bin_path)
+		tools.copy_anything(self.get_staging_path(pkgName) + self.path_bin + "/*",
+		                    bin_path,
 		                    executable=True)
 		
 		## create the package:
-		debug.debug("package : " + self.get_staging_folder(pkgName) + "/" + debianPkgName + ".app.pkg")
-		os.system("cd " + self.get_staging_folder(pkgName) + " ; tar -czf " + pkgName + ".app.tar.gz " + pkgName + ".app")
-		#multiprocess.run_command("cd " + self.get_staging_folder(pkgName) + " ; tar -czf " + pkgName + ".app.tar.gz " + pkgName + ".app")
-		tools.create_directory_of_file(self.get_final_folder())
-		tools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgName + ".app.tar.gz", self.get_final_folder() + "/" + pkgName + ".app.gpkg")
+		debug.debug("package : " + self.get_staging_path(pkgName) + "/" + debianPkgName + ".app.pkg")
+		os.system("cd " + self.get_staging_path(pkgName) + " ; tar -czf " + pkgName + ".app.tar.gz " + pkgName + ".app")
+		#multiprocess.run_command("cd " + self.get_staging_path(pkgName) + " ; tar -czf " + pkgName + ".app.tar.gz " + pkgName + ".app")
+		tools.create_directory_of_file(self.get_final_path())
+		tools.copy_file(self.get_staging_path(pkgName) + "/" + pkgName + ".app.tar.gz", self.get_final_path() + "/" + pkgName + ".app.gpkg")
 		
 
 

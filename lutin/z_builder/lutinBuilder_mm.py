@@ -41,12 +41,12 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to compile a m++ file in object file.
 ##
-def compile(file, binary, target, depancy, flags, path, name, basic_folder):
-	file_src = target.get_full_name_source(basic_folder, file)
-	file_cmd = target.get_full_name_cmd(name, basic_folder, file)
-	file_dst = target.get_full_name_destination(name, basic_folder, file, get_output_type())
-	file_depend = target.get_full_dependency(name, basic_folder, file)
-	file_warning = target.get_full_name_warning(name, basic_folder, file)
+def compile(file, binary, target, depancy, flags, path, name, basic_path):
+	file_src = target.get_full_name_source(basic_path, file)
+	file_cmd = target.get_full_name_cmd(name, basic_path, file)
+	file_dst = target.get_full_name_destination(name, basic_path, file, get_output_type())
+	file_depend = target.get_full_dependency(name, basic_path, file)
+	file_warning = target.get_full_name_warning(name, basic_path, file)
 	# create the command line befor requesting start:
 	cmd = [
 		target.xx,

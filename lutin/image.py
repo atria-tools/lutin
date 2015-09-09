@@ -75,7 +75,7 @@ def resize(srcFile, destFile, x, y, cmd_file=None):
 			else:
 				debug.error(" can not manage extention ... : " + destFile)
 	else:
-		# open an image file (.bmp,.jpg,.png,.gif) you have in the working folder
+		# open an image file (.bmp,.jpg,.png,.gif) you have in the working path
 		im1 = Image.open(srcFile)
 		if im1.size[0] <= x:
 			# for small image just copy:

@@ -38,8 +38,8 @@ def get_output_type():
 ##
 ## @brief Commands for running ar.
 ##
-def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "lib-static")
+def link(file, binary, target, depancy, name, basic_path):
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "lib-static")
 	#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
 	cmd = [
 		target.ar

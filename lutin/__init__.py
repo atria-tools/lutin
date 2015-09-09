@@ -21,7 +21,7 @@ is_init = False
 
 if is_init == False:
 	debug.verbose("Use Make as a make stadard")
-	sys.path.append(tools.get_run_folder())
+	sys.path.append(tools.get_run_path())
 	builder.import_path(tools.get_current_path(__file__))
 	module.import_path(tools.get_current_path(__file__))
 	system.import_path(tools.get_current_path(__file__))
@@ -29,16 +29,16 @@ if is_init == False:
 	
 	debug.debug("missing file lutinBase.py ==> loading subPath...");
 	# Import all sub path without out and archive
-	for folder in os.listdir("."):
-		if os.path.isdir(folder)==True:
-			if     folder.lower()!="android" \
-			   and folder.lower()!="archive" \
-			   and folder.lower()!="out" :
-				debug.debug("Automatic load path: '" + folder + "'")
-				builder.import_path(folder)
-				module.import_path(folder)
-				system.import_path(folder)
-				target.import_path(folder)
+	for path in os.listdir("."):
+		if os.path.isdir(path)==True:
+			if     path.lower()!="android" \
+			   and path.lower()!="archive" \
+			   and path.lower()!="out" :
+				debug.debug("Automatic load path: '" + path + "'")
+				builder.import_path(path)
+				module.import_path(path)
+				system.import_path(path)
+				target.import_path(path)
 	
 	builder.init()
 	

@@ -33,28 +33,28 @@ class Target(target.Target):
 		else:
 			arch="arm64"
 		
-		self.folder_ndk = os.getenv('PROJECT_NDK', "AUTO")
-		self.folder_sdk = os.getenv('PROJECT_SDK', "AUTO")
+		self.path_ndk = os.getenv('PROJECT_NDK', "AUTO")
+		self.path_sdk = os.getenv('PROJECT_SDK', "AUTO")
 		# auto search NDK
-		if self.folder_ndk == "AUTO":
-			for folder in os.listdir("."):
-				if os.path.isdir(folder)==True:
-					if folder=="android":
-						self.folder_ndk = folder + "/ndk"
-			if self.folder_ndk == "AUTO":
-				self.folder_ndk = tools.get_run_folder() + "/../android/ndk"
+		if self.path_ndk == "AUTO":
+			for path in os.listdir("."):
+				if os.path.isdir(path)==True:
+					if path=="android":
+						self.path_ndk = path + "/ndk"
+			if self.path_ndk == "AUTO":
+				self.path_ndk = tools.get_run_path() + "/../android/ndk"
 		# auto search SDK
-		if self.folder_sdk == "AUTO":
-			for folder in os.listdir("."):
-				if os.path.isdir(folder)==True:
-					if folder=="android":
-						self.folder_sdk = folder + "/sdk"
-			if self.folder_sdk == "AUTO":
-				self.folder_sdk = tools.get_run_folder() + "/../android/sdk"
+		if self.path_sdk == "AUTO":
+			for path in os.listdir("."):
+				if os.path.isdir(path)==True:
+					if path=="android":
+						self.path_sdk = path + "/sdk"
+			if self.path_sdk == "AUTO":
+				self.path_sdk = tools.get_run_path() + "/../android/sdk"
 		
-		if not os.path.isdir(self.folder_ndk):
+		if not os.path.isdir(self.path_ndk):
 			debug.error("NDK path not set !!! set env : PROJECT_NDK on the NDK path")
-		if not os.path.isdir(self.folder_sdk):
+		if not os.path.isdir(self.path_sdk):
 			debug.error("SDK path not set !!! set env : PROJECT_SDK on the SDK path")
 		
 		
@@ -63,34 +63,34 @@ class Target(target.Target):
 		if host.BUS_SIZE==64:
 			tmpOsVal = "_64"
 		if self.config["compilator"] == "clang":
-			self.set_cross_base(self.folder_ndk + "/toolchains/llvm-3.6/prebuilt/linux-x86" + tmpOsVal + "/bin/")
+			self.set_cross_base(self.path_ndk + "/toolchains/llvm-3.6/prebuilt/linux-x86" + tmpOsVal + "/bin/")
 		else:
-			baseFolderArm = self.folder_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-			baseFolderMips = self.folder_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-			baseFolderX86 = self.folder_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
-			self.set_cross_base(baseFolderArm + "arm-linux-androideabi-")
-			if not os.path.isdir(baseFolderArm):
+			basepathArm = self.path_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+			basepathMips = self.path_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+			basepathX86 = self.path_ndk + "/toolchains/x86-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
+			self.set_cross_base(basepathArm + "arm-linux-androideabi-")
+			if not os.path.isdir(basepathArm):
 				debug.error("Gcc Arm path does not exist !!!")
-			if not os.path.isdir(baseFolderMips):
+			if not os.path.isdir(basepathMips):
 				debug.info("Gcc Mips path does not exist !!!")
-			if not os.path.isdir(baseFolderX86):
+			if not os.path.isdir(basepathX86):
 				debug.info("Gcc x86 path does not exist !!!")
 		
-		self.folder_bin="/mustNotCreateBinary"
-		self.folder_lib="/data/lib/armeabi"
-		self.folder_data="/data/assets"
-		self.folder_doc="/doc"
+		self.path_bin="/mustNotCreateBinary"
+		self.path_lib="/data/lib/armeabi"
+		self.path_data="/data/assets"
+		self.path_doc="/doc"
 		self.suffix_package='.pkg'
 		
 		# board id at 14 is for android 4.0 and more ...
 		self.boardId = 14
 		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.boardId))
 		if arch == "armv5" or arch == "armv7":
-			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
 		elif arch == "mips":
-			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
 		elif arch == "x86":
-			self.global_include_cc.append("-I" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
 		
 		if True:
 			if self.config["compilator"] == "clang":
@@ -98,11 +98,11 @@ class Target(target.Target):
 					debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")
 				self.global_flags_cc.append("-D__STDCPP_LLVM__")
 				# llvm-libc++ : BSD | MIT
-				self.global_include_cc.append("-gcc-toolchain " + self.folder_ndk +"/sources/android/support/include")
-				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/android/support/include")
-				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
+				self.global_include_cc.append("-gcc-toolchain " + self.path_ndk +"/sources/android/support/include")
+				self.global_include_cc.append("-I" + self.path_ndk +"/sources/android/support/include")
+				self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
 				if arch == "armv5":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
 				elif arch == "armv7":
@@ -111,51 +111,51 @@ class Target(target.Target):
 					self.global_flags_cc.append("-march=armv7-a")
 					self.global_flags_cc.append("-mfpu=vfpv3-d16")
 					self.global_flags_cc.append("-mhard-float")
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/"
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libc++_static.a")
 					self.global_flags_ld.append("-target armv7-none-linux-androideabi")
 					self.global_flags_ld.append("-Wl,--fix-cortex-a8")
 					self.global_flags_ld.append("-Wl,--no-warn-mismatch")
 					self.global_flags_ld.append("-lm_hard")
 				elif arch == "mips":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/mips/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/mips/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
 				elif arch == "x86":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/x86/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/x86/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
 			else:
 				self.global_flags_cc.append("-D__STDCPP_GNU__")
 				# GPL v3 (+ exception link for gcc compilator)
-				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/include/")
-				self.global_include_cc.append("-I" + self.folder_ndk +"/sources/android/support/include/")
+				self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/include/")
+				self.global_include_cc.append("-I" + self.path_ndk +"/sources/android/support/include/")
 				if arch == "armv5":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
 				elif arch == "armv7":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
 					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
 				elif arch == "mips":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libgnustl_static.a")
 					self.global_flags_ld.append(         stdCppBasePath + "libsupc++.a")
 				elif arch == "x86":
-					stdCppBasePath = self.folder_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/x86/"
+					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/x86/"
 					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
 					self.global_flags_ld.append(         stdCppBasePath + "libgnustl_static.a")
 					self.global_flags_ld.append(         stdCppBasePath + "libsupc++.a")
 		else :
-			self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/system/include/")
-			self.global_include_cc.append("-I" + self.folder_ndk +"/sources/cxx-stl/stlport/stlport/")
-			self.global_flags_ld.append(self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
+			self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/system/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/stlport/stlport/")
+			self.global_flags_ld.append(self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
 		
-		self.global_sysroot = "--sysroot=" + self.folder_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm"
+		self.global_sysroot = "--sysroot=" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm"
 		
 		self.global_flags_cc.append("-D__ARM_ARCH_5__")
 		self.global_flags_cc.append("-D__ARM_ARCH_5T__")
@@ -203,8 +203,8 @@ class Target(target.Target):
 				return True
 		return False
 	
-	def get_staging_folder_data(self, binaryName):
-		return self.get_staging_folder(binaryName) + self.folder_data
+	def get_staging_path_data(self, binaryName):
+		return self.get_staging_path(binaryName) + self.path_data
 	
 	def make_package(self, pkgName, pkgProperties, basePkgPath, heritage):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
@@ -214,14 +214,14 @@ class Target(target.Target):
 		pkgNameApplicationName = pkgName
 		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
-		# FINAL_FOLDER_JAVA_PROJECT
-		self.folder_javaProject=   self.get_staging_folder(pkgName) \
+		# FINAL_path_JAVA_PROJECT
+		self.path_javaProject=   self.get_staging_path(pkgName) \
 		                         + "/src/" \
 		                         + pkgProperties["COMPAGNY_TYPE"] \
 		                         + "/" + pkgProperties["COMPAGNY_NAME2"] \
 		                         + "/" + pkgNameApplicationName + "/"
 		#FINAL_FILE_ABSTRACTION
-		self.file_finalAbstraction = self.folder_javaProject + "/" + pkgNameApplicationName + ".java"
+		self.file_finalAbstraction = self.path_javaProject + "/" + pkgNameApplicationName + ".java"
 		
 		compleatePackageName = pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgNameApplicationName
 		
@@ -231,25 +231,25 @@ class Target(target.Target):
 		
 		
 		debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
-		# Create folder :
+		# Create path :
 		tools.create_directory_of_file(self.file_finalAbstraction)
 		# Create file :
 		# java ==> done by ewol wrapper ... (and compiled in the normal compilation system ==> must be find in the dependency list of jar ...
 		
-		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/res/drawable/icon.png");
+		tools.create_directory_of_file(self.get_staging_path(pkgName) + "/res/drawable/icon.png");
 		if     "ICON" in pkgProperties.keys() \
 		   and pkgProperties["ICON"] != "":
-			image.resize(pkgProperties["ICON"], self.get_staging_folder(pkgName) + "/res/drawable/icon.png", 256, 256)
+			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/res/drawable/icon.png", 256, 256)
 		else:
 			# to be sure that we have all time a resource ...
-			tmpFile = open(self.get_staging_folder(pkgName) + "/res/drawable/plop.txt", 'w')
+			tmpFile = open(self.get_staging_path(pkgName) + "/res/drawable/plop.txt", 'w')
 			tmpFile.write('plop\n')
 			tmpFile.flush()
 			tmpFile.close()
 		
 		if pkgProperties["ANDROID_MANIFEST"]!="":
 			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkgProperties["ANDROID_MANIFEST"])
-			tools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_folder(pkgName) + "/AndroidManifest.xml", force=True)
+			tools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_path(pkgName) + "/AndroidManifest.xml", force=True)
 		else:
 			debug.error("missing parameter 'ANDROID_MANIFEST' in the properties ... ")
 		
@@ -262,34 +262,34 @@ class Target(target.Target):
 		for res_source, res_dest in pkgProperties["ANDROID_RESOURCES"]:
 			if res_source == "":
 				continue
-			tools.copy_file(res_source , self.get_staging_folder(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
+			tools.copy_file(res_source , self.get_staging_path(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
 		
 		
 		# Doc :
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
-		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/src/noFile")
-		androidToolPath = self.folder_sdk + "/build-tools/"
+		tools.create_directory_of_file(self.get_staging_path(pkgName) + "/src/noFile")
+		androidToolPath = self.path_sdk + "/build-tools/"
 		# find android tool version
-		dirnames = tools.get_list_sub_folder(androidToolPath)
+		dirnames = tools.get_list_sub_path(androidToolPath)
 		if len(dirnames) != 1:
 			debug.error("an error occured when getting the tools for android")
 		androidToolPath += dirnames[0] + "/"
 		
 		# this is to create resource file for android ... (we did not use aset in jar with ewol ...
-		adModResouceFolder = ""
+		adModResoucepath = ""
 		if "ADMOD_ID" in pkgProperties:
-			adModResouceFolder = " -S " + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
+			adModResoucepath = " -S " + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
 		cmdLine = androidToolPath + "aapt p -f " \
-		          + "-M " + self.get_staging_folder(pkgName) + "/AndroidManifest.xml " \
-		          + "-F " + self.get_staging_folder(pkgName) + "/resources.res " \
-		          + "-I " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
-		          + "-S " + self.get_staging_folder(pkgName) + "/res/ " \
-		          + adModResouceFolder \
-		          + "-J " + self.get_staging_folder(pkgName) + "/src/ "
+		          + "-M " + self.get_staging_path(pkgName) + "/AndroidManifest.xml " \
+		          + "-F " + self.get_staging_path(pkgName) + "/resources.res " \
+		          + "-I " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
+		          + "-S " + self.get_staging_path(pkgName) + "/res/ " \
+		          + adModResoucepath \
+		          + "-J " + self.get_staging_path(pkgName) + "/src/ "
 		multiprocess.run_command(cmdLine)
 		
-		tools.create_directory_of_file(self.get_staging_folder(pkgName) + "/build/classes/noFile")
+		tools.create_directory_of_file(self.get_staging_path(pkgName) + "/build/classes/noFile")
 		debug.print_element("pkg", "*.class", "<==", "*.java")
 		#generate android java files:
 		filesString=""
@@ -298,21 +298,21 @@ class Target(target.Target):
 		old : 
 		if "ADMOD_ID" in pkgProperties:
 			# TODO : check this I do not think it is really usefull ... ==> write for IDE only ...
-			filesString += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
+			filesString += self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
 		if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-			filesString += self.folder_javaProject + pkgNameApplicationName + "Settings.java "
+			filesString += self.path_javaProject + pkgNameApplicationName + "Settings.java "
 		
 		adModJarFile = ""
 		if "ADMOD_ID" in pkgProperties:
-			adModJarFile = ":" + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
+			adModJarFile = ":" + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
 		
 		cmdLine = "javac " \
-		          + "-d " + self.get_staging_folder(pkgName) + "/build/classes " \
-		          + "-classpath " + self.folder_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
+		          + "-d " + self.get_staging_path(pkgName) + "/build/classes " \
+		          + "-classpath " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
 		          + adModJarFile + " " \
 		          + filesString \
 		          + self.file_finalAbstraction + " "  \
-		          + self.get_staging_folder(pkgName) + "/src/R.java "
+		          + self.get_staging_path(pkgName) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		"""
 		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage.src, ["so"])))
@@ -327,19 +327,19 @@ class Target(target.Target):
 			class_extern += elem
 		# create enpoint element :
 		cmdLine = "javac " \
-		          + "-d " + self.get_staging_folder(pkgName) + "/build/classes " \
+		          + "-d " + self.get_staging_path(pkgName) + "/build/classes " \
 		          + "-classpath " + class_extern + " " \
-		          + self.get_staging_folder(pkgName) + "/src/R.java "
+		          + self.get_staging_path(pkgName) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".dex", "<==", "*.class")
 		cmdLine = androidToolPath + "dx " \
 		          + "--dex --no-strict " \
-		          + "--output=" + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
-		          + self.get_staging_folder(pkgName) + "/build/classes/ "
+		          + "--output=" + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
+		          + self.get_staging_path(pkgName) + "/build/classes/ "
 		
 		if "ADMOD_ID" in pkgProperties:
-			cmdLine += self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
+			cmdLine += self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 		# add element to dexification:
 		for elem in upper_jar:
 			# remove android sdk:
@@ -352,16 +352,16 @@ class Target(target.Target):
 		#builderDebug="-agentlib:jdwp=transport=dt_socket,server=y,address=8050,suspend=y "
 		builderDebug=""
 		# note : set -u not signed application...
-		#+ ":" + self.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
+		#+ ":" + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 		cmdLine =   "java -Xmx128M " \
-		          + " -classpath " + self.folder_sdk + "/tools/lib/sdklib.jar " \
+		          + " -classpath " + self.path_sdk + "/tools/lib/sdklib.jar " \
 		          + builderDebug \
 		          + " com.android.sdklib.build.ApkBuilderMain " \
-		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+		          + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 		          + " -u " \
-		          + " -z " + self.get_staging_folder(pkgName) + "/resources.res " \
-		          + " -f " + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
-		          + " -rf " + self.get_staging_folder(pkgName) + "/data "
+		          + " -z " + self.get_staging_path(pkgName) + "/resources.res " \
+		          + " -f " + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
+		          + " -rf " + self.get_staging_path(pkgName) + "/data "
 		multiprocess.run_command(cmdLine)
 		
 		# doc :
@@ -379,7 +379,7 @@ class Target(target.Target):
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + " -storepass Pass__AndroidDebugKey " \
 			    + " -keypass PassKey__AndroidDebugKey " \
-			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+			    + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey"
 			multiprocess.run_command(cmdLine)
 			tmpFile = open("tmpPass.boo", 'w')
@@ -392,26 +392,26 @@ class Target(target.Target):
 			cmdLine = "jarsigner " \
 			    + " -keystore " + basePkgPath + "/AndroidKey.jks " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
-			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+			    + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
 			    + " " + pkgNameApplicationName
 			multiprocess.run_command(cmdLine)
 			cmdLine = "jarsigner " \
 			    + " -verify -verbose -certs " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
-			    + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk "
+			    + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk "
 			multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
-		tools.remove_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk")
+		tools.remove_file(self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk")
 		# verbose mode : -v
 		cmdLine = androidToolPath + "zipalign 4 " \
-		          + self.get_staging_folder(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
-		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
+		          + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+		          + self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk "
 		multiprocess.run_command(cmdLine)
 		
 		# copy file in the final stage :
-		tools.copy_file(self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk",
-		                self.get_final_folder() + "/" + pkgNameApplicationName + ".apk",
+		tools.copy_file(self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk",
+		                self.get_final_path() + "/" + pkgNameApplicationName + ".apk",
 		                force=True)
 	
 	def install_package(self, pkgName):
@@ -421,8 +421,8 @@ class Target(target.Target):
 		pkgNameApplicationName = pkgName
 		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
-		cmdLine = self.folder_sdk + "/platform-tools/adb install -r " \
-		          + self.get_staging_folder(pkgName) + "/" + pkgNameApplicationName + ".apk "
+		cmdLine = self.path_sdk + "/platform-tools/adb install -r " \
+		          + self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk "
 		multiprocess.run_command(cmdLine)
 	
 	def un_install_package(self, pkgName):
@@ -432,15 +432,15 @@ class Target(target.Target):
 		pkgNameApplicationName = pkgName
 		if self.config["mode"] == "debug":
 			pkgNameApplicationName += "debug"
-		cmdLine = self.folder_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
+		cmdLine = self.path_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
 		Rmultiprocess.run_command(cmdLine)
 	
 	def Log(self, pkgName):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("logcat of android board")
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("cmd: " + self.folder_sdk + "/platform-tools/adb shell logcat ")
-		cmdLine = self.folder_sdk + "/platform-tools/adb shell logcat "
+		debug.info("cmd: " + self.path_sdk + "/platform-tools/adb shell logcat ")
+		cmdLine = self.path_sdk + "/platform-tools/adb shell logcat "
 		multiprocess.run_command(cmdLine)
 
 

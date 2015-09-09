@@ -38,8 +38,8 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to link a shared library.
 ##
-def link(file, binary, target, depancy, name, basic_folder):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_folder, file, "lib-shared")
+def link(file, binary, target, depancy, name, basic_path):
+	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "lib-shared")
 	#create command Line
 	cmd = [
 		target.xx,
