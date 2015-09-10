@@ -48,13 +48,13 @@ class Target(target.Target):
 			result += elem
 		return result
 	
-	def make_package(self, pkgName, pkgProperties, basePkgPath, type="generic"):
+	def make_package(self, pkgName, pkgProperties, basePkgPath, heritage_list, type="generic"):
 		if type == "debian":
-			self.make_package_debian(pkgName, pkgProperties, basePkgPath)
+			self.make_package_debian(pkgName, pkgProperties, basePkgPath, heritage_list)
 		elif type == "generic":
-			self.make_package_generic(pkgName, pkgProperties, basePkgPath)
+			self.make_package_generic(pkgName, pkgProperties, basePkgPath, heritage_list)
 	
-	def make_package_debian(self, pkgName, pkgProperties, basePkgPath):
+	def make_package_debian(self, pkgName, pkgProperties, basePkgPath, heritage_list):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debianPkgName = re.sub("_", "-", pkgName)
 		debug.debug("------------------------------------------------------------------------")
@@ -178,7 +178,10 @@ class Target(target.Target):
 	        *    *--> YY
 	        *--> sources
 	"""
-	def make_package_generic(self, pkgName, pkgProperties, basePkgPath):
+	def make_package_generic(self, pkgName, pkgProperties, basePkgPath, heritage_list):
+		debug.warning("heritage for " + str(pkgName) + ":")
+		for heritage in heritage_list.list_heritage:
+			debug.warning("heritage .... " + str(heritage.name) + " : " + str(heritage.depends))
 		debianPkgName = re.sub("_", "-", pkgName)
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate generic '" + debianPkgName + "' v"+pkgProperties["VERSION"])

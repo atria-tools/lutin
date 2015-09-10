@@ -610,7 +610,7 @@ class Module:
 					self.sub_heritage_list.add_heritage(self.local_heritage)
 					target.make_package(self.name, self.package_prop, os.path.join(self.origin_path, ".."), self.sub_heritage_list)
 				else:
-					target.make_package(self.name, self.package_prop, os.path.join(self.origin_path, ".."))
+					target.make_package(self.name, self.package_prop, os.path.join(self.origin_path, ".."), self.sub_heritage_list)
 		
 		# return local dependency ...
 		return self.sub_heritage_list
