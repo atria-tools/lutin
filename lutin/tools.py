@@ -120,11 +120,12 @@ def copy_anything(src, dst, recursive = False, executable=False):
 	debug.verbose("    " + str(tmpPath) + ":")
 	for root, dirnames, filenames in os.walk(tmpPath):
 		deltaRoot = root[len(tmpPath):]
-		if recursive == False and deltaRoot != "":
+		if     recursive == False \
+		   and deltaRoot != "":
 			return
 		debug.verbose("     root='" + str(deltaRoot) + "'") # dir='" + str(dirnames) + "' filenames=" + str(filenames))
 		tmpList = filenames
-		if len(tmpRule)>0:
+		if len(tmpRule) > 0:
 			tmpList = fnmatch.filter(filenames, tmpRule)
 		# Import the module :
 		for cycleFile in tmpList:
@@ -135,7 +136,7 @@ def copy_anything(src, dst, recursive = False, executable=False):
 			          dst     + "/" + deltaRoot + "/" + cycleFile,
 			          executable=True)
 
-
+## @deprecated ...
 def copy_anything_target(target, src, dst):
 	tmpPath = os.path.dirname(os.path.realpath(src))
 	tmpRule = os.path.basename(src)
@@ -148,11 +149,13 @@ def copy_anything_target(target, src, dst):
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
 			newDst = dst
-			if len(newDst) != 0 and newDst[-1] != "/":
+			if     len(newDst) != 0 \
+			   and newDst[-1] != "/":
 				newDst += "/"
 			if root[len(src)-1:] != "":
 				newDst += root[len(src)-1:]
-				if len(newDst) != 0 and newDst[-1] != "/":
+				if     len(newDst) != 0 \
+				   and newDst[-1] != "/":
 					newDst += "/"
 			debug.verbose("Might copy : '" + root+"/"+cycleFile + "' ==> '" + newDst+cycleFile + "'" )
 			target.add_file_staging(root+"/"+cycleFile, newDst+cycleFile)

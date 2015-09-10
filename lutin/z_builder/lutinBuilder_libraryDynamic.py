@@ -79,7 +79,7 @@ def link(file, binary, target, depancy, name, basic_path):
 	# check the dependency for this file :
 	if     depend.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) == False \
 	   and depend.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
-		return tmpList[1]
+		return file_dst
 	tools.create_directory_of_file(file_dst)
 	debug.print_element("SharedLib", name, "==>", file_dst)
 	multiprocess.run_command(cmdLine, store_output_file=file_warning)

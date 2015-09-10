@@ -56,15 +56,19 @@ class Module:
 		self.extention_order_build = ["java", "javah"] # all is not set here is done in the provided order ...
 		# sources list:
 		self.src = []
+		self.header = []
 		# copy files and paths:
 		self.image_to_copy = []
 		self.files = []
 		self.paths = []
+		# The module has been already build ...
 		self.isbuild = False
 		
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
 		   or moduleType == 'LIBRARY' \
+		   or moduleType == 'LIBRARY_DYNAMIC' \
+		   or moduleType == 'LIBRARY_STATIC' \
 		   or moduleType == 'PACKAGE' \
 		   or moduleType == 'PREBUILD':
 			self.type=moduleType
@@ -124,7 +128,85 @@ class Module:
 		# only for gcc :"-Wno-unused-but-set-variable"
 	
 	##
+	## @brief Send image in the build data directory
+	## @param[in] target Target object
+	##
+	def image_to_build(self, target):
+		for source, destination, sizeX, sizeY in self.image_to_copy:
+			extension = source[source.rfind('.'):]
+			if     extension != ".png" \
+			   and extension != ".jpg" \
+			   and sizeX > 0:
+				debug.error("Can not manage image other than .png and jpg to resize : " + source);
+			display_source = source
+			source = self.origin_path + "/" + source
+			if destination == "":
+				destination = source[source.rfind('/')+1:]
+				debug.verbose("Regenerate Destination : '" + destination + "'")
+			# TODO : set it back : file_cmd = target.get_build_path_data(self.name)
+			file_cmd = ""
+			if sizeX > 0:
+				debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
+				fileName, fileExtension = os.path.splitext(os.path.join(self.origin_path,source))
+				image.resize(source, os.path.join(target.get_build_path_data(self.name), dst), sizeX, sizeY, file_cmd)
+			else:
+				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
+				tools.copy_file(source, os.path.join(target.get_build_path_data(self.name), destination), file_cmd)
+	
+	##
+	## @brief Send files in the build data directory
+	## @param[in] target Target object
+	##
+	def files_to_build(self, target):
+		for source, destination in self.files:
+			display_source = source
+			source = os.path.join(self.origin_path, source)
+			if destination == "":
+				destination = source[source.rfind('/')+1:]
+				debug.verbose("Regenerate Destination : '" + destination + "'")
+			# TODO : set it back : file_cmd = target.get_build_path_data(self.name)
+			file_cmd = ""
+			debug.verbose("Might copy file : " + display_source + " ==> " + destination)
+			tools.copy_file(source, os.path.join(target.get_build_path_data(self.name), destination), file_cmd)
+	
+	##
+	## @brief Send compleate folder in the build data directory
+	## @param[in] target Target object
+	##
+	def paths_to_build(self, target):
+		for source, destination in self.paths:
+			debug.debug("Might copy path : " + source + "==>" + destination)
+			tmp_path = os.path.dirname(os.path.realpath(os.path.join(self.origin_path, source)))
+			tmp_rule = os.path.basename(source)
+			for root, dirnames, filenames in os.walk(tmp_path):
+				debug.extreme_verbose(" root='" + str(root) + "' tmp_path='" + str(tmp_path))
+				if root != tmp_path:
+					break
+				debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
+				list_files = filenames
+				if len(tmp_rule)>0:
+					list_files = fnmatch.filter(filenames, tmp_rule)
+				debug.verbose("       filenames=" + str(filenames))
+				# Import the module :
+				for cycle_file in list_files:
+					#for cycle_file in filenames:
+					new_destination = destination
+					# TODO : maybe an error when changing subdirectory ...
+					#if root[len(source)-1:] != "":
+					#	new_destination = os.path.join(new_destination, root[len(source)-1:])
+					debug.verbose("Might copy : '" + os.path.join(root, cycle_file) + "' ==> '" + os.path.join(target.get_build_path_data(self.name), new_destination, cycle_file) + "'" )
+					file_cmd = "" # TODO : ...
+					tools.copy_file(os.path.join(root, cycle_file), os.path.join(target.get_build_path_data(self.name), new_destination, cycle_file), file_cmd)
+	
+	
+	
+	
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
+	##
 	## @brief Commands for copying files
+	## @deprecated
 	##
 	def image_to_staging(self, binary_name, target):
 		for source, destination, sizeX, sizeY in self.image_to_copy:
@@ -133,37 +215,45 @@ class Module:
 			   and extension != ".jpg" \
 			   and sizeX > 0:
 				debug.error("Can not manage image other than .png and jpg to resize : " + source);
-			displaySource = source
+			display_source = source
 			source = self.origin_path + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
 			file_cmd = target.generate_file(binary_name, self.name, self.origin_path, destination, "image")[0]
 			if sizeX > 0:
-				debug.verbose("Image file : " + displaySource + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
+				debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
 				fileName, fileExtension = os.path.splitext(self.origin_path+"/" + source)
 				target.add_image_staging(source, destination, sizeX, sizeY, file_cmd)
 			else:
-				debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
+				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 				target.add_file_staging(source, destination, file_cmd)
 	
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
 	##
 	## @brief Commands for copying files
+	## @deprecated
 	##
 	def files_to_staging(self, binary_name, target):
 		for source, destination in self.files:
-			displaySource = source
+			display_source = source
 			source = self.origin_path + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
 				debug.verbose("Regenerate Destination : '" + destination + "'")
 			file_cmd = target.generate_file(binary_name, self.name, self.origin_path, destination, "image")[0]
 			# TODO : when destination is missing ...
-			debug.verbose("Might copy file : " + displaySource + " ==> " + destination)
+			debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 			target.add_file_staging(source, destination, file_cmd)
 	
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
 	##
 	## @brief Commands for copying files
+	## @deprecated
 	##
 	def paths_to_staging(self, binary_name, target):
 		for source, destination in self.paths:
@@ -289,8 +379,7 @@ class Module:
 			# this is the endpoint binary ...
 			package_name = self.name
 		else :
-			# TODO : Set it better ...
-			None
+			pass
 		# build dependency before
 		list_sub_file_needed_to_build = []
 		self.sub_heritage_list = heritage.HeritageList()
@@ -319,7 +408,24 @@ class Module:
 					if level == lvl:
 						debug.debug("level=" + str(level) + " Do Action : " + action_name)
 						elem = action(target, self, package_name);
-		
+		# ----------------------------------------------------
+		# -- Generic library help                           --
+		# ----------------------------------------------------
+		if self.type=='PREBUILD':
+			debug.print_element("Prebuild", self.name, "", "")
+		if self.type=='LIBRARY':
+			debug.print_element("Library", self.name, "", "")
+		if self.type=='LIBRARY_DYNAMIC':
+			debug.print_element("Library(dynamic)", self.name, "", "")
+		if self.type=='LIBRARY_STATIC':
+			debug.print_element("Library(static)", self.name, "", "")
+		if self.type=='BINARY':
+			debug.print_element("Binary", self.name, "", "")
+		if self.type=='PACKAGE':
+			debug.print_element("Package", self.name, "", "")
+		# ----------------------------------------------------
+		# -- Sources compilation                            --
+		# ----------------------------------------------------
 		if self.type != 'PREBUILD':
 			# build local sources in a specific order :
 			for extention_local in self.extention_order_build:
@@ -370,35 +476,44 @@ class Module:
 					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_path + "/" + file + "'")
 			# when multiprocess availlable, we need to synchronize here ...
 			multiprocess.pool_synchrosize()
-		
-		# generate end point:
+		# ----------------------------------------------------
+		# -- Generation point                               --
+		# ----------------------------------------------------
 		if self.type=='PREBUILD':
-			debug.print_element("Prebuild", self.name, "==>", "find")
 			self.local_heritage.add_sources(self.src)
-		elif self.type=='LIBRARY':
-			try:
-				tmp_builder = builder.get_builder_with_output("a");
-				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
-				if len(list_file) > 0:
-					res_file = tmp_builder.link(list_file,
-					                            package_name,
-					                            target,
-					                            self.sub_heritage_list,
-					                            name = self.name,
-					                            basic_path = self.origin_path)
-					self.local_heritage.add_sources(res_file)
-				tmp_builder = builder.get_builder_with_output("so");
-				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
-				if len(list_file) > 0:
-					res_file = tmp_builder.link(list_file,
-					                            package_name,
-					                            target,
-					                            self.sub_heritage_list,
-					                            name = self.name,
-					                            basic_path = self.origin_path)
-					# TODO : self.local_heritage.add_sources(res_file)
-			except ValueError:
-				debug.error(" UN-SUPPORTED link format:  '.a'")
+		elif    self.type=='LIBRARY' \
+		     or self.type=='LIBRARY_DYNAMIC' \
+		     or self.type=='LIBRARY_STATIC':
+			if    self.type=='LIBRARY' \
+			   or self.type=='LIBRARY_STATIC':
+				try:
+					tmp_builder = builder.get_builder_with_output("a");
+					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+					if len(list_file) > 0:
+						res_file = tmp_builder.link(list_file,
+						                            package_name,
+						                            target,
+						                            self.sub_heritage_list,
+						                            name = self.name,
+						                            basic_path = self.origin_path)
+						self.local_heritage.add_sources(res_file)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.a'")
+			if    self.type=='LIBRARY' \
+			   or self.type=='LIBRARY_DYNAMIC':
+				try:
+					tmp_builder = builder.get_builder_with_output("so");
+					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+					if len(list_file) > 0:
+						res_file = tmp_builder.link(list_file,
+						                            package_name,
+						                            target,
+						                            self.sub_heritage_list,
+						                            name = self.name,
+						                            basic_path = self.origin_path)
+						# TODO : self.local_heritage.add_sources(res_file)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.so'/'.dynlib'/'.dll'")
 			try:
 				tmp_builder = builder.get_builder_with_output("jar");
 				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
@@ -423,10 +538,6 @@ class Module:
 				                            basic_path = self.origin_path)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.bin'")
-			# generate tree for this special binary
-			target.clean_module_tree()
-			self.build_tree(target, self.name)
-			target.copy_to_staging(self.name)
 		elif self.type=="PACKAGE":
 			if target.name=="Android":
 				# special case for android wrapper:
@@ -466,24 +577,49 @@ class Module:
 					                            basic_path = self.origin_path)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
-			target.clean_module_tree()
-			# generate tree for this special binary
-			self.build_tree(target, self.name)
-			target.copy_to_staging(self.name)
+		else:
+			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
+		self.sub_heritage_list.add_heritage(self.local_heritage)
+		
+		# ----------------------------------------------------
+		# -- install header                                 --
+		# ----------------------------------------------------
+		debug.debug("install headers ...")
+		for file in self.header:
+			src_path = os.path.join(self.origin_path, file)
+			dst_path = os.path.join(target.get_build_path_include(self.name), file)
+			tools.copy_file(src_path, dst_path);
+		
+		# ----------------------------------------------------
+		# -- install data                                   --
+		# ----------------------------------------------------
+		debug.debug("install datas")
+		self.image_to_build(target)
+		self.files_to_build(target)
+		self.paths_to_build(target)
+		# TODO : do sothing that create a list of file set in this directory and remove it if necessary ... ==> if not needed anymore ...&
+		
+		# ----------------------------------------------------
+		# -- create package                                 --
+		# ----------------------------------------------------
+		if    self.type=='BINARY' \
+		   or self.type=="PACKAGE":
 			if target.end_generate_package == True:
 				# generate the package with his properties ...
 				if target.name=="Android":
 					self.sub_heritage_list.add_heritage(self.local_heritage)
-					target.make_package(self.name, self.package_prop, self.origin_path + "/..", self.sub_heritage_list)
+					target.make_package(self.name, self.package_prop, os.path.join(self.origin_path, ".."), self.sub_heritage_list)
 				else:
-					target.make_package(self.name, self.package_prop, self.origin_path + "/..")
-		else:
-			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
-			
-		self.sub_heritage_list.add_heritage(self.local_heritage)
+					target.make_package(self.name, self.package_prop, os.path.join(self.origin_path, ".."))
+		
 		# return local dependency ...
 		return self.sub_heritage_list
 	
+	
+	
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
+	# TODO : REMOVE ........................
 	# call here to build the module
 	def build_tree(self, target, package_name):
 		# ckeck if not previously build
@@ -504,7 +640,9 @@ class Module:
 		if self.type=='PREBUILD':
 			# nothing to add ==> just dependence
 			None
-		elif self.type=='LIBRARY':
+		elif    self.type=='LIBRARY' \
+		     or self.type=='LIBRARY_DYNAMIC' \
+		     or self.type=='LIBRARY_STATIC':
 			# remove path of the lib ... for this targer
 			pathbuild = target.get_build_path(self.name)
 			debug.info("remove path : '" + pathbuild + "'")
@@ -595,6 +733,9 @@ class Module:
 	
 	def add_src_file(self, list):
 		self.append_to_internal_list(self.src, list, True)
+	
+	def add_header_file(self, list):
+		self.append_to_internal_list(self.header, list, True)
 	
 	def copy_image(self, source, destination='', sizeX=-1, sizeY=-1):
 		self.image_to_copy.append([source, destination, sizeX, sizeY])

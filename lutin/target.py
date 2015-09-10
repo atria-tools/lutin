@@ -112,7 +112,8 @@ class Target:
 		self.path_lib="lib"
 		self.path_data="share"
 		self.path_doc="doc"
-		self.path_doc="include"
+		self.path_include="include"
+		self.path_object="obj"
 		
 		
 		self.build_done=[]
@@ -185,6 +186,7 @@ class Target:
 	def get_build_mode(self):
 		return self.config["mode"]
 	
+	## @deprecated ...
 	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY, cmdFile=None):
 		for source, dst, x, y, cmdFile2 in self.list_final_file:
 			if dst == outputFile :
@@ -193,6 +195,7 @@ class Target:
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'")
 		self.list_final_file.append([inputFile,outputFile, sizeX, sizeY, cmdFile])
 	
+	## @deprecated ...
 	def add_file_staging(self, inputFile, outputFile, cmdFile=None):
 		for source, dst, x, y, cmdFile2 in self.list_final_file:
 			if dst == outputFile :
@@ -201,6 +204,7 @@ class Target:
 		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
 		self.list_final_file.append([inputFile, outputFile, -1, -1, cmdFile])
 	
+	## @deprecated ...
 	def copy_to_staging(self, binary_name):
 		base_path = self.get_staging_path_data(binary_name)
 		for source, dst, x, y, cmdFile in self.list_final_file:
@@ -229,10 +233,10 @@ class Target:
 		if file[0] == '/':
 			if tools.os.path.isfile(file):
 				return file + self.suffix_cmd_line
-		return self.get_build_path(module_name) + "/" + file + self.suffix_cmd_line
+		return self.get_build_path_object(module_name) + "/" + file + self.suffix_cmd_line
 	
 	def get_full_name_warning(self, module_name, basePath, file):
-		return self.get_build_path(module_name) + "/" + file + self.suffix_warning;
+		return self.get_build_path_object(module_name) + "/" + file + self.suffix_warning;
 	
 	def get_full_name_destination(self, module_name, basePath, file, suffix, remove_suffix=False):
 		# special patch for java file:
@@ -249,10 +253,10 @@ class Target:
 			suffix = suffix[0]
 		else:
 			suffix = ""
-		return self.get_build_path(module_name) + "/" + file + suffix
+		return self.get_build_path_object(module_name) + "/" + file + suffix
 	
 	def get_full_dependency(self, module_name, basePath, file):
-		return self.get_build_path(module_name) + "/" + file + self.suffix_dependence
+		return self.get_build_path_object(module_name) + "/" + file + self.suffix_dependence
 	
 	"""
 		return a list of 3 elements :
@@ -266,6 +270,7 @@ class Target:
 	                  basePath,
 	                  file,
 	                  type):
+		#debug.warning("genrate_file(" + str(binary_name) + "," + str(module_name) + "," + str(basePath) + "," + str(file) + "," + str(type) + ")")
 		list=[]
 		if (type=="bin"):
 			list.append(file)
@@ -275,16 +280,16 @@ class Target:
 			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_warning))
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(os.path.join(self.get_build_path(binary_name), self.path_lib, module_name + self.suffix_lib_dynamic))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
-			list.append(os.path.join(self.get_build_path(binary_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_cmd_line))
-			list.append(os.path.join(self.get_build_path(binary_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_warning))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_cmd_line))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_warning))
 		elif (type=="lib-static"):
 			list.append(file)
-			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_lib_static))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_lib_static + self.suffix_cmd_line))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_lib_static + self.suffix_warning))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_static))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_static + self.suffix_cmd_line))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_static + self.suffix_warning))
 		elif (type=="jar"):
 			list.append(file)
 			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar"))
@@ -308,21 +313,24 @@ class Target:
 		return os.path.join(tools.get_run_path(), self.path_out, self.path_staging, binary_name)
 	
 	def get_build_path(self, module_name):
-		debug.warning("A=" + str(tools.get_run_path()) + " " + str(self.path_out) + " " + str(self.path_build) + " " + str(module_name))
+		#debug.warning("A=" + str(tools.get_run_path()) + " " + str(self.path_out) + " " + str(self.path_build) + " " + str(module_name))
 		return os.path.join(tools.get_run_path(), self.path_out, self.path_build, module_name)
 	
 	
+	def get_build_path_object(self, binary_name):
+		return os.path.join(self.get_build_path(binary_name), self.path_object)
+	
 	def get_build_path_bin(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_bin, binary_name)
+		return os.path.join(self.get_build_path(binary_name), self.path_bin, binary_name)
 	
 	def get_build_path_lib(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_lib, binary_name)
+		return os.path.join(self.get_build_path(binary_name), self.path_lib, binary_name)
 	
 	def get_build_path_data(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_data, binary_name)
+		return os.path.join(self.get_build_path(binary_name), self.path_data, binary_name)
 	
 	def get_build_path_include(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_include, binary_name)
+		return os.path.join(self.get_build_path(binary_name), self.path_include)
 	
 	
 	def get_staging_path_bin(self, binary_name):
@@ -335,7 +343,7 @@ class Target:
 		return os.path.join(self.get_staging_path(binary_name), self.path_data, binary_name)
 	
 	def get_staging_path_include(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_include, binary_name)
+		return os.path.join(self.get_staging_path(binary_name), self.path_include)
 	
 	
 	def get_doc_path(self, module_name):

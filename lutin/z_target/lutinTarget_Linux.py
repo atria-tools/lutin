@@ -34,6 +34,7 @@ class Target(target.Target):
 			if host.BUS_SIZE != 32:
 				self.global_flags_cc.append("-m32")
 		
+		self.global_flags_cc.append("-fpic")
 		self.global_flags_cc.append("-D__STDCPP_GNU__")
 	
 	def generate_list_separate_coma(self, list):
