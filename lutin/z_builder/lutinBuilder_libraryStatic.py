@@ -66,7 +66,7 @@ def link(file, binary, target, depancy, name, basic_path):
 	   and depend.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
 		return file_dst
 	tools.create_directory_of_file(file_dst)
-	debug.print_element("StaticLib", name, "==>", file_dst)
+	debug.print_element("StaticLib", name, "==>", os.path.relpath(file_dst))
 	# explicitly remove the destination to prevent error ...
 	if os.path.exists(file_dst) and os.path.isfile(file_dst):
 		os.remove(file_dst)

@@ -81,7 +81,7 @@ def link(file, binary, target, depancy, name, basic_path):
 	   and depend.need_re_package(file_dst, depancy.src, False, file_cmd, cmdLine) == False:
 		return file_dst
 	tools.create_directory_of_file(file_dst)
-	debug.print_element("SharedLib", name, "==>", file_dst)
+	debug.print_element("SharedLib", name, "==>", os.path.relpath(file_dst))
 	multiprocess.run_command(cmdLine, store_output_file=file_warning)
 	# strip the output file:
 	if    target.config["mode"] == "release" \

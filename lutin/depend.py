@@ -11,12 +11,31 @@ import os
 from . import debug
 from . import env
 
-def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
-	debug.extreme_verbose("Resuest check of dependency of :")
+def _file_size(path):
+	if not os.path.isfile(path):
+		return 0
+	statinfo = os.stat(path)
+	return statinfo.st_size
+
+def _file_read_data(path, binary=False):
+	if not os.path.isfile(path):
+		return ""
+	if binary == True:
+		file = open(path, "rb")
+	else:
+		file = open(path, "r")
+	data_file = file.read()
+	file.close()
+	return data_file
+
+
+def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine="", force_identical=False):
+	debug.extreme_verbose("Request check of dependency of :")
 	debug.extreme_verbose("		dst='" + str(dst) + "'")
 	debug.extreme_verbose("		str='" + str(src) + "'")
 	debug.extreme_verbose("		dept='" + str(dependFile) + "'")
 	debug.extreme_verbose("		cmd='" + str(file_cmd) + "'")
+	debug.extreme_verbose("		force_identical='" + str(force_identical) + "'")
 	# if force mode selected ==> just force rebuild ...
 	if env.get_force_mode():
 		debug.extreme_verbose("			==> must rebuild (force mode)")
@@ -33,7 +52,7 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
 	   and os.path.exists(src) == False:
 		debug.warning("			==> unexistant file :'" + src + "'")
 		return True
-	# chek the basic date if the 2 files
+	# Check the basic date if the 2 files
 	if     dst != "" \
 	   and dst != None \
 	   and os.path.getmtime(src) > os.path.getmtime(dst):
@@ -100,6 +119,19 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine=""):
 					return True
 		# close the current file :
 		file.close()
+	# check the 2 files are identical:
+	if force_identical == True:
+		# check if the 2 cmdline are similar :
+		size_src = _file_size(src)
+		size_dst = _file_size(dst)
+		if size_src != size_dst:
+			debug.extreme_verbose("			Force Rewrite not the same size     size_src=" + str(size_src) + " != size_dest=" + str(size_dst))
+			return True
+		data_src = _file_read_data(src, binary=True)
+		data_dst = _file_read_data(dst, binary=True)
+		if data_src != data_dst:
+			debug.extreme_verbose("			Force Rewrite not the same data")
+			return True
 	
 	debug.extreme_verbose("			==> Not rebuild (all dependency is OK)")
 	return False

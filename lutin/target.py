@@ -274,7 +274,7 @@ class Target:
 		list=[]
 		if (type=="bin"):
 			list.append(file)
-			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary))
+			list.append(self.get_build_file_bin(binary_name))
 			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
 			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_cmd_line))
 			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_warning))
@@ -321,7 +321,7 @@ class Target:
 		return os.path.join(self.get_build_path(binary_name), self.path_object)
 	
 	def get_build_path_bin(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_bin, binary_name)
+		return os.path.join(self.get_build_path(binary_name), self.path_bin)
 	
 	def get_build_path_lib(self, binary_name):
 		return os.path.join(self.get_build_path(binary_name), self.path_lib, binary_name)
@@ -333,17 +333,29 @@ class Target:
 		return os.path.join(self.get_build_path(binary_name), self.path_include)
 	
 	
-	def get_staging_path_bin(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_bin, binary_name)
+	def get_build_file_bin(self, binary_name):
+		return os.path.join(self.get_build_path_bin(binary_name), binary_name + self.suffix_binary)
 	
-	def get_staging_path_lib(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_lib, binary_name)
 	
-	def get_staging_path_data(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_data, binary_name)
 	
-	def get_staging_path_include(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), self.path_include)
+	
+	def get_staging_path_bin(self, package_name):
+		return os.path.join(self.get_staging_path(package_name), self.path_bin)
+	
+	def get_staging_path_lib(self, package_name):
+		return os.path.join(self.get_staging_path(package_name), self.path_lib, package_name)
+	
+	def get_staging_path_data(self, package_name):
+		return os.path.join(self.get_staging_path(package_name), self.path_data, package_name)
+	
+	def get_staging_path_include(self, package_name):
+		return os.path.join(self.get_staging_path(package_name), self.path_include)
+	
+	"""
+	def get_staging_file_bin(self, package_name, binary_name):
+		return os.path.join(self.get_staging_path_bin(package_name), binary_name + self.suffix_binary)
+	"""
+	
 	
 	
 	def get_doc_path(self, module_name):
@@ -369,7 +381,7 @@ class Target:
 		self.module_list.append(newModule)
 	
 	def get_module(self, name):
-		for mod in self.build_done:
+		for mod in self.module_list:
 			if mod.name == name:
 				return mod
 		debug.error("the module '" + str(name) + "'does not exist/already build")

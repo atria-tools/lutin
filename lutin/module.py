@@ -100,6 +100,8 @@ class Module:
 		                     }
 		self.sub_heritage_list = None
 	
+	def get_type(self):
+		return self.type
 	##
 	## @brief add Some copilation flags for this module (and only this one)
 	##
@@ -199,66 +201,6 @@ class Module:
 					tools.copy_file(os.path.join(root, cycle_file), os.path.join(target.get_build_path_data(self.name), new_destination, cycle_file), file_cmd)
 	
 	
-	
-	
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	##
-	## @brief Commands for copying files
-	## @deprecated
-	##
-	def image_to_staging(self, binary_name, target):
-		for source, destination, sizeX, sizeY in self.image_to_copy:
-			extension = source[source.rfind('.'):]
-			if     extension != ".png" \
-			   and extension != ".jpg" \
-			   and sizeX > 0:
-				debug.error("Can not manage image other than .png and jpg to resize : " + source);
-			display_source = source
-			source = self.origin_path + "/" + source
-			if destination == "":
-				destination = source[source.rfind('/')+1:]
-				debug.verbose("Regenerate Destination : '" + destination + "'")
-			file_cmd = target.generate_file(binary_name, self.name, self.origin_path, destination, "image")[0]
-			if sizeX > 0:
-				debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
-				fileName, fileExtension = os.path.splitext(self.origin_path+"/" + source)
-				target.add_image_staging(source, destination, sizeX, sizeY, file_cmd)
-			else:
-				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
-				target.add_file_staging(source, destination, file_cmd)
-	
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	##
-	## @brief Commands for copying files
-	## @deprecated
-	##
-	def files_to_staging(self, binary_name, target):
-		for source, destination in self.files:
-			display_source = source
-			source = self.origin_path + "/" + source
-			if destination == "":
-				destination = source[source.rfind('/')+1:]
-				debug.verbose("Regenerate Destination : '" + destination + "'")
-			file_cmd = target.generate_file(binary_name, self.name, self.origin_path, destination, "image")[0]
-			# TODO : when destination is missing ...
-			debug.verbose("Might copy file : " + display_source + " ==> " + destination)
-			target.add_file_staging(source, destination, file_cmd)
-	
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	##
-	## @brief Commands for copying files
-	## @deprecated
-	##
-	def paths_to_staging(self, binary_name, target):
-		for source, destination in self.paths:
-			debug.debug("Might copy path : " + source + "==>" + destination)
-			tools.copy_anything_target(target, self.origin_path + "/" + source, destination)
 	
 	def gcov(self, target, generate_output=False):
 		if self.type == 'PREBUILD':
@@ -597,7 +539,7 @@ class Module:
 		self.image_to_build(target)
 		self.files_to_build(target)
 		self.paths_to_build(target)
-		# TODO : do sothing that create a list of file set in this directory and remove it if necessary ... ==> if not needed anymore ...&
+		# TODO : do sothing that create a list of file set in this directory and remove it if necessary ... ==> if not needed anymore ...
 		
 		# ----------------------------------------------------
 		# -- create package                                 --
@@ -614,26 +556,6 @@ class Module:
 		
 		# return local dependency ...
 		return self.sub_heritage_list
-	
-	
-	
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	# TODO : REMOVE ........................
-	# call here to build the module
-	def build_tree(self, target, package_name):
-		# ckeck if not previously build
-		if target.is_module_build_tree(self.name)==True:
-			return
-		debug.verbose("build tree of " + self.name)
-		# add all the elements (first added only one keep ==> permit to everload sublib element)
-		self.image_to_staging(package_name, target)
-		self.files_to_staging(package_name, target)
-		self.paths_to_staging(package_name, target)
-		#build tree of all submodules
-		for dep in self.depends:
-			inherit = target.build_tree(dep, package_name)
-	
 	
 	# call here to clean the module
 	def clean(self, target):
@@ -688,9 +610,6 @@ class Module:
 	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
 		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
-	def add_export_path(self, list, type='c'):
-		self.append_to_internal_list2(self.path["export"], type, list)
-	
 	def add_path(self, list, type='c'):
 		self.append_to_internal_list2(self.path["local"], type, list)
 	
@@ -734,8 +653,14 @@ class Module:
 	def add_src_file(self, list):
 		self.append_to_internal_list(self.src, list, True)
 	
-	def add_header_file(self, list):
+	def add_header_file(self, list, rm_path=""):
+		if rm_path != "":
+			debug.warning("remove the basic path ...")
 		self.append_to_internal_list(self.header, list, True)
+	# TODO : Maybe do sothing with this ...
+	def add_export_path(self, list, type='c'):
+		self.append_to_internal_list2(self.path["export"], type, list)
+	
 	
 	def copy_image(self, source, destination='', sizeX=-1, sizeY=-1):
 		self.image_to_copy.append([source, destination, sizeX, sizeY])

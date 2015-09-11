@@ -97,69 +97,58 @@ def add_prefix(prefix,list):
 				result.append(prefix+elem)
 			return result
 
-def copy_file(src, dst, cmd_file=None, force=False, executable=False):
+def copy_file(src, dst, cmd_file=None, force=False, force_identical=False):
 	if os.path.exists(src) == False:
 		debug.error("Request a copy a file that does not existed : '" + src + "'")
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
 	if     force == False \
-	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmdLine=cmd_line) == False:
+	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmdLine=cmd_line, force_identical=force_identical) == False:
+		debug.verbose ("no need to copy ...")
 		return
-	debug.print_element("copy file", src, "==>", dst)
+	debug.print_element("copy file ", os.path.relpath(src), "==>", os.path.relpath(dst))
 	create_directory_of_file(dst)
 	shutil.copyfile(src, dst)
-	if executable == True:
-		os.chmod(dst, stat.S_IRWXU + stat.S_IRGRP + stat.S_IXGRP + stat.S_IROTH + stat.S_IXOTH);
+	# copy property of the permition of the file ... 
+	stat_info = os.stat(src)
+	os.chmod(dst, stat_info.st_mode)
 	store_command(cmd_line, cmd_file)
 
 
-def copy_anything(src, dst, recursive = False, executable=False):
+def copy_anything(src, dst, recursive = False, force_identical=False):
 	debug.verbose(" copy anything : '" + str(src) + "'")
 	debug.verbose("            to : '" + str(dst) + "'")
-	tmpPath = os.path.dirname(os.path.realpath(src))
-	tmpRule = os.path.basename(src)
-	debug.verbose("    " + str(tmpPath) + ":")
-	for root, dirnames, filenames in os.walk(tmpPath):
-		deltaRoot = root[len(tmpPath):]
+	if os.path.isdir(os.path.realpath(src)):
+		tmp_path = os.path.realpath(src)
+		tmp_rule = ""
+	else:
+		tmp_path = os.path.dirname(os.path.realpath(src))
+		tmp_rule = os.path.basename(src)
+	
+	debug.verbose("    " + str(tmp_path) + ":")
+	for root, dirnames, filenames in os.walk(tmp_path):
+		deltaRoot = root[len(tmp_path):]
 		if     recursive == False \
 		   and deltaRoot != "":
 			return
-		debug.verbose("     root='" + str(deltaRoot) + "'") # dir='" + str(dirnames) + "' filenames=" + str(filenames))
+		debug.verbose("     root='" + str(deltaRoot) + "'")
+		debug.verbose("         files=" + str(filenames))
 		tmpList = filenames
-		if len(tmpRule) > 0:
-			tmpList = fnmatch.filter(filenames, tmpRule)
+		if len(tmp_rule) > 0:
+			tmpList = fnmatch.filter(filenames, tmp_rule)
 		# Import the module :
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
 			debug.verbose("        '" + cycleFile + "'")
-			debug.extreme_verbose("Might copy : '" + tmpPath + "/" + deltaRoot + "/" + cycleFile + "' ==> '" + dst + "'")
-			copy_file(tmpPath + "/" + deltaRoot + "/" + cycleFile,
-			          dst     + "/" + deltaRoot + "/" + cycleFile,
-			          executable=True)
-
-## @deprecated ...
-def copy_anything_target(target, src, dst):
-	tmpPath = os.path.dirname(os.path.realpath(src))
-	tmpRule = os.path.basename(src)
-	for root, dirnames, filenames in os.walk(tmpPath):
-		debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
-		tmpList = filenames
-		if len(tmpRule)>0:
-			tmpList = fnmatch.filter(filenames, tmpRule)
-		# Import the module :
-		for cycleFile in tmpList:
-			#for cycleFile in filenames:
-			newDst = dst
-			if     len(newDst) != 0 \
-			   and newDst[-1] != "/":
-				newDst += "/"
-			if root[len(src)-1:] != "":
-				newDst += root[len(src)-1:]
-				if     len(newDst) != 0 \
-				   and newDst[-1] != "/":
-					newDst += "/"
-			debug.verbose("Might copy : '" + root+"/"+cycleFile + "' ==> '" + newDst+cycleFile + "'" )
-			target.add_file_staging(root+"/"+cycleFile, newDst+cycleFile)
-
+			debug.extreme_verbose("Might copy : '" + tmp_path + "/" + deltaRoot + "/" + cycleFile + "' ==> '" + dst + "'")
+			copy_file(tmp_path + "/" + deltaRoot + "/" + cycleFile,
+			          dst      + "/" + deltaRoot + "/" + cycleFile,
+			          force_identical=force_identical)
+			""" TODO : Might be better, but does not work ...
+			debug.extreme_verbose("Might copy : '" + os.path.join(tmp_path, deltaRoot, cycleFile) + "' ==> '" + dst + "'")
+			copy_file(os.path.join(tmp_path, deltaRoot, cycleFile),
+			          os.path.join(dst,      deltaRoot, cycleFile),
+			          force_identical=force_identical)
+			"""
 
 def filter_extention(list_files, extentions, invert=False):
 	out = []
