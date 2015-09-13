@@ -79,6 +79,7 @@ class Target:
 		self.suffix_dependence='.d'
 		self.suffix_obj='.o'
 		self.suffix_lib_static='.a'
+		self.prefix_lib_dynamic='lib'
 		self.suffix_lib_dynamic='.so'
 		self.suffix_binary=''
 		self.suffix_package='.deb'
@@ -280,7 +281,7 @@ class Target:
 			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_warning))
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic))
+			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, self.prefix_lib_dynamic + module_name + self.suffix_lib_dynamic))
 			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
 			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_cmd_line))
 			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_warning))

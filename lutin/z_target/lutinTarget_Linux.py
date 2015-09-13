@@ -118,7 +118,7 @@ class Target(target.Target):
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas
-		target_outpath_data = os.path.join(target_outpath, "share")
+		target_outpath_data = os.path.join(target_outpath, "share", pkgName)
 		tools.create_directory_of_file(target_outpath_data)
 		debug.debug("heritage for " + str(pkgName) + ":")
 		for heritage in heritage_list.list_heritage:
@@ -139,6 +139,7 @@ class Target(target.Target):
 		path_dst = os.path.join(target_outpath_bin, pkgName + self.suffix_binary)
 		debug.warning("path_dst: " + str(path_dst))
 		tools.copy_file(path_src, path_dst)
+		
 		## Create libraries
 		
 		

@@ -63,9 +63,10 @@ class Module:
 		self.paths = []
 		# The module has been already build ...
 		self.isbuild = False
-		
 		## end of basic INIT ...
 		if    moduleType == 'BINARY' \
+		   or moduleType == 'BINARY_SHARED' \
+		   or moduleType == 'BINARY_STAND_ALONE' \
 		   or moduleType == 'LIBRARY' \
 		   or moduleType == 'LIBRARY_DYNAMIC' \
 		   or moduleType == 'LIBRARY_STATIC' \
@@ -316,11 +317,13 @@ class Module:
 		self.local_heritage = heritage.heritage(self)
 		
 		if     package_name==None \
-		   and (    self.type=="BINARY" \
-		         or self.type=="PACKAGE" ) :
+		   and (    self.type == 'BINARY'
+		         or self.type == 'BINARY_SHARED' \
+		         or self.type == 'BINARY_STAND_ALONE' \
+		         or self.type == 'PACKAGE' ) :
 			# this is the endpoint binary ...
 			package_name = self.name
-		else :
+		else:
 			pass
 		# build dependency before
 		list_sub_file_needed_to_build = []
@@ -362,7 +365,11 @@ class Module:
 		if self.type=='LIBRARY_STATIC':
 			debug.print_element("Library(static)", self.name, "", "")
 		if self.type=='BINARY':
-			debug.print_element("Binary", self.name, "", "")
+			debug.print_element("Binary(auto)", self.name, "", "")
+		if self.type=='BINARY_SHARED':
+			debug.print_element("Binary (shared)", self.name, "", "")
+		if self.type=='BINARY_STAND_ALONE':
+			debug.print_element("Binary (stand alone)", self.name, "", "")
 		if self.type=='PACKAGE':
 			debug.print_element("Package", self.name, "", "")
 		# ----------------------------------------------------
@@ -401,13 +408,13 @@ class Module:
 				try:
 					tmp_builder = builder.get_builder(fileExt);
 					res_file = tmp_builder.compile(file,
-					                             package_name,
-					                             target,
-					                             self.sub_heritage_list,
-					                             flags = self.flags,
-					                             path = self.path,
-					                             name = self.name,
-					                             basic_path = self.origin_path)
+					                               package_name,
+					                               target,
+					                               self.sub_heritage_list,
+					                               flags = self.flags,
+					                               path = self.path,
+					                               name = self.name,
+					                               basic_path = self.origin_path)
 					if res_file["action"] == "add":
 						list_sub_file_needed_to_build.append(res_file["file"])
 					elif res_file["action"] == "path":
@@ -423,11 +430,12 @@ class Module:
 		# ----------------------------------------------------
 		if self.type=='PREBUILD':
 			self.local_heritage.add_sources(self.src)
-		elif    self.type=='LIBRARY' \
-		     or self.type=='LIBRARY_DYNAMIC' \
-		     or self.type=='LIBRARY_STATIC':
-			if    self.type=='LIBRARY' \
-			   or self.type=='LIBRARY_STATIC':
+		elif    self.type == 'LIBRARY' \
+		     or self.type == 'LIBRARY_DYNAMIC' \
+		     or self.type == 'LIBRARY_STATIC':
+			res_file_out = []
+			if    self.type == 'LIBRARY' \
+			   or self.type == 'LIBRARY_STATIC':
 				try:
 					tmp_builder = builder.get_builder_with_output("a");
 					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
@@ -438,11 +446,11 @@ class Module:
 						                            self.sub_heritage_list,
 						                            name = self.name,
 						                            basic_path = self.origin_path)
-						self.local_heritage.add_sources(res_file)
+						self.local_heritage.add_lib_static(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.a'")
-			if    self.type=='LIBRARY' \
-			   or self.type=='LIBRARY_DYNAMIC':
+			if    self.type == 'LIBRARY' \
+			   or self.type == 'LIBRARY_DYNAMIC':
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
 					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
@@ -453,7 +461,7 @@ class Module:
 						                            self.sub_heritage_list,
 						                            name = self.name,
 						                            basic_path = self.origin_path)
-						# TODO : self.local_heritage.add_sources(res_file)
+						self.local_heritage.add_lib_dynamic(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'/'.dynlib'/'.dll'")
 			try:
@@ -466,21 +474,42 @@ class Module:
 					                            self.sub_heritage_list,
 					                            name = self.name,
 					                            basic_path = self.origin_path)
-					self.local_heritage.add_sources(res_file)
+					self.local_heritage.add_lib_interpreted('java', res_file)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.jar'")
-		elif self.type=='BINARY':
+		elif    self.type == 'BINARY' \
+		     or self.type == 'BINARY_SHARED' \
+		     or self.type == 'BINARY_STAND_ALONE':
 			try:
 				tmp_builder = builder.get_builder_with_output("bin");
+				parents = { 'src':[],
+				            'dynamic':[],
+				            'static':[]
+				          }
+				parents_dynamic = []
+				parents_static = []
+				#extract libs ...
+				for elem in self.sub_heritage_list.src:
+					if elem[-len(target.suffix_lib_static):] == target.suffix_lib_static:
+						parents_static.append(elem)
+					elif elem[-len(target.suffix_lib_dynamic):] == target.suffix_lib_dynamic:
+						parents_dynamic.append(elem)
+					else:
+						parents['src'].append(elem)
+				
+				static_mode = True
+				if self.type == 'BINARY_SHARED':
+					static_mode = False
 				res_file = tmp_builder.link(list_sub_file_needed_to_build,
 				                            package_name,
 				                            target,
 				                            self.sub_heritage_list,
 				                            name = self.name,
-				                            basic_path = self.origin_path)
+				                            basic_path = self.origin_path,
+				                            static = static_mode)
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.bin'")
-		elif self.type=="PACKAGE":
+		elif self.type == "PACKAGE":
 			if target.name=="Android":
 				# special case for android wrapper:
 				try:

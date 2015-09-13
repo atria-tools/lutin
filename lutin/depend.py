@@ -29,11 +29,11 @@ def _file_read_data(path, binary=False):
 	return data_file
 
 
-def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine="", force_identical=False):
+def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_identical=False):
 	debug.extreme_verbose("Request check of dependency of :")
 	debug.extreme_verbose("		dst='" + str(dst) + "'")
-	debug.extreme_verbose("		str='" + str(src) + "'")
-	debug.extreme_verbose("		dept='" + str(dependFile) + "'")
+	debug.extreme_verbose("		src='" + str(src) + "'")
+	debug.extreme_verbose("		dept='" + str(depend_file) + "'")
 	debug.extreme_verbose("		cmd='" + str(file_cmd) + "'")
 	debug.extreme_verbose("		force_identical='" + str(force_identical) + "'")
 	# if force mode selected ==> just force rebuild ...
@@ -59,9 +59,9 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine="", force_iden
 		debug.extreme_verbose("			==> must rebuild (source time greater)")
 		return True
 	
-	if     dependFile != "" \
-	   and dependFile != None \
-	   and os.path.exists(dependFile) == False:
+	if     depend_file != "" \
+	   and depend_file != None \
+	   and os.path.exists(depend_file) == False:
 		debug.extreme_verbose("			==> must rebuild (no depending file)")
 		return True
 	
@@ -70,50 +70,50 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine="", force_iden
 		if os.path.exists(file_cmd) == False:
 			debug.extreme_verbose("			==> must rebuild (no commandLine file)")
 			return True
-		# check if the 2 cmdline are similar :
+		# check if the 2 cmd_line are similar :
 		file2 = open(file_cmd, "r")
-		firstAndUniqueLine = file2.read()
-		if firstAndUniqueLine != cmdLine:
-			debug.extreme_verbose("			==> must rebuild (cmdLines are not identical)")
-			debug.extreme_verbose("				==> '" + cmdLine + "'")
-			debug.extreme_verbose("				==> '" + firstAndUniqueLine + "'")
+		first_and_unique_line = file2.read()
+		if first_and_unique_line != cmd_line:
+			debug.extreme_verbose("			==> must rebuild (cmd_lines are not identical)")
+			debug.extreme_verbose("				==> '" + cmd_line + "'")
+			debug.extreme_verbose("				==> '" + first_and_unique_line + "'")
 			file2.close()
 			return True
 		# the cmdfile is correct ...
 		file2.close()
 	
-	if     dependFile != "" \
-	   and dependFile != None:
-		debug.extreme_verbose("			start parsing dependency file : '" + dependFile + "'")
-		file = open(dependFile, "r")
-		for curLine in file.readlines():
+	if     depend_file != "" \
+	   and depend_file != None:
+		debug.extreme_verbose("			start parsing dependency file : '" + depend_file + "'")
+		file = open(depend_file, "r")
+		for cur_line in file.readlines():
 			# normal file : end with : ": \\n"
-			curLine = curLine[:len(curLine)-1]
+			cur_line = cur_line[:len(cur_line)-1]
 			# removing last \ ...
-			if curLine[len(curLine)-1:] == '\\' :
-				curLine = curLine[:len(curLine)-1]
+			if cur_line[len(cur_line)-1:] == '\\' :
+				cur_line = cur_line[:len(cur_line)-1]
 			# remove white space : 
-			#debug.verbose("				Line (read) : '" + curLine + "'");
-			curLine = curLine.strip()
-			#debug.verbose("				Line (strip) : '" + curLine + "'");
+			#debug.verbose("				Line (read) : '" + cur_line + "'");
+			cur_line = cur_line.strip()
+			#debug.verbose("				Line (strip) : '" + cur_line + "'");
 			
-			testFile=""
-			if curLine[len(curLine)-1:] == ':':
-				debug.extreme_verbose("				Line (no check (already done) : '" + curLine + "'");
-			elif    len(curLine) == 0 \
-			     or curLine == '\\':
-				debug.extreme_verbose("				Line (Not parsed) : '" + curLine + "'");
+			test_file=""
+			if cur_line[len(cur_line)-1:] == ':':
+				debug.extreme_verbose("				Line (no check (already done) : '" + cur_line + "'");
+			elif    len(cur_line) == 0 \
+			     or cur_line == '\\':
+				debug.extreme_verbose("				Line (Not parsed) : '" + cur_line + "'");
 			else:
-				testFile = curLine
-				debug.extreme_verbose("				Line (might check) : '" + testFile + "'");
+				test_file = cur_line
+				debug.extreme_verbose("				Line (might check) : '" + test_file + "'");
 			# really check files:
-			if testFile!="":
+			if test_file != "":
 				debug.extreme_verbose("					==> test");
-				if False==os.path.exists(testFile):
+				if False==os.path.exists(test_file):
 					debug.extreme_verbose("			==> must rebuild (a dependency file does not exist)")
 					file.close()
 					return True
-				if os.path.getmtime(testFile) > os.path.getmtime(dst):
+				if os.path.getmtime(test_file) > os.path.getmtime(dst):
 					debug.extreme_verbose("			==> must rebuild (a dependency file time is newer)")
 					file.close()
 					return True
@@ -121,7 +121,7 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine="", force_iden
 		file.close()
 	# check the 2 files are identical:
 	if force_identical == True:
-		# check if the 2 cmdline are similar :
+		# check if the 2 cmd_line are similar :
 		size_src = _file_size(src)
 		size_dst = _file_size(dst)
 		if size_src != size_dst:
@@ -138,14 +138,27 @@ def need_re_build(dst, src, dependFile=None, file_cmd="", cmdLine="", force_iden
 
 
 
-def need_re_package(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
-	debug.extreme_verbose("Resuest check of dependency of :")
-	debug.extreme_verbose("		dst='" + dst + "'")
-	debug.extreme_verbose("		src()=")
-	for src in srcList:
-		debug.verbose("			'" + src + "'")
+def need_re_package(dst, src_list, must_have_src, file_cmd="", cmd_line=""):
+	debug.extreme_verbose("Request check of dependency of :")
+	debug.extreme_verbose("		dst='" + str(dst) + "'")
+	compleate_list = []
+	debug.extreme_verbose("		src:")
+	if type(src_list) == str:
+		compleate_list.append(src_list)
+		debug.extreme_verbose("			'" + src_list + "'")
+	elif type(src_list) == list:
+		for src in src_list:
+			compleate_list.append(src)
+			debug.extreme_verbose("			'" + str(src) + "'")
+	elif type(src_list) == dict:
+		for key in src_list:
+			debug.extreme_verbose("			'" + str(key) + "'")
+			for src in src_list[key]:
+				compleate_list.append(src)
+				debug.extreme_verbose("				'" + str(src) + "'")
 	
-	if mustHaveSrc==False and len(srcList)==0:
+	if     must_have_src == False \
+	   and len(compleate_list) == 0:
 		return False
 	
 	# if force mode selected ==> just force rebuild ...
@@ -154,14 +167,14 @@ def need_re_package(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
 		return True
 	
 	# check if the destination existed:
-	if False==os.path.exists(dst):
+	if os.path.exists(dst) == False:
 		debug.extreme_verbose("			==> must re-package (dst does not exist)")
 		return True
 	# chek the basic date if the 2 files
-	if len(srcList)==0:
+	if len(compleate_list) == 0:
 		debug.extreme_verbose("			==> must re-package (no source ???)")
 		return True
-	for src in srcList:
+	for src in compleate_list:
 		if os.path.getmtime(src) > os.path.getmtime(dst):
 			debug.extreme_verbose("			==> must re-package (source time greater) : '" + src + "'")
 			return True
@@ -170,13 +183,13 @@ def need_re_package(dst, srcList, mustHaveSrc, file_cmd="", cmdLine=""):
 		if False==os.path.exists(file_cmd):
 			debug.extreme_verbose("			==> must rebuild (no commandLine file)")
 			return True
-		# check if the 2 cmdline are similar :
+		# check if the 2 cmd_line are similar :
 		file2 = open(file_cmd, "r")
-		firstAndUniqueLine = file2.read()
-		if firstAndUniqueLine != cmdLine:
-			debug.extreme_verbose("			==> must rebuild (cmdLines are not identical)")
-			debug.extreme_verbose("				==> '" + cmdLine + "'")
-			debug.extreme_verbose("				==> '" + firstAndUniqueLine + "'")
+		first_and_unique_line = file2.read()
+		if first_and_unique_line != cmd_line:
+			debug.extreme_verbose("			==> must rebuild (cmd_lines are not identical)")
+			debug.extreme_verbose("				==> '" + cmd_line + "'")
+			debug.extreme_verbose("				==> '" + first_and_unique_line + "'")
 			file2.close()
 			return True
 		# the cmdfile is correct ...

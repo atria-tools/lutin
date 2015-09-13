@@ -12,26 +12,28 @@ import copy
 from . import debug
 
 
-def append_to_list(listout, list):
-	if type(list) == type(str()):
-		if list not in listout:
-			listout.append(list)
+def append_to_list(list_out, elem):
+	if type(elem) == str:
+		if elem not in list_out:
+			list_out.append(elem)
 	else:
 		# mulyiple imput in the list ...
-		for elem in list:
-			if elem not in listout:
-				listout.append(elem)
+		for element in elem:
+			if element not in list_out:
+				list_out.append(element)
 
 
 
 class HeritageList:
 	def __init__(self, heritage = None):
-		self.flags={}
+		self.flags = {}
 		# sources list:
-		self.src=[]
-		self.path={}
-		
-		self.list_heritage=[]
+		self.src = { 'src':[],
+		             'dynamic':[],
+		             'static':[]
+		           }
+		self.path = {}
+		self.list_heritage = []
 		if heritage != None:
 			self.add_heritage(heritage)
 	
@@ -58,10 +60,13 @@ class HeritageList:
 		self.regenerate_tree()
 	
 	def regenerate_tree(self):
-		self.flags={}
+		self.flags = {}
 		# sources list:
-		self.src=[]
-		self.path={}
+		self.src = { 'src':[],
+		             'dynamic':[],
+		             'static':[]
+		           }
+		self.path = {}
 		# reorder heritage list :
 		listHeritage = self.list_heritage
 		self.list_heritage = []
@@ -105,7 +110,9 @@ class HeritageList:
 					self.path[ppp] = value
 				else:
 					append_to_list(self.path[ppp], value)
-			append_to_list(self.src, element.src)
+			append_to_list(self.src['src'], element.src['src'])
+			append_to_list(self.src['dynamic'], element.src['dynamic'])
+			append_to_list(self.src['static'], element.src['static'])
 			if "c-version" in element.flags:
 				ver = element.flags["c-version"]
 				if "c-version" in self.flags:
@@ -122,14 +129,17 @@ class HeritageList:
 
 class heritage:
 	def __init__(self, module):
-		self.name=""
-		self.depends=[]
+		self.name = ""
+		self.depends = []
 		## Remove all variable to prevent error of multiple definition
 		# all the parameter that the upper classe need when build
-		self.flags={}
+		self.flags = {}
 		# sources list:
-		self.src=[]
-		self.path={}
+		self.src = { 'src':[],
+		             'dynamic':[],
+		             'static':[]
+		           }
+		self.path = {}
 		# update is set at true when data are newly created ==> force upper element to update
 		self.hasBeenUpdated=False
 		
@@ -141,16 +151,32 @@ class heritage:
 			self.flags = module.flags["export"]
 			self.path = module.path["export"]
 	
-	def add_depends(self, depend):
-		self.depends.append(depend)
+	def add_depends(self, elements):
+		self.depends.append(elements)
 	
 	def add_import_path(self, list):
 		append_to_list(self.path, list)
 	
-	def add_sources(self, list):
-		if type(list) == type(None):
+	def add_sources(self, elements):
+		if type(elements) == type(None):
 			debug.error("try add element none in a list ...")
-		append_to_list(self.src, list)
+		append_to_list(self.src['src'], elements)
+	
+	def add_lib_static(self, elements):
+		if type(elements) == type(None):
+			debug.error("try add element none in a list ...")
+		append_to_list(self.src['static'], elements)
+	
+	def add_lib_dynamic(self, elements):
+		if type(elements) == type(None):
+			debug.error("try add element none in a list ...")
+		append_to_list(self.src['dynamic'], elements)
+	
+	def add_lib_interpreted(self, type_interpretation, elements):
+		debug.error("TODO ...")
+		if type(elements) == type(None):
+			debug.error("try add element none in a list ...")
+		append_to_list(self.src, elements)
 	
 	def need_update(self, list):
 		self.hasBeenUpdated=True

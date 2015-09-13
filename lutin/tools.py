@@ -102,7 +102,7 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False):
 		debug.error("Request a copy a file that does not existed : '" + src + "'")
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
 	if     force == False \
-	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmdLine=cmd_line, force_identical=force_identical) == False:
+	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmd_line=cmd_line, force_identical=force_identical) == False:
 		debug.verbose ("no need to copy ...")
 		return
 	debug.print_element("copy file ", os.path.relpath(src), "==>", os.path.relpath(dst))
