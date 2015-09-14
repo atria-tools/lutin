@@ -128,7 +128,7 @@ class HeritageList:
 
 
 class heritage:
-	def __init__(self, module):
+	def __init__(self, module, target):
 		self.name = ""
 		self.depends = []
 		## Remove all variable to prevent error of multiple definition
@@ -140,6 +140,7 @@ class heritage:
 		             'static':[]
 		           }
 		self.path = {}
+		self.include = ""
 		# update is set at true when data are newly created ==> force upper element to update
 		self.hasBeenUpdated=False
 		
@@ -150,6 +151,10 @@ class heritage:
 			# keep reference because the flags can change in time
 			self.flags = module.flags["export"]
 			self.path = module.path["export"]
+			# if the user install some header ==> they will ba autoamaticaly exported ...
+			if target != None:
+				if len(module.header) > 0:
+					self.include = target.get_build_path_include(module.name)
 	
 	def add_depends(self, elements):
 		self.depends.append(elements)
@@ -177,6 +182,13 @@ class heritage:
 		if type(elements) == type(None):
 			debug.error("try add element none in a list ...")
 		append_to_list(self.src, elements)
+	
+	def auto_add_build_header(self):
+		if self.include != "":
+			# TODO :Set it better :
+			if 'c' not in self.path:
+				self.path['c'] = []
+			self.path['c'].append(self.include)
 	
 	def need_update(self, list):
 		self.hasBeenUpdated=True

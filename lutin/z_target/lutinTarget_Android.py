@@ -76,11 +76,12 @@ class Target(target.Target):
 			if not os.path.isdir(basepathX86):
 				debug.info("Gcc x86 path does not exist !!!")
 		
-		self.path_bin="/mustNotCreateBinary"
-		self.path_lib="/data/lib/armeabi"
-		self.path_data="/data/assets"
-		self.path_doc="/doc"
-		self.suffix_package='.pkg'
+		# TODO : Set it back in the package only ...
+		#self.path_bin="/mustNotCreateBinary"
+		#self.path_lib="/data/lib/armeabi"
+		#self.path_data="/data/assets"
+		#self.path_doc="/doc"
+		#self.suffix_package='.pkg'
 		
 		# board id at 14 is for android 4.0 and more ...
 		self.boardId = 14
@@ -203,8 +204,10 @@ class Target(target.Target):
 				return True
 		return False
 	
+	"""
 	def get_staging_path_data(self, binaryName):
 		return self.get_staging_path(binaryName) + self.path_data
+	"""
 	
 	def make_package(self, pkgName, pkgProperties, basePkgPath, heritage):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/

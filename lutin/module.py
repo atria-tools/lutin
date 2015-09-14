@@ -79,7 +79,7 @@ class Module:
 			raise 'Input value error'
 		self.origin_file = file;
 		self.origin_path = tools.get_current_path(self.origin_file)
-		self.local_heritage = heritage.heritage(self)
+		self.local_heritage = heritage.heritage(self, None)
 		
 		self.package_prop = { "COMPAGNY_TYPE" : set(""),
 		                      "COMPAGNY_NAME" : set(""),
@@ -311,10 +311,10 @@ class Module:
 		# ckeck if not previously build
 		if target.is_module_build(self.name)==True:
 			if self.sub_heritage_list == None:
-				self.local_heritage = heritage.heritage(self)
+				self.local_heritage = heritage.heritage(self, target)
 			return self.sub_heritage_list
 		# create the package heritage
-		self.local_heritage = heritage.heritage(self)
+		self.local_heritage = heritage.heritage(self, target)
 		
 		if     package_name==None \
 		   and (    self.type == 'BINARY'
@@ -549,8 +549,7 @@ class Module:
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
 		else:
-			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
-		self.sub_heritage_list.add_heritage(self.local_heritage)
+			debug.error("Did not known the element type ... (impossible case) type=" + self.type)
 		
 		# ----------------------------------------------------
 		# -- install header                                 --
@@ -570,11 +569,15 @@ class Module:
 		self.paths_to_build(target)
 		# TODO : do sothing that create a list of file set in this directory and remove it if necessary ... ==> if not needed anymore ...
 		
+		# create local heritage specification
+		self.local_heritage.auto_add_build_header()
+		self.sub_heritage_list.add_heritage(self.local_heritage)
+		
 		# ----------------------------------------------------
 		# -- create package                                 --
 		# ----------------------------------------------------
-		if    self.type=='BINARY' \
-		   or self.type=="PACKAGE":
+		if    self.type[:6] == 'BINARY' \
+		   or self.type == 'PACKAGE':
 			if target.end_generate_package == True:
 				# generate the package with his properties ...
 				if target.name=="Android":
@@ -686,6 +689,7 @@ class Module:
 		if rm_path != "":
 			debug.warning("remove the basic path ...")
 		self.append_to_internal_list(self.header, list, True)
+	
 	# TODO : Maybe do sothing with this ...
 	def add_export_path(self, list, type='c'):
 		self.append_to_internal_list2(self.path["export"], type, list)

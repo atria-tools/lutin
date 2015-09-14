@@ -78,8 +78,8 @@ class Target:
 		self.suffix_warning='.warning'
 		self.suffix_dependence='.d'
 		self.suffix_obj='.o'
+		self.prefix_lib='lib'
 		self.suffix_lib_static='.a'
-		self.prefix_lib_dynamic='lib'
 		self.suffix_lib_dynamic='.so'
 		self.suffix_binary=''
 		self.suffix_package='.deb'
@@ -277,20 +277,20 @@ class Target:
 			list.append(file)
 			list.append(self.get_build_file_bin(binary_name))
 			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
-			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_cmd_line))
-			list.append(os.path.join(self.get_build_path(binary_name), self.path_bin, module_name + self.suffix_binary + self.suffix_warning))
+			list.append(self.get_build_file_bin(binary_name) + self.suffix_cmd_line)
+			list.append(self.get_build_file_bin(binary_name) + self.suffix_warning)
 		elif (type=="lib-shared"):
 			list.append(file)
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, self.prefix_lib_dynamic + module_name + self.suffix_lib_dynamic))
+			list.append(self.get_build_file_dynamic(module_name))
 			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_cmd_line))
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_dynamic + self.suffix_warning))
+			list.append(self.get_build_file_dynamic(module_name) + self.suffix_cmd_line)
+			list.append(self.get_build_file_dynamic(module_name) + self.suffix_warning)
 		elif (type=="lib-static"):
 			list.append(file)
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_static))
+			list.append(self.get_build_file_static(module_name))
 			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_static + self.suffix_cmd_line))
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_lib_static + self.suffix_warning))
+			list.append(self.get_build_file_static(module_name) + self.suffix_cmd_line)
+			list.append(self.get_build_file_static(module_name) + self.suffix_warning)
 		elif (type=="jar"):
 			list.append(file)
 			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar"))
@@ -325,7 +325,7 @@ class Target:
 		return os.path.join(self.get_build_path(binary_name), self.path_bin)
 	
 	def get_build_path_lib(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_lib, binary_name)
+		return os.path.join(self.get_build_path(binary_name), self.path_lib)
 	
 	def get_build_path_data(self, binary_name):
 		return os.path.join(self.get_build_path(binary_name), self.path_data, binary_name)
@@ -336,6 +336,12 @@ class Target:
 	
 	def get_build_file_bin(self, binary_name):
 		return os.path.join(self.get_build_path_bin(binary_name), binary_name + self.suffix_binary)
+	
+	def get_build_file_static(self, binary_name):
+		return os.path.join(self.get_build_path_lib(binary_name), self.prefix_lib + binary_name + self.suffix_lib_static)
+	
+	def get_build_file_dynamic(self, binary_name):
+		return os.path.join(self.get_build_path_lib(binary_name), self.prefix_lib + binary_name + self.suffix_lib_dynamic)
 	
 	
 	

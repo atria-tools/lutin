@@ -50,16 +50,17 @@ def link(file, binary, target, depancy, name, basic_path, static = False):
 		list_static = depancy.src['static']
 		# get only parent shared that is not static
 		for elem in depancy.src['dynamic']:
-			if elem[:-len(target.suffix_lib_dynamic)] + target.suffix_lib_static not in depancy.src['static']:
+			lib_name = elem[:-len(target.suffix_lib_dynamic)] + target.suffix_lib_static
+			if lib_name not in depancy.src['static']:
 				list_dynamic.append(elem)
 	else:
 		#get all parent dynamic libs
 		list_dynamic = depancy.src['dynamic']
 		# get only parent shared that is not static
 		for elem in depancy.src['static']:
-			if elem[:-len(target.suffix_lib_static)] + target.suffix_lib_dynamic not in depancy.src['dynamic']:
+			lib_name = elem[:-len(target.suffix_lib_static)] + target.suffix_lib_dynamic
+			if lib_name not in depancy.src['dynamic']:
 				list_static.append(elem)
-	
 	#create comand line:
 	cmd = [
 		target.xx
@@ -95,10 +96,12 @@ def link(file, binary, target, depancy, name, basic_path, static = False):
 	try:
 		for elem in list_dynamic:
 			lib_path = os.path.dirname(elem)
-			lib_name = elem[len(lib_path)+len(target.prefix_lib_dynamic)+1:-len(target.suffix_lib_dynamic)]
+			lib_name = elem[len(lib_path)+len(target.prefix_lib)+1:-len(target.suffix_lib_dynamic)]
 			cmd.append("-L" + lib_path)
 			cmd.append("-l" + lib_name)
-		#cmd.append(parents['dynamic'])
+		if len(list_dynamic) > 0:
+			cmd.append("-Wl,-R$ORIGIN/../lib/")
+			pass
 	except:
 		pass
 	try:

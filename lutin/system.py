@@ -41,7 +41,7 @@ class System:
 		if True==order:
 			listout.sort()
 	
-	def append_to_internalList(self, listout, list, order=False):
+	def append_to_internal_list(self, listout, list, order=False):
 		if type(list) == type(str()):
 			self.append_and_check(listout, list, order)
 		else:
@@ -50,22 +50,22 @@ class System:
 				self.append_and_check(listout, elem, order)
 	
 	def add_export_flag_LD(self, list):
-		self.append_to_internalList(self.export_flags_ld, list)
+		self.append_to_internal_list(self.export_flags_ld, list)
 	
 	def add_export_flag_CC(self, list):
-		self.append_to_internalList(self.export_flags_cc, list)
+		self.append_to_internal_list(self.export_flags_cc, list)
 	
 	def add_export_flag_XX(self, list):
-		self.append_to_internalList(self.export_flags_xx, list)
+		self.append_to_internal_list(self.export_flags_xx, list)
 	
 	def add_export_flag_M(self, list):
-		self.append_to_internalList(self.export_flags_m, list)
+		self.append_to_internal_list(self.export_flags_m, list)
 	
 	def add_export_flag_MM(self, list):
-		self.append_to_internalList(self.export_flags_mm, list)
+		self.append_to_internal_list(self.export_flags_mm, list)
 	
 	def add_export_SRC(self, list):
-		self.append_to_internalList(self.export_src, list)
+		self.append_to_internal_list(self.export_src, list)
 	
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
 		if name_of_state not in self.action_on_state:
@@ -158,7 +158,7 @@ def exist(lib_name, target_name, target) :
 					data["system"] = theSystem.System(target)
 					data["exist"] = data["system"].valid
 				except:
-					debug.debug("Not find: '" + data["name"] + "'")
+					debug.warning("Not find: '" + data["name"] + "' ==> get exception")
 			return data["exist"]
 	return False
 

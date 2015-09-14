@@ -20,7 +20,7 @@ class System(system.System):
 		# todo : Check if present ...
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_SRC(target.folder_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar")
+		self.add_export_SRC(target.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar")
 		self.add_action("PACKAGE", 10, "admod-auto-wrapper", tool_generate_main_java_class)
 
 

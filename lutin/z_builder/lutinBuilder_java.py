@@ -65,7 +65,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path):
 			out += elem
 		cmd.append(out)
 	class_extern = []
-	upper_jar = tools.filter_extention(depancy.src, ["jar"])
+	upper_jar = tools.filter_extention(depancy.src['src'], ["jar"])
 	#debug.warning("ploppppp = " + str(upper_jar))
 	for elem in upper_jar:
 		class_extern.append(elem)

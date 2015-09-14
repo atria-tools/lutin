@@ -40,6 +40,13 @@ def get_output_type():
 ##
 def link(file, binary, target, depancy, name, basic_path):
 	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "lib-shared")
+	#get all parent dynamic libs
+	list_dynamic = depancy.src['dynamic']
+	# get only parent shared that is not static
+	list_static = []
+	for elem in depancy.src['static']:
+		if elem[:-len(target.suffix_lib_static)] + target.suffix_lib_dynamic not in depancy.src['dynamic']:
+			list_static.append(elem)
 	#create command Line
 	cmd = [
 		target.xx,
@@ -60,7 +67,21 @@ def link(file, binary, target, depancy, name, basic_path):
 		pass
 	try:
 		# keep only compilated files ...
-		cmd.append(tools.filter_extention(depancy.src, get_input_type()))
+		cmd.append(tools.filter_extention(depancy.src['src'], get_input_type()))
+	except:
+		pass
+	try:
+		cmd.append(list_static)
+	except:
+		pass
+	try:
+		for elem in list_dynamic:
+			lib_path = os.path.dirname(elem)
+			lib_name = elem[len(lib_path)+len(target.prefix_lib)+1:-len(target.suffix_lib_dynamic)]
+			cmd.append("-L" + lib_path)
+			cmd.append("-l" + lib_name)
+		if len(list_dynamic) > 0:
+			cmd.append("-Wl,-R$ORIGIN/../lib/")
 	except:
 		pass
 	try:
