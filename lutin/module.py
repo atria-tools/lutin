@@ -558,7 +558,7 @@ class Module:
 		for file in self.header:
 			src_path = os.path.join(self.origin_path, file)
 			dst_path = os.path.join(target.get_build_path_include(self.name), file)
-			tools.copy_file(src_path, dst_path);
+			tools.copy_file(src_path, dst_path, force_identical=True);
 		
 		# ----------------------------------------------------
 		# -- install data                                   --
