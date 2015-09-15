@@ -45,7 +45,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path):
 	# create the command line befor requesting start:
 	cmd = [
 		target.java,
-		"-d", target.get_build_path(name)
+		"-d", target.get_build_path_object(name)
 		]
 	# add source dependency:
 	list_sources_path = []

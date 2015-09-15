@@ -18,6 +18,7 @@ from . import debug
 from . import heritage
 from . import builder
 from . import multiprocess
+from . import image
 
 class Module:
 	
@@ -151,7 +152,7 @@ class Module:
 			if sizeX > 0:
 				debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
 				fileName, fileExtension = os.path.splitext(os.path.join(self.origin_path,source))
-				image.resize(source, os.path.join(target.get_build_path_data(self.name), dst), sizeX, sizeY, file_cmd)
+				image.resize(source, os.path.join(target.get_build_path_data(self.name), destination), sizeX, sizeY, file_cmd)
 			else:
 				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 				tools.copy_file(source, os.path.join(target.get_build_path_data(self.name), destination), file_cmd)
@@ -376,7 +377,7 @@ class Module:
 		# -- Sources compilation                            --
 		# ----------------------------------------------------
 		if self.type != 'PREBUILD':
-			# build local sources in a specific order :
+			# build local sources in a specific order:
 			for extention_local in self.extention_order_build:
 				list_file = tools.filter_extention(self.src, [extention_local])
 				for file in list_file:
@@ -385,13 +386,13 @@ class Module:
 					try:
 						tmp_builder = builder.get_builder(fileExt);
 						res_file = tmp_builder.compile(file,
-						                             package_name,
-						                             target,
-						                             self.sub_heritage_list,
-						                             flags = self.flags,
-						                             path = self.path,
-						                             name = self.name,
-						                             basic_path = self.origin_path)
+						                               package_name,
+						                               target,
+						                               self.sub_heritage_list,
+						                               flags = self.flags,
+						                               path = self.path,
+						                               name = self.name,
+						                               basic_path = self.origin_path)
 						if res_file["action"] == "add":
 							list_sub_file_needed_to_build.append(res_file["file"])
 						elif res_file["action"] == "path":
@@ -480,35 +481,57 @@ class Module:
 		elif    self.type == 'BINARY' \
 		     or self.type == 'BINARY_SHARED' \
 		     or self.type == 'BINARY_STAND_ALONE':
-			try:
-				tmp_builder = builder.get_builder_with_output("bin");
-				parents = { 'src':[],
-				            'dynamic':[],
-				            'static':[]
-				          }
-				parents_dynamic = []
-				parents_static = []
-				#extract libs ...
-				for elem in self.sub_heritage_list.src:
-					if elem[-len(target.suffix_lib_static):] == target.suffix_lib_static:
-						parents_static.append(elem)
-					elif elem[-len(target.suffix_lib_dynamic):] == target.suffix_lib_dynamic:
-						parents_dynamic.append(elem)
-					else:
-						parents['src'].append(elem)
-				
-				static_mode = True
-				if self.type == 'BINARY_SHARED':
-					static_mode = False
-				res_file = tmp_builder.link(list_sub_file_needed_to_build,
-				                            package_name,
-				                            target,
-				                            self.sub_heritage_list,
-				                            name = self.name,
-				                            basic_path = self.origin_path,
-				                            static = static_mode)
-			except ValueError:
-				debug.error(" UN-SUPPORTED link format:  '.bin'")
+			shared_mode = False
+			if target.name=="Android":
+				debug.warning("Android mode ...")
+				# special case for android ...
+				for elem in self.sub_heritage_list.src['src']:
+					debug.warning("    " + elem[-4:])
+					if elem[-4:] == '.jar':
+						# abstract GUI interface ...
+						shared_mode = True
+						break;
+			if shared_mode == True:
+				try:
+					tmp_builder = builder.get_builder_with_output("so");
+					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+					res_file = tmp_builder.link(list_file,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = self.name,
+					                            basic_path = self.origin_path)
+					self.local_heritage.add_sources(res_file)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.so'")
+				try:
+					tmp_builder = builder.get_builder_with_output("jar");
+					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+					if len(list_file) > 0:
+						res_file = tmp_builder.link(list_file,
+						                            package_name,
+						                            target,
+						                            self.sub_heritage_list,
+						                            name = self.name,
+						                            basic_path = self.origin_path)
+						self.local_heritage.add_sources(res_file)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.jar'")
+			else:
+				try:
+					tmp_builder = builder.get_builder_with_output("bin");
+					static_mode = True
+					if self.type == 'BINARY_SHARED':
+						static_mode = False
+					res_file = tmp_builder.link(list_sub_file_needed_to_build,
+					                            package_name,
+					                            target,
+					                            self.sub_heritage_list,
+					                            name = self.name,
+					                            basic_path = self.origin_path,
+					                            static = static_mode)
+				except ValueError:
+					debug.error(" UN-SUPPORTED link format:  '.bin'")
 		elif self.type == "PACKAGE":
 			if target.name=="Android":
 				# special case for android wrapper:

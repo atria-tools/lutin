@@ -14,14 +14,14 @@ from . import tools
 from . import multiprocess
 from . import depend
 
-enableResizeImage = True
+enable_resize_image = True
 try:
 	if platform.system() == "Darwin":
 		import CoreGraphics
 	else:
 		from PIL import Image
 except:
-	enableResizeImage = False
+	enable_resize_image = False
 	debug.warning("Missing python tools : CoreGraphics (MacOs) or PIL") 
 
 def get_pow_2_multiple(size):
@@ -34,31 +34,31 @@ def get_pow_2_multiple(size):
 #        check if force requested
 #        check if time change
 #        check if command line change
-def resize(srcFile, destFile, x, y, cmd_file=None):
-	if enableResizeImage == False:
+def resize(src_file, dest_file, x, y, cmd_file=None):
+	if enable_resize_image == False:
 		return
-	if os.path.exists(srcFile) == False:
-		debug.error("Request a resize an image that does not existed : '" + srcFile + "'")
-	cmd_line = "resize Image : " + srcFile + " ==> " + destFile + " newSize=(" + str(x) + "x" + str(y) + ")"
-	if False==depend.need_re_build(destFile, srcFile, file_cmd=cmd_file , cmdLine=cmd_line):
+	if os.path.exists(src_file) == False:
+		debug.error("Request a resize an image that does not existed : '" + src_file + "'")
+	cmd_line = "resize Image : " + src_file + " ==> " + dest_file + " newSize=(" + str(x) + "x" + str(y) + ")"
+	if False==depend.need_re_build(dest_file, src_file, file_cmd=cmd_file , cmd_line=cmd_line):
 		return
 	# add cmdLine ...
 	x = get_pow_2_multiple(x)
-	extension = destFile[destFile.rfind('.'):]
+	extension = dest_file[dest_file.rfind('.'):]
 	if platform.system() == "Darwin":
-		source_image = CoreGraphics.CGImageImport(CoreGraphics.CGDataProviderCreateWithFilename(srcFile))
+		source_image = CoreGraphics.CGImageImport(CoreGraphics.CGDataProviderCreateWithFilename(src_file))
 		source_width = source_image.getWidth()
 		source_height = source_image.getHeight()
 		if source_width <= x:
 			# for small image just copy:
-			tools.copy_file(srcFile, destFile)
+			tools.copy_file(src_file, dest_file)
 		else:
 			if y <= 0:
 				# keep ratio :
 				y = int(float(x) * float(source_height) / float(source_width))
 			y = get_pow_2_multiple(y)
-			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", srcFile, "==>", destFile)
-			debug.debug("Resize image: " + srcFile + " size=(" + str(source_width) + "x" + str(source_height) + ") -> (" + str(x) + "x" + str(y) + ")")
+			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", src_file, "==>", dest_file)
+			debug.debug("Resize image: " + src_file + " size=(" + str(source_width) + "x" + str(source_height) + ") -> (" + str(x) + "x" + str(y) + ")")
 			source_image_rect = CoreGraphics.CGRectMake(0, 0, source_width, source_height)
 			new_image = source_image.createWithImageInRect(source_image_rect)
 			colors_space = CoreGraphics.CGColorSpaceCreateDeviceRGB()
@@ -67,27 +67,27 @@ def resize(srcFile, destFile, x, y, cmd_file=None):
 			context.setInterpolationQuality(CoreGraphics.kCGInterpolationHigh)
 			new_image_rect = CoreGraphics.CGRectMake(0, 0, x, y)
 			context.drawImage(new_image_rect, new_image)
-			tools.create_directory_of_file(destFile)
+			tools.create_directory_of_file(dest_file)
 			if extension == ".jpeg":
-				context.writeToFile(destFile, CoreGraphics.kCGImageFormatJPEG)
+				context.writeToFile(dest_file, CoreGraphics.kCGImageFormatJPEG)
 			elif extension == ".png":
-				context.writeToFile(destFile, CoreGraphics.kCGImageFormatPNG)
+				context.writeToFile(dest_file, CoreGraphics.kCGImageFormatPNG)
 			else:
-				debug.error(" can not manage extention ... : " + destFile)
+				debug.error(" can not manage extention ... : " + dest_file)
 	else:
 		# open an image file (.bmp,.jpg,.png,.gif) you have in the working path
-		im1 = Image.open(srcFile)
+		im1 = Image.open(src_file)
 		if im1.size[0] <= x:
 			# for small image just copy:
-			tools.copy_file(srcFile, destFile)
+			tools.copy_file(src_file, dest_file)
 		else:
 			if y <= 0:
 				# keep ratio :
 				y = int(float(x) * float(im1.size[1]) / float(im1.size[0]))
 			y = get_pow_2_multiple(y)
-			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", srcFile, "==>", destFile)
+			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", src_file, "==>", dest_file)
 			# use one of these filter options to resize the image
 			tmpImage = im1.resize((x, y), Image.ANTIALIAS)
-			tools.create_directory_of_file(destFile)
-			tmpImage.save(destFile)
-	multiprocess.store_command(cmd_line, cmd_file)
+			tools.create_directory_of_file(dest_file)
+			tmpImage.save(dest_file)
+	tools.store_command(cmd_line, cmd_file)

@@ -18,7 +18,6 @@ from . import heritage
 from . import tools
 from . import module
 from . import system
-from . import image
 from . import multiprocess
 
 class Target:
@@ -186,39 +185,6 @@ class Target:
 	
 	def get_build_mode(self):
 		return self.config["mode"]
-	
-	## @deprecated ...
-	def add_image_staging(self, inputFile, outputFile, sizeX, sizeY, cmdFile=None):
-		for source, dst, x, y, cmdFile2 in self.list_final_file:
-			if dst == outputFile :
-				debug.verbose("already added : " + outputFile)
-				return
-		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'")
-		self.list_final_file.append([inputFile,outputFile, sizeX, sizeY, cmdFile])
-	
-	## @deprecated ...
-	def add_file_staging(self, inputFile, outputFile, cmdFile=None):
-		for source, dst, x, y, cmdFile2 in self.list_final_file:
-			if dst == outputFile :
-				debug.verbose("already added : " + outputFile)
-				return
-		debug.verbose("add file : '" + inputFile + "' ==> '" + outputFile + "'");
-		self.list_final_file.append([inputFile, outputFile, -1, -1, cmdFile])
-	
-	## @deprecated ...
-	def copy_to_staging(self, binary_name):
-		base_path = self.get_staging_path_data(binary_name)
-		for source, dst, x, y, cmdFile in self.list_final_file:
-			if     cmdFile != None \
-			   and cmdFile != "":
-				debug.verbose("cmd file " + cmdFile)
-			if x == -1:
-				debug.verbose("must copy file : '" + source + "' ==> '" + dst + "'");
-				tools.copy_file(source, os.path.join(base_path, dst), cmdFile)
-			else:
-				debug.verbose("resize image : '" + source + "' ==> '" + dst + "' size=(" + str(x) + "," + str(y) + ")");
-				image.resize(source, os.path.join(base_path, dst), x, y, cmdFile)
-	
 	
 	def clean_module_tree(self):
 		self.build_tree_done = []

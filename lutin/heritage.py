@@ -178,10 +178,10 @@ class heritage:
 		append_to_list(self.src['dynamic'], elements)
 	
 	def add_lib_interpreted(self, type_interpretation, elements):
-		debug.error("TODO ...")
+		# TODO : Think at a better methodologie ...
 		if type(elements) == type(None):
 			debug.error("try add element none in a list ...")
-		append_to_list(self.src, elements)
+		append_to_list(self.src['src'], elements)
 	
 	def auto_add_build_header(self):
 		if self.include != "":
