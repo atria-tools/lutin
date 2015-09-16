@@ -11,6 +11,18 @@ import os
 from . import debug
 from . import env
 
+def _create_directory_of_file(file):
+	path = os.path.dirname(file)
+	try:
+		os.stat(path)
+	except:
+		os.makedirs(path)
+
+def _file_write_data(path, data):
+	file = open(path, "w")
+	file.write(data)
+	file.close()
+
 def _file_size(path):
 	if not os.path.isfile(path):
 		return 0
@@ -28,6 +40,12 @@ def _file_read_data(path, binary=False):
 	file.close()
 	return data_file
 
+def create_dependency_file(depend_file, list_files):
+	data = ""
+	for elem in list_files:
+		data += elem + "\n"
+	_create_directory_of_file(depend_file)
+	_file_write_data(depend_file, data)
 
 def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_identical=False):
 	debug.extreme_verbose("Request check of dependency of :")
@@ -47,14 +65,16 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 	   and os.path.exists(dst) == False:
 		debug.extreme_verbose("			==> must rebuild (dst does not exist)")
 		return True
-	if     dst != "" \
-	   and dst != None \
+	if     src != "" \
+	   and src != None \
 	   and os.path.exists(src) == False:
 		debug.warning("			==> unexistant file :'" + src + "'")
 		return True
 	# Check the basic date if the 2 files
 	if     dst != "" \
 	   and dst != None \
+	   and src != "" \
+	   and src != None \
 	   and os.path.getmtime(src) > os.path.getmtime(dst):
 		debug.extreme_verbose("			==> must rebuild (source time greater)")
 		return True

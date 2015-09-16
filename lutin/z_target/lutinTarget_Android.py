@@ -83,8 +83,8 @@ class Target(target.Target):
 		#self.path_doc="/doc"
 		#self.suffix_package='.pkg'
 		
-		# board id at 14 is for android 4.0 and more ...
-		self.boardId = 14
+		# board id at 15 is for android 4.0.3 and more ... (note: API 14 has been removed ...)
+		self.boardId = 15
 		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.boardId))
 		if arch == "armv5" or arch == "armv7":
 			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")

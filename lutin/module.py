@@ -296,7 +296,6 @@ class Module:
 				tmp_file.write('		}, {\n')
 			val += 1
 			tmp_file.write('			"file":"' + elem[0] + '",\n')
-			#tmp_file.write('			"coverage":' + str(elem[1]) + ',\n')
 			tmp_file.write('			"executed":' + str(elem[2]) + ',\n')
 			tmp_file.write('			"executable":' + str(elem[3]) + '\n')
 		tmp_file.write('		}\n')
@@ -392,7 +391,8 @@ class Module:
 						                               flags = self.flags,
 						                               path = self.path,
 						                               name = self.name,
-						                               basic_path = self.origin_path)
+						                               basic_path = self.origin_path,
+						                               module_src = self.src)
 						if res_file["action"] == "add":
 							list_sub_file_needed_to_build.append(res_file["file"])
 						elif res_file["action"] == "path":
@@ -415,7 +415,8 @@ class Module:
 					                               flags = self.flags,
 					                               path = self.path,
 					                               name = self.name,
-					                               basic_path = self.origin_path)
+					                               basic_path = self.origin_path,
+					                               module_src = self.src)
 					if res_file["action"] == "add":
 						list_sub_file_needed_to_build.append(res_file["file"])
 					elif res_file["action"] == "path":

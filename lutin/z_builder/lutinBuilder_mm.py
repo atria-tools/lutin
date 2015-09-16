@@ -41,7 +41,7 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to compile a m++ file in object file.
 ##
-def compile(file, binary, target, depancy, flags, path, name, basic_path):
+def compile(file, binary, target, depancy, flags, path, name, basic_path, module_src):
 	file_src = target.get_full_name_source(basic_path, file)
 	file_cmd = target.get_full_name_cmd(name, basic_path, file)
 	file_dst = target.get_full_name_destination(name, basic_path, file, get_output_type())

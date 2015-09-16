@@ -22,6 +22,7 @@ import shlex
 from . import debug
 from . import tools
 from . import env
+from . import depend
 
 queueLock = threading.Lock()
 workQueue = queue.Queue()
@@ -70,7 +71,7 @@ def run_command_direct(cmd_line):
 		return False
 
 
-def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_file=""):
+def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_file="", depend_data=None):
 	global errorOccured
 	global exitFlag
 	global currentIdExecution
@@ -95,6 +96,8 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 	if p.returncode == 0:
 		debug.debug(env.print_pretty(cmd_line))
 		queueLock.acquire()
+		if depend_data != None:
+			depend.create_dependency_file(depend_data['file'], depend_data['data'])
 		# TODO : Print the output all the time .... ==> to show warnings ...
 		if build_id >= 0 and (output != "" or err != ""):
 			debug.warning("output in subprocess compiling: '" + file + "'")
@@ -163,7 +166,7 @@ class myThread(threading.Thread):
 					cmdLine = data[1]
 					cmdStoreFile = data[3]
 					debug.print_element( "[" + str(data[4]) + "][" + str(self.thread_id) + "] " + comment[0], comment[1], comment[2], comment[3])
-					run_command(cmdLine, cmdStoreFile, build_id=data[4], file=comment[3], store_output_file=data[5])
+					run_command(cmdLine, cmdStoreFile, build_id=data[4], file=comment[3], store_output_file=data[5], depend_data=data[6])
 				else:
 					debug.warning("unknow request command : " + data[0])
 			else:
@@ -218,18 +221,18 @@ def un_init():
 
 
 
-def run_in_pool(cmd_line, comment, store_cmd_line="", store_output_file=""):
+def run_in_pool(cmd_line, comment, store_cmd_line="", store_output_file="", depend_data=None):
 	global currentIdExecution
 	if processorAvaillable <= 1:
 		debug.print_element(comment[0], comment[1], comment[2], comment[3])
-		run_command(cmd_line, store_cmd_line, file=comment[3], store_output_file=store_output_file)
+		run_command(cmd_line, store_cmd_line, file=comment[3], store_output_file=store_output_file, depend_data=depend_data)
 		return
 	# multithreaded mode
 	init()
 	# Fill the queue
 	queueLock.acquire()
 	debug.verbose("add : in pool cmdLine")
-	workQueue.put(["cmdLine", cmd_line, comment, store_cmd_line, currentIdExecution, store_output_file])
+	workQueue.put(["cmdLine", cmd_line, comment, store_cmd_line, currentIdExecution, store_output_file, depend_data])
 	currentIdExecution +=1;
 	queueLock.release()
 	
