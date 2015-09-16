@@ -198,39 +198,39 @@ class Target(target.Target):
 		self.global_flags_cc.append("-fexceptions")
 		self.global_flags_xx.append("-Wa,--noexecstack")
 	
-	def check_right_package(self, pkgProperties, value):
-		for val in pkgProperties["RIGHT"]:
+	def check_right_package(self, pkg_properties, value):
+		for val in pkg_properties["RIGHT"]:
 			if value == val:
 				return True
 		return False
 	
 	"""
-	def get_staging_path_data(self, binaryName):
-		return self.get_staging_path(binaryName) + self.path_data
+	def get_staging_path_data(self, binary_name):
+		return self.get_staging_path(binary_name) + self.path_data
 	"""
 	
-	def make_package(self, pkgName, pkgProperties, basePkgPath, heritage):
+	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + pkgName + "'")
+		debug.info("Generate package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		pkgNameApplicationName = pkgName
+		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
-			pkgNameApplicationName += "debug"
+			pkg_name_application_name += "debug"
 		# FINAL_path_JAVA_PROJECT
-		self.path_javaProject=   self.get_staging_path(pkgName) \
+		self.path_javaProject=   self.get_staging_path(pkg_name) \
 		                         + "/src/" \
-		                         + pkgProperties["COMPAGNY_TYPE"] \
-		                         + "/" + pkgProperties["COMPAGNY_NAME2"] \
-		                         + "/" + pkgNameApplicationName + "/"
+		                         + pkg_properties["COMPAGNY_TYPE"] \
+		                         + "/" + pkg_properties["COMPAGNY_NAME2"] \
+		                         + "/" + pkg_name_application_name + "/"
 		#FINAL_FILE_ABSTRACTION
-		self.file_finalAbstraction = self.path_javaProject + "/" + pkgNameApplicationName + ".java"
+		self.file_finalAbstraction = self.path_javaProject + "/" + pkg_name_application_name + ".java"
 		
-		compleatePackageName = pkgProperties["COMPAGNY_TYPE"]+"."+pkgProperties["COMPAGNY_NAME2"]+"." + pkgNameApplicationName
+		compleatePackageName = pkg_properties["COMPAGNY_TYPE"]+"."+pkg_properties["COMPAGNY_NAME2"]+"." + pkg_name_application_name
 		
-		if "ADMOD_ID" in pkgProperties:
-			pkgProperties["RIGHT"].append("INTERNET")
-			pkgProperties["RIGHT"].append("ACCESS_NETWORK_STATE")
+		if "ADMOD_ID" in pkg_properties:
+			pkg_properties["RIGHT"].append("INTERNET")
+			pkg_properties["RIGHT"].append("ACCESS_NETWORK_STATE")
 		
 		
 		debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
@@ -239,20 +239,20 @@ class Target(target.Target):
 		# Create file :
 		# java ==> done by ewol wrapper ... (and compiled in the normal compilation system ==> must be find in the dependency list of jar ...
 		
-		tools.create_directory_of_file(self.get_staging_path(pkgName) + "/res/drawable/icon.png");
-		if     "ICON" in pkgProperties.keys() \
-		   and pkgProperties["ICON"] != "":
-			image.resize(pkgProperties["ICON"], self.get_staging_path(pkgName) + "/res/drawable/icon.png", 256, 256)
+		tools.create_directory_of_file(self.get_staging_path(pkg_name) + "/res/drawable/icon.png");
+		if     "ICON" in pkg_properties.keys() \
+		   and pkg_properties["ICON"] != "":
+			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/res/drawable/icon.png", 256, 256)
 		else:
 			# to be sure that we have all time a resource ...
-			tmpFile = open(self.get_staging_path(pkgName) + "/res/drawable/plop.txt", 'w')
+			tmpFile = open(self.get_staging_path(pkg_name) + "/res/drawable/plop.txt", 'w')
 			tmpFile.write('plop\n')
 			tmpFile.flush()
 			tmpFile.close()
 		
-		if pkgProperties["ANDROID_MANIFEST"]!="":
-			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkgProperties["ANDROID_MANIFEST"])
-			tools.copy_file(pkgProperties["ANDROID_MANIFEST"], self.get_staging_path(pkgName) + "/AndroidManifest.xml", force=True)
+		if pkg_properties["ANDROID_MANIFEST"]!="":
+			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkg_properties["ANDROID_MANIFEST"])
+			tools.copy_file(pkg_properties["ANDROID_MANIFEST"], self.get_staging_path(pkg_name) + "/AndroidManifest.xml", force=True)
 		else:
 			debug.error("missing parameter 'ANDROID_MANIFEST' in the properties ... ")
 		
@@ -262,16 +262,16 @@ class Target(target.Target):
 		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])
 		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", "movement", "Motion", "Apply movement to test pattern", ["Moving test pattern", "Still test pattern"]
 		#copy needed resources :
-		for res_source, res_dest in pkgProperties["ANDROID_RESOURCES"]:
+		for res_source, res_dest in pkg_properties["ANDROID_RESOURCES"]:
 			if res_source == "":
 				continue
-			tools.copy_file(res_source , self.get_staging_path(pkgName) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
+			tools.copy_file(res_source , self.get_staging_path(pkg_name) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
 		
 		
 		# Doc :
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
-		tools.create_directory_of_file(self.get_staging_path(pkgName) + "/src/noFile")
+		tools.create_directory_of_file(self.get_staging_path(pkg_name) + "/src/noFile")
 		androidToolPath = self.path_sdk + "/build-tools/"
 		# find android tool version
 		dirnames = tools.get_list_sub_path(androidToolPath)
@@ -281,48 +281,48 @@ class Target(target.Target):
 		
 		# this is to create resource file for android ... (we did not use aset in jar with ewol ...
 		adModResoucepath = ""
-		if "ADMOD_ID" in pkgProperties:
+		if "ADMOD_ID" in pkg_properties:
 			adModResoucepath = " -S " + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
 		cmdLine = androidToolPath + "aapt p -f " \
-		          + "-M " + self.get_staging_path(pkgName) + "/AndroidManifest.xml " \
-		          + "-F " + self.get_staging_path(pkgName) + "/resources.res " \
+		          + "-M " + self.get_staging_path(pkg_name) + "/AndroidManifest.xml " \
+		          + "-F " + self.get_staging_path(pkg_name) + "/resources.res " \
 		          + "-I " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
-		          + "-S " + self.get_staging_path(pkgName) + "/res/ " \
+		          + "-S " + self.get_staging_path(pkg_name) + "/res/ " \
 		          + adModResoucepath \
-		          + "-J " + self.get_staging_path(pkgName) + "/src/ "
+		          + "-J " + self.get_staging_path(pkg_name) + "/src/ "
 		multiprocess.run_command(cmdLine)
 		
-		tools.create_directory_of_file(self.get_staging_path(pkgName) + "/build/classes/noFile")
+		tools.create_directory_of_file(self.get_staging_path(pkg_name) + "/build/classes/noFile")
 		debug.print_element("pkg", "*.class", "<==", "*.java")
 		#generate android java files:
 		filesString=""
 		
 		"""
 		old : 
-		if "ADMOD_ID" in pkgProperties:
+		if "ADMOD_ID" in pkg_properties:
 			# TODO : check this I do not think it is really usefull ... ==> write for IDE only ...
 			filesString += self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
-		if len(pkgProperties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-			filesString += self.path_javaProject + pkgNameApplicationName + "Settings.java "
+		if len(pkg_properties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
+			filesString += self.path_javaProject + pkg_name_application_name + "Settings.java "
 		
 		adModJarFile = ""
-		if "ADMOD_ID" in pkgProperties:
+		if "ADMOD_ID" in pkg_properties:
 			adModJarFile = ":" + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
 		
 		cmdLine = "javac " \
-		          + "-d " + self.get_staging_path(pkgName) + "/build/classes " \
+		          + "-d " + self.get_staging_path(pkg_name) + "/build/classes " \
 		          + "-classpath " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
 		          + adModJarFile + " " \
 		          + filesString \
 		          + self.file_finalAbstraction + " "  \
-		          + self.get_staging_path(pkgName) + "/src/R.java "
+		          + self.get_staging_path(pkg_name) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		"""
-		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage.src, ["so"])))
-		debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage.src, ["jar"])))
+		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage_list.src, ["so"])))
+		debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage_list.src, ["jar"])))
 		
 		class_extern = ""
-		upper_jar = tools.filter_extention(heritage.src, ["jar"])
+		upper_jar = tools.filter_extention(heritage_list.src, ["jar"])
 		#debug.warning("ploppppp = " + str(upper_jar))
 		for elem in upper_jar:
 			if len(class_extern) > 0:
@@ -330,18 +330,18 @@ class Target(target.Target):
 			class_extern += elem
 		# create enpoint element :
 		cmdLine = "javac " \
-		          + "-d " + self.get_staging_path(pkgName) + "/build/classes " \
+		          + "-d " + self.get_staging_path(pkg_name) + "/build/classes " \
 		          + "-classpath " + class_extern + " " \
-		          + self.get_staging_path(pkgName) + "/src/R.java "
+		          + self.get_staging_path(pkg_name) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".dex", "<==", "*.class")
 		cmdLine = androidToolPath + "dx " \
 		          + "--dex --no-strict " \
-		          + "--output=" + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
-		          + self.get_staging_path(pkgName) + "/build/classes/ "
+		          + "--output=" + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + ".dex " \
+		          + self.get_staging_path(pkg_name) + "/build/classes/ "
 		
-		if "ADMOD_ID" in pkgProperties:
+		if "ADMOD_ID" in pkg_properties:
 			cmdLine += self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
 		# add element to dexification:
 		for elem in upper_jar:
@@ -360,11 +360,11 @@ class Target(target.Target):
 		          + " -classpath " + self.path_sdk + "/tools/lib/sdklib.jar " \
 		          + builderDebug \
 		          + " com.android.sdklib.build.ApkBuilderMain " \
-		          + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+		          + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 		          + " -u " \
-		          + " -z " + self.get_staging_path(pkgName) + "/resources.res " \
-		          + " -f " + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + ".dex " \
-		          + " -rf " + self.get_staging_path(pkgName) + "/data "
+		          + " -z " + self.get_staging_path(pkg_name) + "/resources.res " \
+		          + " -f " + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + ".dex " \
+		          + " -rf " + self.get_staging_path(pkg_name) + "/data "
 		multiprocess.run_command(cmdLine)
 		
 		# doc :
@@ -382,7 +382,7 @@ class Target(target.Target):
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + " -storepass Pass__AndroidDebugKey " \
 			    + " -keypass PassKey__AndroidDebugKey " \
-			    + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
+			    + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey"
 			multiprocess.run_command(cmdLine)
 			tmpFile = open("tmpPass.boo", 'w')
@@ -393,52 +393,52 @@ class Target(target.Target):
 			print("On release mode we need the file :  and key an pasword to sign the application ...")
 			debug.print_element("pkg", ".apk(signed debug)", "<==", ".apk (not signed)")
 			cmdLine = "jarsigner " \
-			    + " -keystore " + basePkgPath + "/AndroidKey.jks " \
+			    + " -keystore " + base_pkg_path + "/AndroidKey.jks " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
-			    + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
-			    + " " + pkgNameApplicationName
+			    + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
+			    + " " + pkg_name_application_name
 			multiprocess.run_command(cmdLine)
 			cmdLine = "jarsigner " \
 			    + " -verify -verbose -certs " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
-			    + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk "
+			    + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk "
 			multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
-		tools.remove_file(self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk")
+		tools.remove_file(self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk")
 		# verbose mode : -v
 		cmdLine = androidToolPath + "zipalign 4 " \
-		          + self.get_staging_path(pkgName) + "/build/" + pkgNameApplicationName + "-unalligned.apk " \
-		          + self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk "
+		          + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
+		          + self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk "
 		multiprocess.run_command(cmdLine)
 		
 		# copy file in the final stage :
-		tools.copy_file(self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk",
-		                self.get_final_path() + "/" + pkgNameApplicationName + ".apk",
+		tools.copy_file(self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk",
+		                self.get_final_path() + "/" + pkg_name_application_name + ".apk",
 		                force=True)
 	
-	def install_package(self, pkgName):
+	def install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Install package '" + pkgName + "'")
+		debug.info("Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		pkgNameApplicationName = pkgName
+		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
-			pkgNameApplicationName += "debug"
+			pkg_name_application_name += "debug"
 		cmdLine = self.path_sdk + "/platform-tools/adb install -r " \
-		          + self.get_staging_path(pkgName) + "/" + pkgNameApplicationName + ".apk "
+		          + self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk "
 		multiprocess.run_command(cmdLine)
 	
-	def un_install_package(self, pkgName):
+	def un_install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Un-Install package '" + pkgName + "'")
+		debug.info("Un-Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		pkgNameApplicationName = pkgName
+		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
-			pkgNameApplicationName += "debug"
-		cmdLine = self.path_sdk + "/platform-tools/adb uninstall " + pkgNameApplicationName
+			pkg_name_application_name += "debug"
+		cmdLine = self.path_sdk + "/platform-tools/adb uninstall " + pkg_name_application_name
 		Rmultiprocess.run_command(cmdLine)
 	
-	def Log(self, pkgName):
+	def Log(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("logcat of android board")
 		debug.debug("------------------------------------------------------------------------")

@@ -492,6 +492,19 @@ class Target:
 			self.action_on_state[name_of_state] = [[level, name, action]]
 		else:
 			self.action_on_state[name_of_state].append([level, name, action])
+	
+	
+	
+	def generate_list_separate_coma(self, list):
+		result = ""
+		fistTime = True
+		for elem in list:
+			if fistTime == True:
+				fistTime = False
+			else:
+				result += ","
+			result += elem
+		return result
 
 
 targetList=[]
