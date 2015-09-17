@@ -38,15 +38,26 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to link a shared library.
 ##
-def link(file, binary, target, depancy, name, basic_path):
+def link(file, binary, target, depancy, name, basic_path, static=False):
 	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "lib-shared")
-	#get all parent dynamic libs
-	list_dynamic = depancy.src['dynamic']
-	# get only parent shared that is not static
 	list_static = []
-	for elem in depancy.src['static']:
-		if elem[:-len(target.suffix_lib_static)] + target.suffix_lib_dynamic not in depancy.src['dynamic']:
-			list_static.append(elem)
+	list_dynamic = []
+	if static == True:
+		#get all parent static libs
+		list_static = depancy.src['static']
+		# get only parent shared that is not static
+		for elem in depancy.src['dynamic']:
+			lib_name = elem[:-len(target.suffix_lib_dynamic)] + target.suffix_lib_static
+			if lib_name not in depancy.src['static']:
+				list_dynamic.append(elem)
+	else:
+		#get all parent dynamic libs
+		list_dynamic = depancy.src['dynamic']
+		# get only parent shared that is not static
+		for elem in depancy.src['static']:
+			lib_name = elem[:-len(target.suffix_lib_static)] + target.suffix_lib_dynamic
+			if lib_name not in depancy.src['dynamic']:
+				list_static.append(elem)
 	#create command Line
 	cmd = [
 		target.xx,

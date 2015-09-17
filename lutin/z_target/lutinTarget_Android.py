@@ -77,11 +77,15 @@ class Target(target.Target):
 				debug.info("Gcc x86 path does not exist !!!")
 		
 		# TODO : Set it back in the package only ...
-		#self.path_bin="/mustNotCreateBinary"
-		#self.path_lib="/data/lib/armeabi"
-		#self.path_data="/data/assets"
-		#self.path_doc="/doc"
+		#self.path_bin="mustNotCreateBinary"
+		#self.path_lib="data/lib/armeabi"
+		#self.path_data="data/assets"
+		#self.path_doc="doc"
 		#self.suffix_package='.pkg'
+		self.pkg_path_data = "data/assets"
+		self.pkg_path_bin = "mustNotCreateBinary"
+		self.pkg_path_lib = "data/lib/armeabi"
+		self.pkg_path_license = "license"
 		
 		# board id at 15 is for android 4.0.3 and more ... (note: API 14 has been removed ...)
 		self.boardId = 15
@@ -214,17 +218,77 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
+		
+		#output path
+		target_outpath = self.get_staging_path(pkg_name)
+		tools.create_directory_of_file(target_outpath)
+		
+		# TODO : Remove :
+		static = True
+		## Create share datas
+		if static == True:
+			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data, pkg_name)
+		else:
+			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data)
+		tools.create_directory_of_file(target_outpath_data)
+		debug.debug("heritage for " + str(pkg_name) + ":")
+		for heritage in heritage_list.list_heritage:
+			debug.debug("sub elements: " + str(heritage.name))
+			path_src = self.get_build_path_data(heritage.name)
+			debug.verbose("      has directory: " + path_src)
+			if os.path.isdir(path_src):
+				if static == True:
+					debug.debug("      need copy: " + path_src + " to " + target_outpath_data)
+					#copy all data:
+					tools.copy_anything(path_src, target_outpath_data, recursive=True, force_identical=True)
+				else:
+					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + target_outpath_data)
+					#copy all data:
+					tools.copy_anything(os.path.dirname(path_src), target_outpath_data, recursive=True, force_identical=True)
+		
+		## copy binary files
+		# in Android Package wa have no binary element, only shared object ...
+		
+		
+		## Create libraries
+		target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
+		tools.create_directory_of_file(target_outpath_lib)
+		# copy application lib: (needed to lunch ...)
+		file_src = self.get_build_file_dynamic(pkg_name)
+		if os.path.isfile(file_src):
+			debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
+			tools.copy_file(file_src, os.path.join(target_outpath_lib, os.path.basename(file_src)) )
+		# copy other if needed:
+		if static == False:
+			#copy all shared libs...
+			debug.verbose("libs for " + str(pkg_name) + ":")
+			for heritage in heritage_list.list_heritage:
+				debug.debug("sub elements: " + str(heritage.name))
+				file_src = self.get_build_file_dynamic(heritage.name)
+				debug.verbose("      has directory: " + file_src)
+				if os.path.isfile(file_src):
+					debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
+					#copy all data:
+					# TODO : We can have a problem when writing over library files ...
+					tools.copy_file(file_src, os.path.join(target_outpath_lib, os.path.basename(file_src)) )
+		
+		
+		
+		
+		
+		
+		
 		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
 		# FINAL_path_JAVA_PROJECT
-		self.path_javaProject=   self.get_staging_path(pkg_name) \
-		                         + "/src/" \
-		                         + pkg_properties["COMPAGNY_TYPE"] \
-		                         + "/" + pkg_properties["COMPAGNY_NAME2"] \
-		                         + "/" + pkg_name_application_name + "/"
+		self.path_java_project = os.path.join(self.get_staging_path(pkg_name),
+		                                    "src",
+		                                    pkg_properties["COMPAGNY_TYPE"],
+		                                    pkg_properties["COMPAGNY_NAME2"],
+		                                    pkg_name_application_name)
 		#FINAL_FILE_ABSTRACTION
-		self.file_finalAbstraction = self.path_javaProject + "/" + pkg_name_application_name + ".java"
+		self.file_final_abstraction = os.path.join(self.path_java_project, pkg_name_application_name + ".java")
 		
 		compleatePackageName = pkg_properties["COMPAGNY_TYPE"]+"."+pkg_properties["COMPAGNY_NAME2"]+"." + pkg_name_application_name
 		
@@ -235,7 +299,7 @@ class Target(target.Target):
 		
 		debug.print_element("pkg", "absractionFile", "<==", "dynamic file")
 		# Create path :
-		tools.create_directory_of_file(self.file_finalAbstraction)
+		tools.create_directory_of_file(self.file_final_abstraction)
 		# Create file :
 		# java ==> done by ewol wrapper ... (and compiled in the normal compilation system ==> must be find in the dependency list of jar ...
 		
@@ -303,7 +367,7 @@ class Target(target.Target):
 			# TODO : check this I do not think it is really usefull ... ==> write for IDE only ...
 			filesString += self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/src/android/UnusedStub.java "
 		if len(pkg_properties["ANDROID_WALLPAPER_PROPERTIES"])!=0:
-			filesString += self.path_javaProject + pkg_name_application_name + "Settings.java "
+			filesString += self.path_java_project + pkg_name_application_name + "Settings.java "
 		
 		adModJarFile = ""
 		if "ADMOD_ID" in pkg_properties:
@@ -314,15 +378,15 @@ class Target(target.Target):
 		          + "-classpath " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
 		          + adModJarFile + " " \
 		          + filesString \
-		          + self.file_finalAbstraction + " "  \
+		          + self.file_final_abstraction + " "  \
 		          + self.get_staging_path(pkg_name) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		"""
-		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage_list.src, ["so"])))
-		debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage_list.src, ["jar"])))
+		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage_list.src['dynamic'], ["so"])))
+		debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage_list.src['src'], ["jar"])))
 		
 		class_extern = ""
-		upper_jar = tools.filter_extention(heritage_list.src, ["jar"])
+		upper_jar = tools.filter_extention(heritage_list.src['src'], ["jar"])
 		#debug.warning("ploppppp = " + str(upper_jar))
 		for elem in upper_jar:
 			if len(class_extern) > 0:

@@ -347,7 +347,16 @@ class Module:
 			# add at the heritage list :
 			self.sub_heritage_list.add_heritage_list(inherit_list)
 		# do sub library action for automatic generating ...
-		if self.type in target.action_on_state:
+		local_type = self.type
+		if self.type == 'LIBRARY_DYNAMIC':
+			local_type = 'LIBRARY'
+		if self.type == 'LIBRARY_STATIC':
+			local_type = 'LIBRARY'
+		if self.type == 'BINARY_SHARED':
+			local_type = 'BINARY'
+		if self.type == 'BINARY_STAND_ALONE':
+			local_type = 'BINARY'
+		if local_type in target.action_on_state:
 			for lvl in range(0,100):
 				for level, action_name, action in target.action_on_state[self.type]:
 					if level == lvl:
@@ -356,21 +365,21 @@ class Module:
 		# ----------------------------------------------------
 		# -- Generic library help                           --
 		# ----------------------------------------------------
-		if self.type=='PREBUILD':
+		if self.type == 'PREBUILD':
 			debug.print_element("Prebuild", self.name, "", "")
-		if self.type=='LIBRARY':
+		if self.type == 'LIBRARY':
 			debug.print_element("Library", self.name, "", "")
-		if self.type=='LIBRARY_DYNAMIC':
+		if self.type == 'LIBRARY_DYNAMIC':
 			debug.print_element("Library(dynamic)", self.name, "", "")
-		if self.type=='LIBRARY_STATIC':
+		if self.type == 'LIBRARY_STATIC':
 			debug.print_element("Library(static)", self.name, "", "")
-		if self.type=='BINARY':
+		if self.type == 'BINARY':
 			debug.print_element("Binary(auto)", self.name, "", "")
-		if self.type=='BINARY_SHARED':
+		if self.type == 'BINARY_SHARED':
 			debug.print_element("Binary (shared)", self.name, "", "")
-		if self.type=='BINARY_STAND_ALONE':
+		if self.type == 'BINARY_STAND_ALONE':
 			debug.print_element("Binary (stand alone)", self.name, "", "")
-		if self.type=='PACKAGE':
+		if self.type == 'PACKAGE':
 			debug.print_element("Package", self.name, "", "")
 		# ----------------------------------------------------
 		# -- Sources compilation                            --
@@ -492,6 +501,9 @@ class Module:
 						# abstract GUI interface ...
 						shared_mode = True
 						break;
+			static_mode = True
+			if self.type == 'BINARY_SHARED':
+				static_mode = False
 			if shared_mode == True:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
@@ -501,7 +513,8 @@ class Module:
 					                            target,
 					                            self.sub_heritage_list,
 					                            name = self.name,
-					                            basic_path = self.origin_path)
+					                            basic_path = self.origin_path,
+					                            static = static_mode)
 					self.local_heritage.add_sources(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'")
@@ -521,9 +534,6 @@ class Module:
 			else:
 				try:
 					tmp_builder = builder.get_builder_with_output("bin");
-					static_mode = True
-					if self.type == 'BINARY_SHARED':
-						static_mode = False
 					res_file = tmp_builder.link(list_sub_file_needed_to_build,
 					                            package_name,
 					                            target,
