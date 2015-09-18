@@ -358,7 +358,7 @@ class Module:
 			local_type = 'BINARY'
 		if local_type in target.action_on_state:
 			for lvl in range(0,100):
-				for level, action_name, action in target.action_on_state[self.type]:
+				for level, action_name, action in target.action_on_state[local_type]:
 					if level == lvl:
 						debug.debug("level=" + str(level) + " Do Action : " + action_name)
 						elem = action(target, self, package_name);

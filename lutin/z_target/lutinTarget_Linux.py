@@ -118,7 +118,7 @@ class Target(target.Target):
 			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data)
 		tools.create_directory_of_file(target_outpath_data)
 		debug.debug("heritage for " + str(pkg_name) + ":")
-		for heritage in heritage_list.lissourcet_heritage:
+		for heritage in heritage_list.list_heritage:
 			debug.debug("sub elements: " + str(heritage.name))
 			path_src = self.get_build_path_data(heritage.name)
 			debug.verbose("      has directory: " + path_src)
