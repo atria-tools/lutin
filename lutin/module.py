@@ -689,7 +689,7 @@ class Module:
 		self.append_to_internal_list2(self.flags["local"], type, list)
 	
 	def compile_version_XX(self, version, same_as_api=True, gnu=False):
-		cpp_version_list = [1999, 2003, 2011, 2014]
+		cpp_version_list = [1999, 2003, 2011, 2014, 2017]
 		if version not in cpp_version_list:
 			debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
 		# select API version:
@@ -740,11 +740,15 @@ class Module:
 	def copy_path(self, source, destination=''):
 		self.paths.append([source, destination])
 	
-	def print_list(self, description, list):
-		if len(list) > 0:
+	def print_list(self, description, input_list):
+		if type(input_list) == list:
+			if len(input_list) > 0:
+				print('        ' + str(description))
+				for elem in input_list:
+					print('            ' + str(elem))
+		else:
 			print('        ' + str(description))
-			for elem in list:
-				print('            ' + str(elem))
+			print('            ' + str(input_list))
 	
 	def display(self, target):
 		print('-----------------------------------------------')
@@ -759,22 +763,22 @@ class Module:
 		
 		for element in self.flags["local"]:
 			value = self.flags["local"][element]
-			self.print_list('flags ' + element, value)
+			self.print_list('flags "' + str(element) + '"', value)
 		
 		for element in self.flags["export"]:
 			value = self.flags["export"][element]
-			self.print_list('flags export ' + element, value)
+			self.print_list('flags export "' + str(element) + '"', value)
 		
 		self.print_list('src',self.src)
 		self.print_list('files',self.files)
 		self.print_list('paths',self.paths)
 		for element in self.path["local"]:
 			value = self.path["local"][element]
-			self.print_list('local path ' + element, value)
+			self.print_list('local path ' + str(element), value)
 		
 		for element in self.path["export"]:
 			value = self.path["export"][element]
-			self.print_list('export path ' + element, value)
+			self.print_list('export path ' + str(element), value)
 		
 	
 	def pkg_set(self, variable, value):

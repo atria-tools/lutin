@@ -214,7 +214,29 @@ class Target(target.Target):
 	"""
 	
 	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
-		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
+		#The package generated depend of the type of the element:
+		end_point_module_name = heritage_list.list_heritage[-1].name
+		module = self.get_module(end_point_module_name)
+		if module == None:
+			debug.error("can not create package ... ");
+		if module.get_type() == 'PREBUILD':
+			#nothing to do ...
+			return
+		if    module.get_type() == 'LIBRARY' \
+		   or module.get_type() == 'LIBRARY_DYNAMIC' \
+		   or module.get_type() == 'LIBRARY_STATIC':
+			debug.info("Can not create package for library");
+			return
+		if    module.get_type() == 'BINARY' \
+		   or module.get_type() == 'BINARY_STAND_ALONE':
+			self.make_package_generic_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
+		if module.get_type() == 'BINARY_SHARED':
+			self.make_package_generic_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
+		if module.get_type() == 'PACKAGE':
+			debug.info("Can not create package for package");
+			return
+	
+	def make_package_generic_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
@@ -223,8 +245,6 @@ class Target(target.Target):
 		target_outpath = self.get_staging_path(pkg_name)
 		tools.create_directory_of_file(target_outpath)
 		
-		# TODO : Remove :
-		static = True
 		## Create share datas
 		if static == True:
 			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data, pkg_name)

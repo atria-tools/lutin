@@ -115,8 +115,13 @@ def get_version_compilation_flags(flags, dependency_flags):
 		is_gnu = default_version_gnu
 	
 	version = max(version_local, dependency_version)
+	if version == 2017:
+		debug.error("not supported flags for X17 ...");
+		if is_gnu == True:
+			out = ["-std=gnu++17", "-D__CPP_VERSION__=2017"]
+		else:
+			out = ["-std=c++17", "-D__CPP_VERSION__=2017"]
 	if version == 2014:
-		debug.error("not supported flags for X14 ...");
 		if is_gnu == True:
 			out = ["-std=gnu++14", "-D__CPP_VERSION__=2014"]
 		else:

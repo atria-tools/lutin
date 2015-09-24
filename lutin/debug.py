@@ -46,7 +46,7 @@ def enable_color():
 	global color_yellow
 	color_yellow = "\033[33m"
 	global color_blue
-	color_blue   = "\033[34m"
+	color_blue   = "\033[01;34m"
 	global color_purple
 	color_purple = "\033[35m"
 	global color_cyan
