@@ -159,7 +159,7 @@ class Target:
 		if self.config["compilator"] == "clang":
 			self.cc = self.cross + "clang"
 			self.xx = self.cross + "clang++"
-			self.ar=self.cross + "llvm-ar"
+			#self.ar=self.cross + "llvm-ar"
 			self.ranlib=""
 		else:
 			self.cc = self.cross + "gcc"

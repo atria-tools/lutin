@@ -460,6 +460,7 @@ class Module:
 						self.local_heritage.add_lib_static(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.a'")
+			"""
 			if    self.type == 'LIBRARY' \
 			   or self.type == 'LIBRARY_DYNAMIC':
 				try:
@@ -475,6 +476,7 @@ class Module:
 						self.local_heritage.add_lib_dynamic(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'/'.dynlib'/'.dll'")
+			"""
 			try:
 				tmp_builder = builder.get_builder_with_output("jar");
 				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())

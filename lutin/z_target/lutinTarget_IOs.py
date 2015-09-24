@@ -55,11 +55,11 @@ class Target(target.Target):
 		#self.suffix_package=''
 		
 		if self.sumulator == True:
-			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.3.sdk"
+			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
 			self.global_flags_ld.append("-mios-simulator-version-min=8.0")
 			self.global_flags_cc.append("-mios-simulator-version-min=8.0")
 		else:
-			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.3.sdk"
+			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 			self.global_flags_ld.append("-miphoneos-version-min=8.0")
 			self.global_flags_cc.append("-miphoneos-version-min=8.0")
 		
@@ -76,44 +76,116 @@ class Target(target.Target):
 		
 		self.global_flags_m.append("-fobjc-arc")
 		#self.global_flags_m.append("-fmodules")
+		
+		self.pkg_path_data = "share"
+		self.pkg_path_bin = ""
+		self.pkg_path_lib = "lib"
+		self.pkg_path_license = "license"
+		
 	
-	def get_staging_path(self, binary_name):
-		return tools.get_run_path() + self.path_out + self.path_staging + "/" + binary_name + ".app/"
+	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
+		#The package generated depend of the type of the element:
+		end_point_module_name = heritage_list.list_heritage[-1].name
+		module = self.get_module(end_point_module_name)
+		if module == None:
+			debug.error("can not create package ... ");
+		if module.get_type() == 'PREBUILD':
+			#nothing to do ...
+			return
+		if    module.get_type() == 'LIBRARY' \
+		   or module.get_type() == 'LIBRARY_DYNAMIC' \
+		   or module.get_type() == 'LIBRARY_STATIC':
+			debug.info("Can not create package for library");
+			return
+		if    module.get_type() == 'BINARY' \
+		   or module.get_type() == 'BINARY_STAND_ALONE':
+			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
+		if module.get_type() == 'BINARY_SHARED':
+			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
+		if module.get_type() == 'PACKAGE':
+			debug.info("Can not create package for package");
 	
-	def get_staging_path_data(self, binary_name):
-		return self.get_staging_path(binary_name) + self.path_data + "/"
 	
-	def make_package(self, pkg_name, pkg_properties, basePkgPath, heritage_list):
+	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
+		#output path
+		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
+		tools.create_directory_of_file(target_outpath)
 		
+		## Create share datas:
+		if static == True:
+			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data, pkg_name)
+		else:
+			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data)
+		tools.create_directory_of_file(target_outpath_data)
+		debug.debug("heritage for " + str(pkg_name) + ":")
+		for heritage in heritage_list.list_heritage:
+			debug.debug("sub elements: " + str(heritage.name))
+			path_src = self.get_build_path_data(heritage.name)
+			debug.verbose("      has directory: " + path_src)
+			if os.path.isdir(path_src):
+				if static == True:
+					debug.debug("      need copy: " + path_src + " to " + target_outpath_data)
+					#copy all data:
+					tools.copy_anything(path_src, target_outpath_data, recursive=True, force_identical=True)
+				else:
+					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + target_outpath_data)
+					#copy all data:
+					tools.copy_anything(os.path.dirname(path_src), target_outpath_data, recursive=True, force_identical=True)
+		
+		## copy binary files:
+		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
+		tools.create_directory_of_file(target_outpath_bin)
+		path_src = self.get_build_file_bin(pkg_name)
+		path_dst = os.path.join(target_outpath_bin, pkg_name + self.suffix_binary)
+		debug.verbose("path_dst: " + str(path_dst))
+		tools.copy_file(path_src, path_dst)
+		
+		## Create libraries:
+		if static == False:
+			#copy all shred libs...
+			target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
+			tools.create_directory_of_file(target_outpath_lib)
+			debug.verbose("libs for " + str(pkg_name) + ":")
+			for heritage in heritage_list.list_heritage:
+				debug.debug("sub elements: " + str(heritage.name))
+				file_src = self.get_build_file_dynamic(heritage.name)
+				debug.verbose("      has directory: " + file_src)
+				if os.path.isfile(file_src):
+					debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
+					#copy all data:
+					# TODO : We can have a problem when writing over library files ...
+					tools.copy_file(file_src, os.path.join(target_outpath_lib, os.path.basename(file_src)) )
+		
+		## Create icon:
 		if    "ICON" in pkg_properties.keys() \
 		   and pkg_properties["ICON"] != "":
 			# Resize all icon needed for Ios ...
 			# TODO : Do not regenerate if source resource is not availlable
 			# TODO : Add a colored background ...
 			debug.print_element("pkg", "iTunesArtwork.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/iTunesArtwork.png", 512, 512)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork.png"), 512, 512)
 			debug.print_element("pkg", "iTunesArtwork@2x.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/iTunesArtwork@2x.png", 1024, 1024)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork@2x.png"), 1024, 1024)
 			debug.print_element("pkg", "Icon-60@2x.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-60@2x.png", 120, 120)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-60@2x.png"), 120, 120)
 			debug.print_element("pkg", "Icon-76.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-76.png", 76, 76)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76.png"), 76, 76)
 			debug.print_element("pkg", "Icon-76@2x.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-76@2x.png", 152, 152)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76@2x.png"), 152, 152)
 			debug.print_element("pkg", "Icon-Small-40.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-Small-40.png", 40, 40)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40.png"), 40, 40)
 			debug.print_element("pkg", "Icon-Small-40@2x.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-Small-40@2x.png", 80, 80)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40@2x.png"), 80, 80)
 			debug.print_element("pkg", "Icon-Small.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-Small.png", 29, 29)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small.png"), 29, 29)
 			debug.print_element("pkg", "Icon-Small@2x.png", "<==", pkg_properties["ICON"])
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/Icon-Small@2x.png", 58, 58)
+			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small@2x.png"), 58, 58)
 		
 		debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
-		infoFile = self.get_staging_path(pkg_name) + "/PkgInfo"
+		infoFile = os.path.join(target_outpath, "PkgInfo")
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write("APPL????")
@@ -206,7 +278,7 @@ class Target(target.Target):
 		dataFile += "</plist>\n"
 		dataFile += "\n\n"
 		
-		infoFile = self.get_staging_path(pkg_name) + "/Info.plist"
+		infoFile = os.path.join(target_outpath, "Info.plist")
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
@@ -274,7 +346,7 @@ class Target(target.Target):
 		dataFile += "</plist>\n"
 		dataFile += "\n\n"
 
-		infoFile = self.get_staging_path(pkg_name) + "/ResourceRules.plist"
+		infoFile = os.path.join(target_outpath, "ResourceRules.plist")
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
@@ -292,7 +364,7 @@ class Target(target.Target):
 		dataFile += "</plist>\n"
 		dataFile += "\n\n"
 
-		infoFile = self.get_staging_path(pkg_name) + "/Entitlements.plist"
+		infoFile = os.path.join(target_outpath, "Entitlements.plist")
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
 		tmpFile.write(dataFile)
@@ -311,7 +383,7 @@ class Target(target.Target):
 		
 		if self.sumulator == False:
 			# Create the info file
-			tmpFile = open(self.get_build_path(pkg_name) + "/worddown.xcent", 'w')
+			tmpFile = open(os.path.join(target_outpath, pkg_name + ".xcent"), 'w')
 			tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 			tmpFile.write("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n")
 			tmpFile.write("<plist version=\"1.0\">\n")

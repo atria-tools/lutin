@@ -102,7 +102,7 @@ class Target(target.Target):
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
 		
-		## Create share datas
+		## Create share datas:
 		if static == True:
 			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data, pkg_name)
 		else:
@@ -123,7 +123,7 @@ class Target(target.Target):
 					#copy all data:
 					tools.copy_anything(os.path.dirname(path_src), target_outpath_data, recursive=True, force_identical=True)
 		
-		## copy binary files
+		## copy binary files:
 		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
 		tools.create_directory_of_file(target_outpath_bin)
 		path_src = self.get_build_file_bin(pkg_name)
@@ -131,31 +131,31 @@ class Target(target.Target):
 		debug.verbose("path_dst: " + str(path_dst))
 		tools.copy_file(path_src, path_dst)
 		
-		## Create version file
+		## Create version file:
 		tmpFile = open(target_outpath + "/version.txt", 'w')
 		tmpFile.write(pkg_properties["VERSION"])
 		tmpFile.flush()
 		tmpFile.close()
 		
-		## Create maintainer file
+		## Create maintainer file:
 		tmpFile = open(target_outpath + "/maintainer.txt", 'w')
 		tmpFile.write(self.generate_list_separate_coma(pkg_properties["MAINTAINER"]))
 		tmpFile.flush()
 		tmpFile.close()
 		
-		## Create appl_name file
+		## Create appl_name file:
 		tmpFile = open(target_outpath + "/appl_name.txt", 'w')
 		tmpFile.write("en_EN:" + pkg_properties["NAME"])
 		tmpFile.flush()
 		tmpFile.close()
 		
-		## Create appl_description file
+		## Create appl_description file:
 		tmpFile = open(target_outpath + "/appl_description.txt", 'w')
 		tmpFile.write("en_EN:" + pkg_properties["DESCRIPTION"])
 		tmpFile.flush()
 		tmpFile.close()
 		
-		## Create Readme file
+		## Create Readme file:
 		readmeFileDest = target_outpath + "/readme.txt"
 		if os.path.exists(base_pkg_path + "/os-Linux/README")==True:
 			tools.copy_file(base_pkg_path + "/os-Linux/README", readmeFileDest)
@@ -170,7 +170,7 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		
-		## Create licence file
+		## Create licence file:
 		licenseFileDest = os.path.join(target_outpath, self.pkg_path_license, pkg_name + ".txt")
 		tools.create_directory_of_file(licenseFileDest)
 		if os.path.exists(base_pkg_path + "/license.txt")==True:
@@ -182,7 +182,7 @@ class Target(target.Target):
 			tmpFile.flush()
 			tmpFile.close()
 		
-		## Create changeLog file
+		## Create changeLog file:
 		changeLogFileDest = target_outpath + "/changelog.txt"
 		if os.path.exists(base_pkg_path + "/changelog") == True:
 			tools.copy_file(base_pkg_path + "/changelog", changeLogFileDest)
@@ -192,7 +192,6 @@ class Target(target.Target):
 			tmpFile.write("No changelog data " + pkg_name + "\n")
 			tmpFile.flush()
 			tmpFile.close()
-		
 		
 	
 	def make_package_single_file(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
