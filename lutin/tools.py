@@ -97,24 +97,56 @@ def add_prefix(prefix,list):
 				result.append(prefix+elem)
 			return result
 
-def copy_file(src, dst, cmd_file=None, force=False, force_identical=False):
+##
+## @brief Copy a specific file in a specific directory
+## @param[in] src Input file path
+## @param[in] dst Output file path
+## @param[in] cmd_file (default None) Path of file to store the command line used
+## @param[in] force (default False) Force copy of the file
+## @param[in] force_identical (default False) Force file to be identical (read it in binary)
+## @param[in,out] in_list (default None) Not real copy: set the request copy in the input list
+##
+def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_list=None):
 	if os.path.exists(src) == False:
 		debug.error("Request a copy a file that does not existed : '" + src + "'")
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
 	if     force == False \
 	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmd_line=cmd_line, force_identical=force_identical) == False:
 		debug.verbose ("no need to copy ...")
+		if in_list != None:
+			if dst in in_list:
+				debug.verbose("replace copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+			else:
+				debug.verbose("append copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+			# update element in dictionnary:
+			in_list[dst] = {"src":src,
+			                "cmd_file":cmd_file,
+			                "need_copy":False}
 		return
-	debug.print_element("copy file ", os.path.relpath(src), "==>", os.path.relpath(dst))
-	create_directory_of_file(dst)
-	shutil.copyfile(src, dst)
-	# copy property of the permition of the file ... 
-	stat_info = os.stat(src)
-	os.chmod(dst, stat_info.st_mode)
-	store_command(cmd_line, cmd_file)
+	if in_list == None:
+		debug.print_element("copy file ", os.path.relpath(src), "==>", os.path.relpath(dst))
+		create_directory_of_file(dst)
+		shutil.copyfile(src, dst)
+		# copy property of the permition of the file ... 
+		stat_info = os.stat(src)
+		os.chmod(dst, stat_info.st_mode)
+		store_command(cmd_line, cmd_file)
+	else:
+		debug.verbose("append copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+		# update element in dictionnary:
+		in_list[dst] = {"src":src,
+		                "cmd_file":cmd_file,
+		                "need_copy":True}
 
-
-def copy_anything(src, dst, recursive = False, force_identical=False):
+##
+## @brief Copy a compleate directory in a specific folder
+## @param[in] src Input folder path
+## @param[in] dst Output folder path
+## @param[in] recursive (default False) Copy folder with all his dependency
+## @param[in] force (default False) Force copy of the file
+## @param[in,out] in_list (default None) Not real copy: set the request copy in the input list
+##
+def copy_anything(src, dst, recursive = False, force_identical=False, in_list=None):
 	debug.verbose(" copy anything : '" + str(src) + "'")
 	debug.verbose("            to : '" + str(dst) + "'")
 	if os.path.isdir(os.path.realpath(src)):
@@ -127,6 +159,10 @@ def copy_anything(src, dst, recursive = False, force_identical=False):
 	debug.verbose("    " + str(tmp_path) + ":")
 	for root, dirnames, filenames in os.walk(tmp_path):
 		deltaRoot = root[len(tmp_path):]
+		while     len(deltaRoot) > 0 \
+		      and (    deltaRoot[0] == '/' \
+		            or deltaRoot[0] == '\\' ):
+			deltaRoot = deltaRoot[1:]
 		if     recursive == False \
 		   and deltaRoot != "":
 			return
@@ -139,16 +175,22 @@ def copy_anything(src, dst, recursive = False, force_identical=False):
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
 			debug.verbose("        '" + cycleFile + "'")
-			debug.extreme_verbose("Might copy : '" + tmp_path + "/" + deltaRoot + "/" + cycleFile + "' ==> '" + dst + "'")
-			copy_file(tmp_path + "/" + deltaRoot + "/" + cycleFile,
-			          dst      + "/" + deltaRoot + "/" + cycleFile,
-			          force_identical=force_identical)
-			""" TODO : Might be better, but does not work ...
-			debug.extreme_verbose("Might copy : '" + os.path.join(tmp_path, deltaRoot, cycleFile) + "' ==> '" + dst + "'")
+			debug.extreme_verbose("Might copy : '" + tmp_path + "  " + deltaRoot + "  " + cycleFile + "' ==> '" + dst + "'")
 			copy_file(os.path.join(tmp_path, deltaRoot, cycleFile),
-			          os.path.join(dst,      deltaRoot, cycleFile),
-			          force_identical=force_identical)
-			"""
+			          os.path.join(dst, deltaRoot, cycleFile),
+			          force_identical=force_identical,
+			          in_list=in_list)
+
+##
+## @brief real copy of files in a specific dictionnary list
+## @param[in] in_list Dictionnary of file to copy
+##
+def copy_list(in_list):
+	for dst in in_list:
+		if in_list[dst]["need_copy"] == False:
+			continue
+		# note we force the copy to disable the check of needed of copy (already done)
+		copy_file(in_list[dst]["src"], dst, cmd_file=in_list[dst]["cmd_file"], force=True)
 
 def filter_extention(list_files, extentions, invert=False):
 	out = []

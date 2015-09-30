@@ -117,6 +117,8 @@ class Target(target.Target):
 		else:
 			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data)
 		tools.create_directory_of_file(target_outpath_data)
+		# prepare list of copy files
+		copy_list={}
 		debug.debug("heritage for " + str(pkg_name) + ":")
 		for heritage in heritage_list.list_heritage:
 			debug.debug("sub elements: " + str(heritage.name))
@@ -126,11 +128,22 @@ class Target(target.Target):
 				if static == True:
 					debug.debug("      need copy: " + path_src + " to " + target_outpath_data)
 					#copy all data:
-					tools.copy_anything(path_src, target_outpath_data, recursive=True, force_identical=True)
+					tools.copy_anything(path_src,
+					                    target_outpath_data,
+					                    recursive=True,
+					                    force_identical=True,
+					                    in_list=copy_list)
 				else:
 					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + target_outpath_data)
 					#copy all data:
-					tools.copy_anything(os.path.dirname(path_src), target_outpath_data, recursive=True, force_identical=True)
+					tools.copy_anything(os.path.dirname(path_src),
+					                    target_outpath_data,
+					                    recursive=True,
+					                    force_identical=True,
+					                    in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		
 		
 		## copy binary files:
 		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
