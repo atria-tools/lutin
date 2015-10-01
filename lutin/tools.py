@@ -192,6 +192,20 @@ def copy_list(in_list):
 		# note we force the copy to disable the check of needed of copy (already done)
 		copy_file(in_list[dst]["src"], dst, cmd_file=in_list[dst]["cmd_file"], force=True)
 
+##
+## @brief Clean a path from all un-needed element in a directory
+## @param[in] path Path to clean
+## @param[in] normal_list List of all files/path in the path
+##
+def clean_directory(path, normal_list):
+	# get a list of all element in the path:
+	for root, dirnames, filenames in os.walk(path):
+		for file in filenames:
+			file_name = os.path.join(root, file)
+			if file_name not in normal_list:
+				debug.print_element("remove file ", os.path.relpath(file_name), "==>", "---")
+				os.remove(file_name)
+
 def filter_extention(list_files, extentions, invert=False):
 	out = []
 	for file in list_files:

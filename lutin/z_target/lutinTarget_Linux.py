@@ -112,10 +112,11 @@ class Target(target.Target):
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
+		target_shared_path = os.path.join(target_outpath, self.pkg_path_data)
 		if static == True:
-			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data, pkg_name)
+			target_outpath_data = os.path.join(target_shared_path, pkg_name)
 		else:
-			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data)
+			target_outpath_data = target_shared_path
 		tools.create_directory_of_file(target_outpath_data)
 		# prepare list of copy files
 		copy_list={}
@@ -143,7 +144,8 @@ class Target(target.Target):
 					                    in_list=copy_list)
 		#real copy files
 		tools.copy_list(copy_list)
-		
+		# remove unneded files (NOT folder ...)
+		tools.clean_directory(target_shared_path, copy_list)
 		
 		## copy binary files:
 		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
