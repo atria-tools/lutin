@@ -148,14 +148,20 @@ class Target(target.Target):
 		tools.clean_directory(target_shared_path, copy_list)
 		
 		## copy binary files:
+		copy_list={}
 		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
 		tools.create_directory_of_file(target_outpath_bin)
 		path_src = self.get_build_file_bin(pkg_name)
 		path_dst = os.path.join(target_outpath_bin, pkg_name + self.suffix_binary)
 		debug.verbose("path_dst: " + str(path_dst))
-		tools.copy_file(path_src, path_dst)
+		tools.copy_file(path_src,
+		                path_dst,
+		                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
 		
 		## Create libraries:
+		copy_list={}
 		if static == False:
 			#copy all shred libs...
 			target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
@@ -169,7 +175,11 @@ class Target(target.Target):
 					debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
 					#copy all data:
 					# TODO : We can have a problem when writing over library files ...
-					tools.copy_file(file_src, os.path.join(target_outpath_lib, os.path.basename(file_src)) )
+					tools.copy_file(file_src,
+					                os.path.join(target_outpath_lib, os.path.basename(file_src)),
+					                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
 		
 		## Create version file:
 		tmpFile = open(target_outpath + "/version.txt", 'w')

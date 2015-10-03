@@ -34,11 +34,19 @@ Installation
 
 Requirements: ``Python >= 2.7`` and ``pip``
 
-Just run::
+Just run:
 
   pip install lutin
 
-On mac-os you may install pip before:
+Install pip on debian/ubuntu:
+
+  sudo apt-get install pip
+
+Install pip on ARCH-linux:
+
+  sudo pacman -S pip
+
+Install pip on MacOs:
 
   sudo easy_install pip
 

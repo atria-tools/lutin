@@ -440,7 +440,8 @@ class Target:
 				mod.clean(self)
 		else:
 			# get the action an the module ....
-			gettedElement = name.split("?")
+			name2 = name.replace("@", "?")
+			gettedElement = name2.split("?")
 			module_name = gettedElement[0]
 			if len(gettedElement)>=3:
 				sub_action_name = gettedElement[2]

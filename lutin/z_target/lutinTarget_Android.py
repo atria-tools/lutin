@@ -302,7 +302,7 @@ class Target(target.Target):
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
 		# FINAL_path_JAVA_PROJECT
-		self.path_java_project = os.path.join(self.get_staging_path(pkg_name),
+		self.path_java_project = os.path.join(target_outpath,
 		                                    "src",
 		                                    pkg_properties["COMPAGNY_TYPE"],
 		                                    pkg_properties["COMPAGNY_NAME2"],
@@ -323,20 +323,20 @@ class Target(target.Target):
 		# Create file :
 		# java ==> done by ewol wrapper ... (and compiled in the normal compilation system ==> must be find in the dependency list of jar ...
 		
-		tools.create_directory_of_file(self.get_staging_path(pkg_name) + "/res/drawable/icon.png");
+		tools.create_directory_of_file(target_outpath + "/res/drawable/icon.png");
 		if     "ICON" in pkg_properties.keys() \
 		   and pkg_properties["ICON"] != "":
-			image.resize(pkg_properties["ICON"], self.get_staging_path(pkg_name) + "/res/drawable/icon.png", 256, 256)
+			image.resize(pkg_properties["ICON"], target_outpath + "/res/drawable/icon.png", 256, 256)
 		else:
 			# to be sure that we have all time a resource ...
-			tmpFile = open(self.get_staging_path(pkg_name) + "/res/drawable/plop.txt", 'w')
+			tmpFile = open(target_outpath + "/res/drawable/plop.txt", 'w')
 			tmpFile.write('plop\n')
 			tmpFile.flush()
 			tmpFile.close()
 		
 		if pkg_properties["ANDROID_MANIFEST"]!="":
 			debug.print_element("pkg", "AndroidManifest.xml", "<==", pkg_properties["ANDROID_MANIFEST"])
-			tools.copy_file(pkg_properties["ANDROID_MANIFEST"], self.get_staging_path(pkg_name) + "/AndroidManifest.xml", force=True)
+			tools.copy_file(pkg_properties["ANDROID_MANIFEST"], target_outpath + "/AndroidManifest.xml", force=True)
 		else:
 			debug.error("missing parameter 'ANDROID_MANIFEST' in the properties ... ")
 		
@@ -349,13 +349,13 @@ class Target(target.Target):
 		for res_source, res_dest in pkg_properties["ANDROID_RESOURCES"]:
 			if res_source == "":
 				continue
-			tools.copy_file(res_source , self.get_staging_path(pkg_name) + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
+			tools.copy_file(res_source , target_outpath + "/res/" + res_dest + "/" + os.path.basename(res_source), force=True)
 		
 		
 		# Doc :
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
-		tools.create_directory_of_file(self.get_staging_path(pkg_name) + "/src/noFile")
+		tools.create_directory_of_file(target_outpath + "/src/noFile")
 		androidToolPath = self.path_sdk + "/build-tools/"
 		# find android tool version
 		dirnames = tools.get_list_sub_path(androidToolPath)
@@ -368,15 +368,15 @@ class Target(target.Target):
 		if "ADMOD_ID" in pkg_properties:
 			adModResoucepath = " -S " + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
 		cmdLine = androidToolPath + "aapt p -f " \
-		          + "-M " + self.get_staging_path(pkg_name) + "/AndroidManifest.xml " \
-		          + "-F " + self.get_staging_path(pkg_name) + "/resources.res " \
+		          + "-M " + target_outpath + "/AndroidManifest.xml " \
+		          + "-F " + target_outpath + "/resources.res " \
 		          + "-I " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
-		          + "-S " + self.get_staging_path(pkg_name) + "/res/ " \
+		          + "-S " + target_outpath + "/res/ " \
 		          + adModResoucepath \
-		          + "-J " + self.get_staging_path(pkg_name) + "/src/ "
+		          + "-J " + target_outpath + "/src/ "
 		multiprocess.run_command(cmdLine)
 		
-		tools.create_directory_of_file(self.get_staging_path(pkg_name) + "/build/classes/noFile")
+		tools.create_directory_of_file(target_outpath + "/build/classes/noFile")
 		debug.print_element("pkg", "*.class", "<==", "*.java")
 		#generate android java files:
 		filesString=""
@@ -414,16 +414,16 @@ class Target(target.Target):
 			class_extern += elem
 		# create enpoint element :
 		cmdLine = "javac " \
-		          + "-d " + self.get_staging_path(pkg_name) + "/build/classes " \
+		          + "-d " + target_outpath + "/build/classes " \
 		          + "-classpath " + class_extern + " " \
-		          + self.get_staging_path(pkg_name) + "/src/R.java "
+		          + target_outpath + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".dex", "<==", "*.class")
 		cmdLine = androidToolPath + "dx " \
 		          + "--dex --no-strict " \
-		          + "--output=" + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + ".dex " \
-		          + self.get_staging_path(pkg_name) + "/build/classes/ "
+		          + "--output=" + target_outpath + "/build/" + pkg_name_application_name + ".dex " \
+		          + target_outpath + "/build/classes/ "
 		
 		if "ADMOD_ID" in pkg_properties:
 			cmdLine += self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar "
@@ -444,11 +444,11 @@ class Target(target.Target):
 		          + " -classpath " + self.path_sdk + "/tools/lib/sdklib.jar " \
 		          + builderDebug \
 		          + " com.android.sdklib.build.ApkBuilderMain " \
-		          + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
+		          + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 		          + " -u " \
-		          + " -z " + self.get_staging_path(pkg_name) + "/resources.res " \
-		          + " -f " + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + ".dex " \
-		          + " -rf " + self.get_staging_path(pkg_name) + "/data "
+		          + " -z " + target_outpath + "/resources.res " \
+		          + " -f " + target_outpath + "/build/" + pkg_name_application_name + ".dex " \
+		          + " -rf " + target_outpath + "/data "
 		multiprocess.run_command(cmdLine)
 		
 		# doc :
@@ -466,7 +466,7 @@ class Target(target.Target):
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + " -storepass Pass__AndroidDebugKey " \
 			    + " -keypass PassKey__AndroidDebugKey " \
-			    + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
+			    + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 			    + " alias__AndroidDebugKey"
 			multiprocess.run_command(cmdLine)
 			tmpFile = open("tmpPass.boo", 'w')
@@ -479,25 +479,25 @@ class Target(target.Target):
 			cmdLine = "jarsigner " \
 			    + " -keystore " + base_pkg_path + "/AndroidKey.jks " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
-			    + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
+			    + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 			    + " " + pkg_name_application_name
 			multiprocess.run_command(cmdLine)
 			cmdLine = "jarsigner " \
 			    + " -verify -verbose -certs " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
-			    + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk "
+			    + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk "
 			multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
-		tools.remove_file(self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk")
+		tools.remove_file(target_outpath + "/" + pkg_name_application_name + ".apk")
 		# verbose mode : -v
 		cmdLine = androidToolPath + "zipalign 4 " \
-		          + self.get_staging_path(pkg_name) + "/build/" + pkg_name_application_name + "-unalligned.apk " \
-		          + self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk "
+		          + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk " \
+		          + target_outpath + "/" + pkg_name_application_name + ".apk "
 		multiprocess.run_command(cmdLine)
 		
 		# copy file in the final stage :
-		tools.copy_file(self.get_staging_path(pkg_name) + "/" + pkg_name_application_name + ".apk",
+		tools.copy_file(target_outpath + "/" + pkg_name_application_name + ".apk",
 		                self.get_final_path() + "/" + pkg_name_application_name + ".apk",
 		                force=True)
 	
