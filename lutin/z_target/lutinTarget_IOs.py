@@ -83,29 +83,6 @@ class Target(target.Target):
 		self.pkg_path_license = "license"
 		
 	
-	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
-		#The package generated depend of the type of the element:
-		end_point_module_name = heritage_list.list_heritage[-1].name
-		module = self.get_module(end_point_module_name)
-		if module == None:
-			debug.error("can not create package ... ");
-		if module.get_type() == 'PREBUILD':
-			#nothing to do ...
-			return
-		if    module.get_type() == 'LIBRARY' \
-		   or module.get_type() == 'LIBRARY_DYNAMIC' \
-		   or module.get_type() == 'LIBRARY_STATIC':
-			debug.info("Can not create package for library");
-			return
-		if    module.get_type() == 'BINARY' \
-		   or module.get_type() == 'BINARY_STAND_ALONE':
-			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
-		if module.get_type() == 'BINARY_SHARED':
-			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
-		if module.get_type() == 'PACKAGE':
-			debug.info("Can not create package for package");
-	
-	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "'")
@@ -115,38 +92,29 @@ class Target(target.Target):
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
-		if static == True:
-			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data, pkg_name)
-		else:
-			target_outpath_data = os.path.join(target_outpath, self.pkg_path_data)
-		tools.create_directory_of_file(target_outpath_data)
-		debug.debug("heritage for " + str(pkg_name) + ":")
-		for heritage in heritage_list.list_heritage:
-			debug.debug("sub elements: " + str(heritage.name))
-			path_src = self.get_build_path_data(heritage.name)
-			debug.verbose("      has directory: " + path_src)
-			if os.path.isdir(path_src):
-				if static == True:
-					debug.debug("      need copy: " + path_src + " to " + target_outpath_data)
-					#copy all data:
-					tools.copy_anything(path_src, target_outpath_data, recursive=True, force_identical=True)
-				else:
-					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + target_outpath_data)
-					#copy all data:
-					tools.copy_anything(os.path.dirname(path_src), target_outpath_data, recursive=True, force_identical=True)
+		self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## copy binary files:
+		copy_list={}
 		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
 		tools.create_directory_of_file(target_outpath_bin)
 		path_src = self.get_build_file_bin(pkg_name)
 		path_dst = os.path.join(target_outpath_bin, pkg_name + self.suffix_binary)
 		debug.verbose("path_dst: " + str(path_dst))
-		tools.copy_file(path_src, path_dst)
+		tools.copy_file(path_src,
+		                path_dst,
+		                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		if self.pkg_path_bin != "":
+			# remove unneded files (NOT folder ...)
+			tools.clean_directory(target_outpath_bin, copy_list)
 		
 		## Create libraries:
+		copy_list={}
+		target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
 		if static == False:
 			#copy all shred libs...
-			target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
 			tools.create_directory_of_file(target_outpath_lib)
 			debug.verbose("libs for " + str(pkg_name) + ":")
 			for heritage in heritage_list.list_heritage:
@@ -157,7 +125,14 @@ class Target(target.Target):
 					debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
 					#copy all data:
 					# TODO : We can have a problem when writing over library files ...
-					tools.copy_file(file_src, os.path.join(target_outpath_lib, os.path.basename(file_src)) )
+					tools.copy_file(file_src,
+					                os.path.join(target_outpath_lib, os.path.basename(file_src)),
+					                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		if self.pkg_path_lib != "":
+			# remove unneded files (NOT folder ...)
+			tools.clean_directory(target_outpath_lib, copy_list)
 		
 		## Create icon:
 		if    "ICON" in pkg_properties.keys() \
@@ -184,111 +159,107 @@ class Target(target.Target):
 			debug.print_element("pkg", "Icon-Small@2x.png", "<==", pkg_properties["ICON"])
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small@2x.png"), 58, 58)
 		
+		## Create the info file:
 		debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
-		infoFile = os.path.join(target_outpath, "PkgInfo")
-		# Create the info file
-		tmpFile = open(infoFile, 'w')
-		tmpFile.write("APPL????")
-		tmpFile.flush()
-		tmpFile.close()
+		tools.file_write_data(os.path.join(target_outpath, "PkgInfo"),
+		                      "APPL????",
+		                      only_if_new=True)
 		
+		## Create Info.plist (in XML mode)
 		debug.print_element("pkg", "Info.plist", "<==", "Package properties")
 		# http://www.sandroid.org/imcross/#Deployment
-		dataFile  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		dataFile += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		dataFile += "<plist version=\"1.0\">\n"
-		dataFile += "		<dict>\n"
-		dataFile += "			<key>CFBundleDevelopmentRegion</key>\n"
-		dataFile += "			<string>en</string>\n"
-		dataFile += "			<key>CFBundleDisplayName</key>\n"
-		dataFile += "			<string>" + pkg_properties["NAME"] + "</string>\n"
-		dataFile += "			<key>CFBundleExecutable</key>\n"
-		dataFile += "			<string>" + pkg_name + "</string>\n"
-		dataFile += "			<key>CFBundleIdentifier</key>\n"
-		dataFile += "			<string>com." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
+		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+		data_file += "<plist version=\"1.0\">\n"
+		data_file += "		<dict>\n"
+		data_file += "			<key>CFBundleDevelopmentRegion</key>\n"
+		data_file += "			<string>en</string>\n"
+		data_file += "			<key>CFBundleDisplayName</key>\n"
+		data_file += "			<string>" + pkg_properties["NAME"] + "</string>\n"
+		data_file += "			<key>CFBundleExecutable</key>\n"
+		data_file += "			<string>" + pkg_name + "</string>\n"
+		data_file += "			<key>CFBundleIdentifier</key>\n"
+		data_file += "			<string>com." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
 		
-		dataFile += "			<key>CFBundleIconFiles</key>\n"
-		dataFile += "			<array>\n"
-		dataFile += "				<string>Icon-60@2x.png</string>\n"
-		dataFile += "				<string>Icon-76.png</string>\n"
-		dataFile += "				<string>Icon-76@2x.png</string>\n"
-		dataFile += "				<string>Icon-Small-40.png</string>\n"
-		dataFile += "				<string>Icon-Small-40@2x.png</string>\n"
-		dataFile += "				<string>Icon-Small.png</string>\n"
-		dataFile += "				<string>Icon-Small@2x.png</string>\n"
-		dataFile += "				<string>iTunesArtwork.png</string>\n"
-		dataFile += "				<string>iTunesArtwork@2x.png</string>\n"
-		dataFile += "			</array>\n"
+		data_file += "			<key>CFBundleIconFiles</key>\n"
+		data_file += "			<array>\n"
+		data_file += "				<string>Icon-60@2x.png</string>\n"
+		data_file += "				<string>Icon-76.png</string>\n"
+		data_file += "				<string>Icon-76@2x.png</string>\n"
+		data_file += "				<string>Icon-Small-40.png</string>\n"
+		data_file += "				<string>Icon-Small-40@2x.png</string>\n"
+		data_file += "				<string>Icon-Small.png</string>\n"
+		data_file += "				<string>Icon-Small@2x.png</string>\n"
+		data_file += "				<string>iTunesArtwork.png</string>\n"
+		data_file += "				<string>iTunesArtwork@2x.png</string>\n"
+		data_file += "			</array>\n"
 		
-		dataFile += "			<key>CFBundleInfoDictionaryVersion</key>\n"
-		dataFile += "			<string>6.0</string>\n"
-		dataFile += "			<key>CFBundleName</key>\n"
-		dataFile += "			<string>" + pkg_name + "</string>\n"
-		dataFile += "			<key>CFBundlePackageType</key>\n"
-		dataFile += "			<string>APPL</string>\n"
-		dataFile += "			<key>CFBundleSignature</key>\n"
-		dataFile += "			<string>????</string>\n"
-		dataFile += "			<key>CFBundleSupportedPlatforms</key>\n"
-		dataFile += "			<array>\n"
-		dataFile += "				<string>iPhoneSimulator</string>\n"
-		dataFile += "			</array>\n"
-		dataFile += "			\n"
-		dataFile += "			<key>CFBundleShortVersionString</key>\n"
-		dataFile += "			<string>"+pkg_properties["VERSION"]+"</string>\n"
-		dataFile += "			<key>CFBundleVersion</key>\n"
-		dataFile += "			<string>"+pkg_properties["VERSION_CODE"]+"</string>\n"
-		dataFile += "			\n"
-		dataFile += "			<key>CFBundleResourceSpecification</key>\n"
-		dataFile += "			<string>ResourceRules.plist</string>\n"
+		data_file += "			<key>CFBundleInfoDictionaryVersion</key>\n"
+		data_file += "			<string>6.0</string>\n"
+		data_file += "			<key>CFBundleName</key>\n"
+		data_file += "			<string>" + pkg_name + "</string>\n"
+		data_file += "			<key>CFBundlePackageType</key>\n"
+		data_file += "			<string>APPL</string>\n"
+		data_file += "			<key>CFBundleSignature</key>\n"
+		data_file += "			<string>????</string>\n"
+		data_file += "			<key>CFBundleSupportedPlatforms</key>\n"
+		data_file += "			<array>\n"
+		data_file += "				<string>iPhoneSimulator</string>\n"
+		data_file += "			</array>\n"
+		data_file += "			\n"
+		data_file += "			<key>CFBundleShortVersionString</key>\n"
+		data_file += "			<string>"+pkg_properties["VERSION"]+"</string>\n"
+		data_file += "			<key>CFBundleVersion</key>\n"
+		data_file += "			<string>"+pkg_properties["VERSION_CODE"]+"</string>\n"
+		data_file += "			\n"
+		data_file += "			<key>CFBundleResourceSpecification</key>\n"
+		data_file += "			<string>ResourceRules.plist</string>\n"
 		if self.sumulator == False:
-			dataFile += "			<key>LSRequiresIPhoneOS</key>\n"
-			dataFile += "			<true/>\n"
+			data_file += "			<key>LSRequiresIPhoneOS</key>\n"
+			data_file += "			<true/>\n"
 		else:
-			dataFile += "			<key>DTPlatformName</key>\n"
-			dataFile += "			<string>iphonesimulator</string>\n"
-			dataFile += "			<key>DTSDKName</key>\n"
-			dataFile += "			<string>iphonesimulator7.0</string>\n"
-		dataFile += "			\n"
-		dataFile += "			<key>UIDeviceFamily</key>\n"
-		dataFile += "			<array>\n"
-		dataFile += "				<integer>1</integer>\n"
-		dataFile += "				<integer>2</integer>\n"
-		dataFile += "			</array>\n"
-		dataFile += "			<key>UIRequiredDeviceCapabilities</key>\n"
-		dataFile += "			<array>\n"
-		dataFile += "				<string>armv7</string>\n"
-		dataFile += "			</array>\n"
-		dataFile += "			<key>UIStatusBarHidden</key>\n"
-		dataFile += "			<true/>\n"
-		dataFile += "			<key>UISupportedInterfaceOrientations</key>\n"
-		dataFile += "			<array>\n"
-		dataFile += "				<string>UIInterfaceOrientationPortrait</string>\n"
-		dataFile += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
-		dataFile += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
-		dataFile += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
-		dataFile += "			</array>\n"
-		dataFile += "			<key>UISupportedInterfaceOrientations~ipad</key>\n"
-		dataFile += "			<array>\n"
-		dataFile += "				<string>UIInterfaceOrientationPortrait</string>\n"
-		dataFile += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
-		dataFile += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
-		dataFile += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
-		dataFile += "			</array>\n"
-		dataFile += "    </dict>\n"
-		dataFile += "</plist>\n"
-		dataFile += "\n\n"
+			data_file += "			<key>DTPlatformName</key>\n"
+			data_file += "			<string>iphonesimulator</string>\n"
+			data_file += "			<key>DTSDKName</key>\n"
+			data_file += "			<string>iphonesimulator7.0</string>\n"
+		data_file += "			\n"
+		data_file += "			<key>UIDeviceFamily</key>\n"
+		data_file += "			<array>\n"
+		data_file += "				<integer>1</integer>\n"
+		data_file += "				<integer>2</integer>\n"
+		data_file += "			</array>\n"
+		data_file += "			<key>UIRequiredDeviceCapabilities</key>\n"
+		data_file += "			<array>\n"
+		data_file += "				<string>armv7</string>\n"
+		data_file += "			</array>\n"
+		data_file += "			<key>UIStatusBarHidden</key>\n"
+		data_file += "			<true/>\n"
+		data_file += "			<key>UISupportedInterfaceOrientations</key>\n"
+		data_file += "			<array>\n"
+		data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
+		data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
+		data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
+		data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
+		data_file += "			</array>\n"
+		data_file += "			<key>UISupportedInterfaceOrientations~ipad</key>\n"
+		data_file += "			<array>\n"
+		data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
+		data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
+		data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
+		data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
+		data_file += "			</array>\n"
+		data_file += "    </dict>\n"
+		data_file += "</plist>\n"
+		data_file += "\n\n"
+		tools.file_write_data(os.path.join(target_outpath, "Info.plist"),
+		                      data_file,
+		                      only_if_new=True)
 		
-		infoFile = os.path.join(target_outpath, "Info.plist")
-		# Create the info file
-		tmpFile = open(infoFile, 'w')
-		tmpFile.write(dataFile)
-		tmpFile.flush()
-		tmpFile.close()
 		"""
 		infoFile = self.get_staging_path(pkg_name) + "/" + pkg_name + "-Info.plist"
 		# Create the info file
 		tmpFile = open(infoFile, 'w')
-		tmpFile.write(dataFile)
+		tmpFile.write(data_file)
 		tmpFile.flush()
 		tmpFile.close()
 		cmdLine  = "builtin-infoPlistUtility "
@@ -319,57 +290,49 @@ class Target(target.Target):
 		#/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/projectName -o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app.dSYM
 			
 		debug.print_element("pkg", "ResourceRules.plist", "<==", "Resources autorisation")
-		dataFile  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		dataFile += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		dataFile += "<plist version=\"1.0\">\n"
-		dataFile += "	<dict>\n"
-		dataFile += "		<key>rules</key>\n"
-		dataFile += "		<dict>\n"
-		dataFile += "			<key>.*</key>\n"
-		dataFile += "			<true/>\n"
-		dataFile += "			<key>Info.plist</key>\n"
-		dataFile += "			<dict>\n"
-		dataFile += "				<key>omit</key>\n"
-		dataFile += "				<true/>\n"
-		dataFile += "				<key>weight</key>\n"
-		dataFile += "				<real>10</real>\n"
-		dataFile += "			</dict>\n"
-		dataFile += "			<key>ResourceRules.plist</key>\n"
-		dataFile += "			<dict>\n"
-		dataFile += "				<key>omit</key>\n"
-		dataFile += "				<true/>\n"
-		dataFile += "				<key>weight</key>\n"
-		dataFile += "				<real>100</real>\n"
-		dataFile += "			</dict>\n"
-		dataFile += "		</dict>\n"
-		dataFile += "	</dict>\n"
-		dataFile += "</plist>\n"
-		dataFile += "\n\n"
-
-		infoFile = os.path.join(target_outpath, "ResourceRules.plist")
-		# Create the info file
-		tmpFile = open(infoFile, 'w')
-		tmpFile.write(dataFile)
-		tmpFile.flush()
-		tmpFile.close()
+		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+		data_file += "<plist version=\"1.0\">\n"
+		data_file += "	<dict>\n"
+		data_file += "		<key>rules</key>\n"
+		data_file += "		<dict>\n"
+		data_file += "			<key>.*</key>\n"
+		data_file += "			<true/>\n"
+		data_file += "			<key>Info.plist</key>\n"
+		data_file += "			<dict>\n"
+		data_file += "				<key>omit</key>\n"
+		data_file += "				<true/>\n"
+		data_file += "				<key>weight</key>\n"
+		data_file += "				<real>10</real>\n"
+		data_file += "			</dict>\n"
+		data_file += "			<key>ResourceRules.plist</key>\n"
+		data_file += "			<dict>\n"
+		data_file += "				<key>omit</key>\n"
+		data_file += "				<true/>\n"
+		data_file += "				<key>weight</key>\n"
+		data_file += "				<real>100</real>\n"
+		data_file += "			</dict>\n"
+		data_file += "		</dict>\n"
+		data_file += "	</dict>\n"
+		data_file += "</plist>\n"
+		data_file += "\n\n"
+		tools.file_write_data(os.path.join(target_outpath, "ResourceRules.plist"),
+		                      data_file,
+		                      only_if_new=True)
 
 		debug.print_element("pkg", "Entitlements.plist", "<==", "application mode")
-		dataFile  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		dataFile += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		dataFile += "<plist version=\"1.0\">\n"
-		dataFile += "	<dict>\n"
-		dataFile += "		<key>get-task-allow</key>\n"
-		dataFile += "		<true/>\n"
-		dataFile += "    </dict>\n"
-		dataFile += "</plist>\n"
-		dataFile += "\n\n"
-
-		infoFile = os.path.join(target_outpath, "Entitlements.plist")
-		# Create the info file
-		tmpFile = open(infoFile, 'w')
-		tmpFile.write(dataFile)
-		tmpFile.flush()
-		tmpFile.close()
+		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+		data_file += "<plist version=\"1.0\">\n"
+		data_file += "	<dict>\n"
+		data_file += "		<key>get-task-allow</key>\n"
+		data_file += "		<true/>\n"
+		data_file += "    </dict>\n"
+		data_file += "</plist>\n"
+		data_file += "\n\n"
+		tools.file_write_data(os.path.join(target_outpath, "Entitlements.plist"),
+		                      data_file,
+		                      only_if_new=True)
 
 		# Simulateur path :
 		#~/Library/Application\ Support/iPhone\ Simulator/7.0.3/Applications/

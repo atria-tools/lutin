@@ -494,7 +494,81 @@ class Target:
 		else:
 			self.action_on_state[name_of_state].append([level, name, action])
 	
+	##
+	## @brief Create a package/bundle for the platform.
+	## @param[in] pkg_name Package Name (generic name)
+	## @param[in] pkg_properties Property of the package
+	## @param[in] base_pkg_path Base path of the package
+	## @param[in] heritage_list List of dependency of the package
+	## @param[in] static The package is build in static mode
+	##
+	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
+		#The package generated depend of the type of the element:
+		end_point_module_name = heritage_list.list_heritage[-1].name
+		module = self.get_module(end_point_module_name)
+		if module == None:
+			debug.error("can not create package ... ");
+		if module.get_type() == 'PREBUILD':
+			#nothing to do ...
+			return
+		if    module.get_type() == 'LIBRARY' \
+		   or module.get_type() == 'LIBRARY_DYNAMIC' \
+		   or module.get_type() == 'LIBRARY_STATIC':
+			debug.info("Can not create package for library");
+			return
+		if    module.get_type() == 'BINARY' \
+		   or module.get_type() == 'BINARY_STAND_ALONE':
+			self.make_package_generic_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
+		if module.get_type() == 'BINARY_SHARED':
+			self.make_package_generic_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
+		if module.get_type() == 'PACKAGE':
+			debug.info("Can not create package for package");
+			return
+		return
 	
+	##
+	## @brief Create a generic tree of the shared data for each platform
+	## @param[in] path_package Path of the basic install folder of the application
+	## @param[in] pkg_name Package Name (generic name)
+	## @param[in] heritage_list List of dependency of the package
+	## @param[in] static The package is build in static mode
+	##
+	def make_package_binary_data(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
+		target_shared_path = os.path.join(path_package, self.pkg_path_data)
+		if static == True:
+			target_outpath_data = os.path.join(target_shared_path, pkg_name)
+		else:
+			target_outpath_data = target_shared_path
+		tools.create_directory_of_file(target_outpath_data)
+		# prepare list of copy files
+		copy_list={}
+		debug.debug("heritage for " + str(pkg_name) + ":")
+		for heritage in heritage_list.list_heritage:
+			debug.debug("sub elements: " + str(heritage.name))
+			path_src = self.get_build_path_data(heritage.name)
+			debug.verbose("      has directory: " + path_src)
+			if os.path.isdir(path_src):
+				if static == True:
+					debug.debug("      need copy: " + path_src + " to " + target_outpath_data)
+					#copy all data:
+					tools.copy_anything(path_src,
+					                    target_outpath_data,
+					                    recursive=True,
+					                    force_identical=True,
+					                    in_list=copy_list)
+				else:
+					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + target_outpath_data)
+					#copy all data:
+					tools.copy_anything(os.path.dirname(path_src),
+					                    target_outpath_data,
+					                    recursive=True,
+					                    force_identical=True,
+					                    in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		# remove unneded files (NOT folder ...)
+		tools.clean_directory(target_shared_path, copy_list)
+		
 	
 	def generate_list_separate_coma(self, list):
 		result = ""

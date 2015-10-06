@@ -68,7 +68,18 @@ def file_read_data(path, binary=False):
 	file.close()
 	return data_file
 
-def file_write_data(path, data):
+##
+## @brief Write data in a specific path.
+## @param[in] path Path of the data might be written.
+## @param[in] data Data To write in the file.
+## @param[in] only_if_new (default: False) Write data only if data is different.
+##
+def file_write_data(path, data, only_if_new=False):
+	if only_if_new == True:
+		old_data = file_read_data(path)
+		if old_data == data:
+			return
+	#real write of data:
 	file = open(path, "w")
 	file.write(data)
 	file.close()
