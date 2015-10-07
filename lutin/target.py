@@ -125,6 +125,15 @@ class Target:
 		self.sysroot=""
 		
 		self.action_on_state={}
+		
+		# set some default package path
+		self.pkg_path_version_file = "version.txt"
+		self.pkg_path_maintainer_file = "maintainer.txt"
+		self.pkg_path_application_name_file = "appl_name.txt"
+		self.pkg_path_application_description_file = "appl_description.txt"
+		self.pkg_path_readme_file = "readme.txt"
+		self.pkg_path_change_log_file = "changelog.txt"
+		
 	
 	def update_path_tree(self):
 		self.path_out = os.path.join("out", self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
@@ -231,6 +240,7 @@ class Target:
 			1 : destination file
 			2 : dependence files module (*.d)
 	"""
+	# TODO : Remove this it is urgent ...
 	def generate_file(self,
 	                  binary_name,
 	                  module_name,
@@ -536,10 +546,10 @@ class Target:
 	def make_package_binary_data(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
 		target_shared_path = os.path.join(path_package, self.pkg_path_data)
 		if static == True:
-			target_outpath_data = os.path.join(target_shared_path, pkg_name)
+			path_package_data = os.path.join(target_shared_path, pkg_name)
 		else:
-			target_outpath_data = target_shared_path
-		tools.create_directory_of_file(target_outpath_data)
+			path_package_data = target_shared_path
+		tools.create_directory_of_file(path_package_data)
 		# prepare list of copy files
 		copy_list={}
 		debug.debug("heritage for " + str(pkg_name) + ":")
@@ -549,18 +559,18 @@ class Target:
 			debug.verbose("      has directory: " + path_src)
 			if os.path.isdir(path_src):
 				if static == True:
-					debug.debug("      need copy: " + path_src + " to " + target_outpath_data)
+					debug.debug("      need copy: " + path_src + " to " + path_package_data)
 					#copy all data:
 					tools.copy_anything(path_src,
-					                    target_outpath_data,
+					                    path_package_data,
 					                    recursive=True,
 					                    force_identical=True,
 					                    in_list=copy_list)
 				else:
-					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + target_outpath_data)
+					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + path_package_data)
 					#copy all data:
 					tools.copy_anything(os.path.dirname(path_src),
-					                    target_outpath_data,
+					                    path_package_data,
 					                    recursive=True,
 					                    force_identical=True,
 					                    in_list=copy_list)
@@ -568,8 +578,127 @@ class Target:
 		tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
 		tools.clean_directory(target_shared_path, copy_list)
-		
 	
+	##
+	## @brief Create a generic tree of the binary folder
+	## @param[in] path_package Path of the basic install folder of the application
+	## @param[in] pkg_name Package Name (generic name)
+	## @param[in] heritage_list List of dependency of the package
+	## @param[in] static The package is build in static mode
+	##
+	def make_package_binary_bin(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
+		copy_list={}
+		path_package_bin = os.path.join(path_package, self.pkg_path_bin)
+		tools.create_directory_of_file(path_package_bin)
+		path_src = self.get_build_file_bin(pkg_name)
+		path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary)
+		debug.verbose("path_dst: " + str(path_dst))
+		tools.copy_file(path_src,
+		                path_dst,
+		                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		if self.pkg_path_bin != "":
+			# remove unneded files (NOT folder ...)
+			tools.clean_directory(path_package_bin, copy_list)
+	
+	##
+	## @brief Create a generic tree of the library folder
+	## @param[in] path_package Path of the basic install folder of the application
+	## @param[in] pkg_name Package Name (generic name)
+	## @param[in] heritage_list List of dependency of the package
+	## @param[in] static The package is build in static mode
+	##
+	def make_package_binary_lib(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
+		copy_list={}
+		path_package_lib = os.path.join(path_package, self.pkg_path_lib)
+		if static == False:
+			#copy all shred libs...
+			tools.create_directory_of_file(path_package_lib)
+			debug.verbose("libs for " + str(pkg_name) + ":")
+			for heritage in heritage_list.list_heritage:
+				debug.debug("sub elements: " + str(heritage.name))
+				file_src = self.get_build_file_dynamic(heritage.name)
+				debug.verbose("      has directory: " + file_src)
+				if os.path.isfile(file_src):
+					debug.debug("      need copy: " + file_src + " to " + path_package_lib)
+					#copy all data:
+					# TODO : We can have a problem when writing over library files ...
+					tools.copy_file(file_src,
+					                os.path.join(path_package_lib, os.path.basename(file_src)),
+					                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		if self.pkg_path_lib != "":
+			# remove unneded files (NOT folder ...)
+			tools.clean_directory(path_package_lib, copy_list)
+	
+	
+	def make_package_generic_files(self, path_package, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
+		## Create version file:
+		tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
+		                      pkg_properties["VERSION"],
+		                      only_if_new=True)
+		
+		## Create maintainer file:
+		tools.file_write_data(os.path.join(path_package, self.pkg_path_maintainer_file),
+		                      self.generate_list_separate_coma(pkg_properties["MAINTAINER"]),
+		                      only_if_new=True)
+		
+		## Create appl_name file:
+		tools.file_write_data(os.path.join(path_package, self.pkg_path_application_name_file),
+		                      "en_EN:" + pkg_properties["NAME"],
+		                      only_if_new=True)
+		
+		## Create appl_description file:
+		tools.file_write_data(os.path.join(path_package, self.pkg_path_application_description_file),
+		                      "en_EN:" + pkg_properties["DESCRIPTION"],
+		                      only_if_new=True)
+		
+		## Create Readme file:
+		readme_file_dest = os.path.join(path_package, self.pkg_path_readme_file)
+		if os.path.exists(os.path.join(base_pkg_path, "os-Linux/README"))==True:
+			tools.copy_file(os.path.join(base_pkg_path, "os-Linux/README"), readme_file_dest)
+		elif os.path.exists(os.path.join(base_pkg_path, "README"))==True:
+			tools.copy_file(os.path.join(base_pkg_path, "README"), readme_file_dest)
+		elif os.path.exists(os.path.join(base_pkg_path, "README.md"))==True:
+			tools.copy_file(os.path.join(base_pkg_path, "README.md"), readme_file_dest)
+		else:
+			debug.info("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
+			tools.file_write_data(readme_file_dest,
+			                      "No documentation for " + pkg_name + "\n",
+			                      only_if_new=True)
+		
+		## Create licence file:
+		"""
+		# TODO ...
+		license_file_dest = os.path.join(path_package, self.pkg_path_license, pkg_name + ".txt")
+		tools.create_directory_of_file(license_file_dest)
+		if os.path.exists(base_pkg_path + "/license.txt")==True:
+			tools.copy_file(base_pkg_path + "/license.txt", license_file_dest)
+		else:
+			debug.info("no file 'license.txt' ==> generate an empty one")
+			tmpFile = open(license_file_dest, 'w')
+			tools.file_write_data(license_file_dest,
+			                      "No license define by the developper for " + pkg_name + "\n",
+			                      only_if_new=True)
+		"""
+		
+		## Create changeLog file:
+		change_log_file_dest = os.path.join(path_package, self.pkg_path_change_log_file)
+		if os.path.exists(os.path.join(base_pkg_path, "changelog")) == True:
+			tools.copy_file(os.path.join(base_pkg_path, "changelog"), change_log_file_dest)
+		else:
+			debug.info("no file 'changelog' ==> generate an empty one")
+			tools.file_write_data(change_log_file_dest,
+			                      "No changelog data " + pkg_name + "\n",
+			                      only_if_new=True)
+	
+	##
+	## @brief convert a s list of string in a string separated by a ","
+	## @param[in] list List of element to transform
+	## @return The requested string
+	##
 	def generate_list_separate_coma(self, list):
 		result = ""
 		fistTime = True
@@ -582,12 +711,12 @@ class Target:
 		return result
 
 
-targetList=[]
+target_list=[]
 __start_target_name="lutinTarget_"
 
 
 def import_path(path):
-	global targetList
+	global target_list
 	matches = []
 	debug.debug('TARGET: Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
@@ -600,16 +729,16 @@ def import_path(path):
 			targetName = filename.replace('.py', '')
 			targetName = targetName.replace(__start_target_name, '')
 			debug.debug("TARGET:     integrate module: '" + targetName + "' from '" + os.path.join(root, filename) + "'")
-			targetList.append([targetName,os.path.join(root, filename)])
+			target_list.append([targetName,os.path.join(root, filename)])
 
 
 def load_target(name, config):
-	global targetList
+	global target_list
 	debug.debug("load target: " + name)
-	if len(targetList) == 0:
+	if len(target_list) == 0:
 		debug.error("No target to compile !!!")
-	debug.debug("list target: " + str(targetList))
-	for mod in targetList:
+	debug.debug("list target: " + str(target_list))
+	for mod in target_list:
 		if mod[0] == name:
 			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
 			sys.path.append(os.path.dirname(mod[1]))
@@ -621,16 +750,16 @@ def load_target(name, config):
 	raise KeyError("No entry for : " + name)
 
 def list_all_target():
-	global targetList
+	global target_list
 	tmpListName = []
-	for mod in targetList:
+	for mod in target_list:
 		tmpListName.append(mod[0])
 	return tmpListName
 
 def list_all_target_with_desc():
-	global targetList
+	global target_list
 	tmpList = []
-	for mod in targetList:
+	for mod in target_list:
 		sys.path.append(os.path.dirname(mod[1]))
 		theTarget = __import__(__start_target_name + mod[0])
 		try:

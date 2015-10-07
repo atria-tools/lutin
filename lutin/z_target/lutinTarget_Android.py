@@ -217,7 +217,6 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "' v"+pkg_properties["VERSION"])
 		debug.debug("------------------------------------------------------------------------")
-		
 		#output path
 		target_outpath = self.get_staging_path(pkg_name)
 		tools.create_directory_of_file(target_outpath)
@@ -228,7 +227,7 @@ class Target(target.Target):
 		## copy binary files
 		# in Android Package we have no binary element, only shared object ... (and java start file)
 		
-		## Create libraries
+		## Create libraries (special case of Android...)
 		copy_list={}
 		target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
 		tools.create_directory_of_file(target_outpath_lib)
@@ -260,15 +259,19 @@ class Target(target.Target):
 			# remove unneded files (NOT folder ...)
 			tools.clean_directory(target_outpath_lib, copy_list)
 		
+		## Create generic files:
+		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
+		
+		## create specific android project (local)
 		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
 		# FINAL_path_JAVA_PROJECT
 		self.path_java_project = os.path.join(target_outpath,
-		                                    "src",
-		                                    pkg_properties["COMPAGNY_TYPE"],
-		                                    pkg_properties["COMPAGNY_NAME2"],
-		                                    pkg_name_application_name)
+		                                      "src",
+		                                      pkg_properties["COMPAGNY_TYPE"],
+		                                      pkg_properties["COMPAGNY_NAME2"],
+		                                      pkg_name_application_name)
 		#FINAL_FILE_ABSTRACTION
 		self.file_final_abstraction = os.path.join(self.path_java_project, pkg_name_application_name + ".java")
 		
@@ -302,7 +305,7 @@ class Target(target.Target):
 		else:
 			debug.error("missing parameter 'ANDROID_MANIFEST' in the properties ... ")
 		
-		#add properties on wallpaper : 
+		#add properties on wallpaper :
 		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", key, title, summary, [["key","value display"],["key2","value display 2"]])
 		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", "testpattern", "Select test pattern", "Choose which test pattern to display", [["key","value display"],["key2","value display 2"]]])
 		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])

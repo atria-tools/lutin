@@ -85,99 +85,13 @@ class Target(target.Target):
 		self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## copy binary files:
-		copy_list={}
-		target_outpath_bin = os.path.join(target_outpath, self.pkg_path_bin)
-		tools.create_directory_of_file(target_outpath_bin)
-		path_src = self.get_build_file_bin(pkg_name)
-		path_dst = os.path.join(target_outpath_bin, pkg_name + self.suffix_binary)
-		debug.verbose("path_dst: " + str(path_dst))
-		tools.copy_file(path_src,
-		                path_dst,
-		                in_list=copy_list)
-		#real copy files
-		tools.copy_list(copy_list)
-		if self.pkg_path_bin != "":
-			# remove unneded files (NOT folder ...)
-			tools.clean_directory(target_outpath_bin, copy_list)
+		self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create libraries:
-		copy_list={}
-		target_outpath_lib = os.path.join(target_outpath, self.pkg_path_lib)
-		if static == False:
-			#copy all shred libs...
-			tools.create_directory_of_file(target_outpath_lib)
-			debug.verbose("libs for " + str(pkg_name) + ":")
-			for heritage in heritage_list.list_heritage:
-				debug.debug("sub elements: " + str(heritage.name))
-				file_src = self.get_build_file_dynamic(heritage.name)
-				debug.verbose("      has directory: " + file_src)
-				if os.path.isfile(file_src):
-					debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
-					#copy all data:
-					# TODO : We can have a problem when writing over library files ...
-					tools.copy_file(file_src,
-					                os.path.join(target_outpath_lib, os.path.basename(file_src)),
-					                in_list=copy_list)
-		#real copy files
-		tools.copy_list(copy_list)
-		if self.pkg_path_lib != "":
-			# remove unneded files (NOT folder ...)
-			tools.clean_directory(target_outpath_lib, copy_list)
+		self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
-		## Create version file:
-		tools.file_write_data(os.path.join(target_outpath, "version.txt"),
-		                      pkg_properties["VERSION"],
-		                      only_if_new=True)
-		
-		## Create maintainer file:
-		tools.file_write_data(os.path.join(target_outpath, "maintainer.txt"),
-		                      self.generate_list_separate_coma(pkg_properties["MAINTAINER"]),
-		                      only_if_new=True)
-		
-		## Create appl_name file:
-		tools.file_write_data(os.path.join(target_outpath, "appl_name.txt"),
-		                      "en_EN:" + pkg_properties["NAME"],
-		                      only_if_new=True)
-		
-		## Create appl_description file:
-		tools.file_write_data(os.path.join(target_outpath, "appl_description.txt"),
-		                      "en_EN:" + pkg_properties["DESCRIPTION"],
-		                      only_if_new=True)
-		
-		## Create Readme file:
-		readme_file_dest = os.path.join(target_outpath, "readme.txt")
-		if os.path.exists(base_pkg_path + "/os-Linux/README")==True:
-			tools.copy_file(base_pkg_path + "/os-Linux/README", readme_file_dest)
-		elif os.path.exists(base_pkg_path + "/README")==True:
-			tools.copy_file(base_pkg_path + "/README", readme_file_dest)
-		elif os.path.exists(base_pkg_path + "/README.md")==True:
-			tools.copy_file(base_pkg_path + "/README.md", readme_file_dest)
-		else:
-			debug.info("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
-			tools.file_write_data(readme_file_dest,
-			                      "No documentation for " + pkg_name + "\n",
-			                      only_if_new=True)
-		
-		## Create licence file:
-		license_file_dest = os.path.join(target_outpath, self.pkg_path_license, pkg_name + ".txt")
-		tools.create_directory_of_file(license_file_dest)
-		if os.path.exists(base_pkg_path + "/license.txt")==True:
-			tools.copy_file(base_pkg_path + "/license.txt", license_file_dest)
-		else:
-			debug.info("no file 'license.txt' ==> generate an empty one")
-			tools.file_write_data(license_file_dest,
-			                      "No license define by the developper for " + pkg_name + "\n",
-			                      only_if_new=True)
-		
-		## Create changeLog file:
-		change_log_file_dest = target_outpath + "/changelog.txt"
-		if os.path.exists(base_pkg_path + "/changelog") == True:
-			tools.copy_file(base_pkg_path + "/changelog", change_log_file_dest)
-		else:
-			debug.info("no file 'changelog' ==> generate an empty one")
-			tools.file_write_data(change_log_file_dest,
-			                      "No changelog data " + pkg_name + "\n",
-			                      only_if_new=True)
+		## Create generic files:
+		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
 		
 		## create the package:
 		debug.debug("package : " + self.get_staging_path(pkg_name) + "/" + pkg_name + ".app.pkg")
