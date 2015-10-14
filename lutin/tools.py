@@ -68,6 +68,17 @@ def file_read_data(path, binary=False):
 	file.close()
 	return data_file
 
+def version_to_string(version):
+	version_ID = ""
+	for id in version:
+		if len(version_ID) != 0:
+			if type(id) == str:
+				version_ID += "-"
+			else:
+				version_ID += "."
+		version_ID += str(id)
+	return version_ID
+
 ##
 ## @brief Write data in a specific path.
 ## @param[in] path Path of the data might be written.

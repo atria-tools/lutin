@@ -19,6 +19,7 @@ from . import heritage
 from . import builder
 from . import multiprocess
 from . import image
+from . import license
 
 class Module:
 	
@@ -31,15 +32,15 @@ class Module:
 	## 		- files
 	## 		- ...
 	##
-	def __init__(self, file, moduleName, moduleType):
+	def __init__(self, file, module_name, moduleType):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
-		debug.verbose("Create a new module : '" + moduleName + "' TYPE=" + moduleType)
+		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + moduleType)
 		self.origin_file=''
 		self.origin_path=''
 		# type of the module:
 		self.type='LIBRARY'
 		# Name of the module
-		self.name=moduleName
+		self.name=module_name
 		# Dependency list:
 		self.depends = []
 		# Dependency list (optionnal module):
@@ -75,7 +76,7 @@ class Module:
 		   or moduleType == 'PREBUILD':
 			self.type=moduleType
 		else :
-			debug.error('for module "%s"' %moduleName)
+			debug.error('for module "%s"' %module_name)
 			debug.error('    ==> error : "%s" ' %moduleType)
 			raise 'Input value error'
 		self.origin_file = file;
@@ -90,7 +91,7 @@ class Module:
 		                      "SECTION" : set([]),
 		                      "PRIORITY" : set(""),
 		                      "DESCRIPTION" : set(""),
-		                      "VERSION" : set("0.0.0"),
+		                      "VERSION" : [0,0,0],
 		                      "VERSION_CODE" : "",
 		                      "NAME" : set("no-name"), # name of the application
 		                      "ANDROID_MANIFEST" : "", # By default generate the manifest
@@ -98,8 +99,28 @@ class Module:
 		                      "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
 		                      "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
 		                      "RIGHT" : [],
+		                      "LICENSE" : "", # by default: no license
 		                      "ADMOD_POSITION" : "top"
 		                     }
+		self.package_prop_default = { "COMPAGNY_TYPE" : True,
+		                              "COMPAGNY_NAME" : True,
+		                              "COMPAGNY_NAME2" : True,
+		                              "MAINTAINER" : True,
+		                              #"ICON" : True,
+		                              "SECTION" : True,
+		                              "PRIORITY" : True,
+		                              "DESCRIPTION" : True,
+		                              "VERSION" : True,
+		                              "VERSION_CODE" : True,
+		                              "NAME" : True,
+		                              "ANDROID_MANIFEST" : True,
+		                              "ANDROID_RESOURCES" : True,
+		                              "ANDROID_APPL_TYPE" : True,
+		                              "ANDROID_WALLPAPER_PROPERTIES" : True,
+		                              "RIGHT" : True,
+		                              "LICENSE" : True,
+		                              "ADMOD_POSITION" : True
+		                            }
 		self.sub_heritage_list = None
 	
 	def get_type(self):
@@ -460,7 +481,6 @@ class Module:
 						self.local_heritage.add_lib_static(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.a'")
-			"""
 			if    self.type == 'LIBRARY' \
 			   or self.type == 'LIBRARY_DYNAMIC':
 				try:
@@ -476,7 +496,6 @@ class Module:
 						self.local_heritage.add_lib_dynamic(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.so'/'.dynlib'/'.dll'")
-			"""
 			try:
 				tmp_builder = builder.get_builder_with_output("jar");
 				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
@@ -591,10 +610,19 @@ class Module:
 		# -- install header                                 --
 		# ----------------------------------------------------
 		debug.debug("install headers ...")
+		copy_list={}
+		include_path = target.get_build_path_include(self.name)
 		for file in self.header:
-			src_path = os.path.join(self.origin_path, file)
-			dst_path = os.path.join(target.get_build_path_include(self.name), file)
-			tools.copy_file(src_path, dst_path, force_identical=True);
+			src_path = os.path.join(self.origin_path, file["src"])
+			dst_path = os.path.join(include_path, file["dst"])
+			tools.copy_file(src_path,
+			                dst_path,
+			                force_identical=True,
+			                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		# remove unneded files (NOT folder ...)
+		tools.clean_directory(include_path, copy_list)
 		
 		# ----------------------------------------------------
 		# -- install data                                   --
@@ -664,13 +692,17 @@ class Module:
 		# add elements...
 		self.append_to_internal_list(listout[module], list, order)
 	
-	def append_to_internal_list(self, listout, list, order=False):
-		if type(list) == type(str()):
-			self.append_and_check(listout, list, order)
-		else:
+	def append_to_internal_list(self, out_list, in_list, order=False):
+		if type(in_list) == str:
+			self.append_and_check(out_list, in_list, order)
+		elif type(in_list) == list:
 			# mulyiple imput in the list ...
-			for elem in list:
-				self.append_and_check(listout, elem, order)
+			for elem in in_list:
+				self.append_and_check(out_list, elem, order)
+		elif type(in_list) == dict:
+			self.append_and_check(out_list, in_list, order)
+		else:
+			debug.warning("can not add in list other than {list/dict/str} : " + str(type(in_list)))
 	
 	def add_module_depend(self, list):
 		self.append_to_internal_list(self.depends, list, True)
@@ -688,48 +720,58 @@ class Module:
 	def compile_flags(self, type, list):
 		self.append_to_internal_list2(self.flags["local"], type, list)
 	
-	def compile_version_XX(self, version, same_as_api=True, gnu=False):
-		cpp_version_list = [1999, 2003, 2011, 2014, 2017]
-		if version not in cpp_version_list:
-			debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
-		# select API version:
-		api_version = 1999
-		if same_as_api == True:
-			api_version = version
-		self.flags["local"]["c++-version"] = { "version":version,
-		                                       "gnu":gnu
-		                                     }
-		self.flags["export"]["c++-version"] = api_version
-		if gnu == True and same_as_api == True:
-			debug.warning("Can not propagate the gnu extention of the CPP vesion for API");
-	
-	def compile_version_CC(self, version, same_as_api=True, gnu=False):
-		c_version_list = [1989, 1990, 1999, 2011]
-		if version not in c_version_list:
-			debug.error("can not select C version : " + str(version) + " not in " + str(c_version_list))
-		# select API version:
-		api_version = 1999
-		if same_as_api == True:
-			api_version = version
-		self.flags["local"]["c-version"] = { "version":version,
-		                                     "gnu":gnu
-		                                   }
-		self.flags["export"]["c-version"] = api_version
-		if gnu == True and same_as_api == True:
-			debug.warning("Can not propagate the gnu extention of the C vesion for API");
+	def compile_version(self, compilator_type, version, same_as_api=True, gnu=False):
+		if    compilator_type == "c++" \
+		   or compilator_type == "C++":
+			cpp_version_list = [1999, 2003, 2011, 2014, 2017]
+			if version not in cpp_version_list:
+				debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
+			# select API version:
+			api_version = 1999
+			if same_as_api == True:
+				api_version = version
+			self.flags["local"]["c++-version"] = { "version":version,
+			                                       "gnu":gnu
+			                                     }
+			self.flags["export"]["c++-version"] = api_version
+			if gnu == True and same_as_api == True:
+				debug.warning("Can not propagate the gnu extention of the CPP vesion for API");
+		elif    compilator_type == "c" \
+		     or compilator_type == "C":
+			c_version_list = [1989, 1990, 1999, 2011]
+			if version not in c_version_list:
+				debug.error("can not select C version : " + str(version) + " not in " + str(c_version_list))
+			# select API version:
+			api_version = 1999
+			if same_as_api == True:
+				api_version = version
+			self.flags["local"]["c-version"] = { "version":version,
+			                                     "gnu":gnu
+			                                   }
+			self.flags["export"]["c-version"] = api_version
+			if gnu == True and same_as_api == True:
+				debug.warning("Can not propagate the gnu extention of the C vesion for API");
+		else:
+			debug.warning("Can not set version of compilator:" + str(compilator_type));
 	
 	def add_src_file(self, list):
 		self.append_to_internal_list(self.src, list, True)
 	
-	def add_header_file(self, list, rm_path=""):
-		if rm_path != "":
-			debug.warning("remove the basic path ...")
-		self.append_to_internal_list(self.header, list, True)
+	def add_header_file(self, list, destination_path=None):
+		if destination_path != None:
+			debug.verbose("Change destination PATH: " + str(destination_path))
+		new_list = []
+		for elem in list:
+			if destination_path != None:
+				new_list.append({"src":elem,
+				                 "dst":os.path.join(destination_path, os.path.basename(elem))})
+			else:
+				new_list.append({"src":elem,
+				                 "dst":elem})
+		self.append_to_internal_list(self.header, new_list, True)
 	
-	# TODO : Maybe do sothing with this ...
 	def add_export_path(self, list, type='c'):
 		self.append_to_internal_list2(self.path["export"], type, list)
-	
 	
 	def copy_image(self, source, destination='', sizeX=-1, sizeY=-1):
 		self.image_to_copy.append([source, destination, sizeX, sizeY])
@@ -791,21 +833,26 @@ class Module:
 			#	edu : Education
 			#	pri : Private
 			#	museum : ...
-			if value not in ["com", "net", "org", "gov", "mil", "edu", "pri", "museum"]:
+			if value not in ["", "com", "net", "org", "gov", "mil", "edu", "pri", "museum"]:
 				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
 			else:
 				self.package_prop[variable] = value
+				self.package_prop_default[variable] = False
 		elif "COMPAGNY_NAME" == variable:
 			self.package_prop[variable] = value
+			self.package_prop_default[variable] = False
 			val2 = value.lower()
 			val2 = val2.replace(' ', '')
 			val2 = val2.replace('-', '')
 			val2 = val2.replace('_', '')
 			self.package_prop["COMPAGNY_NAME2"] = val2
+			self.package_prop_default["COMPAGNY_NAME2"] = False
 		elif "ICON" == variable:
 			self.package_prop[variable] = value
+			self.package_prop_default[variable] = False
 		elif "MAINTAINER" == variable:
 			self.package_prop[variable] = value
+			self.package_prop_default[variable] = False
 		elif "SECTION" == variable:
 			# project section : (must be separate by coma
 			#    refer to : http://packages.debian.org/sid/
@@ -818,6 +865,7 @@ class Module:
 			#        perl php python ruby science shells sound tex
 			#        text utils vcs video virtual web x11 xfce zope ...
 			self.package_prop[variable] = value
+			self.package_prop_default[variable] = False
 		elif "PRIORITY" == variable:
 			#list = ["required","important","standard","optional","extra"]
 			#if isinstance(value, list):
@@ -825,35 +873,33 @@ class Module:
 				debug.error("can not set the value for this Input : '" + variable + "' : '" + value + "'")
 			else:
 				self.package_prop[variable] = value
-		elif "DESCRIPTION" == variable:
+				self.package_prop_default[variable] = False
+		elif variable in ["DESCRIPTION",
+		                  "VERSION",
+		                  "VERSION_CODE",
+		                  "NAME",
+		                  "ANDROID_MANIFEST",
+		                  "ANDROID_JAVA_FILES",
+		                  "RIGHT",
+		                  "ANDROID_RESOURCES",
+		                  "ANDROID_APPL_TYPE",
+		                  "ADMOD_ID",
+		                  "APPLE_APPLICATION_IOS_ID",
+		                  "LICENSE"]:
 			self.package_prop[variable] = value
-		elif "VERSION" == variable:
-			self.package_prop[variable] = value
-		elif "VERSION_CODE" == variable:
-			self.package_prop[variable] = value
-		elif "NAME" == variable:
-			self.package_prop[variable] = value
-		elif "ANDROID_MANIFEST" == variable:
-			self.package_prop[variable] = value
-		elif "ANDROID_JAVA_FILES" == variable:
-			self.package_prop[variable] = value
-		elif "RIGHT" == variable:
-			self.package_prop[variable] = value
-		elif "ANDROID_RESOURCES" == variable:
-			self.package_prop[variable] = value
-		elif "ANDROID_APPL_TYPE" == variable:
-			self.package_prop[variable] = value
-		elif "ADMOD_ID" == variable:
-			self.package_prop[variable] = value
-		elif "APPLE_APPLICATION_IOS_ID" == variable:
-			self.package_prop[variable] = value
+			self.package_prop_default[variable] = False
 		elif "ADMOD_POSITION" == variable:
 			if value in ["top", "bottom"]:
 				self.package_prop[variable] = value
+				self.package_prop_default[variable] = False
 			else:
 				debug.error("not know pkg element : '" + variable + "' with value : '" + value + "' must be [top|bottom]")
 		else:
 			debug.error("not know pkg element : '" + variable + "'")
+	
+	def pkg_set_if_default(self, variable, value):
+		if self.package_prop_default[variable] == True:
+			self.pkg_set(variable, value)
 	
 	def pkg_add(self, variable, value):
 		if variable in self.package_prop:
@@ -882,11 +928,11 @@ class Module:
 
 
 
-moduleList=[]
+module_list=[]
 __start_module_name="lutin_"
 
 def import_path(path):
-	global moduleList
+	global module_list
 	matches = []
 	debug.debug('MODULE: Start find sub File : "%s"' %path)
 	for root, dirnames, filenames in os.walk(path):
@@ -896,54 +942,148 @@ def import_path(path):
 			debug.debug('Module:     Find a file : "%s"' %os.path.join(root, filename))
 			#matches.append(os.path.join(root, filename))
 			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
-			moduleName = filename.replace('.py', '')
-			moduleName = moduleName.replace(__start_module_name, '')
-			debug.debug("MODULE:     Integrate module: '" + moduleName + "' from '" + os.path.join(root, filename) + "'")
-			moduleList.append([moduleName,os.path.join(root, filename)])
+			module_name = filename.replace('.py', '')
+			module_name = module_name.replace(__start_module_name, '')
+			debug.debug("MODULE:     Integrate module: '" + module_name + "' from '" + os.path.join(root, filename) + "'")
+			module_list.append([module_name,os.path.join(root, filename)])
+	debug.verbose("New list module: ")
+	for mod in module_list:
+		debug.verbose("    " + str(mod[0]))
 
 def exist(target, name):
-	global moduleList
-	for mod in moduleList:
+	global module_list
+	for mod in module_list:
 		if mod[0] == name:
 			return True
 	return False
 
 def load_module(target, name):
-	global moduleList
-	for mod in moduleList:
+	global module_list
+	for mod in module_list:
 		if mod[0] == name:
 			sys.path.append(os.path.dirname(mod[1]))
 			debug.verbose("import module : '" + __start_module_name + name + "'")
-			theModule = __import__(__start_module_name + name)
-			#try:
-			tmpElement = theModule.create(target)
-			#except:
-			#tmpElement = None
-			#debug.warning(" no function 'create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
-			if (tmpElement == None) :
+			the_module_file = mod[1]
+			the_module = __import__(__start_module_name + name)
+			# get basic module properties:
+			property = get_module_option(the_module, name)
+			# configure the module:
+			if "create" in dir(the_module):
+				tmp_element = the_module.create(target, name)
+				if tmp_element != None:
+					# overwrite some package default property (if not set by user)
+					if property["compagny-type"] != None:
+						tmp_element.pkg_set_if_default("COMPAGNY_TYPE", property["compagny-type"])
+					if property["compagny-name"] != None:
+						tmp_element.pkg_set_if_default("COMPAGNY_NAME", property["compagny-name"])
+					if property["maintainer"] != None:
+						tmp_element.pkg_set_if_default("MAINTAINER", property["maintainer"])
+					if property["name"] != None:
+						tmp_element.pkg_set_if_default("NAME", property["name"])
+					if property["description"] != None:
+						tmp_element.pkg_set_if_default("DESCRIPTION", property["description"])
+					if property["license"] != None:
+						tmp_element.pkg_set_if_default("LICENSE", property["license"])
+					if property["version"] != None:
+						tmp_element.pkg_set_if_default("VERSION", property["version"])
+			else:
+				debug.warning(" no function 'create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
+				continue
+			"""
+			if property["type"] == "":
+				continue
+			# configure the module:
+			if "configure" in dir(the_module):
+				tmp_element = module.Module(the_module_file, name, property["type"], property)
+				ret = the_module.configure(target, tmp_element)
+				if ret == True:
+					debug.warning("configure done corectly : " + mod[0] + " from:'" + mod[1] + "'")
+				else:
+					debug.warning("configure NOT done corectly : " + mod[0] + " from:'" + mod[1] + "'")
+			else:
+				debug.warning(" no function 'configure' in the module : " + mod[0] + " from:'" + mod[1] + "'")
+				continue
+			"""
+			# check if create has been done corectly
+			if tmp_element == None:
 				debug.debug("Request load module '" + name + "' not define for this platform")
 			else:
-				target.add_module(tmpElement)
+				target.add_module(tmp_element)
 
 def list_all_module():
-	global moduleList
+	global module_list
 	tmpListName = []
-	for mod in moduleList:
+	for mod in module_list:
 		tmpListName.append(mod[0])
 	return tmpListName
 
 def list_all_module_with_desc():
-	global moduleList
+	global module_list
 	tmpList = []
-	for mod in moduleList:
+	for mod in module_list:
 		sys.path.append(os.path.dirname(mod[1]))
-		theModule = __import__("lutin_" + mod[0])
-		try:
-			tmpdesc = theModule.get_desc()
-			tmpList.append([mod[0], tmpdesc])
-		except:
-			debug.warning("has no naeme : " + mod[0])
-			tmpList.append([mod[0], ""])
+		the_module = __import__("lutin_" + mod[0])
+		tmpList.append(get_module_option(the_module, mod[0]))
 	return tmpList
+
+
+def get_module_option(the_module, name):
+	type = None
+	sub_type = None
+	description = None
+	license = None
+	compagny_type = None
+	compagny_name = None
+	maintainer = None
+	version = None
+	
+	if "get_type" in dir(the_module):
+		type = the_module.get_type()
+	else:
+		debug.debug(" fundtion get_type() must be provided in the module: " + name)
+	
+	if "get_sub_type" in dir(the_module):
+		sub_type = the_module.get_sub_type()
+	
+	if "get_desc" in dir(the_module):
+		description = the_module.get_desc()
+	
+	if "get_licence" in dir(the_module):
+		license = the_module.get_licence()
+	
+	if "get_compagny_type" in dir(the_module):
+		compagny_type = the_module.get_compagny_type()
+		#	com : Commercial
+		#	net : Network??
+		#	org : Organisation
+		#	gov : Governement
+		#	mil : Military
+		#	edu : Education
+		#	pri : Private
+		#	museum : ...
+		compagny_type_list = ["", "com", "net", "org", "gov", "mil", "edu", "pri", "museum"]
+		if compagny_type not in compagny_type_list:
+			debug.warning("[" + name + "] type of the company not normal: " + compagny_type + " not in " + str(compagny_type_list))
+	
+	if "get_compagny_name" in dir(the_module):
+		compagny_name = the_module.get_compagny_name()
+	
+	if "get_maintainer" in dir(the_module):
+		maintainer = the_module.get_maintainer()
+	
+	if "get_version" in dir(the_module):
+		version = the_module.get_version()
+	
+	return {
+	       "name":name,
+	       "description":description,
+	       "type":type,
+	       "sub-type":sub_type,
+	       "license":license,
+	       "compagny-type":compagny_type,
+	       "compagny-name":compagny_name,
+	       "maintainer":maintainer,
+	       "version":version
+	       }
 
 

@@ -637,7 +637,7 @@ class Target:
 	def make_package_generic_files(self, path_package, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
 		## Create version file:
 		tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
-		                      pkg_properties["VERSION"],
+		                      tools.version_to_string(pkg_properties["VERSION"]),
 		                      only_if_new=True)
 		
 		## Create maintainer file:
@@ -664,7 +664,7 @@ class Target:
 		elif os.path.exists(os.path.join(base_pkg_path, "README.md"))==True:
 			tools.copy_file(os.path.join(base_pkg_path, "README.md"), readme_file_dest)
 		else:
-			debug.info("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
+			debug.debug("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
 			tools.file_write_data(readme_file_dest,
 			                      "No documentation for " + pkg_name + "\n",
 			                      only_if_new=True)
@@ -689,7 +689,7 @@ class Target:
 		if os.path.exists(os.path.join(base_pkg_path, "changelog")) == True:
 			tools.copy_file(os.path.join(base_pkg_path, "changelog"), change_log_file_dest)
 		else:
-			debug.info("no file 'changelog' ==> generate an empty one")
+			debug.debug("no file 'changelog' ==> generate an empty one")
 			tools.file_write_data(change_log_file_dest,
 			                      "No changelog data " + pkg_name + "\n",
 			                      only_if_new=True)

@@ -19,12 +19,13 @@ import lutin.env as env
 import lutin.multiprocess as multiprocess
 
 myArgs = arguments.LutinArg()
-myArgs.add(arguments.ArgDefine("h", "help", desc="display this help"))
+myArgs.add(arguments.ArgDefine("h", "help", desc="Display this help"))
+myArgs.add(arguments.ArgDefine("H", "HELP", desc="Display this help (with all compleate information)"))
 myArgs.add_section("option", "Can be set one time in all case")
 myArgs.add(arguments.ArgDefine("v", "verbose", list=[["0","None"],["1","error"],["2","warning"],["3","info"],["4","debug"],["5","verbose"],["6","extreme_verbose"]], desc="display makefile debug level (verbose) default =2"))
-myArgs.add(arguments.ArgDefine("C", "color", desc="display makefile output in color"))
+myArgs.add(arguments.ArgDefine("C", "color", desc="Display makefile output in color"))
 myArgs.add(arguments.ArgDefine("B", "force-build", desc="Force the rebuild without checking the dependency"))
-myArgs.add(arguments.ArgDefine("P", "pretty", desc="print the debug has pretty display"))
+myArgs.add(arguments.ArgDefine("P", "pretty", desc="Print the debug has pretty display"))
 myArgs.add(arguments.ArgDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
 myArgs.add(arguments.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
 myArgs.add(arguments.ArgDefine("w", "warning", desc="Store warning in a file build file"))
@@ -32,15 +33,15 @@ myArgs.add(arguments.ArgDefine("w", "warning", desc="Store warning in a file bui
 myArgs.add_section("properties", "keep in the sequency of the cible")
 myArgs.add(arguments.ArgDefine("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'"))
 myArgs.add(arguments.ArgDefine("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)"))
-myArgs.add(arguments.ArgDefine("", "compilator-version", haveParam=True, desc="with travis we need to specify the name of the version if we want to compile with gcc 4.9 ==> --compilator-version=4.9"))
+myArgs.add(arguments.ArgDefine("", "compilator-version", haveParam=True, desc="With travis we need to specify the name of the version if we want to compile with gcc 4.9 ==> --compilator-version=4.9"))
 myArgs.add(arguments.ArgDefine("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)"))
 myArgs.add(arguments.ArgDefine("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile"))
 myArgs.add(arguments.ArgDefine("b", "bus", list=[["auto","Automatic choice"],["32","32 bits"],["64","64 bits"]], desc="Adressing size (Bus size)"))
 myArgs.add(arguments.ArgDefine("p", "package", desc="Disable the package generation (usefull when just compile for test on linux ...)"))
 myArgs.add(arguments.ArgDefine("g", "gcov", desc="Enable code coverage intrusion in code"))
-myArgs.add(arguments.ArgDefine("", "simulation", desc="simulater mode (availlable only for IOS)"))
-myArgs.add(arguments.ArgDefine("", "list-target", desc="list all availlables targets ==> for auto completion"))
-myArgs.add(arguments.ArgDefine("", "list-module", desc="list all availlables module ==> for auto completion"))
+myArgs.add(arguments.ArgDefine("", "simulation", desc="Simulater mode (availlable only for IOS)"))
+myArgs.add(arguments.ArgDefine("", "list-target", desc="List all availlables targets ==> for auto completion"))
+myArgs.add(arguments.ArgDefine("", "list-module", desc="List all availlables module ==> for auto completion"))
 
 myArgs.add_section("cible", "generate in order set")
 localArgument = myArgs.parse()
@@ -48,7 +49,7 @@ localArgument = myArgs.parse()
 """
 	display the help of this makefile
 """
-def usage():
+def usage(full=False):
 	color = debug.get_color_set()
 	# generic argument displayed : 
 	myArgs.display()
@@ -63,18 +64,85 @@ def usage():
 	print("			Parse all the code of the library with the gcov resolution")
 	listOfAllModule = module.list_all_module_with_desc()
 	for mod in listOfAllModule:
-		print("		" + color['green'] + mod[0] + color['default'])
-		if mod[1] != "":
-			print("			" + mod[1])
+		data_print = "		"
+		if full == False:
+			if    mod["type"][:6] == "BINARY":
+				data_print += color['blue']
+				if mod["sub-type"] == "":
+					data_print += "* "
+				elif mod["sub-type"] == "TEST":
+					data_print += "T "
+				elif mod["sub-type"] == "TOOLS":
+					data_print += "U "
+				elif mod["sub-type"] == "SAMPLE":
+					data_print += "S "
+				else:
+					data_print += "  "
+			elif mod["type"] == "PACKAGE":
+				data_print += color['red'] + "# "
+			elif    mod["type"][:7] == "LIBRARY":
+				data_print += color['yellow'] + "  "
+			else:
+				data_print += color['default'] + "  "
+		else:
+			data_print += color['green']
+		data_print += mod["name"] + color['default']
+		if full == False:
+			data_print += "\r\t\t\t\t\t\t\t"
+			if mod["license"] != "":
+				data_print += color['yellow'] + " [" + mod["license"] + "]" + color['default']
+			if mod["version"] != []:
+				version_ID = tools.version_to_string(mod["version"])
+				data_print += color['blue'] + " (" + version_ID + ")" + color['default']
+			"""
+			if     mod["compagny-type"] != "" \
+			   and mod["compagny-name"] != "":
+				data_print += color['purple'] + " " + mod["compagny-type"] + "/" + mod["compagny-name"] + color['default']
+			elif mod["compagny-name"] != "":
+				data_print += color['purple'] + " " + mod["compagny-name"] + color['default']
+			"""
+		
+		print(data_print)
+		if mod["description"] != "":
+			print("			" + mod["description"])
+		if full == True:
+			if mod["type"] != "":
+				print("				Type:     " + mod["type"])
+			if mod["sub-type"] != "":
+				print("				Sub-Type: " + mod["sub-type"])
+			if mod["version"] != []:
+				version_ID = ""
+				for id in mod["version"]:
+					if len(version_ID) != 0:
+						if type(id) == str:
+							version_ID+="-"
+						else:
+							version_ID+="."
+					version_ID += str(id)
+				print("				version:  " + color['blue'] + version_ID + color['default'])
+			if     mod["compagny-type"] != "" \
+			   and mod["compagny-name"] != "":
+				print("				compagny: " + color['purple'] + mod["compagny-type"] + "/" + mod["compagny-name"] + color['default'])
+			elif mod["compagny-name"] != "":
+				print("				compagny: " + color['purple'] + mod["compagny-name"] + color['default'])
+			if mod["license"] != "":
+				print("				license:  " + color['yellow'] + mod["license"] + color['default'])
+			if mod["maintainer"] != []:
+				print("				maintainers:")
+				for elem in mod["maintainer"]:
+					print("					" + str(elem))
 	print("	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
 	exit(0)
 
 # preparse the argument to get the verbose element for debug mode
 def parseGenericArg(argument, active):
 	if argument.get_option_name() == "help":
-		#display help
 		if active==False:
 			usage()
+		return True
+	if argument.get_option_name() == "HELP":
+		if active==False:
+			usage(True)
 		return True
 	if argument.get_option_name() == "list-module":
 		if active==False:

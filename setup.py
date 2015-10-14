@@ -7,7 +7,7 @@ def readme():
 
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='0.6.4',
+      version='0.7.0',
       description='Lutin generic builder',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
