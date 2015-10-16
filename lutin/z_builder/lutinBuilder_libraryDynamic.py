@@ -91,7 +91,7 @@ def link(file, binary, target, depancy, name, basic_path, static=False):
 			lib_name = elem[len(lib_path)+len(target.prefix_lib)+1:-len(target.suffix_lib_dynamic)]
 			cmd.append("-L" + lib_path)
 			cmd.append("-l" + lib_name)
-		if     target != "MacOs" \
+		if     target.name != "MacOs" \
 		   and target.name != "Android":
 			if len(list_dynamic) > 0:
 				cmd.append("-Wl,-R$ORIGIN/../lib/")
