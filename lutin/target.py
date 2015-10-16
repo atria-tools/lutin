@@ -142,6 +142,9 @@ class Target:
 		self.path_build = os.path.join("build", self.config["compilator"])
 	
 	def create_number_from_version_string(self, data):
+		tmp_data = data.split("-")
+		if len(tmp_data) > 1:
+			data = tmp_data[0]
 		list = data.split(".")
 		if len(list) == 1:
 			list.append("0")
