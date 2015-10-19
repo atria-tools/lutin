@@ -17,6 +17,7 @@ import lutin.module as module
 import lutin.target as target
 import lutin.env as env
 import lutin.multiprocess as multiprocess
+import lutin.tools as tools
 
 myArgs = arguments.LutinArg()
 myArgs.add(arguments.ArgDefine("h", "help", desc="Display this help"))
@@ -66,7 +67,8 @@ def usage(full=False):
 	for mod in listOfAllModule:
 		data_print = "		"
 		if full == False:
-			if    mod["type"][:6] == "BINARY":
+			if     mod["type"] != None \
+			   and mod["type"][:6] == "BINARY":
 				data_print += color['blue']
 				if mod["sub-type"] == "":
 					data_print += "* "
@@ -78,9 +80,11 @@ def usage(full=False):
 					data_print += "S "
 				else:
 					data_print += "  "
-			elif mod["type"] == "PACKAGE":
+			elif     mod["type"] != None \
+			     and mod["type"] == "PACKAGE":
 				data_print += color['red'] + "# "
-			elif    mod["type"][:7] == "LIBRARY":
+			elif     mod["type"] != None \
+			     and mod["type"][:7] == "LIBRARY":
 				data_print += color['yellow'] + "  "
 			else:
 				data_print += color['default'] + "  "
@@ -89,9 +93,11 @@ def usage(full=False):
 		data_print += mod["name"] + color['default']
 		if full == False:
 			data_print += "\r\t\t\t\t\t\t\t"
-			if mod["license"] != "":
+			if     mod["license"] != None \
+			   and mod["license"] != "":
 				data_print += color['yellow'] + " [" + mod["license"] + "]" + color['default']
-			if mod["version"] != []:
+			if     mod["version"] != None \
+			   and mod["version"] != []:
 				version_ID = tools.version_to_string(mod["version"])
 				data_print += color['blue'] + " (" + version_ID + ")" + color['default']
 			"""
@@ -106,11 +112,14 @@ def usage(full=False):
 		if mod["description"] != "":
 			print("			" + mod["description"])
 		if full == True:
-			if mod["type"] != "":
+			if     mod["type"] != None \
+			   and mod["type"] != "":
 				print("				Type:     " + mod["type"])
-			if mod["sub-type"] != "":
+			if     mod["sub-type"] != None \
+			   and mod["sub-type"] != "":
 				print("				Sub-Type: " + mod["sub-type"])
-			if mod["version"] != []:
+			if     mod["version"] != None \
+			   and mod["version"] != []:
 				version_ID = ""
 				for id in mod["version"]:
 					if len(version_ID) != 0:
@@ -120,14 +129,19 @@ def usage(full=False):
 							version_ID+="."
 					version_ID += str(id)
 				print("				version:  " + color['blue'] + version_ID + color['default'])
-			if     mod["compagny-type"] != "" \
+			if     mod["compagny-type"] != None \
+			   and mod["compagny-name"] != None \
+			   and mod["compagny-type"] != "" \
 			   and mod["compagny-name"] != "":
 				print("				compagny: " + color['purple'] + mod["compagny-type"] + "/" + mod["compagny-name"] + color['default'])
-			elif mod["compagny-name"] != "":
+			elif     mod["compagny-name"] != None \
+			     and mod["compagny-name"] != "":
 				print("				compagny: " + color['purple'] + mod["compagny-name"] + color['default'])
-			if mod["license"] != "":
+			if     mod["license"] != None \
+			   and mod["license"] != "":
 				print("				license:  " + color['yellow'] + mod["license"] + color['default'])
-			if mod["maintainer"] != []:
+			if     mod["maintainer"] != None \
+			   and mod["maintainer"] != []:
 				print("				maintainers:")
 				for elem in mod["maintainer"]:
 					print("					" + str(elem))
