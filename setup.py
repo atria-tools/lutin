@@ -7,7 +7,7 @@ def readme():
 
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='0.7.3',
+      version='0.7.4',
       description='Lutin generic builder',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
@@ -19,7 +19,7 @@ setup(name='lutin',
                 'lutin/z_system',
                 'lutin/z_target'],
       classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
         'Topic :: Software Development :: Compilers',
@@ -33,6 +33,7 @@ setup(name='lutin',
       include_package_data = True,
       zip_safe=False)
 
-#To developp: ./setup.py install/develop
+#To developp: sudo ./setup.py install
+#             sudo ./setup.py develop
 #TO register all in pip: ./setup.py register sdist upload
 
