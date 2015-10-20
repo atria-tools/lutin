@@ -535,7 +535,7 @@ class Target:
 		   or module.get_type() == 'BINARY_STAND_ALONE':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
 		if module.get_type() == 'BINARY_SHARED':
-			self.make_packages_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
+			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
 		if module.get_type() == 'PACKAGE':
 			debug.info("Can not create package for package");
 			return
