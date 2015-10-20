@@ -128,8 +128,8 @@ class Target(target.Target):
 		debug.info("disk image: " + output_file_name)
 		
 		## user information:
-		debug.info("You can have an shell interface by executing : ")
-		debug.info("    sudo cp " + shell_file_name + " /usr/local/bin")
+		#debug.info("You can have an shell interface by executing : ")
+		#debug.info("    sudo cp " + shell_file_name + " /usr/local/bin")
 	
 	def install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")

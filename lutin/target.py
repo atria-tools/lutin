@@ -134,6 +134,8 @@ class Target:
 		self.pkg_path_readme_file = "readme.txt"
 		self.pkg_path_change_log_file = "changelog.txt"
 		
+		# special case for IOS (example) no build dynamicly ...
+		self.support_dynamic_link = True
 	
 	def update_path_tree(self):
 		self.path_out = os.path.join("out", self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
@@ -531,9 +533,9 @@ class Target:
 			return
 		if    module.get_type() == 'BINARY' \
 		   or module.get_type() == 'BINARY_STAND_ALONE':
-			self.make_package_generic_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
+			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
 		if module.get_type() == 'BINARY_SHARED':
-			self.make_package_generic_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
+			self.make_packages_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
 		if module.get_type() == 'PACKAGE':
 			debug.info("Can not create package for package");
 			return

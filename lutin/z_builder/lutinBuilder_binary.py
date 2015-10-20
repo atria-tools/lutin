@@ -40,7 +40,7 @@ def get_output_type():
 ##
 ## @brief Commands for running gcc to link an executable.
 ##
-def link(file, binary, target, depancy, name, basic_path, static = False):
+def link(file, binary, target, depancy, flags, name, basic_path, static = False):
 	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "bin")
 	debug.extreme_verbose("list files = " + str(depancy.src))
 	list_static = []

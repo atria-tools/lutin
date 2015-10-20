@@ -476,26 +476,29 @@ class Module:
 						                            package_name,
 						                            target,
 						                            self.sub_heritage_list,
+						                            flags = self.flags,
 						                            name = self.name,
 						                            basic_path = self.origin_path)
 						self.local_heritage.add_lib_static(res_file)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.a'")
-			if    self.type == 'LIBRARY' \
-			   or self.type == 'LIBRARY_DYNAMIC':
-				try:
-					tmp_builder = builder.get_builder_with_output("so");
-					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
-					if len(list_file) > 0:
-						res_file = tmp_builder.link(list_file,
-						                            package_name,
-						                            target,
-						                            self.sub_heritage_list,
-						                            name = self.name,
-						                            basic_path = self.origin_path)
-						self.local_heritage.add_lib_dynamic(res_file)
-				except ValueError:
-					debug.error(" UN-SUPPORTED link format:  '.so'/'.dynlib'/'.dll'")
+			if target.support_dynamic_link == True:
+				if    self.type == 'LIBRARY' \
+				   or self.type == 'LIBRARY_DYNAMIC':
+					try:
+						tmp_builder = builder.get_builder_with_output("so");
+						list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
+						if len(list_file) > 0:
+							res_file = tmp_builder.link(list_file,
+							                            package_name,
+							                            target,
+							                            self.sub_heritage_list,
+							                            flags = self.flags,
+							                            name = self.name,
+							                            basic_path = self.origin_path)
+							self.local_heritage.add_lib_dynamic(res_file)
+					except ValueError:
+						debug.error(" UN-SUPPORTED link format:  '.so'/'.dynlib'/'.dll'")
 			try:
 				tmp_builder = builder.get_builder_with_output("jar");
 				list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
@@ -504,6 +507,7 @@ class Module:
 					                            package_name,
 					                            target,
 					                            self.sub_heritage_list,
+					                            flags = self.flags,
 					                            name = self.name,
 					                            basic_path = self.origin_path)
 					self.local_heritage.add_lib_interpreted('java', res_file)
@@ -513,7 +517,7 @@ class Module:
 		     or self.type == 'BINARY_SHARED' \
 		     or self.type == 'BINARY_STAND_ALONE':
 			shared_mode = False
-			if target.name=="Android":
+			if target.name == "Android":
 				debug.warning("Android mode ...")
 				# special case for android ...
 				for elem in self.sub_heritage_list.src['src']:
@@ -523,8 +527,9 @@ class Module:
 						shared_mode = True
 						break;
 			static_mode = True
-			if self.type == 'BINARY_SHARED':
-				static_mode = False
+			if target.support_dynamic_link == True:
+				if self.type == 'BINARY_SHARED':
+					static_mode = False
 			if shared_mode == True:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
@@ -533,6 +538,7 @@ class Module:
 					                            package_name,
 					                            target,
 					                            self.sub_heritage_list,
+					                            flags = self.flags,
 					                            name = self.name,
 					                            basic_path = self.origin_path,
 					                            static = static_mode)
@@ -547,6 +553,7 @@ class Module:
 						                            package_name,
 						                            target,
 						                            self.sub_heritage_list,
+						                            flags = self.flags,
 						                            name = self.name,
 						                            basic_path = self.origin_path)
 						self.local_heritage.add_sources(res_file)
@@ -559,13 +566,14 @@ class Module:
 					                            package_name,
 					                            target,
 					                            self.sub_heritage_list,
+					                            flags = self.flags,
 					                            name = self.name,
 					                            basic_path = self.origin_path,
 					                            static = static_mode)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.bin'")
 		elif self.type == "PACKAGE":
-			if target.name=="Android":
+			if target.name == "Android":
 				# special case for android wrapper:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
@@ -574,6 +582,7 @@ class Module:
 					                            package_name,
 					                            target,
 					                            self.sub_heritage_list,
+					                            flags = self.flags,
 					                            name = "lib" + self.name,
 					                            basic_path = self.origin_path)
 					self.local_heritage.add_sources(res_file)
@@ -587,6 +596,7 @@ class Module:
 						                            package_name,
 						                            target,
 						                            self.sub_heritage_list,
+						                            flags = self.flags,
 						                            name = self.name,
 						                            basic_path = self.origin_path)
 						self.local_heritage.add_sources(res_file)
@@ -599,6 +609,7 @@ class Module:
 					                            package_name,
 					                            target,
 					                            self.sub_heritage_list,
+					                            flags = self.flags,
 					                            name = self.name,
 					                            basic_path = self.origin_path)
 				except ValueError:

@@ -213,7 +213,7 @@ class Target(target.Target):
 		return self.get_staging_path(binary_name) + self.path_data
 	"""
 	
-	def make_package_generic_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
+	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")

@@ -82,6 +82,8 @@ class Target(target.Target):
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
 		
+		# Disable capabiliteis to compile in shared mode
+		self.support_dynamic_link = False
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
@@ -109,23 +111,23 @@ class Target(target.Target):
 			# Resize all icon needed for Ios ...
 			# TODO : Do not regenerate if source resource is not availlable
 			# TODO : Add a colored background ...
-			debug.print_element("pkg", "iTunesArtwork.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "iTunesArtwork.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork.png"), 512, 512)
-			debug.print_element("pkg", "iTunesArtwork@2x.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "iTunesArtwork@2x.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork@2x.png"), 1024, 1024)
-			debug.print_element("pkg", "Icon-60@2x.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-60@2x.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-60@2x.png"), 120, 120)
-			debug.print_element("pkg", "Icon-76.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-76.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76.png"), 76, 76)
-			debug.print_element("pkg", "Icon-76@2x.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-76@2x.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76@2x.png"), 152, 152)
-			debug.print_element("pkg", "Icon-Small-40.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small-40.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40.png"), 40, 40)
-			debug.print_element("pkg", "Icon-Small-40@2x.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small-40@2x.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40@2x.png"), 80, 80)
-			debug.print_element("pkg", "Icon-Small.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small.png"), 29, 29)
-			debug.print_element("pkg", "Icon-Small@2x.png", "<==", pkg_properties["ICON"])
+			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small@2x.png")
 			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small@2x.png"), 58, 58)
 		
 		## Create the info file:
@@ -177,9 +179,9 @@ class Target(target.Target):
 		data_file += "			</array>\n"
 		data_file += "			\n"
 		data_file += "			<key>CFBundleShortVersionString</key>\n"
-		data_file += "			<string>"+pkg_properties["VERSION"]+"</string>\n"
+		data_file += "			<string>"+tools.version_to_string(pkg_properties["VERSION"])+"</string>\n"
 		data_file += "			<key>CFBundleVersion</key>\n"
-		data_file += "			<string>"+pkg_properties["VERSION_CODE"]+"</string>\n"
+		data_file += "			<string>"+str(pkg_properties["VERSION_CODE"])+"</string>\n"
 		data_file += "			\n"
 		data_file += "			<key>CFBundleResourceSpecification</key>\n"
 		data_file += "			<string>ResourceRules.plist</string>\n"
@@ -312,8 +314,10 @@ class Target(target.Target):
 		# Must create the tarball of the application 
 		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
 		#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
-		
 		if self.sumulator == False:
+			if "APPLE_APPLICATION_IOS_ID" not in pkg_properties:
+				pkg_properties["APPLE_APPLICATION_IOS_ID"] = "00000000"
+				debug.warning("Missing package property : APPLE_APPLICATION_IOS_ID USE " + pkg_properties["APPLE_APPLICATION_IOS_ID"] + " ID ... ==> CAN NOT WORK ..." )
 			# Create the info file
 			tmpFile = open(os.path.join(target_outpath, pkg_name + ".xcent"), 'w')
 			tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
@@ -321,15 +325,12 @@ class Target(target.Target):
 			tmpFile.write("<plist version=\"1.0\">\n")
 			tmpFile.write("    <dict>\n")
 			tmpFile.write("        <key>application-identifier</key>\n")
-			try:
-				tmpFile.write("        <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
-			except:
-				debug.error("Missing package property : APPLE_APPLICATION_IOS_ID")
+			tmpFile.write("        <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
 			tmpFile.write("        <key>get-task-allow</key>\n")
 			tmpFile.write("        <true/>\n")
 			tmpFile.write("        <key>keychain-access-groups</key>\n")
 			tmpFile.write("        <array>\n")
-			tmpFile.write("            <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + ".atriasoft.worddown</string>\n")
+			tmpFile.write("            <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
 			tmpFile.write("        </array>\n")
 			tmpFile.write("    </dict>\n")
 			tmpFile.write("</plist>\n")
@@ -342,18 +343,12 @@ class Target(target.Target):
 				debug.error("To sign an application we need to have a signing key in the file '" + iosDevelopperKeyFile + "' \n it is represented like: 'iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)'\n you can obtain it with : 'certtool y | grep \"Developer\"'")
 			signatureKey = tools.file_read_data(iosDevelopperKeyFile)
 			signatureKey = re.sub('\n', '', signatureKey)
-			cmdLine  = 'codesign  --force --sign '
-			# to get this key ;    certtool y | grep "Developer"
+			cmdLine  = 'codesign --force --sign '
+			# to get this key ; certtool y | grep "Developer"
 			cmdLine += ' "' + signatureKey + '" '
 			cmdLine += ' --entitlements ' + self.get_build_path(pkg_name) + '/worddown.xcent'
 			cmdLine += ' ' + self.get_staging_path(pkg_name)
 			multiprocess.run_command(cmdLine)
-			
-			# --force --sign "iPhone Developer: Edouard DUPIN (SDFGSDFGSDFG)"
-			#		  --resource-rules=/Users/edouarddupin/Library/Developer/Xcode/DerivedData/worddown-cmuvjchgtiteexdiacyqoexsyadg/Build/Products/Debug-iphoneos/worddown.app/ResourceRules.plist
-			#		  --entitlements /Users/edouarddupin/Library/Developer/Xcode/DerivedData/worddown-cmuvjchgtiteexdiacyqoexsyadg/Build/Intermediates/worddown.build/Debug-iphoneos/worddown.build/worddown.xcent
-			#		  /Users/edouarddupin/Library/Developer/Xcode/DerivedData/worddown-cmuvjchgtiteexdiacyqoexsyadg/Build/Products/Debug-iphoneos/worddown.app
-
 	
 	def createRandomNumber(self, len):
 		out = ""
