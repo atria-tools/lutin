@@ -91,6 +91,7 @@ def file_write_data(path, data, only_if_new=False):
 		if old_data == data:
 			return
 	#real write of data:
+	create_directory_of_file(path)
 	file = open(path, "w")
 	file.write(data)
 	file.close()

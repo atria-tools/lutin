@@ -110,7 +110,6 @@ class Target(target.Target):
 		data_file  = "#!/bin/bash\n"
 		data_file += "# Simply open the real application in the correct way (a link does not work ...)\n"
 		data_file += "/Applications/" + pkg_name + ".app/Contents/MacOS/" + pkg_name + " $*\n"
-		#tmpFile.write("open -n /Applications/edn.app --args -AppCommandLineArg $*\n")
 		tools.file_write_data(os.path.join(target_outpath, "shell", pkg_name),
 		                      data_file,
 		                      only_if_new=True)
