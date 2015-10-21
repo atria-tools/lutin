@@ -1051,7 +1051,7 @@ def get_module_option(the_module, name):
 	if "get_type" in dir(the_module):
 		type = the_module.get_type()
 	else:
-		debug.debug(" fundtion get_type() must be provided in the module: " + name)
+		debug.debug(" function get_type() must be provided in the module: " + name)
 	
 	if "get_sub_type" in dir(the_module):
 		sub_type = the_module.get_sub_type()
