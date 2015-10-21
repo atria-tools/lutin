@@ -340,15 +340,17 @@ class Target(target.Target):
 			debug.print_element("pkg(signed)", "pkg", "<==", "Signing application")
 			iosDevelopperKeyFile = ".iosKey.txt"
 			if tools.file_size(iosDevelopperKeyFile) < 10:
-				debug.error("To sign an application we need to have a signing key in the file '" + iosDevelopperKeyFile + "' \n it is represented like: 'iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)'\n you can obtain it with : 'certtool y | grep \"Developer\"'")
-			signatureKey = tools.file_read_data(iosDevelopperKeyFile)
-			signatureKey = re.sub('\n', '', signatureKey)
-			cmdLine  = 'codesign --force --sign '
-			# to get this key ; certtool y | grep "Developer"
-			cmdLine += ' "' + signatureKey + '" '
-			cmdLine += ' --entitlements ' + self.get_build_path(pkg_name) + '/worddown.xcent'
-			cmdLine += ' ' + self.get_staging_path(pkg_name)
-			multiprocess.run_command(cmdLine)
+				debug.warning("To sign an application we need to have a signing key in the file '" + iosDevelopperKeyFile + "' \n it is represented like: 'iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)'\n you can obtain it with : 'certtool y | grep \"Developer\"'")
+				debug.warning("Can not be install ... not runnable")
+			else:
+				signatureKey = tools.file_read_data(iosDevelopperKeyFile)
+				signatureKey = re.sub('\n', '', signatureKey)
+				cmdLine  = 'codesign --force --sign '
+				# to get this key ; certtool y | grep "Developer"
+				cmdLine += ' "' + signatureKey + '" '
+				cmdLine += ' --entitlements ' + self.get_build_path(pkg_name) + '/worddown.xcent'
+				cmdLine += ' ' + self.get_staging_path(pkg_name)
+				multiprocess.run_command(cmdLine)
 	
 	def createRandomNumber(self, len):
 		out = ""
