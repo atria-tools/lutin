@@ -127,9 +127,15 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 		# get the file size of the non strip file
 		originSize = tools.file_size(file_dst);
 		debug.print_element("SharedLib(strip)", name, "", "")
-		cmdLineStrip=tools.list_to_str([
-			target.strip,
-			file_dst])
+		if target.name == "MacOs":
+			cmdLineStrip=tools.list_to_str([
+				target.strip,
+				"-u",
+				file_dst])
+		else:
+			cmdLineStrip=tools.list_to_str([
+				target.strip,
+				file_dst])
 		multiprocess.run_command(cmdLineStrip, store_output_file=file_warning)
 		# get the stip size of the binary
 		stripSize = tools.file_size(file_dst)
