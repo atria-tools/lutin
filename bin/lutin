@@ -192,7 +192,7 @@ def parseGenericArg(argument, active):
 		if active==True:
 			debug.enable_color()
 		return True
-	elif argument.get_option_name() == "force":
+	elif argument.get_option_name() == "force-build":
 		if active==True:
 			env.set_force_mode(True)
 		return True
@@ -284,7 +284,7 @@ for argument in localArgument:
 			my_target = None
 	else:
 		if argument.get_option_name() != "":
-			debug.warning("Can not understand argument : '" + argument.get_option_nName() + "'")
+			debug.warning("Can not understand argument : '" + argument.get_option_name() + "'")
 			usage()
 		else:
 			#load the target if needed :
