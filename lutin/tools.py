@@ -50,6 +50,8 @@ def remove_path_and_sub_path(path):
 def remove_file(path):
 	if os.path.isfile(path):
 		os.remove(path)
+	elif os.path.islink(path):
+		os.remove(path)
 
 def file_size(path):
 	if not os.path.isfile(path):

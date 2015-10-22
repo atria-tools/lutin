@@ -1,0 +1,60 @@
+#language: python
+
+sudo: false
+
+branches:
+  only:
+    - master
+    - dev
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
+      - expect
+      - binutils-mingw-w64-i686
+      - gcc-mingw-w64-i686
+      - g++-mingw-w64-i686
+
+matrix:
+  include:
+    - os: linux
+      env: CONF=release BUILDER=gcc TARGET=Linux TAG=Linux
+    - os: linux
+      env: CONF=debug BUILDER=clang TARGET=Linux
+    - os: linux
+      env: CONF=release BUILDER=gcc TARGET=Windows TAG=Mingw
+    - os: linux
+      env: CONF=debug BUILDER=gcc TARGET=Android TAG=Android DISABLE_PACKAGE=-p
+    - os: osx
+      env: CONF=release BUILDER=clang TARGET=MacOs TAG=MacOs
+    - os: osx
+      env: CONF=release BUILDER=clang TARGET=IOs TAG=IOs
+
+install:
+  - cd ..
+  # download NDK
+  - if [ "$TAG" == "Android" ]; then
+        git clone --depth 1 --branch master https://github.com/HeeroYui/android-download-tool;
+        ./android-download-tool/dl-android.sh;
+    fi
+  - git clone --depth 1 --branch master https://github.com/atria-soft/ci.git
+  - cd -
+
+before_script:
+  - ./setup.py build
+  - export PYTHONPATH=$PYTHONPATH:./lutin/build/lib.linux-x86_64-2.7/:./lutin/build/lib.linux-x86_64-2.7/lutin/:./lutin/build/lib:./lutin/build/lib/lutin/
+  - cd ..
+  - pwd
+  - ls -l *
+  - ./ci/build_send.py --tag=$TAG --status=START;
+
+script:
+  - ./lutin/build/scripts-2.7/lutin -w -j4 -C -P -t$TARGET -c $BUILDER $COMPILATOR_OPTION $BUS -m $CONF $GCOV $DISABLE_PACKAGE test-c; STATUS=$?
+  - ./ci/build_send.py --tag=$TAG --status="$STATUS";
+
+notifications:
+  email:
+    - yui.heero@gmail.com

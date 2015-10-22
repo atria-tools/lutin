@@ -87,19 +87,35 @@ class Target(target.Target):
 		self.pkg_path_lib = "data/lib/armeabi"
 		self.pkg_path_license = "license"
 		
-		# board id at 15 is for android 4.0.3 and more ... (note: API 14 has been removed ...)
-		self.boardId = 15
-		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.boardId))
+		# If the env variable is not define, find the newest version of the BOARD_ID (Note: 0: autofind)
+		self.board_id = int(os.getenv('PROJECT_NDK_BOARD_ID', "0"))
+		if self.board_id != 0:
+			# check if element existed :
+			if not os.path.isdir(self.path_ndk +"/platforms/android-" + str(self.board_id)):
+				debug.error("Specify PROJECT_NDK_BOARD_ID env variable and the BOARD_ID does not exit ... : " + str(self.board_id) + "==> auto-search")
+				self.board_id = 0
+		if self.board_id == 0:
+			debug.debug("Auto-search BOARD-ID")
+			for iii in reversed(range(0, 50)):
+				debug.debug("try: " + self.path_ndk +"/platforms/android-" + str(iii))
+				if os.path.isdir(self.path_ndk +"/platforms/android-" + str(iii)):
+					debug.debug("Find BOARD-ID : " + str(iii))
+					self.board_id = iii
+					break;
+		if self.board_id == 0:
+			debug.error("Can not find BOARD-ID ==> update your android SDK")
+		
+		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.board_id))
 		if arch == "armv5" or arch == "armv7":
-			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-arm/usr/include/")
 		elif arch == "mips":
-			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-mips/usr/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-mips/usr/include/")
 		elif arch == "x86":
-			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-x86/usr/include/")
+			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-x86/usr/include/")
 		
 		if True:
 			if self.config["compilator"] == "clang":
-				if self.boardId < 21:
+				if self.board_id < 21:
 					debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")
 				self.global_flags_cc.append("-D__STDCPP_LLVM__")
 				# llvm-libc++ : BSD | MIT
@@ -158,9 +174,9 @@ class Target(target.Target):
 		else :
 			self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/system/include/")
 			self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/stlport/stlport/")
-			self.global_flags_ld.append(self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm/usr/lib/libstdc++.a")
+			self.global_flags_ld.append(self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-arm/usr/lib/libstdc++.a")
 		
-		self.global_sysroot = "--sysroot=" + self.path_ndk +"/platforms/android-" + str(self.boardId) + "/arch-arm"
+		self.global_sysroot = "--sysroot=" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-arm"
 		
 		self.global_flags_cc.append("-D__ARM_ARCH_5__")
 		self.global_flags_cc.append("-D__ARM_ARCH_5T__")
@@ -266,16 +282,27 @@ class Target(target.Target):
 		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
+		debug.info("ploppppp: " + str(pkg_properties))
 		# FINAL_path_JAVA_PROJECT
 		self.path_java_project = os.path.join(target_outpath,
-		                                      "src",
-		                                      pkg_properties["COMPAGNY_TYPE"],
-		                                      pkg_properties["COMPAGNY_NAME2"],
+		                                      "src")
+		if pkg_properties["COMPAGNY_TYPE"] != "":
+			self.path_java_project = os.path.join(self.path_java_project,
+			                                      pkg_properties["COMPAGNY_TYPE"])
+		if pkg_properties["COMPAGNY_NAME2"] != "":
+			self.path_java_project = os.path.join(self.path_java_project,
+			                                      pkg_properties["COMPAGNY_NAME2"])
+		self.path_java_project = os.path.join(self.path_java_project,
 		                                      pkg_name_application_name)
 		#FINAL_FILE_ABSTRACTION
 		self.file_final_abstraction = os.path.join(self.path_java_project, pkg_name_application_name + ".java")
 		
-		compleatePackageName = pkg_properties["COMPAGNY_TYPE"]+"."+pkg_properties["COMPAGNY_NAME2"]+"." + pkg_name_application_name
+		compleatePackageName = ""
+		if pkg_properties["COMPAGNY_TYPE"] != "":
+			compleatePackageName += pkg_properties["COMPAGNY_TYPE"] + "."
+		if pkg_properties["COMPAGNY_NAME2"] != "":
+			compleatePackageName += pkg_properties["COMPAGNY_NAME2"] + "."
+		compleatePackageName += pkg_name_application_name
 		
 		if "ADMOD_ID" in pkg_properties:
 			pkg_properties["RIGHT"].append("INTERNET")
@@ -335,7 +362,7 @@ class Target(target.Target):
 		cmdLine = androidToolPath + "aapt p -f " \
 		          + "-M " + target_outpath + "/AndroidManifest.xml " \
 		          + "-F " + target_outpath + "/resources.res " \
-		          + "-I " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar "\
+		          + "-I " + self.path_sdk + "/platforms/android-" + str(self.board_id) + "/android.jar "\
 		          + "-S " + target_outpath + "/res/ " \
 		          + adModResoucepath \
 		          + "-J " + target_outpath + "/src/ "
@@ -360,7 +387,7 @@ class Target(target.Target):
 		
 		cmdLine = "javac " \
 		          + "-d " + self.get_staging_path(pkg_name) + "/build/classes " \
-		          + "-classpath " + self.path_sdk + "/platforms/android-" + str(self.boardId) + "/android.jar" \
+		          + "-classpath " + self.path_sdk + "/platforms/android-" + str(self.board_id) + "/android.jar" \
 		          + adModJarFile + " " \
 		          + filesString \
 		          + self.file_final_abstraction + " "  \

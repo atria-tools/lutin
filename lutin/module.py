@@ -83,17 +83,17 @@ class Module:
 		self.origin_path = tools.get_current_path(self.origin_file)
 		self.local_heritage = heritage.heritage(self, None)
 		
-		self.package_prop = { "COMPAGNY_TYPE" : set(""),
-		                      "COMPAGNY_NAME" : set(""),
-		                      "COMPAGNY_NAME2" : set(""),
-		                      "MAINTAINER" : set([]),
+		self.package_prop = { "COMPAGNY_TYPE" : "",
+		                      "COMPAGNY_NAME" : "",
+		                      "COMPAGNY_NAME2" : "",
+		                      "MAINTAINER" : [],
 		                      #"ICON" : set(""),
-		                      "SECTION" : set([]),
-		                      "PRIORITY" : set(""),
-		                      "DESCRIPTION" : set(""),
+		                      "SECTION" : [],
+		                      "PRIORITY" : "",
+		                      "DESCRIPTION" : "",
 		                      "VERSION" : [0,0,0],
 		                      "VERSION_CODE" : "",
-		                      "NAME" : set("no-name"), # name of the application
+		                      "NAME" : "no-name", # name of the application
 		                      "ANDROID_MANIFEST" : "", # By default generate the manifest
 		                      "ANDROID_RESOURCES" : [],
 		                      "ANDROID_APPL_TYPE" : "APPL", # the other mode is "WALLPAPER" ... and later "WIDGET"
@@ -135,9 +135,10 @@ class Module:
 			"-Wreturn-type",
 			#"-Wint-to-pointer-cast",
 			"-Wno-write-strings",
-			"-Woverloaded-virtual",
-			"-Wnon-virtual-dtor",
 			"-Wno-unused-variable"]);
+		self.compile_flags('c++', [
+			"-Woverloaded-virtual",
+			"-Wnon-virtual-dtor"]);
 		#only for gcc : "-Wunused-variable", "-Wunused-but-set-variable",
 	
 	##

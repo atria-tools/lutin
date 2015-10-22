@@ -39,12 +39,14 @@ class Target(target.Target):
 			sys.path.append("c:\\MinGW\\bin" )
 			os.environ['PATH'] += ";c:\\MinGW\\bin\\"
 		else:
-			if self.config["bus-size"] == "64":
-				# 64 bits
-				self.set_cross_base("x86_64-w64-mingw32-")
-			else:
-				# 32 bits
-				self.set_cross_base("i686-w64-mingw32-")
+			#if self.config["bus-size"] == "64":
+			#	# 64 bits
+			#	self.set_cross_base("x86_64-w64-mingw32-")
+			#else:
+			#	# 32 bits
+			#	self.set_cross_base("i686-w64-mingw32-")
+			# Only one ... need understand why
+			self.set_cross_base("i686-w64-mingw32-")
 		# force static link to prenvent many errors ...
 		self.global_flags_ld.append(["-static-libgcc",
 		                             "-static-libstdc++",
