@@ -27,7 +27,7 @@ matrix:
     - os: linux
       env: CONF=release BUILDER=gcc TARGET=Windows TAG=Mingw
     - os: linux
-      env: CONF=debug BUILDER=gcc TARGET=Android TAG=Android DISABLE_PACKAGE=-p
+      env: CONF=release BUILDER=gcc TARGET=Android TAG=Android DISABLE_PACKAGE=-p
     - os: osx
       env: CONF=release BUILDER=clang TARGET=MacOs TAG=MacOs
     - os: osx
