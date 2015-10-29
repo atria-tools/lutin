@@ -17,10 +17,12 @@ class System(system.System):
 		system.System.__init__(self)
 		# create some HELP:
 		self.help="SDK: Android SDK basic interface java\n"
+		# jar file:
+		jar_file_path=os.path.join(target.path_sdk, "platforms", "android-" + str(target.board_id), "android.jar")
 		# TODO : Check if the android sdk android.jar is present ...
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_SRC(target.path_sdk + "/platforms/android-" + str(target.boardId) + "/android.jar")
+		self.add_export_SRC(jar_file_path)
 		self.add_export_flag_LD("-ldl")
 		self.add_export_flag_LD("-llog")
 		self.add_export_flag_LD("-landroid")

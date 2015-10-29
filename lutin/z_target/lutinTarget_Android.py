@@ -97,8 +97,8 @@ class Target(target.Target):
 		if self.board_id == 0:
 			debug.debug("Auto-search BOARD-ID")
 			for iii in reversed(range(0, 50)):
-				debug.debug("try: " + self.path_ndk +"/platforms/android-" + str(iii))
-				if os.path.isdir(self.path_ndk +"/platforms/android-" + str(iii)):
+				debug.debug("try: " + os.path.join(self.path_ndk, "platforms", "android-" + str(iii)))
+				if os.path.isdir(os.path.join(self.path_ndk, "platforms", "android-" + str(iii))):
 					debug.debug("Find BOARD-ID : " + str(iii))
 					self.board_id = iii
 					break;
@@ -107,11 +107,11 @@ class Target(target.Target):
 		
 		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.board_id))
 		if arch == "armv5" or arch == "armv7":
-			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-arm/usr/include/")
+			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm", "usr", "include"))
 		elif arch == "mips":
-			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-mips/usr/include/")
+			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-mips", "usr", "include"))
 		elif arch == "x86":
-			self.global_include_cc.append("-I" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-x86/usr/include/")
+			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-x86", "usr", "include"))
 		
 		if True:
 			if self.config["compilator"] == "clang":
