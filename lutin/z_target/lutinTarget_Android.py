@@ -91,14 +91,14 @@ class Target(target.Target):
 		self.board_id = int(os.getenv('PROJECT_NDK_BOARD_ID', "0"))
 		if self.board_id != 0:
 			# check if element existed :
-			if not os.path.isdir(self.path_ndk +"/platforms/android-" + str(self.board_id)):
+			if not os.path.isdir(self.path_sdk +"/platforms/android-" + str(self.board_id)):
 				debug.error("Specify PROJECT_NDK_BOARD_ID env variable and the BOARD_ID does not exit ... : " + str(self.board_id) + "==> auto-search")
 				self.board_id = 0
 		if self.board_id == 0:
 			debug.debug("Auto-search BOARD-ID")
 			for iii in reversed(range(0, 50)):
-				debug.debug("try: " + os.path.join(self.path_ndk, "platforms", "android-" + str(iii)))
-				if os.path.isdir(os.path.join(self.path_ndk, "platforms", "android-" + str(iii))):
+				debug.debug("try: " + os.path.join(self.path_sdk, "platforms", "android-" + str(iii)))
+				if os.path.isdir(os.path.join(self.path_sdk, "platforms", "android-" + str(iii))):
 					debug.debug("Find BOARD-ID : " + str(iii))
 					self.board_id = iii
 					break;
@@ -119,64 +119,64 @@ class Target(target.Target):
 					debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")
 				self.global_flags_cc.append("-D__STDCPP_LLVM__")
 				# llvm-libc++ : BSD | MIT
-				self.global_include_cc.append("-gcc-toolchain " + self.path_ndk +"/sources/android/support/include")
-				self.global_include_cc.append("-I" + self.path_ndk +"/sources/android/support/include")
-				self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/include/")
+				self.global_include_cc.append("-gcc-toolchain " + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
+				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
+				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "include"))
 				if arch == "armv5":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/armeabi/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "armeabi")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libc++_static.a"))
 				elif arch == "armv7":
 					# The only one tested ... ==> but we have link error ...
 					self.global_flags_cc.append("-target armv7-none-linux-androideabi")
 					self.global_flags_cc.append("-march=armv7-a")
 					self.global_flags_cc.append("-mfpu=vfpv3-d16")
 					self.global_flags_cc.append("-mhard-float")
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/"
-					self.global_flags_ld.append(         stdCppBasePath + "thumb/libc++_static.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libs", "armeabi-v7a")
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libc++_static.a"))
 					self.global_flags_ld.append("-target armv7-none-linux-androideabi")
 					self.global_flags_ld.append("-Wl,--fix-cortex-a8")
 					self.global_flags_ld.append("-Wl,--no-warn-mismatch")
 					self.global_flags_ld.append("-lm_hard")
 				elif arch == "mips":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/mips/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "mips")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath + "include"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath + "libc++_static.a"))
 				elif arch == "x86":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/llvm-libc++/libcxx/libs/x86/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "libc++_static.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "x86")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libc++_static.a"))
 			else:
 				self.global_flags_cc.append("-D__STDCPP_GNU__")
 				# GPL v3 (+ exception link for gcc compilator)
-				self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/include/")
-				self.global_include_cc.append("-I" + self.path_ndk +"/sources/android/support/include/")
+				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "include"))
+				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
 				if arch == "armv5":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
-					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "armeabi")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
 				elif arch == "armv7":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/armeabi-v7a/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "thumb/libgnustl_static.a")
-					self.global_flags_ld.append(         stdCppBasePath + "thumb/libsupc++.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "armeabi-v7a")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
 				elif arch == "mips":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/mips/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "libgnustl_static.a")
-					self.global_flags_ld.append(         stdCppBasePath + "libsupc++.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "mips")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include/"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libgnustl_static.a"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libsupc++.a"))
 				elif arch == "x86":
-					stdCppBasePath = self.path_ndk +"/sources/cxx-stl/gnu-libstdc++/" + gccVersion + "/libs/x86/"
-					self.global_include_cc.append("-I" + stdCppBasePath + "include/")
-					self.global_flags_ld.append(         stdCppBasePath + "libgnustl_static.a")
-					self.global_flags_ld.append(         stdCppBasePath + "libsupc++.a")
+					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "x86")
+					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libgnustl_static.a"))
+					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libsupc++.a"))
 		else :
-			self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/system/include/")
-			self.global_include_cc.append("-I" + self.path_ndk +"/sources/cxx-stl/stlport/stlport/")
-			self.global_flags_ld.append(self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-arm/usr/lib/libstdc++.a")
+			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "system", "include"))
+			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "stlport", "stlport"))
+			self.global_flags_ld.append(os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm", "usr", "lib", "libstdc++.a"))
 		
-		self.global_sysroot = "--sysroot=" + self.path_ndk +"/platforms/android-" + str(self.board_id) + "/arch-arm"
+		self.global_sysroot = "--sysroot=" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm")
 		
 		self.global_flags_cc.append("-D__ARM_ARCH_5__")
 		self.global_flags_cc.append("-D__ARM_ARCH_5T__")
