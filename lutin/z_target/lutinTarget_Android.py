@@ -224,6 +224,13 @@ class Target(target.Target):
 				return True
 		return False
 	
+	def convert_name_application(self, pkg_name):
+		value = pkg_name.lower()
+		value = value.replace(' ', '')
+		value = value.replace('-', '')
+		value = value.replace('_', '')
+		return value
+	
 	"""
 	def get_staging_path_data(self, binary_name):
 		return self.get_staging_path(binary_name) + self.path_data
