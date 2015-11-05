@@ -694,8 +694,9 @@ class Module:
 			if element==newElement:
 				return
 		listout.append(newElement)
-		if True==order:
-			listout.sort()
+		if order == True:
+			if type(newElement) is not dict:
+				listout.sort()
 	
 	def append_to_internal_list2(self, listout, module, list, order=False):
 		# add list in the Map
