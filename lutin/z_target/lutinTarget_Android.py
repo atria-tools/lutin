@@ -355,18 +355,22 @@ class Target(target.Target):
 		# http://asantoso.wordpress.com/2009/09/15/how-to-build-android-application-package-apk-from-the-command-line-using-the-sdk-tools-continuously-integrated-using-cruisecontrol/
 		debug.print_element("pkg", "R.java", "<==", "Resources files")
 		tools.create_directory_of_file(target_outpath + "/src/noFile")
-		androidToolPath = self.path_sdk + "/build-tools/"
+		android_tool_path = self.path_sdk + "/build-tools/"
 		# find android tool version
-		dirnames = tools.get_list_sub_path(androidToolPath)
-		if len(dirnames) != 1:
-			debug.error("an error occured when getting the tools for android")
-		androidToolPath += dirnames[0] + "/"
+		dirnames = tools.get_list_sub_path(android_tool_path)
+		if len(dirnames) == 0:
+			debug.warning("This does not comport directory: '" + android_tool_path + "'")
+			debug.error("An error occured when getting the tools for android")
+		elif len(dirnames) > 1:
+			dirnames = sorted(dirnames, reverse=True)
+			debug.debug("sort tools directory: '" + str(dirnames) + "' ==> select : " + str(dirnames[0]))
+		android_tool_path += dirnames[0] + "/"
 		
 		# this is to create resource file for android ... (we did not use aset in jar with ewol ...
 		adModResoucepath = ""
 		if "ADMOD_ID" in pkg_properties:
 			adModResoucepath = " -S " + self.path_sdk + "/extras/google/google_play_services/libproject/google-play-services_lib/res/ "
-		cmdLine = androidToolPath + "aapt p -f " \
+		cmdLine = android_tool_path + "aapt p -f " \
 		          + "-M " + target_outpath + "/AndroidManifest.xml " \
 		          + "-F " + target_outpath + "/resources.res " \
 		          + "-I " + self.path_sdk + "/platforms/android-" + str(self.board_id) + "/android.jar "\
@@ -419,7 +423,7 @@ class Target(target.Target):
 		multiprocess.run_command(cmdLine)
 		
 		debug.print_element("pkg", ".dex", "<==", "*.class")
-		cmdLine = androidToolPath + "dx " \
+		cmdLine = android_tool_path + "dx " \
 		          + "--dex --no-strict " \
 		          + "--output=" + target_outpath + "/build/" + pkg_name_application_name + ".dex " \
 		          + target_outpath + "/build/classes/ "
@@ -490,7 +494,7 @@ class Target(target.Target):
 		debug.print_element("pkg", ".apk(aligned)", "<==", ".apk (not aligned)")
 		tools.remove_file(target_outpath + "/" + pkg_name_application_name + ".apk")
 		# verbose mode : -v
-		cmdLine = androidToolPath + "zipalign 4 " \
+		cmdLine = android_tool_path + "zipalign 4 " \
 		          + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 		          + target_outpath + "/" + pkg_name_application_name + ".apk "
 		multiprocess.run_command(cmdLine)
