@@ -387,22 +387,23 @@ class Module:
 		# ----------------------------------------------------
 		# -- Generic library help                           --
 		# ----------------------------------------------------
+		package_version_string = tools.version_to_string(self.package_prop["VERSION"]);
 		if self.type == 'PREBUILD':
-			debug.print_element("Prebuild", self.name, "", "")
-		if self.type == 'LIBRARY':
-			debug.print_element("Library", self.name, "", "")
-		if self.type == 'LIBRARY_DYNAMIC':
-			debug.print_element("Library(dynamic)", self.name, "", "")
-		if self.type == 'LIBRARY_STATIC':
-			debug.print_element("Library(static)", self.name, "", "")
-		if self.type == 'BINARY':
-			debug.print_element("Binary(auto)", self.name, "", "")
-		if self.type == 'BINARY_SHARED':
-			debug.print_element("Binary (shared)", self.name, "", "")
-		if self.type == 'BINARY_STAND_ALONE':
-			debug.print_element("Binary (stand alone)", self.name, "", "")
-		if self.type == 'PACKAGE':
-			debug.print_element("Package", self.name, "", "")
+			debug.print_element("Prebuild", self.name, "-", package_version_string)
+		elif self.type == 'LIBRARY':
+			debug.print_element("Library", self.name, "-", package_version_string)
+		elif self.type == 'LIBRARY_DYNAMIC':
+			debug.print_element("Library(dynamic)", self.name, "-", package_version_string)
+		elif self.type == 'LIBRARY_STATIC':
+			debug.print_element("Library(static)", self.name, "-", package_version_string)
+		elif self.type == 'BINARY':
+			debug.print_element("Binary(auto)", self.name, "-", package_version_string)
+		elif self.type == 'BINARY_SHARED':
+			debug.print_element("Binary (shared)", self.name, "-", package_version_string)
+		elif self.type == 'BINARY_STAND_ALONE':
+			debug.print_element("Binary (stand alone)", self.name, "-", package_version_string)
+		elif self.type == 'PACKAGE':
+			debug.print_element("Package", self.name, "-", package_version_string)
 		# ----------------------------------------------------
 		# -- Sources compilation                            --
 		# ----------------------------------------------------
@@ -958,7 +959,7 @@ def import_path(path):
 			module_name = filename.replace('.py', '')
 			module_name = module_name.replace(__start_module_name, '')
 			debug.debug("MODULE:     Integrate module: '" + module_name + "' from '" + os.path.join(root, filename) + "'")
-			module_list.append([module_name,os.path.join(root, filename)])
+			module_list.append([module_name, os.path.join(root, filename)])
 	debug.verbose("New list module: ")
 	for mod in module_list:
 		debug.verbose("    " + str(mod[0]))
