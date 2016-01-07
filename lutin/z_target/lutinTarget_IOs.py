@@ -63,7 +63,6 @@ class Target(target.Target):
 			self.global_flags_ld.append("-miphoneos-version-min=8.0")
 			self.global_flags_cc.append("-miphoneos-version-min=8.0")
 		
-		self.global_flags_cc.append("-D__STDCPP_LLVM__")
 		self.global_flags_ld.append([
 			"-Xlinker",
 			"-objc_abi_version",

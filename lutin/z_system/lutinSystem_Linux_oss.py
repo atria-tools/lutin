@@ -24,7 +24,7 @@ class System(system.System):
 			return;
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag_CC("-ljack")
+		self.add_export_flag("link", "-ljack")
 		"""
 
 

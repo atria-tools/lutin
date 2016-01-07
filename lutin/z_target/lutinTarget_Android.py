@@ -25,13 +25,14 @@ class Target(target.Target):
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
 			config["bus-size"] = "32"
-		arch = ""
-		target.Target.__init__(self, "Android", config, arch)
+		self.type_arch = ""
+		target.Target.__init__(self, "Android", config, self.type_arch)
 		
+		debug.warning("plop " + str(self.ar))
 		if config["bus-size"] == "32":
-			arch="armv7"
+			self.type_arch="armv7"
 		else:
-			arch="arm64"
+			self.type_arch="arm64"
 		
 		self.path_ndk = os.getenv('PROJECT_NDK', "AUTO")
 		self.path_sdk = os.getenv('PROJECT_SDK', "AUTO")
@@ -60,10 +61,14 @@ class Target(target.Target):
 		
 		tmpOsVal = "64"
 		gccVersion = "4.9"
+		# TODO : Remove this or set it better ...
+		self.compilator_version = gccVersion
 		if host.BUS_SIZE==64:
 			tmpOsVal = "_64"
 		if self.config["compilator"] == "clang":
 			self.set_cross_base(self.path_ndk + "/toolchains/llvm-3.6/prebuilt/linux-x86" + tmpOsVal + "/bin/")
+			# Patch for LLVM AR tool
+			self.ar = self.cross + "llvm-ar"
 		else:
 			basepathArm = self.path_ndk + "/toolchains/arm-linux-androideabi-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
 			basepathMips = self.path_ndk + "/toolchains/mipsel-linux-android-" + gccVersion + "/prebuilt/linux-x86" + tmpOsVal + "/bin/"
@@ -106,75 +111,42 @@ class Target(target.Target):
 			debug.error("Can not find BOARD-ID ==> update your android SDK")
 		
 		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.board_id))
-		if arch == "armv5" or arch == "armv7":
+		if self.type_arch == "armv5" or self.type_arch == "armv7":
 			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm", "usr", "include"))
-		elif arch == "mips":
+		elif self.type_arch == "mips":
 			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-mips", "usr", "include"))
-		elif arch == "x86":
+		elif self.type_arch == "x86":
 			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-x86", "usr", "include"))
 		
-		if True:
-			if self.config["compilator"] == "clang":
-				if self.board_id < 21:
-					debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")
-				self.global_flags_cc.append("-D__STDCPP_LLVM__")
-				# llvm-libc++ : BSD | MIT
-				self.global_include_cc.append("-gcc-toolchain " + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
-				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
-				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "include"))
-				if arch == "armv5":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "armeabi")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libc++_static.a"))
-				elif arch == "armv7":
-					# The only one tested ... ==> but we have link error ...
-					self.global_flags_cc.append("-target armv7-none-linux-androideabi")
-					self.global_flags_cc.append("-march=armv7-a")
-					self.global_flags_cc.append("-mfpu=vfpv3-d16")
-					self.global_flags_cc.append("-mhard-float")
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libs", "armeabi-v7a")
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libc++_static.a"))
-					self.global_flags_ld.append("-target armv7-none-linux-androideabi")
-					self.global_flags_ld.append("-Wl,--fix-cortex-a8")
-					self.global_flags_ld.append("-Wl,--no-warn-mismatch")
-					self.global_flags_ld.append("-lm_hard")
-				elif arch == "mips":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "mips")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath + "include"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath + "libc++_static.a"))
-				elif arch == "x86":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "x86")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libc++_static.a"))
-			else:
-				self.global_flags_cc.append("-D__STDCPP_GNU__")
-				# GPL v3 (+ exception link for gcc compilator)
-				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "include"))
-				self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
-				if arch == "armv5":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "armeabi")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
-				elif arch == "armv7":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "armeabi-v7a")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
-				elif arch == "mips":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "mips")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include/"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libgnustl_static.a"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libsupc++.a"))
-				elif arch == "x86":
-					stdCppBasePath = os.path.join(self.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", gccVersion, "libs", "x86")
-					self.global_include_cc.append("-I" + os.path.join(stdCppBasePath, "include"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libgnustl_static.a"))
-					self.global_flags_ld.append(         os.path.join(stdCppBasePath, "libsupc++.a"))
-		else :
-			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "system", "include"))
-			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "cxx-stl", "stlport", "stlport"))
-			self.global_flags_ld.append(os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm", "usr", "lib", "libstdc++.a"))
+		self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
+		
+		if self.config["compilator"] == "clang":
+			self.global_include_cc.append("-gcc-toolchain " + os.path.join(self.path_ndk, "sources", "android", "support", "include"))
+			if self.type_arch == "armv5":
+				pass
+			elif self.type_arch == "armv7":
+				# The only one tested ... ==> but we have link error ...
+				self.global_flags_cc.append("-target armv7-none-linux-androideabi")
+				self.global_flags_cc.append("-march=armv7-a")
+				self.global_flags_cc.append("-mfpu=vfpv3-d16")
+				self.global_flags_cc.append("-mhard-float")
+				self.global_flags_ld.append("-target armv7-none-linux-androideabi")
+				self.global_flags_ld.append("-Wl,--fix-cortex-a8")
+				self.global_flags_ld.append("-Wl,--no-warn-mismatch")
+				self.global_flags_ld.append("-lm_hard")
+			elif self.type_arch == "mips":
+				pass
+			elif self.type_arch == "x86":
+				pass
+		else:
+			if self.type_arch == "armv5":
+				pass
+			elif self.type_arch == "armv7":
+				pass
+			elif self.type_arch == "mips":
+				pass
+			elif self.type_arch == "x86":
+				pass
 		
 		self.global_sysroot = "--sysroot=" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm")
 		
@@ -183,7 +155,7 @@ class Target(target.Target):
 		self.global_flags_cc.append("-D__ARM_ARCH_5E__")
 		self.global_flags_cc.append("-D__ARM_ARCH_5TE__")
 		if self.config["compilator"] != "clang":
-			if self.arch == "armv5":
+			if self.type_arch == "armv5":
 				# -----------------------
 				# -- arm V5 :
 				# -----------------------

@@ -86,6 +86,8 @@ class Target:
 		self.path_generate_code="/generate_header"
 		self.path_arch="/" + self.name
 		
+		self.global_flags_xx.append("-nostdlib")
+		
 		if "debug" == self.config["mode"]:
 			self.global_flags_cc.append("-g")
 			self.global_flags_cc.append("-DDEBUG")

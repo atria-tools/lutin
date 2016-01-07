@@ -82,7 +82,7 @@ class Module:
 		self.origin_file = file;
 		self.origin_path = tools.get_current_path(self.origin_file)
 		self.local_heritage = heritage.heritage(self, None)
-		
+		# TODO : Do a better dynamic property system => not really versatil
 		self.package_prop = { "COMPAGNY_TYPE" : "",
 		                      "COMPAGNY_NAME" : "",
 		                      "COMPAGNY_NAME2" : "",
@@ -627,11 +627,19 @@ class Module:
 		include_path = target.get_build_path_include(self.name)
 		for file in self.header:
 			src_path = os.path.join(self.origin_path, file["src"])
-			dst_path = os.path.join(include_path, file["dst"])
-			tools.copy_file(src_path,
-			                dst_path,
-			                force_identical=True,
-			                in_list=copy_list)
+			if "multi-dst" in file:
+				dst_path = os.path.join(include_path, file["multi-dst"])
+				tools.copy_anything(src_path,
+				                    dst_path,
+				                    recursive=False,
+				                    force_identical=True,
+				                    in_list=copy_list)
+			else:
+				dst_path = os.path.join(include_path, file["dst"])
+				tools.copy_file(src_path,
+				                dst_path,
+				                force_identical=True,
+				                in_list=copy_list)
 		#real copy files
 		tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
@@ -773,12 +781,17 @@ class Module:
 	
 	def add_header_file(self, list, destination_path=None):
 		if destination_path != None:
-			debug.verbose("Change destination PATH: " + str(destination_path))
+			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
 		for elem in list:
 			if destination_path != None:
-				new_list.append({"src":elem,
-				                 "dst":os.path.join(destination_path, os.path.basename(elem))})
+				base = os.path.basename(elem)
+				if '*' in base or '[' in base or '(' in base:
+					new_list.append({"src":elem,
+					                 "multi-dst":destination_path})
+				else:
+					new_list.append({"src":elem,
+					                 "dst":os.path.join(destination_path, base)})
 			else:
 				new_list.append({"src":elem,
 				                 "dst":elem})

@@ -38,8 +38,6 @@ class Target(target.Target):
 		#self.suffix_binary=''
 		#self.suffix_package=''
 		
-		self.global_flags_cc.append("-D__STDCPP_LLVM__")
-		
 		self.pkg_path_data = "Resources"
 		self.pkg_path_bin = "MacOS"
 		self.pkg_path_lib = "lib"

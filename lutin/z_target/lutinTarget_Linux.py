@@ -35,8 +35,6 @@ class Target(target.Target):
 				self.global_flags_cc.append("-m32")
 		
 		self.global_flags_cc.append("-fpic")
-		self.global_flags_cc.append("-D__STDCPP_GNU__")
-		
 		
 		self.pkg_path_data = "share"
 		self.pkg_path_bin = "bin"

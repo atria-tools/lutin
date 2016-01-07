@@ -23,7 +23,7 @@ class System(system.System):
 			return;
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag_LD([
+		self.add_export_flag("link", [
 		    "-lboost_system",
 		    "-lboost_thread",
 		    "-lboost_chrono"

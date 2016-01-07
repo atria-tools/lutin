@@ -36,6 +36,13 @@ def get_input_type():
 def get_output_type():
 	return ["o"]
 
+def remove_element(data, to_remove):
+	out = []
+	for elem in data:
+		if elem not in to_remove:
+			out.append(elem)
+	return out;
+
 ##
 ## @brief Commands for running gcc to compile a C++ file in object file.
 ##
@@ -68,29 +75,53 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		cmd.append(get_version_compilation_flags(flags, depancy.flags))
 	except:
 		pass
+	list_flags = [];
 	try:
-		cmd.append(target.global_flags_cc)
+		list_flags.append(target.global_flags_cc)
 	except:
 		pass
 	try:
-		cmd.append(target.global_flags_xx)
+		list_flags.append(target.global_flags_xx)
 	except:
 		pass
 	for type in ["c", "c++"]:
 		try:
-			cmd.append(depancy.flags[type])
+			list_flags.append(depancy.flags[type])
 		except:
 			pass
 	for view in ["local", "export"]:
 		for type in ["c", "c++"]:
 			try:
-				cmd.append(flags[view][type])
+				list_flags.append(flags[view][type])
 			except:
 				pass
+	# get blacklist of flags
+	list_flags_blacklist = [];
+	try:
+		list_flags_blacklist.append(target.global_flags_cc_remove)
+	except:
+		pass
+	try:
+		list_flags_blacklist.append(target.global_flags_xx_remove)
+	except:
+		pass
+	for type in ["c-remove", "c++-remove"]:
+		try:
+			list_flags_blacklist.append(depancy.flags[type])
+		except:
+			pass
+	for view in ["local", "export"]:
+		for type in ["c-remove", "c++-remove"]:
+			try:
+				list_flags_blacklist.append(flags[view][type])
+			except:
+				pass
+	# apply blacklisting of data and add it on the cmdLine
+	cmd.append(remove_element(list_flags, list_flags_blacklist));
 	cmd.append(["-c", "-MMD", "-MP"])
 	cmd.append(file_src)
 	# Create cmd line
-	cmdLine=tools.list_to_str(cmd)
+	cmdLine = tools.list_to_str(cmd)
 	# check the dependency for this file :
 	if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
 		return {"action":"add", "file":file_dst}

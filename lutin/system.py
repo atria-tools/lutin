@@ -23,6 +23,7 @@ class System:
 		self.include_cc=[]
 		self.export_flags_cc=[]
 		self.export_flags_xx=[]
+		self.export_flags_xx_remove=[]
 		self.export_flags_mm=[]
 		self.export_flags_m=[]
 		self.export_flags_ar=[]
@@ -31,6 +32,7 @@ class System:
 		self.export_libs_ld=[]
 		self.export_libs_ld_shared=[]
 		self.export_src=[]
+		self.export_path=[]
 		self.action_on_state={}
 		
 	def append_and_check(self, listout, newElement, order):
@@ -38,7 +40,7 @@ class System:
 			if element==newElement:
 				return
 		listout.append(newElement)
-		if True==order:
+		if order == True:
 			listout.sort()
 	
 	def append_to_internal_list(self, listout, list, order=False):
@@ -49,26 +51,39 @@ class System:
 			for elem in list:
 				self.append_and_check(listout, elem, order)
 	
-	def add_export_flag_LD(self, list):
-		self.append_to_internal_list(self.export_flags_ld, list)
-	
-	def add_export_flag_CC(self, list):
-		self.append_to_internal_list(self.export_flags_cc, list)
-	
-	def add_export_flag_XX(self, list):
-		self.append_to_internal_list(self.export_flags_xx, list)
-	
-	def add_export_flag_M(self, list):
-		self.append_to_internal_list(self.export_flags_m, list)
-	
-	def add_export_flag_MM(self, list):
-		self.append_to_internal_list(self.export_flags_mm, list)
-	
-	def add_export_SRC(self, list):
+	def add_export_sources(self, list):
 		self.append_to_internal_list(self.export_src, list)
 	
+	# todo : add other than C ...
+	def add_export_path(self, list):
+		self.append_to_internal_list(self.export_path, list)
+	
+	def add_export_flag(self, type, list):
+		if type == "link":
+			self.append_to_internal_list(self.export_flags_ld, list)
+		if type == "link-remove":
+			# TODO
+			pass
+		elif type == "c":
+			self.append_to_internal_list(self.export_flags_cc, list)
+		elif type == "c-remove":
+			# TODO
+			pass
+		elif type == "c++":
+			self.append_to_internal_list(self.export_flags_xx, list)
+		elif type == "c++-remove":
+			self.append_to_internal_list(self.export_flags_xx_remove, list)
+			pass
+		elif type == "m":
+			self.append_to_internal_list(self.export_flags_m, list)
+		elif type == "mm":
+			self.append_to_internal_list(self.export_flags_mm, list)
+		else:
+			debug.warning("no option : '" + str(type) + "'")
+		
+	
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
-		if name_of_state not in self.action_on_state:
+		if name_of_state not in self.action_on_add_src_filestate:
 			self.action_on_state[name_of_state] = [[level, name, action]]
 		else:
 			self.action_on_state[name_of_state].append([level, name, action])
@@ -76,15 +91,17 @@ class System:
 
 
 
-def createModuleFromSystem(target, dict):
+def create_module_from_system(target, dict):
 	myModule = module.Module(dict["path"], dict["name"], 'PREBUILD')
 	
 	myModule.add_export_flag('c', dict["system"].export_flags_cc)
 	myModule.add_export_flag('link', dict["system"].export_flags_ld)
 	myModule.add_export_flag('c++', dict["system"].export_flags_xx)
+	myModule.add_export_flag('c++-remove', dict["system"].export_flags_xx_remove)
 	myModule.add_export_flag('m', dict["system"].export_flags_m)
 	myModule.add_export_flag('mm', dict["system"].export_flags_mm)
 	myModule.add_src_file(dict["system"].export_src)
+	myModule.add_export_path(dict["system"].export_path)
 	
 	for elem in dict["system"].action_on_state:
 		level, name, action = dict["system"].action_on_state[elem]
@@ -172,7 +189,7 @@ def load(target, lib_name, target_name):
 				debug.error("you must call this function after checking of the system exist() !2!")
 			if data["module"] == None:
 				# create a module from the system interface...
-				data["module"] = createModuleFromSystem(target, data)
+				data["module"] = create_module_from_system(target, data)
 				data["loaded"] = True
 			target.add_module(data["module"])
 			return
