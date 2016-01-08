@@ -422,19 +422,18 @@ class Target:
 		for elem in self.module_list:
 			if elem.name == name:
 				return True
-		# TODO : Check internal module and system module ...
-		# need to import the module (or the system module ...)
-		exist = system.exist(name, self.name, self)
-		if exist == True:
-			system.load(self, name, self.name)
-			return True;
 		# try to find in the local Modules:
 		exist = module.exist(self, name)
 		if exist == True:
 			module.load_module(self, name)
 			return True;
-		else:
-			return False;
+		# need to import the module (or the system module ...)
+		exist = system.exist(name, self.name, self)
+		if exist == True:
+			system.load(self, name, self.name)
+			return True;
+		# we did not find the module ...
+		return False;
 	
 	def load_all(self):
 		listOfAllTheModule = module.list_all_module()
