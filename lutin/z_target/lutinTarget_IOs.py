@@ -56,25 +56,26 @@ class Target(target.Target):
 		
 		if self.sumulator == True:
 			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
-			self.global_flags_ld.append("-mios-simulator-version-min=8.0")
-			self.global_flags_cc.append("-mios-simulator-version-min=8.0")
+			self.add_flag("link", "-mios-simulator-version-min=8.0")
+			self.add_flag("c", "-mios-simulator-version-min=8.0")
 		else:
 			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
-			self.global_flags_ld.append("-miphoneos-version-min=8.0")
-			self.global_flags_cc.append("-miphoneos-version-min=8.0")
+			self.add_flag("link", "-miphoneos-version-min=8.0")
+			self.add_flag("c", "-miphoneos-version-min=8.0")
 		
-		self.global_flags_ld.append([
-			"-Xlinker",
-			"-objc_abi_version",
-			"-Xlinker 2",
-			"-Xlinker",
-			"-no_implicit_dylibs",
-			"-stdlib=libc++",
-			"-fobjc-arc",
-			"-fobjc-link-runtime"])
+		self.add_flag("link", [
+		    "-Xlinker",
+		    "-objc_abi_version",
+		    "-Xlinker 2",
+		    "-Xlinker",
+		    "-no_implicit_dylibs",
+		    "-stdlib=libc++",
+		    "-fobjc-arc",
+		    "-fobjc-link-runtime"
+		    ])
 		
-		self.global_flags_m.append("-fobjc-arc")
-		#self.global_flags_m.append("-fmodules")
+		self.add_flag("m", ["-fobjc-arc")
+		#self.add_flag("m", ["-fmodules")
 		
 		self.pkg_path_data = "share"
 		self.pkg_path_bin = ""

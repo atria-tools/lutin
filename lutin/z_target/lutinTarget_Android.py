@@ -110,7 +110,7 @@ class Target(target.Target):
 		if self.board_id == 0:
 			debug.error("Can not find BOARD-ID ==> update your android SDK")
 		
-		self.global_flags_cc.append("-D__ANDROID_BOARD_ID__=" + str(self.board_id))
+		self.add_flag("c", "-D__ANDROID_BOARD_ID__=" + str(self.board_id))
 		if self.type_arch == "armv5" or self.type_arch == "armv7":
 			self.global_include_cc.append("-I" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm", "usr", "include"))
 		elif self.type_arch == "mips":
@@ -126,14 +126,18 @@ class Target(target.Target):
 				pass
 			elif self.type_arch == "armv7":
 				# The only one tested ... ==> but we have link error ...
-				self.global_flags_cc.append("-target armv7-none-linux-androideabi")
-				self.global_flags_cc.append("-march=armv7-a")
-				self.global_flags_cc.append("-mfpu=vfpv3-d16")
-				self.global_flags_cc.append("-mhard-float")
-				self.global_flags_ld.append("-target armv7-none-linux-androideabi")
-				self.global_flags_ld.append("-Wl,--fix-cortex-a8")
-				self.global_flags_ld.append("-Wl,--no-warn-mismatch")
-				self.global_flags_ld.append("-lm_hard")
+				self.add_flag("c", [
+				    "-target armv7-none-linux-androideabi",
+				    "-march=armv7-a",
+				    "-mfpu=vfpv3-d16",
+				    "-mhard-float"
+				    ])
+				self.add_flag("link", [
+				    "-target armv7-none-linux-androideabi",
+				    "-Wl,--fix-cortex-a8",
+				    "-Wl,--no-warn-mismatch",
+				    "-lm_hard"
+				    ])
 			elif self.type_arch == "mips":
 				pass
 			elif self.type_arch == "x86":
@@ -150,45 +154,57 @@ class Target(target.Target):
 		
 		self.global_sysroot = "--sysroot=" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm")
 		
-		self.global_flags_cc.append("-D__ARM_ARCH_5__")
-		self.global_flags_cc.append("-D__ARM_ARCH_5T__")
-		self.global_flags_cc.append("-D__ARM_ARCH_5E__")
-		self.global_flags_cc.append("-D__ARM_ARCH_5TE__")
+		self.add_flag("c", [
+		    "-D__ARM_ARCH_5__",
+		    "-D__ARM_ARCH_5T__",
+		    "-D__ARM_ARCH_5E__",
+		    "-D__ARM_ARCH_5TE__"
+		    ])
 		if self.config["compilator"] != "clang":
 			if self.type_arch == "armv5":
 				# -----------------------
 				# -- arm V5 :
 				# -----------------------
-				self.global_flags_cc.append("-march=armv5te")
-				self.global_flags_cc.append("-msoft-float")
+				self.add_flag("c", [
+				    "-march=armv5te",
+				    "-msoft-float"
+				    ])
 			else:
 				# -----------------------
 				# -- arm V7 (Neon) :
 				# -----------------------
-				self.global_flags_cc.append("-mfpu=neon")
-				self.global_flags_cc.append("-mfloat-abi=softfp")
-				self.global_flags_ld.append("-mfpu=neon")
-				self.global_flags_ld.append("-mfloat-abi=softfp")
-				self.global_flags_cc.append("-D__ARM_ARCH_7__")
-				self.global_flags_cc.append("-D__ARM_NEON__")
+				self.add_flag("c", [
+				    "-mfpu=neon",
+				    "-mfloat-abi=softfp",
+				    "-D__ARM_ARCH_7__",
+				    "-D__ARM_NEON__"
+				    ])
+				self.add_flag("link", [
+				    "-mfpu=neon",
+				    "-mfloat-abi=softfp"
+				    ])
 		
 		# the -mthumb must be set for all the android produc, some ot the not work coretly without this one ... (all android code is generated with this flags)
-		self.global_flags_cc.append("-mthumb")
+		self.add_flag("c", "-mthumb")
 		# -----------------------
 		# -- Common flags :
 		# -----------------------
-		self.global_flags_cc.append("-fpic")
+		self.add_flag("c", "-fpic")
 		if self.config["compilator"] != "clang":
-			self.global_flags_cc.append("-ffunction-sections")
-			self.global_flags_cc.append("-funwind-tables")
-			self.global_flags_cc.append("-fstack-protector")
-			self.global_flags_cc.append("-Wno-psabi")
-			self.global_flags_cc.append("-mtune=xscale")
-			self.global_flags_cc.append("-fomit-frame-pointer")
-			self.global_flags_cc.append("-fno-strict-aliasing")
-		self.global_flags_xx.append("-frtti")
-		self.global_flags_cc.append("-fexceptions")
-		self.global_flags_xx.append("-Wa,--noexecstack")
+			self.add_flag("c", [
+			    "-ffunction-sections",
+			    "-funwind-tables",
+			    "-fstack-protector",
+			    "-Wno-psabi",
+			    "-mtune=xscale",
+			    "-fomit-frame-pointer",
+			    "-fno-strict-aliasing"
+			    ])
+		self.add_flag("c++", [
+		    "-frtti",
+		    "-fexceptions",
+		    "-Wa,--noexecstack"
+		    ])
 	
 	def check_right_package(self, pkg_properties, value):
 		for val in pkg_properties["RIGHT"]:

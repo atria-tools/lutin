@@ -69,14 +69,11 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		cmd.append(local_ref_on_builder_cpp.get_version_compilation_flags(flags, depancy.flags))
 	except:
 		pass
-	try:
-		cmd.append(target.global_flags_cc)
-	except:
-		pass
-	try:
-		cmd.append(target.global_flags_mm)
-	except:
-		pass
+	for type in ["c", "c++", "m", "mm"]:
+		try:
+			cmd.append(target.global_flags[type])
+		except:
+			pass
 	for type in ["c", "c++", "m", "mm"]:
 		try:
 			cmd.append(depancy.flags[type])

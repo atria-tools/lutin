@@ -110,7 +110,7 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 	except:
 		pass
 	try:
-		cmd.append(target.global_flags_ld)
+		cmd.append(target.global_flags["link"])
 	except:
 		pass
 	cmdLine=tools.list_to_str(cmd)

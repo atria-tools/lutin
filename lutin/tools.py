@@ -300,3 +300,31 @@ def store_warning(file, output, err):
 	file2.close()
 
 
+## List tools:
+def list_append_and_check(listout, newElement, order):
+	for element in listout:
+		if element==newElement:
+			return
+	listout.append(newElement)
+	if order == True:
+		if type(newElement) is not dict:
+			listout.sort()
+
+def list_append_to(out_list, in_list, order=False):
+	if type(in_list) == str:
+		list_append_and_check(out_list, in_list, order)
+	elif type(in_list) == list:
+		# mulyiple imput in the list ...
+		for elem in in_list:
+			list_append_and_check(out_list, elem, order)
+	elif type(in_list) == dict:
+		list_append_and_check(out_list, in_list, order)
+	else:
+		debug.warning("can not add in list other than {list/dict/str} : " + str(type(in_list)))
+
+def list_append_to_2(listout, module, list, order=False):
+	# add list in the Map
+	if module not in listout:
+		listout[module] = []
+	# add elements...
+	list_append_to(listout[module], list, order)

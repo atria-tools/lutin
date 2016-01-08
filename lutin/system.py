@@ -15,72 +15,30 @@ import datetime
 # Local import
 from . import debug
 from . import module
+from . import tools
 
 class System:
 	def __init__(self):
 		self.valid=False;
 		self.help="";
-		self.include_cc=[]
-		self.export_flags_cc=[]
-		self.export_flags_xx=[]
-		self.export_flags_xx_remove=[]
-		self.export_flags_mm=[]
-		self.export_flags_m=[]
-		self.export_flags_ar=[]
-		self.export_flags_ld=[]
-		self.export_flags_ld_shared=[]
-		self.export_libs_ld=[]
-		self.export_libs_ld_shared=[]
+		self.export_depends=[]
+		self.export_flags={}
 		self.export_src=[]
 		self.export_path=[]
 		self.action_on_state={}
-		
-	def append_and_check(self, listout, newElement, order):
-		for element in listout:
-			if element==newElement:
-				return
-		listout.append(newElement)
-		if order == True:
-			listout.sort()
-	
-	def append_to_internal_list(self, listout, list, order=False):
-		if type(list) == type(str()):
-			self.append_and_check(listout, list, order)
-		else:
-			# mulyiple imput in the list ...
-			for elem in list:
-				self.append_and_check(listout, elem, order)
 	
 	def add_export_sources(self, list):
-		self.append_to_internal_list(self.export_src, list)
+		tools.list_append_to(self.export_src, list)
 	
 	# todo : add other than C ...
 	def add_export_path(self, list):
-		self.append_to_internal_list(self.export_path, list)
+		tools.list_append_to(self.export_path, list)
+	
+	def add_module_depend(self, list):
+		tools.list_append_to(self.export_depends, list, True)
 	
 	def add_export_flag(self, type, list):
-		if type == "link":
-			self.append_to_internal_list(self.export_flags_ld, list)
-		if type == "link-remove":
-			# TODO
-			pass
-		elif type == "c":
-			self.append_to_internal_list(self.export_flags_cc, list)
-		elif type == "c-remove":
-			# TODO
-			pass
-		elif type == "c++":
-			self.append_to_internal_list(self.export_flags_xx, list)
-		elif type == "c++-remove":
-			self.append_to_internal_list(self.export_flags_xx_remove, list)
-			pass
-		elif type == "m":
-			self.append_to_internal_list(self.export_flags_m, list)
-		elif type == "mm":
-			self.append_to_internal_list(self.export_flags_mm, list)
-		else:
-			debug.warning("no option : '" + str(type) + "'")
-		
+		tools.list_append_to_2(self.export_flags, type, list)
 	
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
 		if name_of_state not in self.action_on_add_src_filestate:
@@ -93,16 +51,17 @@ class System:
 
 def create_module_from_system(target, dict):
 	myModule = module.Module(dict["path"], dict["name"], 'PREBUILD')
-	
-	myModule.add_export_flag('c', dict["system"].export_flags_cc)
-	myModule.add_export_flag('link', dict["system"].export_flags_ld)
-	myModule.add_export_flag('c++', dict["system"].export_flags_xx)
-	myModule.add_export_flag('c++-remove', dict["system"].export_flags_xx_remove)
-	myModule.add_export_flag('m', dict["system"].export_flags_m)
-	myModule.add_export_flag('mm', dict["system"].export_flags_mm)
+	# add element flags to export
+	for elem in dict["system"].export_flags:
+		debug.verbose("add element :" + str(elem) + " elems=" + str(dict["system"].export_flags[elem]))
+		myModule.add_export_flag(elem, dict["system"].export_flags[elem])
+	# add module dependency
+	myModule.add_module_depend(dict["system"].export_depends)
+	# add exporting sources
 	myModule.add_src_file(dict["system"].export_src)
+	# add export path
 	myModule.add_export_path(dict["system"].export_path)
-	
+	# Export all actions ...
 	for elem in dict["system"].action_on_state:
 		level, name, action = dict["system"].action_on_state[elem]
 		target.add_action(elem, level, name, action)

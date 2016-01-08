@@ -70,11 +70,11 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	except:
 		pass
 	try:
-		cmd.append(target.global_flags_cc)
+		cmd.append(target.global_flags["c"])
 	except:
 		pass
 	try:
-		cmd.append(target.global_flags_m)
+		cmd.append(target.global_flags["m"])
 	except:
 		pass
 	for type in ["c", "m"]:

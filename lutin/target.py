@@ -54,11 +54,11 @@ class Target:
 		# Target global variables.
 		###############################################################################
 		self.global_include_cc=[]
+		"""
 		self.global_flags_cc=['-D__TARGET_OS__'+self.name,
 		                      '-D__TARGET_ARCH__'+self.select_arch,
 		                      '-D__TARGET_ADDR__'+self.select_bus + 'BITS',
 		                      '-D_REENTRANT']
-		
 		self.global_flags_xx=[]
 		self.global_flags_mm=[]
 		if self.name == "Windows":
@@ -68,6 +68,9 @@ class Target:
 		self.global_flags_ar=['rcs']
 		self.global_flags_ld=[]
 		self.global_flags_ld_shared=[]
+		"""
+		self.global_flags={}
+		
 		self.global_libs_ld=[]
 		self.global_libs_ld_shared=[]
 		
@@ -86,30 +89,42 @@ class Target:
 		self.path_generate_code="/generate_header"
 		self.path_arch="/" + self.name
 		
-		self.global_flags_xx.append("-nostdlib")
+		self.add_flag("c", [
+		    '-D__TARGET_OS__' + self.name,
+		    '-D__TARGET_ARCH__' + self.select_arch,
+		    '-D__TARGET_ADDR__' + self.select_bus + 'BITS',
+		    '-D_REENTRANT'
+		    ])
+		self.add_flag("c++", "-nostdlib")
+		self.add_flag("ar", 'rcs')
+		
+		if self.name == "Windows":
+			self.add_flag("c++", ['-static-libgcc', '-static-libstdc++'])
 		
 		if "debug" == self.config["mode"]:
-			self.global_flags_cc.append("-g")
-			self.global_flags_cc.append("-DDEBUG")
-			self.global_flags_cc.append("-O0")
+			self.add_flag("c", [
+			    "-g",
+			    "-DDEBUG",
+			    "-O0"
+			    ])
 		else:
-			self.global_flags_cc.append("-DNDEBUG")
-			self.global_flags_cc.append("-O3")
+			self.add_flag("c", [
+			    "-DNDEBUG",
+			    "-O3"
+			    ])
 		
 		## To add code coverate on build result system
 		if self.config["gcov"] == True:
-			self.global_flags_cc.append("-fprofile-arcs")
-			self.global_flags_cc.append("-ftest-coverage")
-			self.global_flags_ld.append("-fprofile-arcs")
-			self.global_flags_ld.append("-ftest-coverage")
+			self.add_flag("c", [
+			    "-fprofile-arcs",
+			    "-ftest-coverage"
+			    ])
+			self.add_flag("link", [
+			    "-fprofile-arcs",
+			    "-ftest-coverage"
+			    ])
 		
 		self.update_path_tree()
-		"""
-		self.path_bin="usr/bin"
-		self.path_lib="usr/lib"
-		self.path_data="usr/share"
-		self.path_doc="usr/share/doc"
-		"""
 		self.path_bin="bin"
 		self.path_lib="lib"
 		self.path_data="share"
@@ -138,6 +153,9 @@ class Target:
 		
 		# special case for IOS (example) no build dynamicly ...
 		self.support_dynamic_link = True
+	
+	def add_flag(self, type, list):
+		tools.list_append_to_2(self.global_flags, type, list)
 	
 	def update_path_tree(self):
 		self.path_out = os.path.join("out", self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])

@@ -698,49 +698,21 @@ class Module:
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
-	def append_and_check(self, listout, newElement, order):
-		for element in listout:
-			if element==newElement:
-				return
-		listout.append(newElement)
-		if order == True:
-			if type(newElement) is not dict:
-				listout.sort()
-	
-	def append_to_internal_list2(self, listout, module, list, order=False):
-		# add list in the Map
-		if module not in listout:
-			listout[module] = []
-		# add elements...
-		self.append_to_internal_list(listout[module], list, order)
-	
-	def append_to_internal_list(self, out_list, in_list, order=False):
-		if type(in_list) == str:
-			self.append_and_check(out_list, in_list, order)
-		elif type(in_list) == list:
-			# mulyiple imput in the list ...
-			for elem in in_list:
-				self.append_and_check(out_list, elem, order)
-		elif type(in_list) == dict:
-			self.append_and_check(out_list, in_list, order)
-		else:
-			debug.warning("can not add in list other than {list/dict/str} : " + str(type(in_list)))
-	
 	def add_module_depend(self, list):
-		self.append_to_internal_list(self.depends, list, True)
+		tools.list_append_to(self.depends, list, True)
 	
 	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
-		self.append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
+		tools.list_append_and_check(self.depends_optionnal, [module_name, compilation_flags, export], True)
 	
 	def add_path(self, list, type='c'):
-		self.append_to_internal_list2(self.path["local"], type, list)
+		tools.list_append_to_2(self.path["local"], type, list)
 	
 	def add_export_flag(self, type, list):
-		self.append_to_internal_list2(self.flags["export"], type, list)
+		tools.list_append_to_2(self.flags["export"], type, list)
 	
 	# add the link flag at the module
 	def compile_flags(self, type, list):
-		self.append_to_internal_list2(self.flags["local"], type, list)
+		tools.list_append_to_2(self.flags["local"], type, list)
 	
 	def compile_version(self, compilator_type, version, same_as_api=True, gnu=False):
 		if    compilator_type == "c++" \
@@ -777,7 +749,7 @@ class Module:
 			debug.warning("Can not set version of compilator:" + str(compilator_type));
 	
 	def add_src_file(self, list):
-		self.append_to_internal_list(self.src, list, True)
+		tools.list_append_to(self.src, list, True)
 	
 	def add_header_file(self, list, destination_path=None):
 		if destination_path != None:
@@ -795,10 +767,10 @@ class Module:
 			else:
 				new_list.append({"src":elem,
 				                 "dst":elem})
-		self.append_to_internal_list(self.header, new_list, True)
+		tools.list_append_to(self.header, new_list, True)
 	
 	def add_export_path(self, list, type='c'):
-		self.append_to_internal_list2(self.path["export"], type, list)
+		tools.list_append_to_2(self.path["export"], type, list)
 	
 	def copy_image(self, source, destination='', sizeX=-1, sizeY=-1):
 		self.image_to_copy.append([source, destination, sizeX, sizeY])

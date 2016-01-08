@@ -45,7 +45,7 @@ def link(file, binary, target, depancy, flags, name, basic_path):
 		target.ar
 		]
 	try:
-		cmd.append(target.global_flags_ar)
+		cmd.append(target.global_flags["ar"])
 	except:
 		pass
 	try:

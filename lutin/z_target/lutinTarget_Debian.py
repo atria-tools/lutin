@@ -28,13 +28,13 @@ class Target(target.Target):
 		if self.config["bus-size"] == "64":
 			# 64 bits
 			if host.BUS_SIZE != 64:
-				self.global_flags_cc.append("-m64")
+				self.add_flag("c", "-m64")
 		else:
 			# 32 bits
 			if host.BUS_SIZE != 32:
-				self.global_flags_cc.append("-m32")
+				self.add_flag("c", "-m32")
 		
-		self.global_flags_cc.append("-fpic")
+		self.add_flag("c", "-fpic")
 		
 		self.pkg_path_data = "share"
 		self.pkg_path_bin = "bin"

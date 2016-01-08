@@ -77,11 +77,11 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		pass
 	list_flags = [];
 	try:
-		list_flags.append(target.global_flags_cc)
+		list_flags.append(target.global_flags["c"])
 	except:
 		pass
 	try:
-		list_flags.append(target.global_flags_xx)
+		list_flags.append(target.global_flags["c++"])
 	except:
 		pass
 	for type in ["c", "c++"]:
@@ -98,11 +98,11 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	# get blacklist of flags
 	list_flags_blacklist = [];
 	try:
-		list_flags_blacklist.append(target.global_flags_cc_remove)
+		list_flags_blacklist.append(target.global_flags["c-remove"])
 	except:
 		pass
 	try:
-		list_flags_blacklist.append(target.global_flags_xx_remove)
+		list_flags_blacklist.append(target.global_flags["c++-remove"])
 	except:
 		pass
 	for type in ["c-remove", "c++-remove"]:
