@@ -59,10 +59,15 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 			if lib_name not in depancy.src['dynamic']:
 				list_static.append(elem)
 	#create command Line
-	cmd = [
-		target.xx,
-		"-o", file_dst
-		]
+	cmd = []
+	# a specific case to not depend on the libstdc++ automaticly added by the G++ or clang++ compilator ==> then need to compile with GCC or CLANG if use libcxx from llvm or other ...
+	if     "need-libstdc++" in depancy.flags \
+	   and depancy.flags["need-libstdc++"] == True:
+		cmd.append(target.xx)
+	else:
+		cmd.append(target.cc)
+	
+	cmd.append(["-o", file_dst])
 	try:
 		cmd.append(target.global_sysroot)
 	except:
@@ -76,6 +81,22 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 		cmd.append(file_src)
 	except:
 		pass
+	for view in ["local", "export"]:
+		for type in ["link", "link-dynamic"]:
+			try:
+				cmd.append(flags[view][type])
+			except:
+				pass
+	for type in ["link", "link-dynamic"]:
+		try:
+			cmd.append(depancy.flags[type])
+		except:
+			pass
+	for type in ["link", "link-dynamic"]:
+		try:
+			cmd.append(target.global_flags[type])
+		except:
+			pass
 	try:
 		# keep only compilated files ...
 		cmd.append(tools.filter_extention(depancy.src['src'], get_input_type()))
@@ -95,22 +116,6 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 		   and target.name != "Android":
 			if len(list_dynamic) > 0:
 				cmd.append("-Wl,-R$ORIGIN/../lib/")
-	except:
-		pass
-	try:
-		cmd.append(flags["local"]["link"])
-	except:
-		pass
-	try:
-		cmd.append(flags["export"]["link"])
-	except:
-		pass
-	try:
-		cmd.append(depancy.flags["link"])
-	except:
-		pass
-	try:
-		cmd.append(target.global_flags["link"])
 	except:
 		pass
 	cmdLine=tools.list_to_str(cmd)

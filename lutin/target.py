@@ -216,6 +216,16 @@ class Target:
 		self.strip = self.cross + "strip"
 		self.dlltool = self.cross + "dlltool"
 		self.update_path_tree()
+		
+		#some static libraries that is sometime needed when not use stdlib ...
+		ret = multiprocess.run_command_direct(self.xx + " -print-file-name=libgcc.a");
+		if ret == False:
+			debug.error("Can not get the g++/clang++ libgcc.a ...")
+		self.stdlib_name_libgcc = ret;
+		ret = multiprocess.run_command_direct(self.xx + " -print-file-name=libsupc++.a");
+		if ret == False:
+			debug.error("Can not get the g++/clang++ libsupc++.a ...")
+		self.stdlib_name_libsupc = ret;
 	
 	def get_build_mode(self):
 		return self.config["mode"]

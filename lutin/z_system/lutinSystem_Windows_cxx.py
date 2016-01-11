@@ -27,5 +27,6 @@ class System(system.System):
 		    "-static-libstdc++",
 		    "-static"
 		    ])
+		self.add_export_flag("need-libstdc++", True)
 
 

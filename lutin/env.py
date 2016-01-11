@@ -76,38 +76,42 @@ def print_pretty(my_string, force=False):
 		baseElementList = []
 		if end_with(cmdApplication, ["javac"]) == True:
 			baseElementList = [
-				"-d",
-				"-D",
-				"-classpath",
-				"-sourcepath"
-				]
+			    "-d",
+			    "-D",
+			    "-classpath",
+			    "-sourcepath"
+			    ]
 		elif end_with(cmdApplication, ["jar"]) == True:
 			baseElementList = [
-				"cf",
-				"-C"
-				]
+			    "cf",
+			    "-C"
+			    ]
 		elif end_with(cmdApplication, ["aapt"]) == True:
 			baseElementList = [
-				"-M",
-				"-F",
-				"-I",
-				"-S",
-				"-J"
-				]
+			    "-M",
+			    "-F",
+			    "-I",
+			    "-S",
+			    "-J"
+			    ]
 		elif end_with(cmdApplication, ["g++", "gcc", "clang", "clang++", "ar", "ld", "ranlib"]) == True:
 			baseElementList = [
-				"-o",
-				"-D",
-				"-I",
-				"-L",
-				"-framework",
-				"-isysroot",
-				"-arch",
-				"-keystore",
-				"-sigalg",
-				"-digestalg",
-				"-target",
-				"-gcc-toolchain"]
+			    "-o",
+			    "-D",
+			    "-I",
+			    "-L",
+			    "-framework",
+			    "-isysroot",
+			    "-arch",
+			    "-keystore",
+			    "-sigalg",
+			    "-digestalg",
+			    "-target",
+			    "-gcc-toolchain",
+			    "-current_version",
+			    "-compatibility_version"
+			    ]
+
 		for element in baseElementList:
 			tmpcmdLine = tmpcmdLine.replace(element+'\n\t', element+' ')
 		for element in ["<", "<<", ">", ">>"]:

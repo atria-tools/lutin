@@ -97,6 +97,15 @@ def warning(input, force=False):
 		print(color_purple + "[WARNING] " + input + color_default)
 		debugLock.release()
 
+def todo(input, force=False):
+	global debugLock
+	global debugLevel
+	if    debugLevel >= 3 \
+	   or force == True:
+		debugLock.acquire()
+		print(color_purple + "[TODO] " + input + color_default)
+		debugLock.release()
+
 def error(input, threadID=-1, force=False, crash=True):
 	global debugLock
 	global debugLevel

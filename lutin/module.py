@@ -711,6 +711,7 @@ class Module:
 		tools.list_append_to_2(self.flags["export"], type, list)
 	
 	# add the link flag at the module
+	# TODO : Rename this in add_flag
 	def compile_flags(self, type, list):
 		tools.list_append_to_2(self.flags["local"], type, list)
 	

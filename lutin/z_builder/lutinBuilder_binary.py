@@ -62,9 +62,14 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 			if lib_name not in depancy.src['dynamic']:
 				list_static.append(elem)
 	#create comand line:
-	cmd = [
-		target.xx
-		]
+	cmd = []
+	# a specific case to not depend on the libstdc++ automaticly added by the G++ or clang++ compilator ==> then need to compile with GCC or CLANG if use libcxx from llvm or other ...
+	if     "need-libstdc++" in depancy.flags \
+	   and depancy.flags["need-libstdc++"] == True:
+		cmd.append(target.xx)
+	else:
+		cmd.append(target.cc)
+	
 	try:
 		cmd.append(target.arch)
 	except:

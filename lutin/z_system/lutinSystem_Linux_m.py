@@ -16,11 +16,10 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help = "CXX: Generic C++ library"
+		self.help="M : m library \n base of std libs (availlagle in GNU C lib and bionic"
+		# No check ==> on the basic std libs:
 		self.valid = True
-		# no check needed ==> just add this:
-		self.add_export_flag("c++","-D__STDCPP_LLVM__")
-		self.add_export_flag("c++-remove","-nostdlib")
-		self.add_export_flag("need-libstdc++", True)
+		# todo : create a searcher of the presence of the library:
+		self.add_export_flag("link", "-lm")
 
 
