@@ -97,13 +97,30 @@ class HeritageList:
 			debug.verbose("	" + element.name + " " + str(element.depends))
 		for element in reversed(self.list_heritage):
 			for flags in element.flags:
-				if flags in ["c-version", "c++-version"]:
-					continue
+				# get value
 				value = element.flags[flags]
-				if flags not in self.flags:
-					self.flags[flags] = value
-				else:
-					append_to_list(self.flags[flags], value)
+				# if it is a list, simply add element on the previous one
+				if type(value) == list:
+					if flags not in self.flags:
+						self.flags[flags] = value
+					else:
+						append_to_list(self.flags[flags], value)
+				elif type(value) == bool:
+					if flags not in self.flags:
+						self.flags[flags] = value
+					else:
+						# keep only true, if false ==> bad case ...
+						if    self.flags[flags] == True \
+						   or value == True:
+							self.flags[flags] = True
+				elif type(value) == int:
+					# case of "c-version", "c++-version"
+					if flags not in self.flags:
+						self.flags[flags] = value
+					else:
+						# keep only true, if false ==> bad case ...
+						if self.flags[flags] < value:
+							self.flags[flags] = value
 			for ppp in element.path:
 				value = element.path[ppp]
 				if ppp not in self.path:
@@ -113,18 +130,6 @@ class HeritageList:
 			append_to_list(self.src['src'], element.src['src'])
 			append_to_list(self.src['dynamic'], element.src['dynamic'])
 			append_to_list(self.src['static'], element.src['static'])
-			if "c-version" in element.flags:
-				ver = element.flags["c-version"]
-				if "c-version" in self.flags:
-					if self.flags["c-version"] > ver:
-						ver = self.flags["c-version"]
-				self.flags["c-version"] = ver
-			if "c++-version" in element.flags:
-				ver = element.flags["c++-version"]
-				if "c++-version" in self.flags:
-					if self.flags["c++-version"] > ver:
-						ver = self.flags["c++-version"]
-				self.flags["c++-version"] = ver
 
 
 class heritage:

@@ -323,6 +323,10 @@ def list_append_to(out_list, in_list, order=False):
 		debug.warning("can not add in list other than {list/dict/str} : " + str(type(in_list)))
 
 def list_append_to_2(listout, module, list, order=False):
+	# sepcial cse of bool
+	if type(list) == bool:
+		listout[module] = list
+		return
 	# add list in the Map
 	if module not in listout:
 		listout[module] = []
