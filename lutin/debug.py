@@ -52,6 +52,24 @@ def enable_color():
 	global color_cyan
 	color_cyan   = "\033[36m"
 
+def disable_color():
+	global debugColor
+	debugColor = True
+	global color_default
+	color_default= ""
+	global color_red
+	color_red    = ""
+	global color_green
+	color_green  = ""
+	global color_yellow
+	color_yellow = ""
+	global color_blue
+	color_blue   = ""
+	global color_purple
+	color_purple = ""
+	global color_cyan
+	color_cyan   = ""
+
 def extreme_verbose(input, force=False):
 	global debugLock
 	global debugLevel
@@ -106,7 +124,7 @@ def todo(input, force=False):
 		print(color_purple + "[TODO] " + input + color_default)
 		debugLock.release()
 
-def error(input, threadID=-1, force=False, crash=True):
+def error(input, thread_id=-1, force=False, crash=True):
 	global debugLock
 	global debugLevel
 	if    debugLevel >= 1 \
@@ -114,10 +132,10 @@ def error(input, threadID=-1, force=False, crash=True):
 		debugLock.acquire()
 		print(color_red + "[ERROR] " + input + color_default)
 		debugLock.release()
-	if crash==True:
+	if crash == True:
 		from . import multiprocess
-		multiprocess.error_occured()
-		if threadID != -1:
+		multiprocess.set_error_occured()
+		if thread_id != -1:
 			threading.interrupt_main()
 		exit(-1)
 		#os_exit(-1)

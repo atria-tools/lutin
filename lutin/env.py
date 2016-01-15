@@ -25,6 +25,40 @@ def get_force_mode():
 	global force_mode
 	return force_mode
 
+parse_depth = 9999999
+
+def set_parse_depth(val):
+	global parse_depth
+	parse_depth = val
+	debug.debug("Set depth search element: " + str(parse_depth))
+
+def get_parse_depth():
+	global parse_depth
+	return parse_depth
+
+exclude_search_path = []
+
+def set_exclude_search_path(val):
+	global exclude_search_path
+	exclude_search_path = val
+	debug.debug("Set depth search element: " + str(exclude_search_path))
+
+def get_exclude_search_path():
+	global exclude_search_path
+	return exclude_search_path
+
+
+build_system_base_name = "lutin"
+
+def set_build_system_base_name(val):
+	global build_system_base_name
+	build_system_base_name = val
+	debug.debug("Set basename: '" + str(build_system_base_name) + "'")
+
+def get_build_system_base_name():
+	global build_system_base_name
+	return build_system_base_name
+
 
 print_pretty_mode=False
 

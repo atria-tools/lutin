@@ -74,8 +74,8 @@ class Target(target.Target):
 		    "-fobjc-link-runtime"
 		    ])
 		
-		self.add_flag("m", ["-fobjc-arc")
-		#self.add_flag("m", ["-fmodules")
+		self.add_flag("m", ["-fobjc-arc"])
+		#self.add_flag("m", ["-fmodules"])
 		
 		self.pkg_path_data = "share"
 		self.pkg_path_bin = ""

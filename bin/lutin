@@ -10,6 +10,7 @@
 # for path inspection:
 import sys
 import os
+import lutin
 import lutin.debug as debug
 import lutin.arg as arguments
 import lutin.host as host
@@ -18,6 +19,8 @@ import lutin.target as target
 import lutin.env as env
 import lutin.multiprocess as multiprocess
 import lutin.tools as tools
+import lutin.host as lutinHost
+import lutin.tools as lutinTools
 
 myArgs = arguments.LutinArg()
 myArgs.add(arguments.ArgDefine("h", "help", desc="Display this help"))
@@ -28,6 +31,7 @@ myArgs.add(arguments.ArgDefine("C", "color", desc="Display makefile output in co
 myArgs.add(arguments.ArgDefine("B", "force-build", desc="Force the rebuild without checking the dependency"))
 myArgs.add(arguments.ArgDefine("P", "pretty", desc="Print the debug has pretty display"))
 myArgs.add(arguments.ArgDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
+myArgs.add(arguments.ArgDefine("d", "depth", haveParam=True, desc="Depth of the search of sub element lutin_*.py (default=" + str(env.get_parse_depth()) + ")"))
 myArgs.add(arguments.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
 myArgs.add(arguments.ArgDefine("w", "warning", desc="Store warning in a file build file"))
 
@@ -150,6 +154,7 @@ def usage(full=False):
 
 # preparse the argument to get the verbose element for debug mode
 def parseGenericArg(argument, active):
+	debug.extreme_verbose("parse arg : " + argument.get_option_name() + " " + argument.get_arg() + " active=" + str(active))
 	if argument.get_option_name() == "help":
 		if active==False:
 			usage()
@@ -184,13 +189,24 @@ def parseGenericArg(argument, active):
 		if active==True:
 			multiprocess.set_core_number(int(argument.get_arg()))
 		return True
+	elif argument.get_option_name()=="depth":
+		if active==True:
+			env.set_parse_depth(int(argument.get_arg()))
+		return True
 	elif argument.get_option_name() == "verbose":
 		if active==True:
 			debug.set_level(int(argument.get_arg()))
 		return True
 	elif argument.get_option_name() == "color":
 		if active==True:
-			debug.enable_color()
+			if    argument.get_arg() == "" \
+			   or argument.get_arg() == "1" \
+			   or argument.get_arg() == "true" \
+			   or argument.get_arg() == "True" \
+			   or argument.get_arg() == True:
+				debug.enable_color()
+			else:
+				debug.disable_color()
 		return True
 	elif argument.get_option_name() == "force-build":
 		if active==True:
@@ -198,28 +214,85 @@ def parseGenericArg(argument, active):
 		return True
 	elif argument.get_option_name() == "pretty":
 		if active==True:
-			env.set_print_pretty_mode(True)
+			if    argument.get_arg() == "" \
+			   or argument.get_arg() == "1" \
+			   or argument.get_arg() == "true" \
+			   or argument.get_arg() == "True" \
+			   or argument.get_arg() == True:
+				env.set_print_pretty_mode(True)
+			else:
+				env.set_print_pretty_mode(False)
 		return True
 	elif argument.get_option_name() == "force-strip":
 		if active==True:
-			env.set_force_strip_mode(True)
+			if    argument.get_arg() == "" \
+			   or argument.get_arg() == "1" \
+			   or argument.get_arg() == "true" \
+			   or argument.get_arg() == "True" \
+			   or argument.get_arg() == True:
+				env.set_force_strip_mode(True)
+			else:
+				env.set_force_strip_mode(False)
 		return True
 	elif argument.get_option_name() == "warning":
 		if active==True:
-			env.set_warning_mode(True)
+			if    argument.get_arg() == "" \
+			   or argument.get_arg() == "1" \
+			   or argument.get_arg() == "true" \
+			   or argument.get_arg() == "True" \
+			   or argument.get_arg() == True:
+				env.set_warning_mode(True)
+			else:
+				env.set_warning_mode(False)
 		return True
 	return False
+
+
+# open configuration of lutin:
+config_file_name = "lutinConfig.py"
+config_file = os.path.join(tools.get_run_path(), config_file_name)
+if os.path.isfile(config_file) == True:
+	sys.path.append(os.path.dirname(config_file))
+	debug.debug("Find basic configuration file: '" + config_file + "'")
+	# the file exist, we can open it and get the initial configuration:
+	configuration_file = __import__(config_file_name[:-3])
+	if "get_exclude_path" in dir(configuration_file):
+		data = configuration_file.get_exclude_path()
+		debug.debug(" get default config 'get_exclude_path' val='" + str(data) + "'")
+		env.set_exclude_search_path(data)
+	if "get_parsing_depth" in dir(configuration_file):
+		data = configuration_file.get_parsing_depth()
+		debug.debug(" get default config 'get_parsing_depth' val='" + str(data) + "'")
+		parseGenericArg(arguments.ArgElement("depth", str(data)), True)
+		
+	if "get_default_jobs" in dir(configuration_file):
+		data = configuration_file.get_default_jobs()
+		debug.debug(" get default config 'get_default_jobs' val='" + str(data) + "'")
+		parseGenericArg(arguments.ArgElement("jobs", str(data)), True)
+		
+	if "get_default_color" in dir(configuration_file):
+		data = configuration_file.get_default_color()
+		debug.debug(" get default config 'get_default_color' val='" + str(data) + "'")
+		parseGenericArg(arguments.ArgElement("color", str(data)), True)
+		
+	if "get_default_debug_level" in dir(configuration_file):
+		data = configuration_file.get_default_debug_level()
+		debug.debug(" get default config 'get_default_debug_level' val='" + str(data) + "'")
+		parseGenericArg(arguments.ArgElement("verbose", str(data)), True)
+		
+	if "get_default_print_pretty" in dir(configuration_file):
+		data = configuration_file.get_default_print_pretty()
+		debug.debug(" get default config 'get_default_print_pretty' val='" + str(data) + "'")
+		parseGenericArg(arguments.ArgElement("pretty", str(data)), True)
+		
+	
 
 # parse default unique argument:
 for argument in localArgument:
 	parseGenericArg(argument, True)
 
-
-import lutin
-
-
-import lutin.host as lutinHost
-import lutin.tools as lutinTools
+# initialize the system ...
+lutin.init()
 
 #available target : Linux / MacOs / Windows / Android ...
 targetName = host.OS

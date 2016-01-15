@@ -20,6 +20,7 @@ from . import builder
 from . import multiprocess
 from . import image
 from . import license
+from . import env
 
 class Module:
 	
@@ -926,29 +927,32 @@ class Module:
 		self.ext_project_add_module(target, projectMng)
 		projectMng.generate_project_file()
 
-
-
 module_list=[]
-__start_module_name="lutin_"
+__start_module_name="_"
 
-def import_path(path):
+def import_path(path_list):
 	global module_list
-	matches = []
-	debug.debug('MODULE: Start find sub File : "%s"' %path)
-	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, __start_module_name + "*.py")
-		# Import the module :
-		for filename in tmpList:
-			debug.debug('Module:     Find a file : "%s"' %os.path.join(root, filename))
-			#matches.append(os.path.join(root, filename))
-			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
-			module_name = filename.replace('.py', '')
-			module_name = module_name.replace(__start_module_name, '')
-			debug.debug("MODULE:     Integrate module: '" + module_name + "' from '" + os.path.join(root, filename) + "'")
-			module_list.append([module_name, os.path.join(root, filename)])
+	global_base = env.get_build_system_base_name()
+	debug.debug("MODULE: Init with Files list:")
+	for elem in path_list:
+		sys.path.append(os.path.dirname(elem))
+		# Get file name:
+		filename = os.path.basename(elem)
+		# Remove .py at the end:
+		filename = filename[:-3]
+		# Remove global base name:
+		filename = filename[len(global_base):]
+		# Check if it start with the local patern:
+		if filename[:len(__start_module_name)] != __start_module_name:
+			debug.extreme_verbose("MODULE:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			continue
+		# Remove local patern
+		module_name = filename[len(__start_module_name):]
+		debug.verbose("MODULE:     Integrate: '" + module_name + "' from '" + elem + "'")
+		module_list.append([module_name, elem])
 	debug.verbose("New list module: ")
-	for mod in module_list:
-		debug.verbose("    " + str(mod[0]))
+	for elem in module_list:
+		debug.verbose("    " + str(elem[0]))
 
 def exist(target, name):
 	global module_list
@@ -962,9 +966,9 @@ def load_module(target, name):
 	for mod in module_list:
 		if mod[0] == name:
 			sys.path.append(os.path.dirname(mod[1]))
-			debug.verbose("import module : '" + __start_module_name + name + "'")
+			debug.verbose("import module : '" + env.get_build_system_base_name() + __start_module_name + name + "'")
 			the_module_file = mod[1]
-			the_module = __import__(__start_module_name + name)
+			the_module = __import__(env.get_build_system_base_name() + __start_module_name + name)
 			# get basic module properties:
 			property = get_module_option(the_module, name)
 			# configure the module:
@@ -1022,7 +1026,7 @@ def list_all_module_with_desc():
 	tmpList = []
 	for mod in module_list:
 		sys.path.append(os.path.dirname(mod[1]))
-		the_module = __import__("lutin_" + mod[0])
+		the_module = __import__(env.get_build_system_base_name() + __start_module_name + mod[0])
 		tmpList.append(get_module_option(the_module, mod[0]))
 	return tmpList
 
@@ -1036,22 +1040,25 @@ def get_module_option(the_module, name):
 	compagny_name = None
 	maintainer = None
 	version = None
+	version_id = None
 	
-	if "get_type" in dir(the_module):
+	list_of_function_in_factory = dir(the_module)
+	
+	if "get_type" in list_of_function_in_factory:
 		type = the_module.get_type()
 	else:
 		debug.debug(" function get_type() must be provided in the module: " + name)
 	
-	if "get_sub_type" in dir(the_module):
+	if "get_sub_type" in list_of_function_in_factory:
 		sub_type = the_module.get_sub_type()
 	
-	if "get_desc" in dir(the_module):
+	if "get_desc" in list_of_function_in_factory:
 		description = the_module.get_desc()
 	
-	if "get_licence" in dir(the_module):
+	if "get_licence" in list_of_function_in_factory:
 		license = the_module.get_licence()
 	
-	if "get_compagny_type" in dir(the_module):
+	if "get_compagny_type" in list_of_function_in_factory:
 		compagny_type = the_module.get_compagny_type()
 		#	com : Commercial
 		#	net : Network??
@@ -1065,14 +1072,17 @@ def get_module_option(the_module, name):
 		if compagny_type not in compagny_type_list:
 			debug.warning("[" + name + "] type of the company not normal: " + compagny_type + " not in " + str(compagny_type_list))
 	
-	if "get_compagny_name" in dir(the_module):
+	if "get_compagny_name" in list_of_function_in_factory:
 		compagny_name = the_module.get_compagny_name()
 	
-	if "get_maintainer" in dir(the_module):
+	if "get_maintainer" in list_of_function_in_factory:
 		maintainer = the_module.get_maintainer()
 	
-	if "get_version" in dir(the_module):
+	if "get_version" in list_of_function_in_factory:
 		version = the_module.get_version()
+	
+	if "get_version_id" in list_of_function_in_factory:
+		version_id = the_module.get_version_id()
 	
 	return {
 	       "name":name,
@@ -1083,7 +1093,8 @@ def get_module_option(the_module, name):
 	       "compagny-type":compagny_type,
 	       "compagny-name":compagny_name,
 	       "maintainer":maintainer,
-	       "version":version
+	       "version":version,
+	       "version-id":version_id
 	       }
 
 

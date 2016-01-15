@@ -19,6 +19,7 @@ from . import tools
 from . import module
 from . import system
 from . import multiprocess
+from . import env
 
 class Target:
 	def __init__(self, name, config, arch):
@@ -746,25 +747,32 @@ class Target:
 
 
 target_list=[]
-__start_target_name="lutinTarget_"
+__start_target_name="Target_"
 
 
-def import_path(path):
+def import_path(path_list):
 	global target_list
-	matches = []
-	debug.debug('TARGET: Start find sub File : "%s"' %path)
-	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, __start_target_name + "*.py")
-		# Import the module :
-		for filename in tmpList:
-			debug.debug('TARGET:     Find a file : "%s"' %os.path.join(root, filename))
-			#matches.append(os.path.join(root, filename))
-			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
-			targetName = filename.replace('.py', '')
-			targetName = targetName.replace(__start_target_name, '')
-			debug.debug("TARGET:     integrate module: '" + targetName + "' from '" + os.path.join(root, filename) + "'")
-			target_list.append([targetName,os.path.join(root, filename)])
-
+	global_base = env.get_build_system_base_name()
+	debug.debug("TARGET: Init with Files list:")
+	for elem in path_list:
+		sys.path.append(os.path.dirname(elem))
+		# Get file name:
+		filename = os.path.basename(elem)
+		# Remove .py at the end:
+		filename = filename[:-3]
+		# Remove global base name:
+		filename = filename[len(global_base):]
+		# Check if it start with the local patern:
+		if filename[:len(__start_target_name)] != __start_target_name:
+			debug.extreme_verbose("TARGET:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			continue
+		# Remove local patern
+		target_name = filename[len(__start_target_name):]
+		debug.verbose("TARGET:     Integrate: '" + target_name + "' from '" + elem + "'")
+		target_list.append([target_name, elem])
+	debug.verbose("New list TARGET: ")
+	for elem in target_list:
+		debug.verbose("    " + str(elem[0]))
 
 def load_target(name, config):
 	global target_list
@@ -776,8 +784,8 @@ def load_target(name, config):
 		if mod[0] == name:
 			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
 			sys.path.append(os.path.dirname(mod[1]))
-			debug.verbose("import target : '" + __start_target_name + name + "'")
-			theTarget = __import__(__start_target_name + name)
+			debug.verbose("import target : '" + env.get_build_system_base_name() + __start_target_name + name + "'")
+			theTarget = __import__(env.get_build_system_base_name() + __start_target_name + name)
 			#create the target
 			tmpTarget = theTarget.Target(config)
 			return tmpTarget
@@ -795,7 +803,7 @@ def list_all_target_with_desc():
 	tmpList = []
 	for mod in target_list:
 		sys.path.append(os.path.dirname(mod[1]))
-		theTarget = __import__(__start_target_name + mod[0])
+		theTarget = __import__(env.get_build_system_base_name() + __start_target_name + mod[0])
 		try:
 			tmpdesc = theTarget.get_desc()
 			tmpList.append([mod[0], tmpdesc])

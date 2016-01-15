@@ -16,6 +16,7 @@ import datetime
 from . import debug
 from . import module
 from . import tools
+from . import env
 
 class System:
 	def __init__(self):
@@ -73,61 +74,70 @@ def create_module_from_system(target, dict):
 
 # Dictionnaire of Target name
 #   inside table of ["Name of the lib", "path of the lib", boolean loaded, module loaded]
-systemList={}
-__start_system_name="lutinSystem_"
+system_list={}
+__start_system_name="System_"
 
+def import_path(path_list):
+	global system_list
+	global_base = env.get_build_system_base_name()
+	debug.debug("SYSTEM: Init with Files list:")
+	for elem in path_list:
+		sys.path.append(os.path.dirname(elem))
+		# Get file name:
+		filename = os.path.basename(elem)
+		# Remove .py at the end:
+		filename = filename[:-3]
+		# Remove global base name:
+		filename = filename[len(global_base):]
+		# Check if it start with the local patern:
+		if filename[:len(__start_system_name)] != __start_system_name:
+			debug.extreme_verbose("SYSTEM:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			continue
+		# Remove local patern
+		system_name = filename[len(__start_system_name):]
+		system_type, system_name = system_name.split('_')
+		debug.verbose("SYSTEM:     Integrate: '" + system_type + "':'" + system_name + "' from '" + elem + "'")
+		if system_type in system_list:
+			system_list[system_type].append({"name":system_name,
+			                               "path":elem,
+			                               "system":None,
+			                               "loaded":False,
+			                               "exist":False,
+			                               "module":None})
+		else:
+			system_list[system_type] = [{"name":system_name,
+			                           "path":elem,
+			                           "system":None,
+			                           "loaded":False,
+			                           "exist":False,
+			                           "module":None}]
+	debug.verbose("New list system: ")
+	for elem in system_list:
+		debug.verbose("    " + str(elem))
+		for val in system_list[elem]:
+			debug.verbose("        " + str(val["name"]))
 
-def import_path(path):
-	global targetList
-	matches = []
-	debug.debug('Start find sub File : "%s"' %path)
-	for root, dirnames, filenames in os.walk(path):
-		tmpList = fnmatch.filter(filenames, __start_system_name + "*.py")
-		# Import the module :
-		for filename in tmpList:
-			debug.verbose('    Find a file : "%s"' %os.path.join(root, filename))
-			sys.path.append(os.path.dirname(os.path.join(root, filename)) )
-			systemName = filename.replace('.py', '')
-			systemName = systemName.replace(__start_system_name, '')
-			targetType, systemName = systemName.split('_')
-			debug.debug("integrate system: '" + targetType + "':'" + systemName + "' from '" + os.path.join(root, filename) + "'")
-			if targetType in systemList:
-				systemList[targetType].append({"name":systemName,
-				                               "path":os.path.join(root, filename),
-				                               "system":None,
-				                               "loaded":False,
-				                               "exist":False,
-				                               "module":None})
-			else:
-				systemList[targetType] = [{"name":systemName,
-				                           "path":os.path.join(root, filename),
-				                           "system":None,
-				                           "loaded":False,
-				                           "exist":False,
-				                           "module":None}]
-	debug.debug("list system=" + str(systemList))
 
 def display():
-	global systemList
-	for elementName in systemList:
-		debug.info("integrate system: '" + elementName +"'")
-		for data in systemList[elementName]:
-			debug.info("    '" + data["name"] +"' in " + data["path"])
-
+	global system_list
+	for elementName in system_list:
+		debug.info("SYSTEM:     Integrate system: '" + elementName +"'")
+		for data in system_list[elementName]:
+			debug.info("SYSTEM:    '" + data["name"] +"' in " + data["path"])
 
 def exist(lib_name, target_name, target) :
-	global systemList
+	global system_list
 	debug.verbose("exist= " + lib_name + " in " + target_name)
-	if target_name not in systemList:
+	if target_name not in system_list:
 		return False
-	for data in systemList[target_name]:
+	for data in system_list[target_name]:
 		if data["name"] == lib_name:
 			# we find it in the List ==> need to check if it is present in the system :
 			if data["loaded"] == False:
 				debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
 				sys.path.append(os.path.dirname(data["path"]))
 				debug.verbose("import system : '" + data["name"] + "'")
-				theSystem = __import__(__start_system_name + target_name + "_" + data["name"])
+				theSystem = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
 				#create the system module
 				try:
 					debug.info("call : " + data["name"])
@@ -139,10 +149,10 @@ def exist(lib_name, target_name, target) :
 	return False
 
 def load(target, lib_name, target_name):
-	global systemList
-	if target_name not in systemList:
+	global system_list
+	if target_name not in system_list:
 		debug.error("you must call this function after checking of the system exist() !1!")
-	for data in systemList[target_name]:
+	for data in system_list[target_name]:
 		if data["name"] == lib_name:
 			if data["exist"] == False:
 				debug.error("you must call this function after checking of the system exist() !2!")
