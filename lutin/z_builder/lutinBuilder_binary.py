@@ -36,6 +36,13 @@ def get_input_type():
 def get_output_type():
 	return ["", "exe", "bin"]
 
+##
+## @brief Get builder support multi-threading or not
+## @return True Multithreading supported
+## @return False Multithreading NOT supported
+##
+def get_support_multithreading():
+	return False
 
 ##
 ## @brief Commands for running gcc to link an executable.

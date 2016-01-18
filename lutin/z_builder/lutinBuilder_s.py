@@ -31,3 +31,11 @@ def get_input_type():
 ##
 def get_output_type():
 	return ["o"]
+
+##
+## @brief Get builder support multi-threading or not
+## @return True Multithreading supported
+## @return False Multithreading NOT supported
+##
+def get_support_multithreading():
+	return True

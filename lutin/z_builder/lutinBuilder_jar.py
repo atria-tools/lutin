@@ -36,6 +36,14 @@ def get_output_type():
 	return ["jar"]
 
 ##
+## @brief Get builder support multi-threading or not
+## @return True Multithreading supported
+## @return False Multithreading NOT supported
+##
+def get_support_multithreading():
+	return False
+
+##
 ## @brief Commands for running gcc to link a shared library.
 ##
 def link(file, binary, target, depancy, flags, name, basic_path):

@@ -39,6 +39,14 @@ def get_output_type():
 	return ["o"]
 
 ##
+## @brief Get builder support multi-threading or not
+## @return True Multithreading supported
+## @return False Multithreading NOT supported
+##
+def get_support_multithreading():
+	return True
+
+##
 ## @brief Commands for running gcc to compile a m file in object file.
 ##
 def compile(file, binary, target, depancy, flags, path, name, basic_path, module_src):
@@ -94,7 +102,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	# Create cmd line
 	cmdLine=tools.list_to_str(cmd)
 	# check the dependency for this file :
-	if False==depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine):
+	if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
 		return {"action":"add", "file":file_dst}
 	tools.create_directory_of_file(file_dst)
 	comment = ["m", name, "<==", file]

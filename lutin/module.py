@@ -332,7 +332,7 @@ class Module:
 	# call here to build the module
 	def build(self, target, package_name):
 		# ckeck if not previously build
-		if target.is_module_build(self.name)==True:
+		if target.is_module_build(self.name) == True:
 			if self.sub_heritage_list == None:
 				self.local_heritage = heritage.heritage(self, target)
 			return self.sub_heritage_list
@@ -417,6 +417,9 @@ class Module:
 					fileExt = file.split(".")[-1]
 					try:
 						tmp_builder = builder.get_builder(fileExt);
+						multithreading = tmp_builder.get_support_multithreading()
+						if multithreading == False:
+							multiprocess.pool_synchrosize()
 						res_file = tmp_builder.compile(file,
 						                               package_name,
 						                               target,
@@ -426,6 +429,8 @@ class Module:
 						                               name = self.name,
 						                               basic_path = self.origin_path,
 						                               module_src = self.src)
+						if multithreading == False:
+							multiprocess.pool_synchrosize()
 						if res_file["action"] == "add":
 							list_sub_file_needed_to_build.append(res_file["file"])
 						elif res_file["action"] == "path":
@@ -440,7 +445,10 @@ class Module:
 				#debug.info(" " + self.name + " <== " + file);
 				fileExt = file.split(".")[-1]
 				try:
-					tmp_builder = builder.get_builder(fileExt);
+					tmp_builder = builder.get_builder(fileExt)
+					multithreading = tmp_builder.get_support_multithreading()
+					if multithreading == False:
+						multiprocess.pool_synchrosize()
 					res_file = tmp_builder.compile(file,
 					                               package_name,
 					                               target,
@@ -450,6 +458,8 @@ class Module:
 					                               name = self.name,
 					                               basic_path = self.origin_path,
 					                               module_src = self.src)
+					if multithreading == False:
+						multiprocess.pool_synchrosize()
 					if res_file["action"] == "add":
 						list_sub_file_needed_to_build.append(res_file["file"])
 					elif res_file["action"] == "path":
