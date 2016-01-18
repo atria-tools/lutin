@@ -23,10 +23,10 @@ class System(system.System):
 			return;
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag("link", [
-		    "-lboost_system",
-		    "-lboost_thread",
-		    "-lboost_chrono"
+		self.add_export_flag("link-lib", [
+		    "boost_system",
+		    "boost_thread",
+		    "boost_chrono"
 		    ])
 		
 

@@ -82,26 +82,19 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 	except:
 		pass
 	for view in ["local", "export"]:
+		if view not in flags:
+			continue
 		for type in ["link", "link-dynamic"]:
-			try:
+			if type in flags[view]:
 				cmd.append(flags[view][type])
-			except:
-				pass
 	for type in ["link", "link-dynamic"]:
-		try:
+		if type in depancy.flags:
 			cmd.append(depancy.flags[type])
-		except:
-			pass
 	for type in ["link", "link-dynamic"]:
-		try:
+		if type in target.global_flags:
 			cmd.append(target.global_flags[type])
-		except:
-			pass
-	try:
-		# keep only compilated files ...
+	if 'src' in depancy.src:
 		cmd.append(tools.filter_extention(depancy.src['src'], get_input_type()))
-	except:
-		pass
 	try:
 		cmd.append(list_static)
 	except:
@@ -118,6 +111,18 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 				cmd.append("-Wl,-R$ORIGIN/../lib/")
 	except:
 		pass
+	for view in ["local", "export"]:
+		if view not in flags:
+			continue
+		for type in ["link-lib"]:
+			if type in flags[view]:
+				cmd.append([("-l" + sss).replace("-l/", "/") for sss in flags[view][type] ])
+	for type in ["link-lib"]:
+		if type in depancy.flags:
+			cmd.append([("-l" + sss).replace("-l/", "/") for sss in depancy.flags[type] ])
+	for type in ["link-lib"]:
+		if type in target.global_flags:
+			cmd.append([("-l" + sss).replace("-l/", "/") for sss in target.global_flags[type] ])
 	cmdLine=tools.list_to_str(cmd)
 	# check the dependency for this file :
 	if     depend.need_re_package(file_dst, file_src, True, file_cmd, cmdLine) == False \

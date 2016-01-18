@@ -23,8 +23,8 @@ class System(system.System):
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
 		self.add_export_sources(jar_file_path)
-		self.add_export_flag("link", "-ldl")
-		self.add_export_flag("link", "-llog")
-		self.add_export_flag("link", "-landroid")
+		self.add_export_flag("link-lib", "dl")
+		self.add_export_flag("link-lib", "log")
+		self.add_export_flag("link-lib", "android")
 
 

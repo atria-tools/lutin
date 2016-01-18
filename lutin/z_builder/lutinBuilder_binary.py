@@ -122,6 +122,18 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 		cmd.append(target.global_flags_ld)
 	except:
 		pass
+	for view in ["local", "export"]:
+		if view not in flags:
+			continue
+		for type in ["link-lib"]:
+			if type in flags[view]:
+				cmd.append([("-l" + sss).replace("-l/", "/") for sss in flags[view][type] ])
+	for type in ["link-lib"]:
+		if type in depancy.flags:
+			cmd.append([("-l" + sss).replace("-l/", "/") for sss in depancy.flags[type] ])
+	for type in ["link-lib"]:
+		if type in target.global_flags:
+			cmd.append([("-l" + sss).replace("-l/", "/") for sss in target.global_flags[type] ])
 	cmd_line = tools.list_to_str(cmd)
 	# check the dependency for this file :
 	if     depend.need_re_package(file_dst, file_src, True, file_cmd=file_cmd, cmd_line=cmd_line) == False \
