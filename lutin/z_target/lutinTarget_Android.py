@@ -28,7 +28,6 @@ class Target(target.Target):
 		self.type_arch = ""
 		target.Target.__init__(self, "Android", config, self.type_arch)
 		
-		debug.warning("plop " + str(self.ar))
 		if config["bus-size"] == "32":
 			self.type_arch="armv7"
 		else:
@@ -277,7 +276,7 @@ class Target(target.Target):
 		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
-		debug.info("ploppppp: " + str(pkg_properties))
+		#debug.info("ploppppp: " + str(pkg_properties))
 		# FINAL_path_JAVA_PROJECT
 		self.path_java_project = os.path.join(target_outpath,
 		                                      "src")

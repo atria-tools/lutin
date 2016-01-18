@@ -140,7 +140,7 @@ def exist(lib_name, target_name, target) :
 				theSystem = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
 				#create the system module
 				try:
-					debug.info("call : " + data["name"])
+					debug.verbose("SYSTEM: request: " + data["name"])
 					data["system"] = theSystem.System(target)
 					data["exist"] = data["system"].valid
 				except:
