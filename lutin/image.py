@@ -35,10 +35,13 @@ def get_pow_2_multiple(size):
 #        check if time change
 #        check if command line change
 def resize(src_file, dest_file, x, y, cmd_file=None):
-	if enable_resize_image == False:
-		return
 	if os.path.exists(src_file) == False:
 		debug.error("Request a resize an image that does not existed : '" + src_file + "'")
+		return
+	if enable_resize_image == False:
+		debug.warning("Can not resize image missing pillow or CoreGraphics : '" + src_file + "' (just copy)")
+		tools.copy_file(src_file, dest_file)
+		return
 	cmd_line = "resize Image : " + src_file + " ==> " + dest_file + " newSize=(" + str(x) + "x" + str(y) + ")"
 	if depend.need_re_build(dest_file, src_file, file_cmd=cmd_file , cmd_line=cmd_line) == False:
 		return
