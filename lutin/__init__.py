@@ -68,7 +68,8 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 	if len(tmp_list_lutin_file) != 0:
 		need_parse_sub_folder = False
 	# check if the file "lutin_parse_sub.py" is present ==> parse SubFolder (force and add +1 in the resursing
-	if base_name + "parse_sub.py" in list_files:
+	if base_name + "ParseSubFolders.txt" in list_files:
+		debug.debug("find SubParser ... " + str(base_name + "ParseSubFolders.txt") + " " + path)
 		need_parse_sub_folder = True
 		rm_value = 0
 	if need_parse_sub_folder == True:
