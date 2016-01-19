@@ -11,8 +11,8 @@ import os
 import threading
 import re
 
-debugLevel=3
-debugColor=False
+debug_level=3
+debug_color=False
 
 color_default= ""
 color_red    = ""
@@ -23,20 +23,20 @@ color_purple = ""
 color_cyan   = ""
 
 
-debugLock = threading.Lock()
+debug_lock = threading.Lock()
 
 def set_level(id):
-	global debugLevel
-	debugLevel = id
-	#print "SetDebug level at " + str(debugLevel)
+	global debug_level
+	debug_level = id
+	#print "SetDebug level at " + str(debug_level)
 
 def get_level():
-	global debugLevel
-	return debugLevel
+	global debug_level
+	return debug_level
 
 def enable_color():
-	global debugColor
-	debugColor = True
+	global debug_color
+	debug_color = True
 	global color_default
 	color_default= "\033[00m"
 	global color_red
@@ -53,8 +53,8 @@ def enable_color():
 	color_cyan   = "\033[36m"
 
 def disable_color():
-	global debugColor
-	debugColor = True
+	global debug_color
+	debug_color = True
 	global color_default
 	color_default= ""
 	global color_red
@@ -71,67 +71,67 @@ def disable_color():
 	color_cyan   = ""
 
 def extreme_verbose(input, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 6 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 6 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_blue + input + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def verbose(input, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 5 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 5 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_blue + input + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def debug(input, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 4 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 4 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_green + input + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def info(input, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 3 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 3 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(input + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def warning(input, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 2 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 2 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_purple + "[WARNING] " + input + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def todo(input, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 3 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 3 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_purple + "[TODO] " + input + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def error(input, thread_id=-1, force=False, crash=True):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 1 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 1 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_red + "[ERROR] " + input + color_default)
-		debugLock.release()
+		debug_lock.release()
 	if crash == True:
 		from . import multiprocess
 		multiprocess.set_error_occured()
@@ -142,18 +142,18 @@ def error(input, thread_id=-1, force=False, crash=True):
 		#raise "error happend"
 
 def print_element(type, lib, dir, name, force=False):
-	global debugLock
-	global debugLevel
-	if    debugLevel >= 3 \
+	global debug_lock
+	global debug_level
+	if    debug_level >= 3 \
 	   or force == True:
-		debugLock.acquire()
+		debug_lock.acquire()
 		print(color_cyan + type + color_default + " : " + color_yellow + lib + color_default + " " + dir + " " + color_blue + name + color_default)
-		debugLock.release()
+		debug_lock.release()
 
 def print_compilator(myString):
-	global debugColor
-	global debugLock
-	if debugColor == True:
+	global debug_color
+	global debug_lock
+	if debug_color == True:
 		myString = myString.replace('\\n', '\n')
 		myString = myString.replace('\\t', '\t')
 		myString = myString.replace('error:', color_red+'error:'+color_default)
@@ -163,9 +163,9 @@ def print_compilator(myString):
 		myString = myString.replace('-COLORIN-', color_yellow)
 		myString = myString.replace('-COLOROUT-', color_default)
 	
-	debugLock.acquire()
+	debug_lock.acquire()
 	print(myString)
-	debugLock.release()
+	debug_lock.release()
 
 def get_color_set() :
 	global color_default
