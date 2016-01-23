@@ -48,6 +48,7 @@ class System(system.System):
 		else:
 			self.add_export_flag("c++", "-D__STDCPP_GNU__")
 			self.add_export_flag("c++-remove","-nostdlib")
+			self.add_export_flag("need-libstdc++", True)
 			# GPL v3 (+ exception link for gcc compilator)
 			self.add_export_path(os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "include"))
 			if target.type_arch == "armv5":

@@ -26,6 +26,19 @@ def get_force_mode():
 	global force_mode
 	return force_mode
 
+force_optimisation=False
+
+def set_force_optimisation(val):
+	global force_optimisation
+	if val==1:
+		force_optimisation = 1
+	else:
+		force_optimisation = 0
+
+def get_force_optimisation():
+	global force_optimisation
+	return force_optimisation
+
 parse_depth = 9999999
 
 def set_parse_depth(val):
@@ -115,6 +128,19 @@ def print_pretty(my_string, force=False):
 			    "-D",
 			    "-classpath",
 			    "-sourcepath"
+			    ]
+		elif end_with(cmdApplication, ["java"]) == True:
+			baseElementList = [
+			    "-z",
+			    "-f",
+			    "-rf"
+			    ]
+		elif end_with(cmdApplication, ["jarsigner"]) == True:
+			baseElementList = [
+			    "-sigalg",
+			    "-digestalg",
+			    "-storepass",
+			    "-keypass"
 			    ]
 		elif end_with(cmdApplication, ["jar"]) == True:
 			baseElementList = [

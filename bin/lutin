@@ -34,6 +34,7 @@ myArgs.add(arguments.ArgDefine("P", "pretty", desc="Print the debug has pretty d
 myArgs.add(arguments.ArgDefine("j", "jobs", haveParam=True, desc="Specifies the number of jobs (commands) to run simultaneously"))
 myArgs.add(arguments.ArgDefine("d", "depth", haveParam=True, desc="Depth of the search of sub element lutin_*.py (default=" + str(env.get_parse_depth()) + ")"))
 myArgs.add(arguments.ArgDefine("s", "force-strip", desc="Force the stripping of the compile elements"))
+myArgs.add(arguments.ArgDefine("o", "force-optimisation", desc="Force optimisation of the build"))
 myArgs.add(arguments.ArgDefine("w", "warning", desc="Store warning in a file build file"))
 
 myArgs.add_section("properties", "keep in the sequency of the cible")
@@ -211,7 +212,14 @@ def parseGenericArg(argument, active):
 		return True
 	elif argument.get_option_name() == "force-build":
 		if active==True:
-			env.set_force_mode(True)
+			if    argument.get_arg() == "" \
+			   or argument.get_arg() == "1" \
+			   or argument.get_arg() == "true" \
+			   or argument.get_arg() == "True" \
+			   or argument.get_arg() == True:
+				env.set_force_mode(True)
+			else:
+				env.set_force_mode(False)
 		return True
 	elif argument.get_option_name() == "pretty":
 		if active==True:
@@ -223,6 +231,17 @@ def parseGenericArg(argument, active):
 				env.set_print_pretty_mode(True)
 			else:
 				env.set_print_pretty_mode(False)
+		return True
+	elif argument.get_option_name() == "force-optimisation":
+		if active==True:
+			if    argument.get_arg() == "" \
+			   or argument.get_arg() == "1" \
+			   or argument.get_arg() == "true" \
+			   or argument.get_arg() == "True" \
+			   or argument.get_arg() == True:
+				env.set_force_optimisation(True)
+			else:
+				env.set_force_optimisation(False)
 		return True
 	elif argument.get_option_name() == "force-strip":
 		if active==True:

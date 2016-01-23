@@ -99,6 +99,10 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 		cmd.append(file_src)
 	except:
 		pass
+	try:
+		cmd.append(list_static)
+	except:
+		pass
 	for view in ["local", "export"]:
 		if view not in flags:
 			continue
@@ -113,10 +117,6 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 			cmd.append(target.global_flags[type])
 	if 'src' in depancy.src:
 		cmd.append(tools.filter_extention(depancy.src['src'], get_input_type()))
-	try:
-		cmd.append(list_static)
-	except:
-		pass
 	try:
 		for elem in list_dynamic:
 			lib_path = os.path.dirname(elem)
