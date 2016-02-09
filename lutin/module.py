@@ -124,6 +124,9 @@ class Module:
 		                            }
 		self.sub_heritage_list = None
 	
+	def __repr__(self):
+		return "{lutin.Module:" + str(self.name) + "}"
+	
 	def get_type(self):
 		return self.type
 	##

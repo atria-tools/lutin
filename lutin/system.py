@@ -47,6 +47,8 @@ class System:
 		else:
 			self.action_on_state[name_of_state].append([level, name, action])
 	
+	def __repr__(self):
+		return "{lutin.System}"
 
 
 

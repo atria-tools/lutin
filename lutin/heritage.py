@@ -130,7 +130,9 @@ class HeritageList:
 			append_to_list(self.src['src'], element.src['src'])
 			append_to_list(self.src['dynamic'], element.src['dynamic'])
 			append_to_list(self.src['static'], element.src['static'])
-
+	
+	def __repr__(self):
+		return "{HeritageList:" + str(self.list_heritage) + "}"
 
 class heritage:
 	def __init__(self, module, target):
@@ -224,5 +226,8 @@ class heritage:
 				if self.flags["c++-version"] > ver:
 					ver = self.flags["c++-version"]
 			self.flags["c++-version"] = ver
+	
+	def __repr__(self):
+		return "{Heritage:" + str(self.name) + " ... }"
 
 
