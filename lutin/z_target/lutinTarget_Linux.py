@@ -73,7 +73,7 @@ class Target(target.Target):
 	"""
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.info("-- Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
@@ -100,7 +100,7 @@ class Target(target.Target):
 	
 	def install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Install package '" + pkg_name + "'")
+		debug.info("-- Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
 		# this is temporary ... Will call:
 		if False:
@@ -123,7 +123,7 @@ class Target(target.Target):
 	
 	def un_install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Un-Install package '" + pkg_name + "'")
+		debug.info("-- Un-Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
 		# this is temporary ... Will call:
 		if False:
@@ -137,5 +137,14 @@ class Target(target.Target):
 			# remove executable link version:
 			tools.remove_file(target_bin_link)
 	
+	def run(self, pkg_name):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "'")
+		debug.debug("------------------------------------------------------------------------")
+		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "bin", pkg_name)
+		multiprocess.run_command_no_lock_out(appl_path)
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' Finished")
+		debug.debug("------------------------------------------------------------------------")
 
 

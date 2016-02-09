@@ -136,7 +136,7 @@ class Target(target.Target):
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
 		# copy the application in the basic application path : /Applications/xxx.app
-		shutil.copytree(tools.get_run_path() + self.path_out + self.path_staging + "/" + pkg_name + ".app", "/Applications/" + pkg_name + ".app")
+		shutil.copytree(os.path.join(tools.get_run_path(),self.path_out,self.path_staging,pkg_name + ".app"), os.path.join("/Applications", pkg_name + ".app"))
 	
 	def un_install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
@@ -146,6 +146,18 @@ class Target(target.Target):
 		# Remove the application in the basic application path : /Applications/xxx.app
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
+	
+	def run(self, pkg_name):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "'")
+		debug.debug("------------------------------------------------------------------------")
+		appl_path = os.path.join(tools.get_run_path(),self.path_out,self.path_staging,pkg_name + ".app", "bin", pkg_name)
+		multiprocess.run_command_no_lock_out(appl_path)
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' Finished")
+		debug.debug("------------------------------------------------------------------------")
+
+
 
 
 

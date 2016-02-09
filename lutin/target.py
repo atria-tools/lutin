@@ -155,6 +155,9 @@ class Target:
 		# special case for IOS (example) no build dynamicly ...
 		self.support_dynamic_link = True
 	
+	def __repr__(self):
+		return "{lutin.Target}"
+	
 	def add_flag(self, type, list):
 		tools.list_append_to_2(self.global_flags, type, list)
 	
@@ -460,7 +463,7 @@ class Target:
 	def build(self, name, packagesName=None, optionnal=False):
 		if name == "gcov":
 			debug.info("gcov all")
-			debug.error("must set the gcov parsig on a specific library or binary ==> not supported now for all")
+			debug.error("must set the gcov parsing on a specific library or binary ==> not supported now for all")
 		if name == "dump":
 			debug.info("dump all")
 			self.load_all()
@@ -488,49 +491,87 @@ class Target:
 			name2 = name.replace("@", "?")
 			gettedElement = name2.split("?")
 			module_name = gettedElement[0]
-			if len(gettedElement)>=3:
-				sub_action_name = gettedElement[2]
-			else:
-				sub_action_name = ""
-			if len(gettedElement)>=2:
-				actionName = gettedElement[1]
-			else :
-				actionName = "build"
-			debug.verbose("requested : " + module_name + "?" + actionName)
-			if actionName == "install":
-				self.build(module_name + "?build")
-				self.install_package(module_name)
-			elif actionName == "uninstall":
-				self.un_install_package(module_name)
-			elif actionName == "log":
-				self.Log(module_name)
-			else:
-				present = self.load_if_needed(module_name, optionnal=optionnal)
-				if     present == False \
-				   and optionnal == True:
-					return [heritage.HeritageList(), False]
-				# clean requested
-				for mod in self.module_list:
-					if mod.name == module_name:
-						if actionName == "dump":
-							debug.info("dump module '" + module_name + "'")
-							return mod.display(self)
-						elif actionName == "clean":
-							debug.info("clean module '" + module_name + "'")
-							return mod.clean(self)
-						elif actionName == "gcov":
-							debug.debug("gcov on module '" + module_name + "'")
-							if sub_action_name == "output":
-								return mod.gcov(self, generate_output=True)
-							return mod.gcov(self, generate_output=False)
-						elif actionName == "build":
-							debug.debug("build module '" + module_name + "'")
-							if optionnal == True:
-								return [mod.build(self, None), True]
-							return mod.build(self, None)
-				if optionnal == True:
-					return [heritage.HeritageList(), False]
-				debug.error("not know module name : '" + module_name + "' to '" + actionName + "' it")
+			action_list = gettedElement[1:]
+			if len(action_list) == 0:
+				action_list = ["build"]
+			debug.verbose("requested : " + module_name + " ? actions:" + str(action_list))
+			for action_name in action_list:
+				debug.verbose("requested : " + module_name + "?" + action_name + " [START]")
+				ret = None;
+				if action_name == "install":
+					try:
+						self.install_package(module_name)
+					except AttributeError:
+						debug.error("target have no 'install_package' instruction")
+				elif action_name == "uninstall":
+					try:
+						self.un_install_package(module_name)
+					except AttributeError:
+						debug.error("target have no 'un_install_package' instruction")
+				elif action_name == "run":
+					try:
+						self.run(module_name)
+					except AttributeError:
+						debug.error("target have no 'run' instruction")
+				elif action_name == "log":
+					try:
+						self.show_log(module_name)
+					except AttributeError:
+						debug.error("target have no 'show_log' instruction")
+				else:
+					present = self.load_if_needed(module_name, optionnal=optionnal)
+					if     present == False \
+					   and optionnal == True:
+						ret = [heritage.HeritageList(), False]
+					else:
+						# clean requested
+						for mod in self.module_list:
+							if mod.name == module_name:
+								if action_name[:4] == "dump":
+									debug.info("dump module '" + module_name + "'")
+									if len(action_name) > 4:
+										debug.warning("action 'dump' does not support options ... : '" + action_name + "'")
+									ret = mod.display(self)
+									break
+								elif action_name[:5] == "clean":
+									debug.info("clean module '" + module_name + "'")
+									if len(action_name) > 5:
+										debug.warning("action 'clean' does not support options ... : '" + action_name + "'")
+									ret = mod.clean(self)
+									break
+								elif action_name[:4] == "gcov":
+									debug.debug("gcov on module '" + module_name + "'")
+									if len(action_name) > 4:
+										# we have option:
+										option_list = action_name.split(":")
+										if len(option_list) == 0:
+											debug.warning("action 'gcov' wrong options options ... : '" + action_name + "' might be separate with ':'")
+											option_list = []
+										else:
+											option_list = option_list[1:]
+									if "output" in option_list:
+										ret = mod.gcov(self, generate_output=True)
+									else:
+										ret = mod.gcov(self, generate_output=False)
+									break
+								elif action_name[:5] == "build":
+									if len(action_name) > 5:
+										debug.warning("action 'build' does not support options ... : '" + action_name + "'")
+									debug.debug("build module '" + module_name + "'")
+									if optionnal == True:
+										ret = [mod.build(self, None), True]
+									else:
+										ret = mod.build(self, None)
+									break
+						if     optionnal == True \
+						   and ret == None:
+							ret = [heritage.HeritageList(), False]
+							break
+						if ret == None:
+							debug.error("not know module name : '" + module_name + "' to '" + action_name + "' it")
+				debug.verbose("requested : " + module_name + "?" + action_name + " [STOP]")
+			if len(action_list) == 1:
+				return ret
 	
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
 		debug.verbose("add action : " + name)

@@ -42,6 +42,22 @@ exit_flag = False # resuest stop of the thread
 is_init = False # the thread are initialized
 error_occured = False # a thread have an error
 processor_availlable = 1 # number of CPU core availlable
+##
+## @brief Execute the command with no get of output
+##
+def run_command_no_lock_out(cmd_line):
+	# prepare command line:
+	args = shlex.split(cmd_line)
+	debug.verbose("cmd = " + str(args))
+	try:
+		# create the subprocess
+		p = subprocess.Popen(args)
+	except subprocess.CalledProcessError as e:
+		debug.error("subprocess.CalledProcessError : " + str(args))
+	except:
+		debug.error("Exception on : " + str(args))
+	# launch the subprocess:
+	p.communicate()
 
 ##
 ## @brief Execute the command and ruturn generate data

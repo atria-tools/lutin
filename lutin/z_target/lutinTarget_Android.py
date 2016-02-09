@@ -512,7 +512,7 @@ class Target(target.Target):
 		cmdLine = self.path_sdk + "/platform-tools/adb uninstall " + pkg_name_application_name
 		Rmultiprocess.run_command(cmdLine)
 	
-	def Log(self, pkg_name):
+	def show_log(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("logcat of android board")
 		debug.debug("------------------------------------------------------------------------")
