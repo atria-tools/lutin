@@ -137,12 +137,15 @@ class Target(target.Target):
 			# remove executable link version:
 			tools.remove_file(target_bin_link)
 	
-	def run(self, pkg_name):
+	def run(self, pkg_name, option_list):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Run package '" + pkg_name + "'")
+		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
 		debug.debug("------------------------------------------------------------------------")
 		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "bin", pkg_name)
-		multiprocess.run_command_no_lock_out(appl_path)
+		cmd = appl_path + " "
+		for elem in option_list:
+			cmd += elem + " "
+		multiprocess.run_command_no_lock_out(cmd)
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
 		debug.debug("------------------------------------------------------------------------")

@@ -48,7 +48,7 @@ processor_availlable = 1 # number of CPU core availlable
 def run_command_no_lock_out(cmd_line):
 	# prepare command line:
 	args = shlex.split(cmd_line)
-	debug.verbose("cmd = " + str(args))
+	debug.info("cmd = " + str(args))
 	try:
 		# create the subprocess
 		p = subprocess.Popen(args)

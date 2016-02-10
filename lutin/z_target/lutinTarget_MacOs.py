@@ -147,12 +147,15 @@ class Target(target.Target):
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
 	
-	def run(self, pkg_name):
+	def run(self, pkg_name, option_list):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
 		appl_path = os.path.join(tools.get_run_path(),self.path_out,self.path_staging,pkg_name + ".app", "bin", pkg_name)
-		multiprocess.run_command_no_lock_out(appl_path)
+		cmd = appl_path + " "
+		for elem in option_list:
+			cmd += elem + " "
+		multiprocess.run_command_no_lock_out(cmd)
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
 		debug.debug("------------------------------------------------------------------------")

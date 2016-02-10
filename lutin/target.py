@@ -508,11 +508,23 @@ class Target:
 						self.un_install_package(module_name)
 					except AttributeError:
 						debug.error("target have no 'un_install_package' instruction")
-				elif action_name == "run":
-					try:
-						self.run(module_name)
-					except AttributeError:
-						debug.error("target have no 'run' instruction")
+				elif action_name[:3] == "run":
+					if len(action_name) > 3:
+						# we have option:
+						action_name2 = action_name.replace("\:", "1234COLUMN4321")
+						option_list = action_name2.split(":")
+						if len(option_list) == 0:
+							debug.warning("action 'run' wrong options options ... : '" + action_name + "' might be separate with ':'")
+							option_list = []
+						else:
+							option_list_tmp = option_list[1:]
+							option_list = []
+							for elem in option_list_tmp:
+								option_list.append(elem.replace("1234COLUMN4321", ":"))
+					#try:
+					self.run(module_name, option_list)
+					#except AttributeError:
+					#	debug.error("target have no 'run' instruction")
 				elif action_name == "log":
 					try:
 						self.show_log(module_name)
