@@ -521,6 +521,8 @@ class Target:
 							option_list = []
 							for elem in option_list_tmp:
 								option_list.append(elem.replace("1234COLUMN4321", ":"))
+					else:
+						option_list = []
 					#try:
 					self.run(module_name, option_list)
 					#except AttributeError:
@@ -561,6 +563,8 @@ class Target:
 											option_list = []
 										else:
 											option_list = option_list[1:]
+									else:
+										option_list = []
 									if "output" in option_list:
 										ret = mod.gcov(self, generate_output=True)
 									else:
