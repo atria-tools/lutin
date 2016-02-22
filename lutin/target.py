@@ -121,8 +121,8 @@ class Target:
 			    "-ftest-coverage"
 			    ])
 			self.add_flag("link", [
-			    "-fprofile-arcs",
-			    "-ftest-coverage"
+			    "-lgcov",
+			    "--coverage"
 			    ])
 		
 		self.update_path_tree()

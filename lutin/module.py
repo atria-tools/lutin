@@ -261,31 +261,51 @@ class Module:
 		executed_lines = 0
 		executable_lines = 0
 		for elem in ret:
+			debug.verbose("line : " + elem)
 			if remove_next == True:
 				remove_next = False
 				continue;
 			if    elem[:10] == "Creating '" \
-			   or elem[:10] == "Removing '":
+			   or elem[:10] == "Removing '" \
+			   or elem[:14] == "Suppression de" \
+			   or elem[:11] == "Création de":
 				remove_next = True
 				continue
-			if     elem[:6] == "File '" \
-			   and self.origin_path != elem[6:len(self.origin_path)+6]:
-				remove_next = True
+			if    elem[:6] in ["File '", "File «"] \
+			   or elem[:7] in ["File ' ", "File « "]:
+				if     self.origin_path != elem[7:len(self.origin_path)+7] \
+				   and self.origin_path != elem[6:len(self.origin_path)+6]:
+					remove_next = True
+					debug.verbose("    REMOVE: '" + str(self.origin_path) + "' != '" + str(elem[6:len(self.origin_path)+7]) + "'")
+					continue
+				if elem[:6] not in ["File '", "File «"]:
+					last_file = elem[6+len(self.origin_path)+1:-1]
+					if elem[:7] not in ["File ' ", "File« "]:
+						last_file = elem[7+len(self.origin_path)+1:-1]
 				continue
-			if elem[:6] == "File '":
-				last_file = elem[6+len(self.origin_path)+1:-1]
+			if elem[:7] == "Aucune ":
+				debug.verbose("    Nothing to execute");
 				continue
-			start_with = "Lines executed:"
-			if elem[:len(start_with)] != start_with:
+			start_with = ["Lines executed:", "Lignes exécutées:"]
+			find = False
+			for line_base in start_with:
+				if elem[:len(line_base)] == line_base:
+					find = True
+					elem = elem[len(line_base)+1:]
+					break;
+			if find == False:
 				debug.warning("    gcov ret : " + str(elem));
-				debug.warning("         ==> does not start with : " + start_with);
+				debug.warning("         ==> does not start with : " + str(start_with));
 				debug.warning("         Parsing error");
 				continue
-			out = elem[len(start_with):].split("% of ")
+			out = elem.split("% of ")
 			if len(out) != 2:
-				debug.warning("    gcov ret : " + str(elem));
-				debug.warning("         Parsing error of '% of '");
-				continue
+				out = elem.split("% de ")
+				if len(out) != 2:
+					debug.warning("    gcov ret : " + str(elem));
+					debug.warning("         Parsing error of '% of '");
+					continue
+			debug.verbose("property : " + str(out))
 			pourcent = float(out[0])
 			total_line_count = int(out[1])
 			total_executed_line = int(float(total_line_count)*pourcent/100.0)
@@ -303,7 +323,10 @@ class Module:
 				debug.info("   %  " + str(elem[1]) + "\r\t\t" + str(elem[0]));
 			else:
 				debug.info("   % " + str(elem[1]) + "\r\t\t" + str(elem[0]));
-		pourcent = 100.0*float(executed_lines)/float(executable_lines)
+		try:
+			pourcent = 100.0*float(executed_lines)/float(executable_lines)
+		except ZeroDivisionError:
+			pourcent = 0.0
 		# generate json file:
 		json_file_name = target.get_build_path(self.name) + "/" + self.name + "_coverage.json"
 		debug.debug("generate json file : " + json_file_name)
