@@ -42,6 +42,8 @@ class Module:
 		self.type='LIBRARY'
 		# Name of the module
 		self.name=module_name
+		# Tools list:
+		self.tools = []
 		# Dependency list:
 		self.depends = []
 		# Dependency list (optionnal module):
@@ -234,12 +236,38 @@ class Module:
 		if self.type == 'PREBUILD':
 			debug.error("Can not generate gcov on prebuid system ... : '" + self.name + "'");
 			return
+		# list of path that can apear in the output data :
+		gcov_path_file = []
+		gcov_path_file.append(target.get_build_path_include(self.name)) # for include (that is installed)
+		gcov_path_file.append(" " + target.get_build_path_include(self.name))
+		gcov_path_file.append(self.origin_path) # for sources.
+		gcov_path_file.append(" " + self.origin_path)
+		# squash header and src...
+		full_list_file = []
+		for elem in self.header:
+			debug.extreme_verbose("plop H : " +str(elem['src']))
+			full_list_file.append([self.name, elem['src']])
+		for elem in self.src:
+			debug.extreme_verbose("plop S : " +str(elem))
+			full_list_file.append([self.name, elem])
+		for mod_name in self.tools:
+			tool_module = load_module(target, mod_name)
+			if tool_module == None:
+				continue
+			for elem in tool_module.header:
+				debug.extreme_verbose("plop HH: " + ":" + str(elem['src']))
+				full_list_file.append([tool_module.name, elem['src']])
+			for elem in tool_module.src:
+				debug.extreme_verbose("plop SS: " + tool_module.name + ":" + str(elem))
+				full_list_file.append([tool_module.name, elem])
+		debug.extreme_verbose("plop F : " +str(self.extention_order_build))
 		# remove uncompilable elements:
-		list_file = tools.filter_extention(self.src, self.extention_order_build, True)
+		# TODO: list_file = tools.filter_extention(full_list_file, self.extention_order_build, True)
+		list_file = full_list_file;
 		global_list_file = ""
 		for file in list_file:
-			debug.verbose(" gcov : " + self.name + " <== " + file);
-			file_dst = target.get_full_name_destination(self.name, self.origin_path, file, "o")
+			debug.verbose(" gcov : " + self.name + " <== " + str(file));
+			file_dst = target.get_full_name_destination(file[0], self.origin_path, file[1], "o")
 			global_list_file += file_dst + " "
 		cmd = "gcov"
 		# specify the version of gcov we need to use
@@ -261,9 +289,10 @@ class Module:
 		executed_lines = 0
 		executable_lines = 0
 		for elem in ret:
-			debug.verbose("line : " + elem)
+			debug.debug("line: " + elem)
 			if remove_next == True:
 				remove_next = False
+				debug.debug("--------------------------")
 				continue;
 			if    elem[:10] == "Creating '" \
 			   or elem[:10] == "Removing '" \
@@ -273,15 +302,17 @@ class Module:
 				continue
 			if    elem[:6] in ["File '", "File «"] \
 			   or elem[:7] in ["File ' ", "File « "]:
-				if     self.origin_path != elem[7:len(self.origin_path)+7] \
-				   and self.origin_path != elem[6:len(self.origin_path)+6]:
+				path_finder = False
+				for path_base_finder in gcov_path_file:
+					if path_base_finder == elem[6:len(path_base_finder)+6]:
+						path_finder = True
+						last_file = elem[6+len(path_base_finder)+1:-1]
+						while last_file[-1] == " ":
+							last_file = last_file[:-1]
+				if path_finder == False:
 					remove_next = True
-					debug.verbose("    REMOVE: '" + str(self.origin_path) + "' != '" + str(elem[6:len(self.origin_path)+7]) + "'")
+					debug.verbose("    REMOVE: '" + str(elem[6:len(self.origin_path)+1]) + "' not in " + str(gcov_path_file))
 					continue
-				if elem[:6] not in ["File '", "File «"]:
-					last_file = elem[6+len(self.origin_path)+1:-1]
-					if elem[:7] not in ["File ' ", "File« "]:
-						last_file = elem[7+len(self.origin_path)+1:-1]
 				continue
 			if elem[:7] == "Aucune ":
 				debug.verbose("    Nothing to execute");
@@ -309,11 +340,27 @@ class Module:
 			pourcent = float(out[0])
 			total_line_count = int(out[1])
 			total_executed_line = int(float(total_line_count)*pourcent/100.0)
+			# check if in source or header:
+			in_source_file = False
+			debug.verbose("    ??> Check: " + str(last_file))
+			for elem_header in self.header:
+				debug.verbose("        ==> Check: " + str(elem_header['src']))
+				if elem_header['src'] == last_file:
+					in_source_file = True
+			for elem_src in self.src:
+				debug.verbose("        ==> Check: " + str(elem_src))
+				if elem_src == last_file:
+					in_source_file = True
+			if in_source_file == False:
+				debug.verbose("        ==> Remove not in source: " + str(out))
+				continue
 			useful_list.append([last_file, pourcent, total_executed_line, total_line_count])
 			executed_lines += total_executed_line
 			executable_lines += total_line_count
 			last_file = ""
+			debug.debug("--------------------------")
 		ret = useful_list[:-1]
+		debug.verbose("plopppp " + str(useful_list))
 		#for elem in ret:
 		#	debug.info("    " + str(elem));
 		for elem in ret:
@@ -354,6 +401,7 @@ class Module:
 		tmp_file.close()
 		# print debug:
 		debug.print_element("coverage", self.name, ":", str(pourcent) + "%  " + str(executed_lines) + "/" + str(executable_lines))
+		return True
 	
 	# call here to build the module
 	def build(self, target, package_name):
@@ -735,6 +783,9 @@ class Module:
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
+	def add_tools(self, list):
+		tools.list_append_to(self.tools, list, True)
+	
 	def add_module_depend(self, list):
 		tools.list_append_to(self.depends, list, True)
 	
@@ -1049,6 +1100,7 @@ def load_module(target, name):
 				debug.debug("Request load module '" + name + "' not define for this platform")
 			else:
 				target.add_module(tmp_element)
+				return tmp_element
 
 def list_all_module():
 	global module_list
