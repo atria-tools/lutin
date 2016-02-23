@@ -766,6 +766,7 @@ class Module:
 		if self.type=='PREBUILD':
 			# nothing to add ==> just dependence
 			None
+			return True
 		elif    self.type=='LIBRARY' \
 		     or self.type=='LIBRARY_DYNAMIC' \
 		     or self.type=='LIBRARY_STATIC':
@@ -773,6 +774,7 @@ class Module:
 			pathbuild = target.get_build_path(self.name)
 			debug.info("remove path : '" + pathbuild + "'")
 			tools.remove_path_and_sub_path(pathbuild)
+			return True
 		elif    self.type=='BINARY' \
 		     or self.type=='PACKAGE':
 			# remove path of the lib ... for this targer
@@ -782,6 +784,7 @@ class Module:
 			pathStaging = target.get_staging_path(self.name)
 			debug.info("remove path : '" + pathStaging + "'")
 			tools.remove_path_and_sub_path(pathStaging)
+			return True
 		else:
 			debug.error("Dit not know the element type ... (impossible case) type=" + self.type)
 	
@@ -912,6 +915,7 @@ class Module:
 			value = self.path["export"][element]
 			self.print_list('export path ' + str(element), value)
 		
+		return True
 	
 	def pkg_set(self, variable, value):
 		if "COMPAGNY_TYPE" == variable:
