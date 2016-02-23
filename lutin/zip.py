@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 ##
 ## @author Edouard DUPIN
 ##
@@ -6,6 +7,7 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
+
 import platform
 import os
 import zipfile

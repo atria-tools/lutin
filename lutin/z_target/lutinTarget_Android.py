@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 ##
 ## @author Edouard DUPIN
 ##
@@ -6,7 +7,6 @@
 ##
 ## @license APACHE v2.0 (see license file)
 ##
-
 
 from lutin import debug
 from lutin import target
