@@ -315,7 +315,8 @@ class Module:
 					debug.verbose("    REMOVE: '" + str(elem[6:len(self.origin_path)+1]) + "' not in " + str(gcov_path_file))
 					continue
 				continue
-			if elem[:7] == "Aucune ":
+			if    elem[:7] == "Aucune " \
+			   or elem[:19] == "No executable lines":
 				debug.verbose("    Nothing to execute");
 				continue
 			start_with = ["Lines executed:", "Lignes exécutées:"]
