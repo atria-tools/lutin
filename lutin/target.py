@@ -45,6 +45,7 @@ class Target:
 		# todo : remove this :
 		self.sumulator = config["simulation"]
 		self.name = name
+		self.config_based_on = name
 		self.end_generate_package = config["generate-package"]
 		debug.info("=================================");
 		debug.info("== Target='" + self.name + "' " + config["bus-size"] + " bits for arch '" + config["arch"] + "'");
