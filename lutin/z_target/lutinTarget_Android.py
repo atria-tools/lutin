@@ -467,7 +467,7 @@ class Target(target.Target):
 			print("On release mode we need the file :  and key an pasword to sign the application ...")
 			debug.print_element("pkg", ".apk(signed debug)", "<==", ".apk (not signed)")
 			cmdLine = "jarsigner " \
-			    + " -keystore " + base_pkg_path + "/AndroidKey.jks " \
+			    + " -keystore " + pkg_properties["ANDROID_SIGN"] + " " \
 			    + " -sigalg SHA1withRSA -digestalg SHA1 " \
 			    + target_outpath + "/build/" + pkg_name_application_name + "-unalligned.apk " \
 			    + " " + pkg_name_application_name

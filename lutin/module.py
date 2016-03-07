@@ -104,7 +104,8 @@ class Module:
 		                      "ANDROID_WALLPAPER_PROPERTIES" : [], # To create properties of the wallpaper (no use of EWOL display)
 		                      "RIGHT" : [],
 		                      "LICENSE" : "", # by default: no license
-		                      "ADMOD_POSITION" : "top"
+		                      "ADMOD_POSITION" : "top",
+		                      "ANDROID_SIGN" : "no_file.jks"
 		                     }
 		self.package_prop_default = { "COMPAGNY_TYPE" : True,
 		                              "COMPAGNY_NAME" : True,
@@ -123,7 +124,8 @@ class Module:
 		                              "ANDROID_WALLPAPER_PROPERTIES" : True,
 		                              "RIGHT" : True,
 		                              "LICENSE" : True,
-		                              "ADMOD_POSITION" : True
+		                              "ADMOD_POSITION" : True,
+		                              "ANDROID_SIGN" : True
 		                            }
 		self.sub_heritage_list = None
 	
@@ -979,7 +981,8 @@ class Module:
 		                  "ANDROID_APPL_TYPE",
 		                  "ADMOD_ID",
 		                  "APPLE_APPLICATION_IOS_ID",
-		                  "LICENSE"]:
+		                  "LICENSE",
+		                  "ANDROID_SIGN"]:
 			self.package_prop[variable] = value
 			self.package_prop_default[variable] = False
 		elif "ADMOD_POSITION" == variable:
