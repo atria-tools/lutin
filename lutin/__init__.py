@@ -71,8 +71,26 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 	# check if the file "lutin_parse_sub.py" is present ==> parse SubFolder (force and add +1 in the resursing
 	if base_name + "ParseSubFolders.txt" in list_files:
 		debug.debug("find SubParser ... " + str(base_name + "ParseSubFolders.txt") + " " + path)
-		need_parse_sub_folder = True
-		rm_value = 0
+		data_file_sub = tools.file_read_data(os.path.join(path, base_name + "ParseSubFolders.txt"))
+		if data_file_sub == "":
+			debug.debug("    Empty file Load all subfolder in the worktree in '" + str(path) + "'")
+			need_parse_sub_folder = True
+			rm_value = 0
+		else:
+			list_sub = data_file_sub.split("\n")
+			debug.debug("    Parse selected folders " + str(list_sub) + " no parse local folder directory")
+			need_parse_sub_folder = False
+			for folder in list_sub:
+				if    folder == "" \
+				   or folder == "/":
+					continue;
+				tmp_out = import_path_local(os.path.join(path, folder),
+				                            1,
+				                            exclude_path,
+				                            base_name)
+				# add all the elements:
+				for elem in tmp_out:
+					out.append(elem)
 	if need_parse_sub_folder == True:
 		list_folders = filter_path(path, list_files)
 		for folder in list_folders:
