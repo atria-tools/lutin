@@ -11,6 +11,7 @@
 # for path inspection:
 import sys
 import os
+import copy
 import lutin
 import lutin.debug as debug
 import lutin.arg as arguments
@@ -154,6 +155,15 @@ def usage(full=False):
 	print("	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
 	exit(0)
 
+def check_boolean(value):
+	if    value == "" \
+	   or value == "1" \
+	   or value == "true" \
+	   or value == "True" \
+	   or value == True:
+		return True
+	return False
+
 # preparse the argument to get the verbose element for debug mode
 def parseGenericArg(argument, active):
 	debug.extreme_verbose("parse arg : " + argument.get_option_name() + " " + argument.get_arg() + " active=" + str(active))
@@ -201,66 +211,42 @@ def parseGenericArg(argument, active):
 		return True
 	elif argument.get_option_name() == "color":
 		if active==True:
-			if    argument.get_arg() == "" \
-			   or argument.get_arg() == "1" \
-			   or argument.get_arg() == "true" \
-			   or argument.get_arg() == "True" \
-			   or argument.get_arg() == True:
+			if check_boolean(argument.get_arg()) == True:
 				debug.enable_color()
 			else:
 				debug.disable_color()
 		return True
 	elif argument.get_option_name() == "force-build":
 		if active==True:
-			if    argument.get_arg() == "" \
-			   or argument.get_arg() == "1" \
-			   or argument.get_arg() == "true" \
-			   or argument.get_arg() == "True" \
-			   or argument.get_arg() == True:
+			if check_boolean(argument.get_arg()) == True:
 				env.set_force_mode(True)
 			else:
 				env.set_force_mode(False)
 		return True
 	elif argument.get_option_name() == "pretty":
 		if active==True:
-			if    argument.get_arg() == "" \
-			   or argument.get_arg() == "1" \
-			   or argument.get_arg() == "true" \
-			   or argument.get_arg() == "True" \
-			   or argument.get_arg() == True:
+			if check_boolean(argument.get_arg()) == True:
 				env.set_print_pretty_mode(True)
 			else:
 				env.set_print_pretty_mode(False)
 		return True
 	elif argument.get_option_name() == "force-optimisation":
 		if active==True:
-			if    argument.get_arg() == "" \
-			   or argument.get_arg() == "1" \
-			   or argument.get_arg() == "true" \
-			   or argument.get_arg() == "True" \
-			   or argument.get_arg() == True:
+			if check_boolean(argument.get_arg()) == True:
 				env.set_force_optimisation(True)
 			else:
 				env.set_force_optimisation(False)
 		return True
 	elif argument.get_option_name() == "force-strip":
 		if active==True:
-			if    argument.get_arg() == "" \
-			   or argument.get_arg() == "1" \
-			   or argument.get_arg() == "true" \
-			   or argument.get_arg() == "True" \
-			   or argument.get_arg() == True:
+			if check_boolean(argument.get_arg()) == True:
 				env.set_force_strip_mode(True)
 			else:
 				env.set_force_strip_mode(False)
 		return True
 	elif argument.get_option_name() == "warning":
 		if active==True:
-			if    argument.get_arg() == "" \
-			   or argument.get_arg() == "1" \
-			   or argument.get_arg() == "true" \
-			   or argument.get_arg() == "True" \
-			   or argument.get_arg() == True:
+			if check_boolean(argument.get_arg()) == True:
 				env.set_warning_mode(True)
 			else:
 				env.set_warning_mode(False)
@@ -326,8 +312,6 @@ config = {
 	"gcov":False,
 	"compilator-version":""
 	}
-# load the default target :
-my_target = None
 actionDone=False
 # parse all argument
 for argument in localArgument:
@@ -349,8 +333,6 @@ for argument in localArgument:
 		if config["compilator"] != argument.get_arg():
 			debug.debug("change compilator ==> " + argument.get_arg())
 			config["compilator"] = argument.get_arg()
-			#remove previous target
-			my_target = None
 	elif argument.get_option_name() == "target":
 		# No check input ==> this will be verify automaticly chen the target will be loaded
 		if targetName != argument.get_arg():
@@ -367,23 +349,38 @@ for argument in localArgument:
 			             "gcov":False,
 			             "compilator-version":""
 			          }
-			#remove previous target
-			my_target = None
 	elif argument.get_option_name() == "mode":
 		if config["mode"] != argument.get_arg():
 			config["mode"] = argument.get_arg()
 			debug.debug("change mode ==> " + config["mode"])
-			#remove previous target
-			my_target = None
 	else:
+		argument_value = argument.get_arg()
+		debug.debug("something request : '" + argument_value + "'")
 		if argument.get_option_name() != "":
 			debug.warning("Can not understand argument : '" + argument.get_option_name() + "'")
 			usage()
+			break;
+		name2 = argument_value.replace("@", "?")
+		gettedElement = name2.split("?")
+		module_name = gettedElement[0]
+		action_list = gettedElement[1:]
+		if len(action_list) == 0:
+			action_list = "build"
+		debug.debug("requested: '" + module_name + "' ? actions:'" + str(action_list) + "'")
+		multiple_module_list = []
+		if module_name[-1] == "*":
+			base_name = module_name[:-1]
+			for mod in module.list_all_module():
+				if mod[:len(base_name)] == base_name:
+					debug.verbose("need do it for: " + mod);
+					multiple_module_list.append(mod)
 		else:
-			#load the target if needed :
-			if my_target == None:
-				my_target = target.load_target(targetName, config)
-			my_target.build(argument.get_arg())
+			multiple_module_list.append(module_name)
+		debug.debug("Will do: '" + str(multiple_module_list) + "' ? actions:'" + str(action_list) + "'")
+		for module_name in multiple_module_list:
+			#Load target with specific configuration:
+			my_target = target.load_target(targetName, copy.deepcopy(config))
+			my_target.build(module_name, actions=action_list)
 			actionDone=True
 
 # if no action done : we do "all" ...
