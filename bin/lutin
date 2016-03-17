@@ -312,6 +312,8 @@ config = {
 	"gcov":False,
 	"compilator-version":""
 	}
+# load the default target :
+my_target = None
 actionDone=False
 # parse all argument
 for argument in localArgument:
@@ -333,6 +335,8 @@ for argument in localArgument:
 		if config["compilator"] != argument.get_arg():
 			debug.debug("change compilator ==> " + argument.get_arg())
 			config["compilator"] = argument.get_arg()
+			#remove previous target
+			my_target = None
 	elif argument.get_option_name() == "target":
 		# No check input ==> this will be verify automaticly chen the target will be loaded
 		if targetName != argument.get_arg():
@@ -349,10 +353,14 @@ for argument in localArgument:
 			             "gcov":False,
 			             "compilator-version":""
 			          }
+			#remove previous target
+			my_target = None
 	elif argument.get_option_name() == "mode":
 		if config["mode"] != argument.get_arg():
 			config["mode"] = argument.get_arg()
 			debug.debug("change mode ==> " + config["mode"])
+			#remove previous target
+			my_target = None
 	else:
 		argument_value = argument.get_arg()
 		debug.debug("something request : '" + argument_value + "'")
@@ -378,8 +386,9 @@ for argument in localArgument:
 			multiple_module_list.append(module_name)
 		debug.debug("Will do: '" + str(multiple_module_list) + "' ? actions:'" + str(action_list) + "'")
 		for module_name in multiple_module_list:
-			#Load target with specific configuration:
-			my_target = target.load_target(targetName, copy.deepcopy(config))
+			#load the target if needed :
+			if my_target == None:
+				my_target = target.load_target(targetName, copy.deepcopy(config))
 			my_target.build(module_name, actions=action_list)
 			actionDone=True
 

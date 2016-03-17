@@ -475,7 +475,7 @@ class Target:
 		if actions == []:
 			actions = ["build"]
 		if type(actions) == str:
-			actions = [action]
+			actions = [actions]
 		if name == "gcov":
 			debug.info("gcov all")
 			debug.error("must set the gcov parsing on a specific library or binary ==> not supported now for all")
@@ -483,7 +483,7 @@ class Target:
 			debug.info("dump all")
 			self.load_all()
 			for mod in self.module_list:
-				mod.display(self)
+				mod.display()
 			return
 		if name == "all":
 			debug.info("build all")
@@ -553,7 +553,7 @@ class Target:
 									debug.info("dump module '" + module_name + "'")
 									if len(action_name) > 4:
 										debug.warning("action 'dump' does not support options ... : '" + action_name + "'")
-									ret = mod.display(self)
+									ret = mod.display()
 									break
 								elif action_name[:5] == "clean":
 									debug.info("clean module '" + module_name + "'")

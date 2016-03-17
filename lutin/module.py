@@ -10,6 +10,7 @@
 
 import sys
 import os
+import copy
 import inspect
 import fnmatch
 # Local import
@@ -413,7 +414,8 @@ class Module:
 		if target.is_module_build(self.name) == True:
 			if self.sub_heritage_list == None:
 				self.local_heritage = heritage.heritage(self, target)
-			return self.sub_heritage_list
+				debug.warning("plop " + str(self.local_heritage));
+			return copy.deepcopy(self.sub_heritage_list)
 		# create the package heritage
 		self.local_heritage = heritage.heritage(self, target)
 		
@@ -548,6 +550,7 @@ class Module:
 					debug.warning(" UN-SUPPORTED file format:  '" + self.origin_path + "/" + file + "'")
 			# when multiprocess availlable, we need to synchronize here ...
 			multiprocess.pool_synchrosize()
+		
 		# ----------------------------------------------------
 		# -- Generation point                               --
 		# ----------------------------------------------------
@@ -761,7 +764,7 @@ class Module:
 					target.make_package(self.name, self.package_prop, os.path.join(self.origin_path, ".."), self.sub_heritage_list)
 		
 		# return local dependency ...
-		return self.sub_heritage_list
+		return copy.deepcopy(self.sub_heritage_list)
 	
 	# call here to clean the module
 	def clean(self, target):
@@ -887,7 +890,7 @@ class Module:
 			print('        ' + str(description))
 			print('            ' + str(input_list))
 	
-	def display(self, target):
+	def display(self):
 		print('-----------------------------------------------')
 		print(' package : "' + self.name + "'")
 		print('-----------------------------------------------')
@@ -911,11 +914,11 @@ class Module:
 		self.print_list('paths',self.paths)
 		for element in self.path["local"]:
 			value = self.path["local"][element]
-			self.print_list('local path ' + str(element), value)
+			self.print_list('local path "' + str(element) + '" ' + str(len(value)), value)
 		
 		for element in self.path["export"]:
 			value = self.path["export"][element]
-			self.print_list('export path ' + str(element), value)
+			self.print_list('export path "' + str(element) + '" ' + str(len(value)), value)
 		
 		return True
 	
