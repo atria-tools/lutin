@@ -87,17 +87,20 @@ def version_to_string(version):
 ## @param[in] path Path of the data might be written.
 ## @param[in] data Data To write in the file.
 ## @param[in] only_if_new (default: False) Write data only if data is different.
+## @return True Something has been copied
+## @return False Nothing has been copied
 ##
 def file_write_data(path, data, only_if_new=False):
 	if only_if_new == True:
 		old_data = file_read_data(path)
 		if old_data == data:
-			return
+			return False
 	#real write of data:
 	create_directory_of_file(path)
 	file = open(path, "w")
 	file.write(data)
 	file.close()
+	return True
 
 def list_to_str(list):
 	if type(list) == type(str()):
@@ -131,6 +134,8 @@ def add_prefix(prefix,list):
 ## @param[in] force (default False) Force copy of the file
 ## @param[in] force_identical (default False) Force file to be identical (read it in binary)
 ## @param[in,out] in_list (default None) Not real copy: set the request copy in the input list
+## @return True Something has/must been copied
+## @return False Nothing has/myst been copied
 ##
 def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_list=None):
 	if os.path.exists(src) == False:
@@ -138,7 +143,7 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
 	if     force == False \
 	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmd_line=cmd_line, force_identical=force_identical) == False:
-		debug.verbose ("no need to copy ...")
+		debug.verbose("no need to copy ...")
 		if in_list != None:
 			if dst in in_list:
 				debug.verbose("replace copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
@@ -148,7 +153,7 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 			in_list[dst] = {"src":src,
 			                "cmd_file":cmd_file,
 			                "need_copy":False}
-		return
+		return False
 	if in_list == None:
 		debug.print_element("copy file ", os.path.relpath(src), "==>", os.path.relpath(dst))
 		create_directory_of_file(dst)
@@ -163,6 +168,7 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 		in_list[dst] = {"src":src,
 		                "cmd_file":cmd_file,
 		                "need_copy":True}
+	return True
 
 ##
 ## @brief Copy a compleate directory in a specific folder
@@ -210,20 +216,28 @@ def copy_anything(src, dst, recursive = False, force_identical=False, in_list=No
 ##
 ## @brief real copy of files in a specific dictionnary list
 ## @param[in] in_list Dictionnary of file to copy
+## @return True Something has been copied
+## @return False Nothing has been copied
 ##
 def copy_list(in_list):
+	has_file_copied = False
 	for dst in in_list:
 		if in_list[dst]["need_copy"] == False:
 			continue
 		# note we force the copy to disable the check of needed of copy (already done)
 		copy_file(in_list[dst]["src"], dst, cmd_file=in_list[dst]["cmd_file"], force=True)
+		has_file_copied = True
+	return has_file_copied
 
 ##
 ## @brief Clean a path from all un-needed element in a directory
 ## @param[in] path Path to clean
 ## @param[in] normal_list List of all files/path in the path
+## @return True Something has been removed
+## @return False Nothing has been removed
 ##
 def clean_directory(path, normal_list):
+	has_file_removed = False
 	# get a list of all element in the path:
 	for root, dirnames, filenames in os.walk(path):
 		for file in filenames:
@@ -231,6 +245,8 @@ def clean_directory(path, normal_list):
 			if file_name not in normal_list:
 				debug.print_element("remove file ", os.path.relpath(file_name), "==>", "---")
 				os.remove(file_name)
+				has_file_removed = True
+	return has_file_removed
 
 def filter_extention(list_files, extentions, invert=False):
 	out = []

@@ -74,30 +74,34 @@ class Target(target.Target):
 	"""
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.debug("-- Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
-		self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_share = self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## copy binary files:
-		self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_bin = self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create libraries:
-		self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_lib = self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create generic files:
-		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
+		ret_file = self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## create the package:
-		debug.debug("package : " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.pkg"))
-		os.system("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
-		#multiprocess.run_command("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
-		tools.create_directory_of_file(self.get_final_path())
-		tools.copy_file(os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.tar.gz"), os.path.join(self.get_final_path(), pkg_name + ".app.gpkg"))
+		if    ret_share \
+		   or ret_bin \
+		   or ret_lib \
+		   or ret_file:
+			debug.debug("package : " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.pkg"))
+			os.system("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
+			#multiprocess.run_command("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
+			tools.create_directory_of_file(self.get_final_path())
+			tools.copy_file(os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.tar.gz"), os.path.join(self.get_final_path(), pkg_name + ".app.gpkg"))
 	
 	def install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")

@@ -63,24 +63,30 @@ class Target(target.Target):
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.debug("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
-		self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_share = self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## copy binary files:
-		self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_bin = self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create libraries:
-		self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_lib = self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create generic files:
-		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
+		ret_file = self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
 		
+		## create the package:
+		if    ret_share \
+		   or ret_bin \
+		   or ret_lib \
+		   or ret_file:
+			debug.info("TODO: create a windows pkg ...")
 	
 	def make_package_single_file(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
 		debug.debug("------------------------------------------------------------------------")

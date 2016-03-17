@@ -642,6 +642,8 @@ class Target:
 	## @param[in] pkg_name Package Name (generic name)
 	## @param[in] heritage_list List of dependency of the package
 	## @param[in] static The package is build in static mode
+	## @return True Something has been copied
+	## @return False Nothing has been copied
 	##
 	def make_package_binary_data(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
 		target_shared_path = os.path.join(path_package, self.pkg_path_data)
@@ -675,9 +677,10 @@ class Target:
 					                    force_identical=True,
 					                    in_list=copy_list)
 		#real copy files
-		tools.copy_list(copy_list)
+		ret_copy = tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
-		tools.clean_directory(target_shared_path, copy_list)
+		ret_remove = tools.clean_directory(target_shared_path, copy_list)
+		return ret_copy or ret_remove
 	
 	##
 	## @brief Create a generic tree of the binary folder
@@ -685,6 +688,8 @@ class Target:
 	## @param[in] pkg_name Package Name (generic name)
 	## @param[in] heritage_list List of dependency of the package
 	## @param[in] static The package is build in static mode
+	## @return True Something has been copied
+	## @return False Nothing has been copied
 	##
 	def make_package_binary_bin(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
 		copy_list={}
@@ -697,10 +702,12 @@ class Target:
 		                path_dst,
 		                in_list=copy_list)
 		#real copy files
-		tools.copy_list(copy_list)
+		ret_copy = tools.copy_list(copy_list)
+		ret_remove = False
 		if self.pkg_path_bin != "":
 			# remove unneded files (NOT folder ...)
-			tools.clean_directory(path_package_bin, copy_list)
+			ret_remove = tools.clean_directory(path_package_bin, copy_list)
+		return ret_copy or ret_remove
 	
 	##
 	## @brief Create a generic tree of the library folder
@@ -708,6 +715,8 @@ class Target:
 	## @param[in] pkg_name Package Name (generic name)
 	## @param[in] heritage_list List of dependency of the package
 	## @param[in] static The package is build in static mode
+	## @return True Something has been copied
+	## @return False Nothing has been copied
 	##
 	def make_package_binary_lib(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
 		copy_list={}
@@ -728,46 +737,49 @@ class Target:
 					                os.path.join(path_package_lib, os.path.basename(file_src)),
 					                in_list=copy_list)
 		#real copy files
-		tools.copy_list(copy_list)
+		ret_copy = tools.copy_list(copy_list)
+		ret_remove = False
 		if self.pkg_path_lib != "":
 			# remove unneded files (NOT folder ...)
-			tools.clean_directory(path_package_lib, copy_list)
+			ret_remove = tools.clean_directory(path_package_lib, copy_list)
+		return ret_copy or ret_remove
 	
 	
 	def make_package_generic_files(self, path_package, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
 		## Create version file:
-		tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
-		                      tools.version_to_string(pkg_properties["VERSION"]),
-		                      only_if_new=True)
+		ret_version = tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
+		                                    tools.version_to_string(pkg_properties["VERSION"]),
+		                                    only_if_new=True)
 		
 		## Create maintainer file:
-		tools.file_write_data(os.path.join(path_package, self.pkg_path_maintainer_file),
-		                      self.generate_list_separate_coma(pkg_properties["MAINTAINER"]),
-		                      only_if_new=True)
+		ret_maintainer = tools.file_write_data(os.path.join(path_package, self.pkg_path_maintainer_file),
+		                                       self.generate_list_separate_coma(pkg_properties["MAINTAINER"]),
+		                                       only_if_new=True)
 		
 		## Create appl_name file:
-		tools.file_write_data(os.path.join(path_package, self.pkg_path_application_name_file),
-		                      "en_EN:" + pkg_properties["NAME"],
-		                      only_if_new=True)
+		ret_appl_name = tools.file_write_data(os.path.join(path_package, self.pkg_path_application_name_file),
+		                                      "en_EN:" + pkg_properties["NAME"],
+		                                      only_if_new=True)
 		
 		## Create appl_description file:
-		tools.file_write_data(os.path.join(path_package, self.pkg_path_application_description_file),
-		                      "en_EN:" + pkg_properties["DESCRIPTION"],
-		                      only_if_new=True)
+		ret_appl_desc = tools.file_write_data(os.path.join(path_package, self.pkg_path_application_description_file),
+		                                      "en_EN:" + pkg_properties["DESCRIPTION"],
+		                                      only_if_new=True)
 		
 		## Create Readme file:
 		readme_file_dest = os.path.join(path_package, self.pkg_path_readme_file)
+		ret_readme = False
 		if os.path.exists(os.path.join(base_pkg_path, "os-Linux/README"))==True:
-			tools.copy_file(os.path.join(base_pkg_path, "os-Linux/README"), readme_file_dest)
+			ret_readme = tools.copy_file(os.path.join(base_pkg_path, "os-Linux/README"), readme_file_dest)
 		elif os.path.exists(os.path.join(base_pkg_path, "README"))==True:
-			tools.copy_file(os.path.join(base_pkg_path, "README"), readme_file_dest)
+			ret_readme = tools.copy_file(os.path.join(base_pkg_path, "README"), readme_file_dest)
 		elif os.path.exists(os.path.join(base_pkg_path, "README.md"))==True:
-			tools.copy_file(os.path.join(base_pkg_path, "README.md"), readme_file_dest)
+			ret_readme = tools.copy_file(os.path.join(base_pkg_path, "README.md"), readme_file_dest)
 		else:
 			debug.debug("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
-			tools.file_write_data(readme_file_dest,
-			                      "No documentation for " + pkg_name + "\n",
-			                      only_if_new=True)
+			ret_readme = tools.file_write_data(readme_file_dest,
+			                                   "No documentation for " + pkg_name + "\n",
+			                                   only_if_new=True)
 		
 		## Create licence file:
 		"""
@@ -786,13 +798,20 @@ class Target:
 		
 		## Create changeLog file:
 		change_log_file_dest = os.path.join(path_package, self.pkg_path_change_log_file)
+		ret_changelog = False
 		if os.path.exists(os.path.join(base_pkg_path, "changelog")) == True:
-			tools.copy_file(os.path.join(base_pkg_path, "changelog"), change_log_file_dest)
+			ret_changelog = tools.copy_file(os.path.join(base_pkg_path, "changelog"), change_log_file_dest)
 		else:
 			debug.debug("no file 'changelog' ==> generate an empty one")
-			tools.file_write_data(change_log_file_dest,
-			                      "No changelog data " + pkg_name + "\n",
-			                      only_if_new=True)
+			ret_changelog = tools.file_write_data(change_log_file_dest,
+			                                      "No changelog data " + pkg_name + "\n",
+			                                      only_if_new=True)
+		return    ret_version \
+		       or ret_maintainer \
+		       or ret_appl_name \
+		       or ret_appl_desc \
+		       or ret_readme \
+		       or ret_changelog
 	
 	##
 	## @brief convert a s list of string in a string separated by a ","
