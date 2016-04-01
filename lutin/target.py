@@ -121,14 +121,22 @@ class Target:
 		
 		## To add code coverate on build result system
 		if self.config["gcov"] == True:
-			self.add_flag("c", [
-			    "-fprofile-arcs",
-			    "-ftest-coverage"
-			    ])
-			self.add_flag("link", [
-			    "-lgcov",
-			    "--coverage"
-			    ])
+			if self.config["compilator"] == "clang":
+				self.add_flag("c", [
+				    "--coverage"
+				    ])
+				self.add_flag("link", [
+				    "--coverage"
+				    ])
+			else:
+				self.add_flag("c", [
+				    "-fprofile-arcs",
+				    "-ftest-coverage"
+				    ])
+				self.add_flag("link", [
+				    "-lgcov",
+				    "--coverage"
+				    ])
 		
 		self.update_path_tree()
 		self.path_bin="bin"
