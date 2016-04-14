@@ -327,8 +327,9 @@ class Module:
 			for line_base in start_with:
 				if elem[:len(line_base)] == line_base:
 					find = True
-					elem = elem[len(line_base)+1:]
+					elem = elem[len(line_base):]
 					break;
+			debug.verbose(" temp Value: " + str(elem))
 			if find == False:
 				debug.warning("    gcov ret : " + str(elem));
 				debug.warning("         ==> does not start with : " + str(start_with));
@@ -375,6 +376,7 @@ class Module:
 				debug.info("   %  " + str(elem[1]) + "\r\t\t" + str(elem[0]));
 			else:
 				debug.info("   % " + str(elem[1]) + "\r\t\t" + str(elem[0]));
+			debug.verbose("       " + str(elem[2]) + " / " + str(elem[3]));
 		try:
 			pourcent = 100.0*float(executed_lines)/float(executable_lines)
 		except ZeroDivisionError:
