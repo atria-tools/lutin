@@ -487,6 +487,35 @@ class Module:
 			debug.print_element("Binary (stand alone)", self.name, "-", package_version_string)
 		elif self.type == 'PACKAGE':
 			debug.print_element("Package", self.name, "-", package_version_string)
+		
+		# ---------------------------------------------------------------------------
+		# -- install header (do it first for extern lib and gcov better interface) --
+		# ---------------------------------------------------------------------------
+		debug.debug("install headers ...")
+		copy_list={}
+		include_path = target.get_build_path_include(self.name)
+		for file in self.header:
+			src_path = os.path.join(self.origin_path, file["src"])
+			if "multi-dst" in file:
+				dst_path = os.path.join(include_path, file["multi-dst"])
+				tools.copy_anything(src_path,
+				                    dst_path,
+				                    recursive=False,
+				                    force_identical=True,
+				                    in_list=copy_list)
+			else:
+				dst_path = os.path.join(include_path, file["dst"])
+				tools.copy_file(src_path,
+				                dst_path,
+				                force_identical=True,
+				                in_list=copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		# remove unneded files (NOT folder ...)
+		tools.clean_directory(include_path, copy_list)
+		# add the pat to the usable dirrectory
+		self.add_path(include_path)
+		
 		# ----------------------------------------------------
 		# -- Sources compilation                            --
 		# ----------------------------------------------------
@@ -712,32 +741,6 @@ class Module:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
 		else:
 			debug.error("Did not known the element type ... (impossible case) type=" + self.type)
-		
-		# ----------------------------------------------------
-		# -- install header                                 --
-		# ----------------------------------------------------
-		debug.debug("install headers ...")
-		copy_list={}
-		include_path = target.get_build_path_include(self.name)
-		for file in self.header:
-			src_path = os.path.join(self.origin_path, file["src"])
-			if "multi-dst" in file:
-				dst_path = os.path.join(include_path, file["multi-dst"])
-				tools.copy_anything(src_path,
-				                    dst_path,
-				                    recursive=False,
-				                    force_identical=True,
-				                    in_list=copy_list)
-			else:
-				dst_path = os.path.join(include_path, file["dst"])
-				tools.copy_file(src_path,
-				                dst_path,
-				                force_identical=True,
-				                in_list=copy_list)
-		#real copy files
-		tools.copy_list(copy_list)
-		# remove unneded files (NOT folder ...)
-		tools.clean_directory(include_path, copy_list)
 		
 		# ----------------------------------------------------
 		# -- install data                                   --
