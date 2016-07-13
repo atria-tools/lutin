@@ -49,3 +49,57 @@ def get_output_type():
 ##
 def get_support_multithreading():
 	return True
+
+##
+## @brief Commands for running gcc to compile a C file in object file.
+##
+def compile(file, binary, target, depancy, flags, path, name, basic_path, module_src):
+	file_src = target.get_full_name_source(basic_path, file)
+	file_cmd = target.get_full_name_cmd(name, basic_path, file)
+	file_dst = target.get_full_name_destination(name, basic_path, file, get_output_type())
+	file_depend = target.get_full_dependency(name, basic_path, file)
+	file_warning = target.get_full_name_warning(name, basic_path, file)
+	
+	# create the command line befor requesting start:
+	cmd = [
+		target.cc,
+		"-o", file_dst,
+		target.arch,
+		target.sysroot,
+		target.global_include_cc]
+	for view in ["export", "local"]:
+		try:
+			cmd.append(tools.add_prefix("-I", path[view]["c"]))
+		except:
+			pass
+	try:
+		cmd.append(tools.add_prefix("-I", depancy.path["c"]))
+	except:
+		pass
+	try:
+		cmd.append(target.global_flags["c"])
+	except:
+		pass
+	try:
+		cmd.append(depancy.flags["c"])
+	except:
+		pass
+	for view in ["local", "export"]:
+		try:
+			cmd.append(flags[view]["c"])
+		except:
+			pass
+	cmd.append("-c")
+	cmd.append("-MMD")
+	cmd.append("-MP")
+	cmd.append(file_src)
+	# Create cmd line
+	cmdLine=tools.list_to_str(cmd)
+	# check the dependency for this file :
+	if depend.need_re_build(file_dst, file_src, file_depend, file_cmd, cmdLine) == False:
+		return {"action":"add", "file":file_dst}
+	tools.create_directory_of_file(file_dst)
+	comment = ["s", name, "<==", file]
+	# process element
+	multiprocess.run_in_pool(cmdLine, comment, file_cmd, store_output_file=file_warning)
+	return {"action":"add", "file":file_dst}
