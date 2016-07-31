@@ -75,8 +75,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		target.xx,
 		"-o", file_dst,
 		target.arch,
-		target.sysroot,
-		target.global_include_cc
+		target.sysroot
 		]
 	for view in ["export", "local"]:
 		for type in ["c", "c++"]:
@@ -89,6 +88,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 			cmd.append(tools.add_prefix("-I",depancy.path[type]))
 		except:
 			pass
+	cmd.append(target.global_include_cc)
 	try:
 		cmd.append(get_version_compilation_flags(flags, depancy.flags))
 	except:

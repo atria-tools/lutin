@@ -65,8 +65,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		target.cc,
 		"-o", file_dst,
 		target.arch,
-		target.sysroot,
-		target.global_include_cc]
+		target.sysroot]
 	for view in ["export", "local"]:
 		try:
 			cmd.append(tools.add_prefix("-I", path[view]["c"]))
@@ -76,6 +75,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		cmd.append(tools.add_prefix("-I", depancy.path["c"]))
 	except:
 		pass
+	cmd.append(target.global_include_cc)
 	try:
 		cmd.append(target.global_flags["c"])
 	except:

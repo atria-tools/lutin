@@ -174,13 +174,15 @@ class Target(target.Target):
 				# -----------------------
 				self.add_flag("c", [
 				    "-mfpu=neon",
+				    "-march=armv7-a",
 				    "-mfloat-abi=softfp",
 				    "-D__ARM_ARCH_7__",
 				    "-D__ARM_NEON__"
 				    ])
 				self.add_flag("link", [
 				    "-mfpu=neon",
-				    "-mfloat-abi=softfp"
+				    "-mfloat-abi=softfp",
+				    "-Wl,--fix-cortex-a8",
 				    ])
 		
 		# the -mthumb must be set for all the android produc, some ot the not work coretly without this one ... (all android code is generated with this flags)
