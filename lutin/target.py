@@ -98,6 +98,7 @@ class Target:
 		    '-D__TARGET_ADDR__' + self.select_bus + 'BITS',
 		    '-D_REENTRANT'
 		    ])
+		self.add_flag("c", "-nodefaultlibs")
 		self.add_flag("c++", "-nostdlib")
 		self.add_flag("ar", 'rcs')
 		

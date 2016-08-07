@@ -28,6 +28,7 @@ class System:
 		self.export_src=[]
 		self.export_path=[]
 		self.action_on_state={}
+		self.headers=[]
 	
 	def add_export_sources(self, list):
 		tools.list_append_to(self.export_src, list)
@@ -47,7 +48,13 @@ class System:
 			self.action_on_state[name_of_state] = [[level, name, action]]
 		else:
 			self.action_on_state[name_of_state].append([level, name, action])
-	
+	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
+		self.headers.append({
+		  "list":list,
+		  "dst":destination_path,
+		  "clip":clip_path,
+		  "recursive":recursive
+		  })
 	def __repr__(self):
 		return "{lutin.System}"
 
@@ -69,7 +76,12 @@ def create_module_from_system(target, dict):
 	for elem in dict["system"].action_on_state:
 		level, name, action = dict["system"].action_on_state[elem]
 		target.add_action(elem, level, name, action)
-	
+	for elem in dict["system"].headers:
+		myModule.add_header_file(
+		    elem["list"],
+		    destination_path=elem["dst"],
+		    clip_path=elem["clip"],
+		    recursive=elem["recursive"])
 	return myModule
 
 

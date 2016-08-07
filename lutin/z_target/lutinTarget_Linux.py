@@ -41,6 +41,9 @@ class Target(target.Target):
 		self.pkg_path_bin = "bin"
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
+		
+		self.sysroot = "--sysroot=/aDirectoryThatDoesNotExist/"
+		
 	
 	"""
 	.local/application

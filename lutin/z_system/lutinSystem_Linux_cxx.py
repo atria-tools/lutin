@@ -20,8 +20,14 @@ class System(system.System):
 		self.help = "CXX: Generic C++ library"
 		self.valid = True
 		# no check needed ==> just add this:
+		self.add_module_depend(['c'])
 		self.add_export_flag("c++", "-D__STDCPP_GNU__")
-		self.add_export_flag("c++-remove", "-nostdlib")
-		self.add_export_flag("need-libstdc++", True)
+		#self.add_export_flag("c++-remove", "-nostdlib")
+		#self.add_export_flag("need-libstdc++", True)
+		
+		self.add_header_file([
+		    "/usr/include/c++/6.1.1/*"
+		    ],
+		    recursive=True)
 
 

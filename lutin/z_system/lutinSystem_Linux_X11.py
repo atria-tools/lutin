@@ -17,16 +17,17 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="M : m library \n base of std libs (availlagle in GNU C lib and bionic"
-		# No check ==> on the basic std libs:
+		self.help = "X11: Basic interface of Linux Graphic interface"
 		self.valid = True
-		# todo : create a searcher of the presence of the library:
-		self.add_export_flag("link-lib", "m")
+		# no check needed ==> just add this:
+		self.add_module_depend(['c'])
+		
 		self.add_header_file([
-		    "/usr/include/math.h"
+		    "/usr/include/X11/*"
 		    ],
-		    clip_path="/usr/include",
-		    recursive=False)
-
+		    destination_path="X11",
+		    recursive=True)
+		
+		self.add_export_flag('link-lib', 'X11')
 
 

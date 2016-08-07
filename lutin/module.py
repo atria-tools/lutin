@@ -500,7 +500,7 @@ class Module:
 				dst_path = os.path.join(include_path, file["multi-dst"])
 				tools.copy_anything(src_path,
 				                    dst_path,
-				                    recursive=False,
+				                    recursive=file["recursive"],
 				                    force_identical=True,
 				                    in_list=copy_list)
 			else:
@@ -854,23 +854,99 @@ class Module:
 	
 	def add_src_file(self, list):
 		tools.list_append_to(self.src, list, True)
-	
-	def add_header_file(self, list, destination_path=None):
+	##
+	## @brief An an header file in the install directory
+	## @param[in] list List of element that is needed to install (can be a list or a simple string)
+	## @param[in,optional] destination_path Path to install the files (remove all the path of the file)
+	## @param[in,optional] clip_path Remove a part of the path set in the list and install data in generic include path
+	## @param[in,optional] recursive when use regexp in file list ==> we can add recursive property
+	##
+	## @code
+	##  	my_module.add_header_file([
+	##  	    'include/ewol/widget.h',
+	##  	    'include/ewol/context/context.h',
+	##  	    ])
+	## @endcode
+	## Here the user need to acces to the file wrote: #include <include/ewol/cotext/context.h>
+	##
+	## We can simplify it:
+	## @code
+	##  	my_module.add_header_file([
+	##  	    'include/ewol/widget.h',
+	##  	    'include/ewol/context/context.h',
+	##  	    ],
+	##  	    destination_path='ewol')
+	## @endcode
+	## Here the user need to acces to the file wrote: #include <ewol/context.h> ==> the internal path has been removed
+	##
+	## An other way is:
+	## @code
+	##  	my_module.add_header_file([
+	##  	    'include/ewol/widget.h',
+	##  	    'include/ewol/context/context.h',
+	##  	    ],
+	##  	    clip_path='include')
+	## @endcode
+	## Here the user need to acces to the file wrote: #include <ewol/context/context.h> ==> it just remove the include data
+	##
+	## With a copy all methode:
+	## @code
+	##  	my_module.add_header_file(
+	##  	    'include/*.h',
+	##  	    recursive=True)
+	## @endcode
+	## Here the user need to acces to the file wrote: #include <ewol/context/context.h> ==> it just remove the include data
+	##
+	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
 		if destination_path != None:
 			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
 		for elem in list:
+			base = os.path.basename(elem)
 			if destination_path != None:
-				base = os.path.basename(elem)
-				if '*' in base or '[' in base or '(' in base:
+				if clip_path != None:
+					debug.error("can not use 'destination_path' and 'clip_path' at the same time ...");
+				if    '*' in base \
+				   or '[' in base \
+				   or '(' in base:
 					new_list.append({"src":elem,
-					                 "multi-dst":destination_path})
+					                 "multi-dst":destination_path,
+					                 "recursive":recursive})
 				else:
 					new_list.append({"src":elem,
-					                 "dst":os.path.join(destination_path, base)})
+					                 "dst":os.path.join(destination_path, base),
+					                 "recursive":recursive})
 			else:
-				new_list.append({"src":elem,
-				                 "dst":elem})
+				if clip_path == None:
+					if    '*' in base \
+					   or '[' in base \
+					   or '(' in base:
+						new_list.append({"src":elem,
+						                 "multi-dst":"",
+						                 "recursive":recursive})
+					else:
+						new_list.append({"src":elem,
+						                 "dst":elem,
+						                 "recursive":recursive})
+				else:
+					if len(clip_path)>len(elem):
+						debug.error("can not clip a path with not the same name: '" + clip_path + "' != '" + elem + "' (size too small)")
+					if clip_path != elem[:len(clip_path)]:
+						debug.error("can not clip a path with not the same name: '" + clip_path + "' != '" + elem[:len(clip_path)] + "'")
+					out_elem = elem[len(clip_path):]
+					while     len(out_elem) > 0 \
+					      and out_elem[0] == "/":
+						out_elem = out_elem[1:]
+					if    '*' in base \
+					   or '[' in base \
+					   or '(' in base:
+						new_list.append({"src":elem,
+						                 "multi-dst":"",
+						                 "recursive":recursive})
+					else:
+						new_list.append({"src":elem,
+						                 "dst":out_elem,
+						                 "recursive":recursive})
 		tools.list_append_to(self.header, new_list, True)
 	
 	def add_export_path(self, list, type='c'):
