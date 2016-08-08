@@ -22,8 +22,34 @@ class System(system.System):
 		if     not os.path.isfile("/usr/include/pulse/pulseaudio.h"):
 			# we did not find the library reqiested (just return) (automaticly set at false)
 			return;
+		dst_data = tools.file_read_data("/usr/include/pulse/version.h")
+		lines = dst_data.split("\n")
+		patern = "#define pa_get_headers_version() (\""
+		version = None
+		for line in lines:
+			if line[:len(patern)] == patern:
+				#Find the version line
+				version = line[len(patern)]
+				version2 = line[len(patern)+2]
+				debug.verbose("detect version '" + version + "'")
+				break;
+		if version == None:
+			debug.warning("Can not det version of Pulseaudio ... ==> remove it")
+			return
+		self.set_version([int(version),int(version2)])
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag("link-lib", ["pulse-simple", "pulse"])
+		self.add_export_flag("link-lib", [
+		    "pulsecommon-" + version + ".0",
+		    "pulse-mainloop-glib",
+		    "pulse-simple",
+		    "pulse"
+		    ])
+		self.add_export_flag("link", "-L/usr/lib/pulseaudio")
+		self.add_header_file([
+		    "/usr/include/pulse/*",
+		    ],
+		    destination_path="pulse",
+		    recursive=True)
 
 

@@ -26,5 +26,15 @@ class System(system.System):
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag("link-lib", "asound")
+		self.add_header_file([
+		    "/usr/include/alsa/*",
+		    ],
+		    destination_path="alsa",
+		    recursive=True)
+		self.add_header_file([
+		    "/usr/include/dssi/*",
+		    ],
+		    destination_path="dssi",
+		    recursive=True)
 
 

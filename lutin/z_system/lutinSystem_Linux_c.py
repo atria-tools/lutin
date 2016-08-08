@@ -38,6 +38,7 @@ class System(system.System):
 		    "/usr/include/setjmp.h*",
 		    "/usr/include/signal.h*",
 		    "/usr/include/string.h*",
+		    "/usr/include/strings.h*",
 		    "/usr/include/std*",
 		    "/usr/include/tgmath.h*",
 		    "/usr/include/time.h*",
@@ -57,39 +58,59 @@ class System(system.System):
 		    "/usr/include/getopt.h*",
 		    "/usr/include/dirent.h*",
 		    "/usr/include/setjmp.h*",
+		    "/usr/include/netdb.h*",
+		    "/usr/include/syslog.h*",
+		    "/usr/include/memory.h*",
+		    "/usr/include/poll.h*",
+		    "/usr/include/termios.h*",
+		    "/usr/include/regex.h*",
+		    "/usr/include/semaphore.h*",
+		    "/usr/include/libgen.h*",
+		    "/usr/include/ifaddrs.h*",
+		    "/usr/include/stropts.h*",
+		    "/usr/include/pwd.h*",
 		    ],
 		    recursive=False)
 		self.add_header_file([
 		    "/usr/include/sys/*",
 		    ],
 		    destination_path="sys",
-		    recursive=False)
+		    recursive=True)
 		self.add_header_file([
 		    "/usr/include/bits/*",
 		    ],
 		    destination_path="bits",
-		    recursive=False)
+		    recursive=True)
 		self.add_header_file([
 		    "/usr/include/gnu/*",
 		    ],
 		    destination_path="gnu",
-		    recursive=False)
+		    recursive=True)
 		self.add_header_file([
 		    "/usr/include/linux/*",
 		    ],
 		    destination_path="linux",
-		    recursive=False)
+		    recursive=True)
 		self.add_header_file([
 		    "/usr/include/asm/*",
 		    ],
 		    destination_path="asm",
-		    recursive=False)
+		    recursive=True)
 		self.add_header_file([
 		    "/usr/include/asm-generic/*",
 		    ],
 		    destination_path="asm-generic",
-		    recursive=False)
-		self.add_export_flag("link-bin", "/usr/lib/crti.o")
-		self.add_export_flag("link-bin", "/usr/lib/crt1.o")
+		    recursive=True)
+		self.add_header_file([
+		    "/usr/include/netinet/*",
+		    ],
+		    destination_path="netinet",
+		    recursive=True)
+		self.add_header_file([
+		    "/usr/include/net/*",
+		    ],
+		    destination_path="net",
+		    recursive=True)
+		self.add_export_flag("link", "-B/usr/lib")
 
 

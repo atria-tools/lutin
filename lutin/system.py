@@ -29,6 +29,7 @@ class System:
 		self.export_path=[]
 		self.action_on_state={}
 		self.headers=[]
+		self.version=None
 	
 	def add_export_sources(self, list):
 		tools.list_append_to(self.export_src, list)
@@ -42,6 +43,9 @@ class System:
 	
 	def add_export_flag(self, type, list):
 		tools.list_append_to_2(self.export_flags, type, list)
+	
+	def set_version(self, version_list):
+		self.version = version_list
 	
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
 		if name_of_state not in self.action_on_add_src_filestate:
@@ -82,6 +86,8 @@ def create_module_from_system(target, dict):
 		    destination_path=elem["dst"],
 		    clip_path=elem["clip"],
 		    recursive=elem["recursive"])
+	if dict["system"].version != None:
+		myModule.package_prop["VERSION"] = dict["system"].version
 	return myModule
 
 
@@ -158,8 +164,8 @@ def exist(lib_name, target_name, target) :
 					debug.verbose("SYSTEM: request: " + data["name"])
 					data["system"] = theSystem.System(target)
 					data["exist"] = data["system"].valid
-				except:
-					debug.warning("Not find: '" + data["name"] + "' ==> get exception")
+				except Exception as e:
+					debug.warning("Not find: '" + data["name"] + "' ==> get exception:" + str(e))
 			return data["exist"]
 	return False
 

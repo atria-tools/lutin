@@ -17,19 +17,17 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help = "CXX: Generic C++ library"
+		self.help="rpc : generic RPC library (developed by oracle)"
+		# No check ==> on the basic std libs:
 		self.valid = True
-		# no check needed ==> just add this:
-		self.add_module_depend([
-		    'c'
-		    ])
-		self.add_export_flag("c++", "-D__STDCPP_GNU__")
-		#self.add_export_flag("c++-remove", "-nostdlib")
-		#self.add_export_flag("need-libstdc++", True)
-		self.add_export_flag("link-lib", "stdc++")
+		# todo : create a searcher of the presence of the library:
+		self.add_export_flag("link-lib", "rpcsvc")
 		self.add_header_file([
-		    "/usr/include/c++/6.1.1/*"
+		    "/usr/include/rpc/*"
 		    ],
+		    destination_path="rpc",
 		    recursive=True)
+		
+
 
 
