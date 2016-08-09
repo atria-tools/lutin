@@ -503,12 +503,11 @@ class Module:
 				ret_write = tools.file_write_data(os.path.join(generate_path, elem_generate["filename"]), elem_generate["data"], only_if_new=True)
 				if ret_write == True:
 					debug.print_element("generate", self.name, "##", elem_generate["filename"])
+				dst = os.path.join(include_path, elem_generate["filename"])
+				copy_list[dst] = {"src":os.path.join(generate_path, elem_generate["filename"]),
+				                  "cmd_file":None,
+				                  "need_copy":ret_write}
 				if elem_generate["install"] == True:
-					dst = os.path.join(include_path, elem_generate["filename"])
-					copy_list[dst] = {"src":os.path.join(generate_path, elem_generate["filename"]),
-					                  "cmd_file":None,
-					                  "need_copy":False}
-				else:
 					have_only_generate_file = True
 		if have_only_generate_file == True:
 			self.add_path(generate_path)
