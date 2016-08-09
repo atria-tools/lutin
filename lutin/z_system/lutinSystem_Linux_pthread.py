@@ -30,5 +30,8 @@ class System(system.System):
 		    "/usr/include/pthread.h"
 		    ],
 		    clip_path="/usr/include/")
+		self.add_module_depend([
+		    'c'
+		    ])
 
 

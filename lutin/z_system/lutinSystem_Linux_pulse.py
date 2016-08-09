@@ -38,6 +38,9 @@ class System(system.System):
 			return
 		self.set_version([int(version),int(version2)])
 		self.valid = True
+		self.add_module_depend([
+		    'c'
+		    ])
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag("link-lib", [
 		    "pulsecommon-" + version + ".0",

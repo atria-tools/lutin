@@ -129,6 +129,7 @@ class Module:
 		                              "ANDROID_SIGN" : True
 		                            }
 		self.sub_heritage_list = None
+		self.generate_file = []
 	
 	def __repr__(self):
 		return "{lutin.Module:" + str(self.name) + "}"
@@ -488,12 +489,34 @@ class Module:
 		elif self.type == 'PACKAGE':
 			debug.print_element("Package", self.name, "-", package_version_string)
 		
+		# list of all file to copy:
+		copy_list={}
+		# ---------------------------------------------------------------------------
+		# -- install header (generated header files)                               --
+		# ---------------------------------------------------------------------------
+		generate_path = target.get_build_path_temporary_generate(self.name)
+		include_path = target.get_build_path_include(self.name)
+		have_only_generate_file = False
+		if len(self.generate_file) > 0:
+			debug.debug("install GENERATED headers ...")
+			for elem_generate in self.generate_file:
+				ret_write = tools.file_write_data(os.path.join(generate_path, elem_generate["filename"]), elem_generate["data"], only_if_new=True)
+				if ret_write == True:
+					debug.print_element("generate", self.name, "##", elem_generate["filename"])
+				if elem_generate["install"] == True:
+					dst = os.path.join(include_path, elem_generate["filename"])
+					copy_list[dst] = {"src":os.path.join(generate_path, elem_generate["filename"]),
+					                  "cmd_file":None,
+					                  "need_copy":False}
+				else:
+					have_only_generate_file = True
+		if have_only_generate_file == True:
+			self.add_path(generate_path)
+		
 		# ---------------------------------------------------------------------------
 		# -- install header (do it first for extern lib and gcov better interface) --
 		# ---------------------------------------------------------------------------
 		debug.debug("install headers ...")
-		copy_list={}
-		include_path = target.get_build_path_include(self.name)
 		for file in self.header:
 			src_path = os.path.join(self.origin_path, file["src"])
 			if "multi-dst" in file:
@@ -516,9 +539,9 @@ class Module:
 		# add the pat to the usable dirrectory
 		self.add_path(include_path)
 		
-		# ----------------------------------------------------
-		# -- Sources compilation                            --
-		# ----------------------------------------------------
+		# ---------------------------------------------------------------------------
+		# -- Sources compilation                                                   --
+		# ---------------------------------------------------------------------------
 		if self.type != 'PREBUILD':
 			# build local sources in a specific order:
 			for extention_local in self.extention_order_build:
@@ -901,6 +924,8 @@ class Module:
 		if destination_path != None:
 			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
+		if type(list) == str:
+			list = [list]
 		for elem in list:
 			base = os.path.basename(elem)
 			if destination_path != None:
@@ -948,6 +973,20 @@ class Module:
 						                 "dst":out_elem,
 						                 "recursive":recursive})
 		tools.list_append_to(self.header, new_list, True)
+	
+	##
+	## @brief Many library need to generate dynamic file configuration, use this to generat your configuration and add it in the include path
+	## @param[in] data_file Data of the file that is generated
+	## @param[in] destination_path Path where to install data
+	## @param[in] install_element add the file in the include path and not only in the generate path
+	## @note this does not rewrite the file if it is not needed
+	##
+	def add_generated_header_file(self, data_file, destination_path, install_element=False):
+		self.generate_file.append({
+		    "data":data_file,
+		    "filename":destination_path,
+		    "install":install_element
+		    });
 	
 	def add_export_path(self, list, type='c'):
 		tools.list_append_to_2(self.path["export"], type, list)

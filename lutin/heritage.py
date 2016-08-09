@@ -16,12 +16,12 @@ from . import debug
 def append_to_list(list_out, elem):
 	if type(elem) == str:
 		if elem not in list_out:
-			list_out.append(elem)
+			list_out.append(copy.deepcopy(elem))
 	else:
 		# mulyiple imput in the list ...
 		for element in elem:
 			if element not in list_out:
-				list_out.append(element)
+				list_out.append(copy.deepcopy(element))
 
 
 
@@ -61,6 +61,7 @@ class HeritageList:
 		self.regenerate_tree()
 	
 	def regenerate_tree(self):
+		debug.verbose("Regenerate heritage list:")
 		self.flags = {}
 		# sources list:
 		self.src = { 'src':[],
@@ -72,30 +73,37 @@ class HeritageList:
 		listHeritage = self.list_heritage
 		self.list_heritage = []
 		# first step : add all lib with no dependency:
+		debug.extreme_verbose("    add element with no dependency:")
 		for herit in listHeritage:
 			if len(herit.depends) == 0:
-				self.list_heritage.append(herit)
+				debug.extreme_verbose("        add: " + str(herit.name))
+				self.list_heritage.append(copy.deepcopy(herit))
 				listHeritage.remove(herit)
+		debug.extreme_verbose("    add element with dependency:")
 		while len(listHeritage) > 0:
 			currentHeritageSize = len(listHeritage)
-			debug.verbose("list heritage = " + str([[x.name, x.depends] for x in listHeritage]))
+			debug.verbose("        list heritage = " + str([[x.name, x.depends] for x in listHeritage]))
+			debug.extreme_verbose("        list heritage (rest):")
+			for tmppp_herit in listHeritage:
+				debug.extreme_verbose("            elem= " + str(tmppp_herit.name) + " : " + str(tmppp_herit.depends))
 			# Add element only when all dependence are resolved
 			for herit in listHeritage:
 				listDependsName = [y.name for y in self.list_heritage]
 				if all(x in listDependsName for x in herit.depends) == True:
+					debug.extreme_verbose("        add: " + str(herit.name))
 					listHeritage.remove(herit)
-					self.list_heritage.append(herit)
+					self.list_heritage.append(copy.deepcopy(herit))
 			if currentHeritageSize == len(listHeritage):
 				debug.warning("Not resolve dependency between the library ==> can be a cyclic dependency !!!")
 				for herit in listHeritage:
-					self.list_heritage.append(herit)
+					self.list_heritage.append(copy.deepcopy(herit))
 				listHeritage = []
 				debug.warning("new heritage list:")
 				for element in self.list_heritage:
 					debug.warning("	" + element.name + " " + str(element.depends))
-		debug.verbose("new heritage list:")
+		debug.extreme_verbose("new heritage list:")
 		for element in self.list_heritage:
-			debug.verbose("	" + element.name + " " + str(element.depends))
+			debug.extreme_verbose("	" + element.name + " " + str(element.depends))
 		for element in reversed(self.list_heritage):
 			for flags in element.flags:
 				# get value
@@ -122,15 +130,26 @@ class HeritageList:
 						# keep only true, if false ==> bad case ...
 						if self.flags[flags] < value:
 							self.flags[flags] = value
+			append_to_list(self.src['src'], element.src['src'])
+			append_to_list(self.src['dynamic'], element.src['dynamic'])
+			append_to_list(self.src['static'], element.src['static'])
+		for element in self.list_heritage:
+			debug.extreme_verbose("    elem: " + str(element.name))
+			debug.extreme_verbose("    Path (base): " + str(self.path))
+			debug.extreme_verbose("         inside: " + str(element.path))
 			for ppp in element.path:
-				value = element.path[ppp]
+				value = copy.deepcopy(element.path[ppp])
 				if ppp not in self.path:
 					self.path[ppp] = value
 				else:
 					append_to_list(self.path[ppp], value)
-			append_to_list(self.src['src'], element.src['src'])
-			append_to_list(self.src['dynamic'], element.src['dynamic'])
-			append_to_list(self.src['static'], element.src['static'])
+			debug.extreme_verbose("Path : " + str(self.path))
+		for ppp in self.path:
+			tmp = self.path[ppp]
+			self.path[ppp] = []
+			for iii in reversed(tmp):
+				self.path[ppp].append(iii)
+		debug.extreme_verbose("Path : " + str(self.path))
 	
 	def __repr__(self):
 		return "{HeritageList:" + str(self.list_heritage) + "}"
@@ -157,8 +176,8 @@ class heritage:
 			self.name = module.name
 			self.depends = copy.deepcopy(module.depends)
 			# keep reference because the flags can change in time
-			self.flags = module.flags["export"]
-			self.path = module.path["export"]
+			self.flags = module.flags["export"] # have no deep copy here is a feature ...
+			self.path = copy.deepcopy(module.path["export"])
 			# if the user install some header ==> they will ba autoamaticaly exported ...
 			if target != None:
 				if len(module.header) > 0:
@@ -210,7 +229,7 @@ class heritage:
 		for flags in other.flags:
 			value = other.flags[flags]
 			if flags not in self.flags:
-				self.flags[flags] = value
+				self.flags[flags] = copy.deepcopy(value)
 			else:
 				append_to_list(self.flags[flags], value)
 		self.add_import_path(other.path)

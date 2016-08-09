@@ -25,5 +25,12 @@ class System(system.System):
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag("link-lib", "z")
+		self.add_module_depend([
+		    'c'
+		    ])
+		self.add_header_file([
+		    "/usr/include/zlib.h"
+		    ],
+		    destination_path="")
 
 

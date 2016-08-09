@@ -36,5 +36,8 @@ class System(system.System):
 		    ],
 		    destination_path="dssi",
 		    recursive=True)
+		self.add_module_depend([
+		    'c'
+		    ])
 
 

@@ -145,6 +145,7 @@ class Target:
 		self.path_data="share"
 		self.path_doc="doc"
 		self.path_include="include"
+		self.path_temporary_generate="generate"
 		self.path_object="obj"
 		
 		
@@ -361,6 +362,9 @@ class Target:
 	
 	def get_build_path_include(self, binary_name):
 		return os.path.join(self.get_build_path(binary_name), self.path_include)
+	
+	def get_build_path_temporary_generate(self, binary_name):
+		return os.path.join(self.get_build_path(binary_name), self.path_temporary_generate)
 	
 	
 	def get_build_file_bin(self, binary_name):

@@ -21,7 +21,9 @@ class System(system.System):
 		self.valid = True
 		# no check needed ==> just add this:
 		self.add_module_depend([
-		    'c'
+		    'c',
+		    'm',
+		    'pthread'
 		    ])
 		self.add_export_flag("c++", "-D__STDCPP_GNU__")
 		#self.add_export_flag("c++-remove", "-nostdlib")

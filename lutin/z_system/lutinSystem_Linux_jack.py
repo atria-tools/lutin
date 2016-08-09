@@ -26,7 +26,8 @@ class System(system.System):
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag("link-lib", "jack")
 		self.add_module_depend([
-		    'uuid'
+		    'uuid',
+		    'c'
 		    ])
 		self.add_header_file([
 		    "/usr/include/jack/*",

@@ -27,6 +27,9 @@ class System(system.System):
 		    ],
 		    destination_path="arpa",
 		    recursive=True)
+		self.add_module_depend([
+		    'c'
+		    ])
 		
 
 
