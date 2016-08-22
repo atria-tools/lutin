@@ -78,7 +78,8 @@ class Module:
 		   or moduleType == 'LIBRARY_DYNAMIC' \
 		   or moduleType == 'LIBRARY_STATIC' \
 		   or moduleType == 'PACKAGE' \
-		   or moduleType == 'PREBUILD':
+		   or moduleType == 'PREBUILD' \
+		   or moduleType == 'DATA':
 			self.type=moduleType
 		else :
 			debug.error('for module "%s"' %module_name)
@@ -167,8 +168,9 @@ class Module:
 	##
 	## @brief Send image in the build data directory
 	## @param[in] target Target object
+	## @param[in] copy_list When copy file, this API permit to remove unneeded files
 	##
-	def image_to_build(self, target):
+	def image_to_build(self, target, copy_list):
 		for source, destination, sizeX, sizeY in self.image_to_copy:
 			extension = source[source.rfind('.'):]
 			if     extension != ".png" \
@@ -188,13 +190,17 @@ class Module:
 				image.resize(source, os.path.join(target.get_build_path_data(self.name), destination), sizeX, sizeY, file_cmd)
 			else:
 				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
-				tools.copy_file(source, os.path.join(target.get_build_path_data(self.name), destination), file_cmd)
+				tools.copy_file(source,
+				                os.path.join(target.get_build_path_data(self.name), destination),
+				                file_cmd,
+				                in_list=copy_list)
 	
 	##
 	## @brief Send files in the build data directory
 	## @param[in] target Target object
+	## @param[in] copy_list When copy file, this API permit to remove unneeded files
 	##
-	def files_to_build(self, target):
+	def files_to_build(self, target, copy_list):
 		for source, destination in self.files:
 			display_source = source
 			source = os.path.join(self.origin_path, source)
@@ -204,13 +210,17 @@ class Module:
 			# TODO : set it back : file_cmd = target.get_build_path_data(self.name)
 			file_cmd = ""
 			debug.verbose("Might copy file : " + display_source + " ==> " + destination)
-			tools.copy_file(source, os.path.join(target.get_build_path_data(self.name), destination), file_cmd)
+			tools.copy_file(source,
+			                os.path.join(target.get_build_path_data(self.name), destination),
+			                force_identical=True,
+			                in_list=copy_list)
 	
 	##
 	## @brief Send compleate folder in the build data directory
 	## @param[in] target Target object
+	## @param[in] copy_list When copy file, this API permit to remove unneeded files
 	##
-	def paths_to_build(self, target):
+	def paths_to_build(self, target, copy_list):
 		for source, destination in self.paths:
 			debug.debug("Might copy path : " + source + "==>" + destination)
 			tmp_path = os.path.dirname(os.path.realpath(os.path.join(self.origin_path, source)))
@@ -233,7 +243,10 @@ class Module:
 					#	new_destination = os.path.join(new_destination, root[len(source)-1:])
 					debug.verbose("Might copy : '" + os.path.join(root, cycle_file) + "' ==> '" + os.path.join(target.get_build_path_data(self.name), new_destination, cycle_file) + "'" )
 					file_cmd = "" # TODO : ...
-					tools.copy_file(os.path.join(root, cycle_file), os.path.join(target.get_build_path_data(self.name), new_destination, cycle_file), file_cmd)
+					tools.copy_file(os.path.join(root, cycle_file),
+					                os.path.join(target.get_build_path_data(self.name), new_destination, cycle_file),
+					                file_cmd,
+					                in_list=copy_list)
 	
 	
 	
@@ -472,7 +485,9 @@ class Module:
 		# -- Generic library help                           --
 		# ----------------------------------------------------
 		package_version_string = tools.version_to_string(self.package_prop["VERSION"]);
-		if self.type == 'PREBUILD':
+		if self.type == 'DATA':
+			debug.print_element("Data", self.name, "-", package_version_string)
+		elif self.type == 'PREBUILD':
 			debug.print_element("Prebuild", self.name, "-", package_version_string)
 		elif self.type == 'LIBRARY':
 			debug.print_element("Library", self.name, "-", package_version_string)
@@ -761,6 +776,8 @@ class Module:
 					                            basic_path = self.origin_path)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
+		elif self.type == "DATA":
+			debug.debug("Data package have noting to build... just install")
 		else:
 			debug.error("Did not known the element type ... (impossible case) type=" + self.type)
 		
@@ -768,10 +785,14 @@ class Module:
 		# -- install data                                   --
 		# ----------------------------------------------------
 		debug.debug("install datas")
-		self.image_to_build(target)
-		self.files_to_build(target)
-		self.paths_to_build(target)
-		# TODO : do sothing that create a list of file set in this directory and remove it if necessary ... ==> if not needed anymore ...
+		copy_list={}
+		self.image_to_build(target, copy_list) # TODO : When file is resized, the final file is not removed if the file is not needed anymore
+		self.files_to_build(target, copy_list)
+		self.paths_to_build(target, copy_list)
+		#real copy files
+		tools.copy_list(copy_list)
+		# remove unneded files (NOT folder ...)
+		tools.clean_directory(target.get_build_path_data(self.name), copy_list)
 		
 		# create local heritage specification
 		self.local_heritage.auto_add_build_header()
