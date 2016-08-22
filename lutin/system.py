@@ -158,14 +158,14 @@ def exist(lib_name, target_name, target) :
 				debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
 				sys.path.append(os.path.dirname(data["path"]))
 				debug.verbose("import system : '" + data["name"] + "'")
-				theSystem = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
+				the_system = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
 				#create the system module
-				try:
-					debug.verbose("SYSTEM: request: " + data["name"])
-					data["system"] = theSystem.System(target)
+				debug.verbose("SYSTEM: request: " + str(data["name"]))
+				if "System" in dir(the_system):
+					data["system"] = the_system.System(target)
 					data["exist"] = data["system"].valid
-				except Exception as e:
-					debug.warning("Not find: '" + data["name"] + "' ==> get exception:" + str(e))
+				else:
+					debug.warning("Not find: '" + data["name"] + "' ==> get exception")
 			return data["exist"]
 	return False
 

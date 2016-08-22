@@ -449,6 +449,7 @@ class Module:
 		self.sub_heritage_list = heritage.HeritageList()
 		# optionnal dependency :
 		for dep, option, export in self.depends_optionnal:
+			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
 			inherit_list, isBuilt = target.build(dep, package_name, True)
 			if isBuilt == True:
 				self.local_heritage.add_depends(dep);

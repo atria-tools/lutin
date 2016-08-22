@@ -127,6 +127,7 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 				cmd.append("-Wl,-R$ORIGIN/../lib/")
 	except:
 		pass
+	cmd.append("-Wl,-rpath,\"\$ORIGIN/../lib\"")
 	try:
 		cmd.append(flags["local"]["link"])
 	except:
