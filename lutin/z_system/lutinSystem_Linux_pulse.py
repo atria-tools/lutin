@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import env
 import os
 
 class System(system.System):
@@ -41,18 +42,24 @@ class System(system.System):
 		self.add_module_depend([
 		    'c'
 		    ])
-		# todo : create a searcher of the presence of the library:
-		self.add_export_flag("link-lib", [
-		    "pulsecommon-" + version + ".0",
-		    "pulse-mainloop-glib",
-		    "pulse-simple",
-		    "pulse"
-		    ])
-		self.add_export_flag("link", "-L/usr/lib/pulseaudio")
-		self.add_header_file([
-		    "/usr/include/pulse/*",
-		    ],
-		    destination_path="pulse",
-		    recursive=True)
+		if env.get_isolate_system() == False:
+			self.add_export_flag("link-lib", [
+			    "pulse-simple",
+			    "pulse"
+			    ])
+		else:
+			# todo : create a searcher of the presence of the library:
+			self.add_export_flag("link-lib", [
+			    "pulsecommon-" + version + ".0",
+			    "pulse-mainloop-glib",
+			    "pulse-simple",
+			    "pulse"
+			    ])
+			self.add_export_flag("link", "-L/usr/lib/pulseaudio")
+			self.add_header_file([
+			    "/usr/include/pulse/*",
+			    ],
+			    destination_path="pulse",
+			    recursive=True)
 
 

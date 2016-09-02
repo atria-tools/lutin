@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import env
 import os
 
 class System(system.System):
@@ -24,14 +25,14 @@ class System(system.System):
 		    'c',
 		    'X11'
 		    ])
-		
-		self.add_header_file([
-		    "/usr/include/GL/*"
-		    ],
-		    destination_path="GL",
-		    recursive=True)
-		
 		self.add_export_flag('link-lib', 'GL')
+		if env.get_isolate_system() == True:
+				self.add_header_file([
+			    "/usr/include/GL/*"
+			    ],
+			    destination_path="GL",
+			    recursive=True)
+		
 		"""
 		if target.name=="Linux":
 			

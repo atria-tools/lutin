@@ -11,6 +11,8 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import multiprocess
+from lutin import env
 import os
 
 class System(system.System):
@@ -26,12 +28,23 @@ class System(system.System):
 		    'pthread'
 		    ])
 		self.add_export_flag("c++", "-D__STDCPP_GNU__")
-		#self.add_export_flag("c++-remove", "-nostdlib")
-		#self.add_export_flag("need-libstdc++", True)
-		self.add_export_flag("link-lib", "stdc++")
-		self.add_header_file([
-		    "/usr/include/c++/6.1.1/*"
-		    ],
-		    recursive=True)
+		if env.get_isolate_system() == False:
+			self.add_export_flag("c++-remove", "-nostdlib")
+			self.add_export_flag("need-libstdc++", True)
+		else:
+			self.add_export_flag("link-lib", "stdc++")
+			compilator_gcc = "g++"
+			if target.config["compilator-version"] != "":
+				compilator_gcc = compilator_gcc + "-" + target.config["compilator-version"]
+			
+			#get g++ compilation version :
+			version_cpp = multiprocess.run_command_direct(compilator_gcc + " -dumpversion");
+			if version_cpp == False:
+				debug.error("Can not get the g++ version ...")
+			
+			self.add_header_file([
+			    "/usr/include/c++/" + version_cpp + "/*"
+			    ],
+			    recursive=True)
 
 

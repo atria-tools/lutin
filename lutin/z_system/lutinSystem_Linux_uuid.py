@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import env
 import os
 
 class System(system.System):
@@ -28,10 +29,11 @@ class System(system.System):
 		    ])
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag("link-lib", "uuid")
-		self.add_header_file([
-		    "/usr/include/uuid/*",
-		    ],
-		    destination_path="uuid",
-		    recursive=True)
+		if env.get_isolate_system() == False:
+			self.add_header_file([
+			    "/usr/include/uuid/*",
+			    ],
+			    destination_path="uuid",
+			    recursive=True)
 
 

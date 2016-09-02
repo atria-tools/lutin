@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import env
 import os
 
 class System(system.System):
@@ -21,13 +22,12 @@ class System(system.System):
 		self.valid = True
 		# no check needed ==> just add this:
 		self.add_module_depend(['c'])
-		
-		self.add_header_file([
-		    "/usr/include/X11/*"
-		    ],
-		    destination_path="X11",
-		    recursive=True)
-		
 		self.add_export_flag('link-lib', 'X11')
+		if env.get_isolate_system() == False:
+			self.add_header_file([
+			    "/usr/include/X11/*"
+			    ],
+			    destination_path="X11",
+			    recursive=True)
 
 

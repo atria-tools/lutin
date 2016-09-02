@@ -39,6 +39,19 @@ def get_force_optimisation():
 	global force_optimisation
 	return force_optimisation
 
+isolate_system=False
+
+def set_isolate_system(val):
+	global isolate_system
+	if val==1:
+		isolate_system = 1
+	else:
+		isolate_system = 0
+
+def get_isolate_system():
+	global isolate_system
+	return isolate_system
+
 parse_depth = 9999999
 
 def set_parse_depth(val):

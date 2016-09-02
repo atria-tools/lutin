@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import target
 from lutin import tools
+from lutin import env
 import os
 import stat
 import re
@@ -41,8 +42,9 @@ class Target(target.Target):
 		self.pkg_path_bin = "bin"
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
-		
-		self.sysroot = "--sysroot=/aDirectoryThatDoesNotExist/"
+		# disable sysroot when generate build in isolated mode
+		if env.get_isolate_system() == True:
+			self.sysroot = "--sysroot=/aDirectoryThatDoesNotExist/"
 		
 	
 	"""

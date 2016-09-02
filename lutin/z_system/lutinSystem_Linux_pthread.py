@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import env
 import os
 
 class System(system.System):
@@ -25,13 +26,14 @@ class System(system.System):
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
 		self.add_export_flag("link-lib", "pthread")
-		self.add_header_file([
-		    "/usr/include/sched.h",
-		    "/usr/include/pthread.h"
-		    ],
-		    clip_path="/usr/include/")
 		self.add_module_depend([
 		    'c'
 		    ])
+		if env.get_isolate_system() == True:
+			self.add_header_file([
+			    "/usr/include/sched.h",
+			    "/usr/include/pthread.h"
+			    ],
+			    clip_path="/usr/include/")
 
 

@@ -11,6 +11,7 @@
 from lutin import debug
 from lutin import system
 from lutin import tools
+from lutin import env
 import os
 
 class System(system.System):
@@ -25,11 +26,12 @@ class System(system.System):
 		self.add_module_depend([
 		    'c'
 		    ])
-		self.add_header_file([
-		    "/usr/include/math.h"
-		    ],
-		    clip_path="/usr/include",
-		    recursive=False)
+		if env.get_isolate_system() == True:
+			self.add_header_file([
+			    "/usr/include/math.h"
+			    ],
+			    clip_path="/usr/include",
+			    recursive=False)
 
 
 
