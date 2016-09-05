@@ -14,39 +14,12 @@ Release (master)
     :target: https://travis-ci.org/HeeroYui/lutin
 
 
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=master&tag=Linux
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=master&tag=MacOs
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=master&tag=Mingw
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-
-
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=master&tag=Android
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=master&tag=IOs
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-
 
 Developement (dev)
 ------------------
 
 .. image:: https://travis-ci.org/HeeroYui/lutin.svg?branch=dev
     :target: https://travis-ci.org/HeeroYui/lutin
-
-
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=dev&tag=Linux
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=dev&tag=MacOs
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=dev&tag=Mingw
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-
-
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=dev&tag=Android
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
-.. image:: http://atria-soft.com/ci/build/HeeroYui/lutin.svg?branch=dev&tag=IOs
-    :target: http://atria-soft.com/ci/HeeroYui/lutin
 
 
 Instructions
@@ -70,7 +43,7 @@ http://github.com/HeeroYui/lutin/
 Documentation
 -------------
 
-http://github.io/HeeroYui/lutin/
+http://github.com/HeeroYui/lutin/tree/master/doc/
 
 Installation
 ------------

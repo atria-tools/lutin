@@ -23,7 +23,7 @@ class System(system.System):
 		# no check needed ==> just add this:
 		self.add_module_depend(['c'])
 		self.add_export_flag('link-lib', 'X11')
-		if env.get_isolate_system() == False:
+		if env.get_isolate_system() == True:
 			self.add_header_file([
 			    "/usr/include/X11/*"
 			    ],

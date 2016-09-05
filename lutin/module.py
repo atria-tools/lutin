@@ -141,14 +141,14 @@ class Module:
 	## @brief add Some copilation flags for this module (and only this one)
 	##
 	def add_extra_compile_flags(self):
-		self.compile_flags('c', [
+		self.add_flag('c', [
 			"-Wall",
 			"-Wsign-compare",
 			"-Wreturn-type",
 			#"-Wint-to-pointer-cast",
 			"-Wno-write-strings",
 			"-Wno-unused-variable"]);
-		self.compile_flags('c++', [
+		self.add_flag('c++', [
 			"-Woverloaded-virtual",
 			"-Wnon-virtual-dtor"]);
 		#only for gcc : "-Wunused-variable", "-Wunused-but-set-variable",
@@ -157,10 +157,10 @@ class Module:
 	## @brief remove all unneeded warning on compilation ==> for extern libs ...
 	##
 	def remove_compile_warning(self):
-		self.compile_flags('c', [
+		self.add_flag('c', [
 			"-Wno-int-to-pointer-cast"
 			]);
-		self.compile_flags('c++', [
+		self.add_flag('c++', [
 			"-Wno-c++11-narrowing"
 			])
 		# only for gcc :"-Wno-unused-but-set-variable"
@@ -456,9 +456,9 @@ class Module:
 				# TODO : Add optionnal Flags ...
 				#     ==> do it really better ...
 				if export == False:
-					self.compile_flags(option[0], option[1]);
+					self.add_flag(option[0], option[1]);
 				else:
-					self.add_export_flag(option[0], option[1]);
+					self.add_flag(option[0], option[1], export=True);
 			# add at the heritage list :
 			self.sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self.depends:
@@ -854,13 +854,22 @@ class Module:
 	def add_path(self, list, type='c'):
 		tools.list_append_to_2(self.path["local"], type, list)
 	
-	def add_export_flag(self, type, list):
-		tools.list_append_to_2(self.flags["export"], type, list)
 	
-	# add the link flag at the module
-	# TODO : Rename this in add_flag
+	def add_flag(self, type, list, export=False):
+		if export == True:
+			tools.list_append_to_2(self.flags["export"], type, list)
+		else:
+			tools.list_append_to_2(self.flags["local"], type, list)
+	
+	## deprecated ...
+	def add_export_flag(self, type, list):
+		debug.warning("add_export_flag is deprecated ==> use add_flag(xxx, yyy, export=True)")
+		self.add_flag(type, list, export=True)
+	
+	## deprecated ...
 	def compile_flags(self, type, list):
-		tools.list_append_to_2(self.flags["local"], type, list)
+		debug.warning("compile_flags is deprecated ==> use add_flag(xxx, yyy)")
+		self.add_flag(type, list)
 	
 	def compile_version(self, compilator_type, version, same_as_api=True, gnu=False):
 		if    compilator_type == "c++" \

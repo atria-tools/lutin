@@ -69,7 +69,7 @@ def create_module_from_system(target, dict):
 	# add element flags to export
 	for elem in dict["system"].export_flags:
 		debug.verbose("add element :" + str(elem) + " elems=" + str(dict["system"].export_flags[elem]))
-		myModule.add_export_flag(elem, dict["system"].export_flags[elem])
+		myModule.add_flag(elem, dict["system"].export_flags[elem], export=True)
 	# add module dependency
 	myModule.add_module_depend(dict["system"].export_depends)
 	# add exporting sources

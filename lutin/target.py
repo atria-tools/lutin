@@ -173,6 +173,23 @@ class Target:
 	def __repr__(self):
 		return "{lutin.Target}"
 	
+	##
+	## @brief Get the type of the target: ["Linux, ...]
+	## @return The current target name and other sub name type (ubuntu ...)
+	##
+	def get_type(self):
+		out = [self.name]
+		if self.name != self.config_based_on:
+			out.append(self.config_based_on)
+		return out
+	
+	##
+	## @brief Get build mode of the target: ["debug", "release"]
+	## @return The current target build mode.
+	##
+	def get_mode(self):
+		return self.config["mode"]
+	
 	def add_flag(self, type, list):
 		tools.list_append_to_2(self.global_flags, type, list)
 	
