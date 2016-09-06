@@ -151,6 +151,11 @@ class HeritageList:
 				self.path[ppp].append(iii)
 		debug.extreme_verbose("Path : " + str(self.path))
 	
+	##
+	## @brief Generate a string representing the class (for str(xxx))
+	## @param[in] self (handle) Class handle
+	## @return (string) string of str() convertion
+	##
 	def __repr__(self):
 		return "{HeritageList:" + str(self.list_heritage) + "}"
 
@@ -169,19 +174,19 @@ class heritage:
 		self.path = {}
 		self.include = ""
 		# update is set at true when data are newly created ==> force upper element to update
-		self.hasBeenUpdated=False
+		self.has_been_updated=False
 		
 		if type(module) != type(None):
 			# all the parameter that the upper classe need when build
-			self.name = module.name
-			self.depends = copy.deepcopy(module.depends)
+			self.name = module.get_name()
+			self.depends = copy.deepcopy(module.get_depends())
 			# keep reference because the flags can change in time
-			self.flags = module.flags["export"] # have no deep copy here is a feature ...
-			self.path = copy.deepcopy(module.path["export"])
+			self.flags = module._flags["export"] # have no deep copy here is a feature ...
+			self.path = copy.deepcopy(module._path["export"])
 			# if the user install some header ==> they will ba autoamaticaly exported ...
 			if target != None:
-				if len(module.header) > 0:
-					self.include = target.get_build_path_include(module.name)
+				if len(module._header) > 0:
+					self.include = target.get_build_path_include(module.get_name())
 	
 	def add_depends(self, elements):
 		self.depends.append(elements)
@@ -218,14 +223,14 @@ class heritage:
 			self.path['c'].append(self.include)
 	
 	def need_update(self, list):
-		self.hasBeenUpdated=True
+		self.has_been_updated=True
 	
 	def add_sub(self, other):
 		if type(other) == type(None):
 			debug.verbose("input of the heriatege class is None !!!")
 			return
-		if other.hasBeenUpdated == True:
-			self.hasBeenUpdated = True
+		if other.has_been_updated == True:
+			self.has_been_updated = True
 		for flags in other.flags:
 			value = other.flags[flags]
 			if flags not in self.flags:
@@ -247,6 +252,11 @@ class heritage:
 					ver = self.flags["c++-version"]
 			self.flags["c++-version"] = ver
 	
+	##
+	## @brief Generate a string representing the class (for str(xxx))
+	## @param[in] self (handle) Class handle
+	## @return (string) string of str() convertion
+	##
 	def __repr__(self):
 		return "{Heritage:" + str(self.name) + " ... }"
 

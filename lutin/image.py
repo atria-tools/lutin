@@ -25,12 +25,25 @@ except:
 	enable_resize_image = False
 	debug.warning("Missing python tools : CoreGraphics (MacOs) or PIL") 
 
+##
+## @brief Generate the upper pow 2 of the size in parameter
+## @param[in] size (int) Size that might heve the upper pow(2)
+## @return the new size in pow(2)
+##
 def get_pow_2_multiple(size):
 	base = 2
 	while size>base:
 		base = base * 2
 	return base
 
+##
+## @brief Resize an image
+## @param[in] src_file (string) Path of the source image file
+## @param[in] dest_file (string) Path out the destination image file
+## @param[in] x (int) Width of the image
+## @param[in] y (int) Height of the image
+## @param[in] cmd_file (string) Filename of where is store the cmdline to generate the 'dst'
+##
 # TODO : 3 things to do :
 #        check if force requested
 #        check if time change

@@ -41,6 +41,11 @@ def _file_read_data(path, binary=False):
 	file.close()
 	return data_file
 
+##
+## @brief Creata a dependency file with a list of files
+## @param[in] depend_file (string) filename to store a dependency data
+## @param[in] list_files ([string,...]) List of file that depend the current element
+##
 def create_dependency_file(depend_file, list_files):
 	data = ""
 	for elem in list_files:
@@ -48,6 +53,16 @@ def create_dependency_file(depend_file, list_files):
 	_create_directory_of_file(depend_file)
 	_file_write_data(depend_file, data)
 
+##
+## @brief Check if all dependency of a file and dependency file is correct or not
+## @param[in] dst (string) File that will be generated
+## @param[in] src (string) Source File needed to generate the 'dst'
+## @param[in] depend_file (string) Dependency file that contain all file that the src depending
+## @param[in] file_cmd (string) Filename of where is store the cmdline to generate the 'dst'
+## @param[in] cmd_line (string) Command line that will be use to generate the 'dst'
+## @param[in] force_identical (string) for copy file this check if the src and dst are identical
+## @return (bool) True: something change ==> need to rebuild, False otherwise
+##
 def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_identical=False):
 	debug.extreme_verbose("Request check of dependency of :")
 	debug.extreme_verbose("		dst='" + str(dst) + "'")
@@ -142,7 +157,7 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 		file.close()
 	# check the 2 files are identical:
 	if force_identical == True:
-		# check if the 2 cmd_line are similar :
+		# check if the 2 cmd_line are similar:
 		size_src = _file_size(src)
 		size_dst = _file_size(dst)
 		if size_src != size_dst:
@@ -157,8 +172,15 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 	debug.extreme_verbose("			==> Not rebuild (all dependency is OK)")
 	return False
 
-
-
+##
+## @brief 
+## @param[in] dst (string) File that will be generated
+## @param[in] src_list ([string,...]) Source file list needed to generate the 'dst'
+## @param[in] must_have_src (bool) All sources must be present
+## @param[in] file_cmd (string) Filename of where is store the cmdline to generate the 'dst'
+## @param[in] cmd_line (string) Command line that will be use to generate the 'dst'
+## @return (bool) True: Need to regenerate the package, False otherwise
+##
 def need_re_package(dst, src_list, must_have_src, file_cmd="", cmd_line=""):
 	debug.extreme_verbose("Request check of dependency of :")
 	debug.extreme_verbose("		dst='" + str(dst) + "'")

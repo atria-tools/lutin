@@ -18,7 +18,9 @@ from . import debug
 from . import module
 from . import tools
 from . import env
-
+##
+## @brief System class represent the pre-build Module that are already install and accessible in the system environment
+##
 class System:
 	def __init__(self):
 		self.valid=False;
@@ -59,6 +61,11 @@ class System:
 		  "clip":clip_path,
 		  "recursive":recursive
 		  })
+	##
+	## @brief Generate a string representing the class (for str(xxx))
+	## @param[in] self (handle) Class handle
+	## @return (string) string of str() convertion
+	##
 	def __repr__(self):
 		return "{lutin.System}"
 
@@ -75,7 +82,7 @@ def create_module_from_system(target, dict):
 	# add exporting sources
 	myModule.add_src_file(dict["system"].export_src)
 	# add export path
-	myModule.add_export_path(dict["system"].export_path)
+	myModule.add_path(dict["system"].export_path, export=True)
 	# Export all actions ...
 	for elem in dict["system"].action_on_state:
 		level, name, action = dict["system"].action_on_state[elem]
@@ -98,6 +105,10 @@ def create_module_from_system(target, dict):
 system_list={}
 __start_system_name="System_"
 
+##
+## @brief Import all File that start with env.get_build_system_base_name() + __start_system_name + XXX and register in the list of System
+## @param[in] path_list ([string,...]) List of file that start with env.get_build_system_base_name() in the running worktree (Parse one time ==> faster)
+##
 def import_path(path_list):
 	global system_list
 	global_base = env.get_build_system_base_name()
@@ -138,7 +149,9 @@ def import_path(path_list):
 		for val in system_list[elem]:
 			debug.verbose("        " + str(val["name"]))
 
-
+##
+## @brief Display all the system binary that can be used
+##
 def display():
 	global system_list
 	for elementName in system_list:
@@ -146,6 +159,13 @@ def display():
 		for data in system_list[elementName]:
 			debug.info("SYSTEM:    '" + data["name"] +"' in " + data["path"])
 
+##
+## @brief Check if a library is availlable for a specific target
+## @param[in] lib_name (string) Name of the Library
+## @param[in] target_name (string) Name of the target
+## @param[in] target (handle) Handle on the @ref Target build engine
+## @return 
+##
 def exist(lib_name, target_name, target) :
 	global system_list
 	debug.verbose("exist= " + lib_name + " in " + target_name)

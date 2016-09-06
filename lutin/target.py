@@ -21,7 +21,9 @@ from . import module
 from . import system
 from . import multiprocess
 from . import env
-
+##
+## @brief Target class represent the buyild environement for a specific platform like Linux, or Android ....
+##
 class Target:
 	def __init__(self, name, config, arch):
 		self.config = config
@@ -170,6 +172,11 @@ class Target:
 		# special case for IOS (example) no build dynamicly ...
 		self.support_dynamic_link = True
 	
+	##
+	## @brief Generate a string representing the class (for str(xxx))
+	## @param[in] self (handle) Class handle
+	## @return (string) string of str() convertion
+	##
 	def __repr__(self):
 		return "{lutin.Target}"
 	
@@ -434,12 +441,12 @@ class Target:
 		return False
 	
 	def add_module(self, newModule):
-		debug.debug("Add nodule for Taget : " + newModule.name)
+		debug.debug("Add nodule for Taget : " + newModule.get_name())
 		self.module_list.append(newModule)
 	
 	def get_module(self, name):
 		for mod in self.module_list:
-			if mod.name == name:
+			if mod.get_name() == name:
 				return mod
 		debug.error("the module '" + str(name) + "'does not exist/already build")
 		return None
@@ -455,21 +462,21 @@ class Target:
 	
 	def build_tree(self, name, packagesName):
 		for mod in self.module_list:
-			if mod.name == name:
+			if mod.get_name() == name:
 				mod.build_tree(self, packagesName)
 				return
 		debug.error("request to build tree on un-existant module name : '" + name + "'")
 	
 	def clean(self, name):
 		for mod in self.module_list:
-			if mod.name == name:
+			if mod.get_name() == name:
 				mod.clean(self)
 				return
 		debug.error("request to clean an un-existant module name : '" + name + "'")
 	
 	def load_if_needed(self, name, optionnal=False):
 		for elem in self.module_list:
-			if elem.name == name:
+			if elem.get_name() == name:
 				return True
 		# try to find in the local Modules:
 		exist = module.exist(self, name)
@@ -491,7 +498,7 @@ class Target:
 	
 	def project_add_module(self, name, projectMng, addedModule):
 		for mod in self.module_list:
-			if mod.name == name:
+			if mod.get_name() == name:
 				mod.ext_project_add_module(self, projectMng, addedModule)
 				return
 	
@@ -578,7 +585,8 @@ class Target:
 						ret = [heritage.HeritageList(), False]
 					else:
 						for mod in self.module_list:
-							if mod.name == module_name:
+							debug.verbose("compare " + mod.get_name() + " == " + module_name)
+							if mod.get_name() == module_name:
 								if action_name[:4] == "dump":
 									debug.info("dump module '" + module_name + "'")
 									if len(action_name) > 4:
@@ -863,7 +871,10 @@ class Target:
 target_list=[]
 __start_target_name="Target_"
 
-
+##
+## @brief Import all File that start with env.get_build_system_base_name() + __start_target_name + XXX and register in the list of Target
+## @param[in] path_list ([string,...]) List of file that start with env.get_build_system_base_name() in the running worktree (Parse one time ==> faster)
+##
 def import_path(path_list):
 	global target_list
 	global_base = env.get_build_system_base_name()
@@ -888,6 +899,9 @@ def import_path(path_list):
 	for elem in target_list:
 		debug.verbose("    " + str(elem[0]))
 
+##
+## @brief
+##
 def load_target(name, config):
 	global target_list
 	debug.debug("load target: " + name)
