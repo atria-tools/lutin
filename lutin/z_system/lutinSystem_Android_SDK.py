@@ -24,9 +24,9 @@ class System(system.System):
 		# TODO : Check if the android sdk android.jar is present ...
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_sources(jar_file_path)
-		self.add_export_flag("link-lib", "dl")
-		self.add_export_flag("link-lib", "log")
-		self.add_export_flag("link-lib", "android")
+		self.add_sources(jar_file_path)
+		self.add_flag("link-lib", "dl")
+		self.add_flag("link-lib", "log")
+		self.add_flag("link-lib", "android")
 
 

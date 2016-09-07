@@ -21,8 +21,8 @@ class System(system.System):
 		self.help = "CXX: Generic C++ library"
 		self.valid = True
 		# no check needed ==> just add this:
-		self.add_export_flag("c++","-D__STDCPP_LLVM__")
-		self.add_export_flag("c++-remove","-nostdlib")
-		self.add_export_flag("need-libstdc++", True)
+		self.add_flag("c++","-D__STDCPP_LLVM__")
+		self.add_flag("c++-remove","-nostdlib")
+		self.add_flag("need-libstdc++", True)
 
 

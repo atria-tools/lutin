@@ -22,17 +22,17 @@ class System(system.System):
 		self.help = "CXX: Generic C++ library"
 		self.valid = True
 		# no check needed ==> just add this:
-		self.add_module_depend([
+		self.add_depend([
 		    'c',
 		    'm',
 		    'pthread'
 		    ])
-		self.add_export_flag("c++", "-D__STDCPP_GNU__")
+		self.add_flag("c++", "-D__STDCPP_GNU__")
 		if env.get_isolate_system() == False:
-			self.add_export_flag("c++-remove", "-nostdlib")
-			self.add_export_flag("need-libstdc++", True)
+			self.add_flag("c++-remove", "-nostdlib")
+			self.add_flag("need-libstdc++", True)
 		else:
-			self.add_export_flag("link-lib", "stdc++")
+			self.add_flag("link-lib", "stdc++")
 			compilator_gcc = "g++"
 			if target.config["compilator-version"] != "":
 				compilator_gcc = compilator_gcc + "-" + target.config["compilator-version"]

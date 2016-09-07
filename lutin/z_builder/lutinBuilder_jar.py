@@ -57,7 +57,12 @@ def get_support_multithreading():
 ## @brief Commands for running gcc to link a shared library.
 ##
 def link(file, binary, target, depancy, flags, name, basic_path):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "jar")
+	file_src = file
+	file_dst = os.path.join(target.get_build_path(name), name + ".jar")
+	file_depend = file_dst + target.suffix_dependence
+	file_cmd = file_dst + target.suffix_cmd_line
+	file_warning = file_dst + target.suffix_warning
+	
 	#create command Line
 	cmd = [
 		target.jar,

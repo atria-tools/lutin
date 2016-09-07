@@ -21,12 +21,12 @@ class System(system.System):
 		self.help="rpc : generic RPC library (developed by oracle)"
 		# No check ==> on the basic std libs:
 		self.valid = True
-		self.add_module_depend([
+		self.add_depend([
 		    'c'
 		    ])
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag("link-lib", "rpcsvc")
-		if env.get_isolate_system() == False:
+		self.add_flag("link-lib", "rpcsvc")
+		if env.get_isolate_system() == True:
 			self.add_header_file([
 			    "/usr/include/rpc/*"
 			    ],

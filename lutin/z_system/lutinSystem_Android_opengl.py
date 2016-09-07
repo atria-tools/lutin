@@ -21,7 +21,7 @@ class System(system.System):
 		self.help = "OpenGL: Generic graphic library"
 		self.valid = True
 		# no check needed ==> just add this:
-		self.add_module_depend([
+		self.add_depend([
 		    'c',
 		    ])
 		"""
@@ -31,6 +31,6 @@ class System(system.System):
 		    destination_path="GL",
 		    recursive=True)
 		"""
-		self.add_export_flag('link-lib', "GLESv2")
+		self.add_flag('link-lib', "GLESv2")
 
 

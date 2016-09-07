@@ -22,40 +22,78 @@ from . import env
 ## @brief System class represent the pre-build Module that are already install and accessible in the system environment
 ##
 class System:
+	##
+	## @brief Constructor
+	## @param[in] self (handle) Class handle
+	## @return None
+	##
 	def __init__(self):
-		self.valid=False;
-		self.help="";
-		self.export_depends=[]
-		self.export_flags={}
-		self.export_src=[]
-		self.export_path=[]
-		self.action_on_state={}
-		self.headers=[]
-		self.version=None
+		self._valid=False;
+		self._help="";
+		self._export_depends=[]
+		self._export_flags={}
+		self._export_src=[]
+		self._export_path=[]
+		self._action_on_state={}
+		self._headers=[]
+		self._version=None
+	##
+	## @brief Add source element
+	## @param[in] self (handle) Class handle
+	## @param[in] list ([string,...]) List of all Files to add. ex: *.a, *.so ...
+	## @return None
+	##
+	def add_sources(self, list):
+		tools.list_append_to(self._export_src, list)
 	
-	def add_export_sources(self, list):
-		tools.list_append_to(self.export_src, list)
-	
+	##
+	## @brief Add include path of the sources
+	## @param[in] self (handle) Class handle
+	## @param[in] list ([string,...]) List of all path to add in the -I include element
+	## @return None
+	##
 	# todo : add other than C ...
-	def add_export_path(self, list):
-		tools.list_append_to(self.export_path, list)
+	def add_path(self, list):
+		tools.list_append_to(self._export_path, list)
 	
-	def add_module_depend(self, list):
-		tools.list_append_to(self.export_depends, list, True)
+	##
+	## @brief Add a dependency on this module
+	## @param[in] self (handle) Class handle
+	## @param[in] list ([string,...] or string) Name(s) of the modules dependency
+	## @return None
+	##
+	def add_depend(self, list):
+		tools.list_append_to(self._export_depends, list, True)
 	
-	def add_export_flag(self, type, list):
-		tools.list_append_to_2(self.export_flags, type, list)
+	##
+	## @brief Add compilation flags
+	## @param[in] self (handle) Class handle
+	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
+	## @param[in] list ([string,...] or string) List of path to include
+	## @return None
+	##
+	def add_flag(self, type, list):
+		tools.list_append_to_2(self._export_flags, type, list)
 	
+	##
+	## @brief Set version of the module
+	## @param[in] self (handle) Class handle
+	## @param[in] version_list ([int,...]) Ids of the version. ex: [1,2,5] or [0,8,"dev"]
+	## @return None
+	##
 	def set_version(self, version_list):
-		self.version = version_list
+		self._version = version_list
 	
+	## @copydoc lutin.module.Target.add_action
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
-		if name_of_state not in self.action_on_add_src_filestate:
-			self.action_on_state[name_of_state] = [[level, name, action]]
+		if name_of_state not in self._action_on_state:
+			self._action_on_state[name_of_state] = [[level, name, action]]
 		else:
-			self.action_on_state[name_of_state].append([level, name, action])
+			self._action_on_state[name_of_state].append([level, name, action])
+	
+	## @copydoc lutin.module.Module.add_header_file
 	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
-		self.headers.append({
+		self._headers.append({
 		  "list":list,
 		  "dst":destination_path,
 		  "clip":clip_path,
@@ -68,41 +106,56 @@ class System:
 	##
 	def __repr__(self):
 		return "{lutin.System}"
+	
+	##
+	## @brief Configure a module with internal datas
+	## @param[in] self (handle) Class handle
+	## @param[in] target (handle) @ref lutin.module.Target handle
+	## @param[in] module (handle) @ref lutin.module.Module handle
+	## @return None
+	##
+	def configure_module(self, target, module):
+		# add element flags to export
+		for elem in self._export_flags:
+			debug.verbose("add element :" + str(elem) + " elems=" + str(self._export_flags[elem]))
+			module.add_flag(elem, self._export_flags[elem], export=True)
+		# add module dependency
+		module.add_depend(self._export_depends)
+		# add exporting sources
+		module.add_src_file(self._export_src)
+		# add export path
+		module.add_path(self._export_path, export=True)
+		# Export all actions ...
+		for elem in self._action_on_state:
+			level, name, action = self._action_on_state[elem]
+			target.add_action(elem, level, name, action)
+		for elem in self._headers:
+			module.add_header_file(
+			    elem["list"],
+			    destination_path=elem["dst"],
+			    clip_path=elem["clip"],
+			    recursive=elem["recursive"])
+		if self._version != None:
+			module.pkg_set("VERSION", self._version);
+		
 
 
-
+##
+## @brief Create a @ref lutin.module.Module for the system list elements
+## @param[in] target (handle) @ref lutin.target.Target handle
+## @param[in] name (string) Name of the system module
+##
 def create_module_from_system(target, dict):
-	myModule = module.Module(dict["path"], dict["name"], 'PREBUILD')
-	# add element flags to export
-	for elem in dict["system"].export_flags:
-		debug.verbose("add element :" + str(elem) + " elems=" + str(dict["system"].export_flags[elem]))
-		myModule.add_flag(elem, dict["system"].export_flags[elem], export=True)
-	# add module dependency
-	myModule.add_module_depend(dict["system"].export_depends)
-	# add exporting sources
-	myModule.add_src_file(dict["system"].export_src)
-	# add export path
-	myModule.add_path(dict["system"].export_path, export=True)
-	# Export all actions ...
-	for elem in dict["system"].action_on_state:
-		level, name, action = dict["system"].action_on_state[elem]
-		target.add_action(elem, level, name, action)
-	for elem in dict["system"].headers:
-		myModule.add_header_file(
-		    elem["list"],
-		    destination_path=elem["dst"],
-		    clip_path=elem["clip"],
-		    recursive=elem["recursive"])
-	if dict["system"].version != None:
-		myModule.package_prop["VERSION"] = dict["system"].version
-	return myModule
+	my_module = module.Module(dict["path"], dict["name"], 'PREBUILD')
+	dict["system"].configure_module(target, my_module)
+	return my_module
 
 
 
 
 # Dictionnaire of Target name
 #   inside table of ["Name of the lib", "path of the lib", boolean loaded, module loaded]
-system_list={}
+__system_list={}
 __start_system_name="System_"
 
 ##
@@ -110,7 +163,7 @@ __start_system_name="System_"
 ## @param[in] path_list ([string,...]) List of file that start with env.get_build_system_base_name() in the running worktree (Parse one time ==> faster)
 ##
 def import_path(path_list):
-	global system_list
+	global __system_list
 	global_base = env.get_build_system_base_name()
 	debug.debug("SYSTEM: Init with Files list:")
 	for elem in path_list:
@@ -129,49 +182,49 @@ def import_path(path_list):
 		system_name = filename[len(__start_system_name):]
 		system_type, system_name = system_name.split('_')
 		debug.verbose("SYSTEM:     Integrate: '" + system_type + "':'" + system_name + "' from '" + elem + "'")
-		if system_type in system_list:
-			system_list[system_type].append({"name":system_name,
+		if system_type in __system_list:
+			__system_list[system_type].append({"name":system_name,
+			                                   "path":elem,
+			                                   "system":None,
+			                                   "loaded":False,
+			                                   "exist":False,
+			                                   "module":None})
+		else:
+			__system_list[system_type] = [{"name":system_name,
 			                               "path":elem,
 			                               "system":None,
 			                               "loaded":False,
 			                               "exist":False,
-			                               "module":None})
-		else:
-			system_list[system_type] = [{"name":system_name,
-			                           "path":elem,
-			                           "system":None,
-			                           "loaded":False,
-			                           "exist":False,
-			                           "module":None}]
+			                               "module":None}]
 	debug.verbose("New list system: ")
-	for elem in system_list:
+	for elem in __system_list:
 		debug.verbose("    " + str(elem))
-		for val in system_list[elem]:
+		for val in __system_list[elem]:
 			debug.verbose("        " + str(val["name"]))
 
 ##
 ## @brief Display all the system binary that can be used
 ##
 def display():
-	global system_list
-	for elementName in system_list:
+	global __system_list
+	for elementName in __system_list:
 		debug.info("SYSTEM:     Integrate system: '" + elementName +"'")
-		for data in system_list[elementName]:
+		for data in __system_list[elementName]:
 			debug.info("SYSTEM:    '" + data["name"] +"' in " + data["path"])
 
 ##
-## @brief Check if a library is availlable for a specific target
+## @brief Check if a system Module is availlable for a specific target
 ## @param[in] lib_name (string) Name of the Library
 ## @param[in] target_name (string) Name of the target
 ## @param[in] target (handle) Handle on the @ref Target build engine
-## @return 
+## @return (bool) find the system lib or not
 ##
 def exist(lib_name, target_name, target) :
-	global system_list
+	global __system_list
 	debug.verbose("exist= " + lib_name + " in " + target_name)
-	if target_name not in system_list:
+	if target_name not in __system_list:
 		return False
-	for data in system_list[target_name]:
+	for data in __system_list[target_name]:
 		if data["name"] == lib_name:
 			# we find it in the List ==> need to check if it is present in the system :
 			if data["loaded"] == False:
@@ -189,11 +242,18 @@ def exist(lib_name, target_name, target) :
 			return data["exist"]
 	return False
 
+##
+## @brief Load a system Module for a specific target
+## @param[in] target (handle) Handle on the @ref Target build engine
+## @param[in] lib_name (string) Name of the Library
+## @param[in] target_name (string) Name of the target
+## @return None
+##
 def load(target, lib_name, target_name):
-	global system_list
-	if target_name not in system_list:
+	global __system_list
+	if target_name not in __system_list:
 		debug.error("you must call this function after checking of the system exist() !1!")
-	for data in system_list[target_name]:
+	for data in __system_list[target_name]:
 		if data["name"] == lib_name:
 			if data["exist"] == False:
 				debug.error("you must call this function after checking of the system exist() !2!")

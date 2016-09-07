@@ -21,6 +21,6 @@ class System(system.System):
 		self.help="CoreAudio : MacOs interface for audio (all time present, just system interface)"
 		self.valid = True
 		# todo : create a searcher of the presence of the library:
-		self.add_export_flag("link", "-framework CoreAudio")
-		self.add_export_flag("link", "-framework CoreFoundation")
+		self.add_flag("link", "-framework CoreAudio")
+		self.add_flag("link", "-framework CoreFoundation")
 

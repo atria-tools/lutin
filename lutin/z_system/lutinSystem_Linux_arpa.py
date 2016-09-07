@@ -26,13 +26,13 @@ class System(system.System):
 		# No check ==> on the basic std libs:
 		self.valid = True
 		if env.get_isolate_system() == True:
-			#self.add_export_flag("link-lib", "xns")
+			#self.add_flag("link-lib", "xns")
 			self.add_header_file([
 			    "/usr/include/arpa/*"
 			    ],
 			    destination_path="arpa",
 			    recursive=True)
-			self.add_module_depend([
+			self.add_depend([
 			    'c'
 			    ])
 		

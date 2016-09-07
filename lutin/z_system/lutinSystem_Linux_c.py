@@ -171,5 +171,5 @@ class System(system.System):
 			    ],
 			    destination_path="net",
 			    recursive=True)
-			self.add_export_flag("link", "-B/usr/lib")
+			self.add_flag("link", "-B/usr/lib")
 

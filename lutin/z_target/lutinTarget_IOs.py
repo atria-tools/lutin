@@ -353,7 +353,7 @@ class Target(target.Target):
 				cmdLine += ' ' + self.get_staging_path(pkg_name)
 				multiprocess.run_command(cmdLine)
 	
-	def createRandomNumber(self, len):
+	def create_random_number(self, len):
 		out = ""
 		for iii in range(0,len):
 			out += random.choice(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"])
@@ -378,15 +378,15 @@ class Target(target.Target):
 			if tools.file_size(simulatorIdFile) < 10:
 				#create the file:
 				tmpFile = open(simulatorIdFile, 'w')
-				tmpFile.write(self.createRandomNumber(8))
+				tmpFile.write(self.create_random_number(8))
 				tmpFile.write("-")
-				tmpFile.write(self.createRandomNumber(4))
+				tmpFile.write(self.create_random_number(4))
 				tmpFile.write("-")
-				tmpFile.write(self.createRandomNumber(4))
+				tmpFile.write(self.create_random_number(4))
 				tmpFile.write("-")
-				tmpFile.write(self.createRandomNumber(4))
+				tmpFile.write(self.create_random_number(4))
 				tmpFile.write("-")
-				tmpFile.write(self.createRandomNumber(12))
+				tmpFile.write(self.create_random_number(12))
 				tmpFile.flush()
 				tmpFile.close()
 			simulatorId = tools.file_read_data(simulatorIdFile)

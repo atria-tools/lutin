@@ -58,7 +58,12 @@ def get_support_multithreading():
 ## @brief Commands for running gcc to link an executable.
 ##
 def link(file, binary, target, depancy, flags, name, basic_path, static = False):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "bin")
+	file_src = file
+	file_dst = target.get_build_file_bin(binary)
+	file_depend = file_dst + target.suffix_dependence
+	file_cmd = file_dst + target.suffix_cmd_line
+	file_warning = file_dst + target.suffix_warning
+	
 	debug.extreme_verbose("list files = " + str(depancy.src))
 	list_static = []
 	list_dynamic = []

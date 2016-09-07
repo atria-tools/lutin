@@ -25,53 +25,53 @@ class System(system.System):
 				debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")
 				self.valid = False
 				return
-			self.add_export_flag("c++", "-D__STDCPP_LLVM__")
+			self.add_flag("c++", "-D__STDCPP_LLVM__")
 			# llvm is BSD-like licence
-			self.add_export_path(os.path.join(target.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "include"))
+			self.add_path(os.path.join(target.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "include"))
 			if target.type_arch == "armv5":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "armeabi")
-				self.add_export_path(        os.path.join(stdCppBasePath, "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "libc++_static.a"))
+				self.add_path(        os.path.join(stdCppBasePath, "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "libc++_static.a"))
 			elif target.type_arch == "armv7":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libs", "armeabi-v7a")
-				self.add_export_path(        os.path.join(stdCppBasePath + "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "thumb", "libc++_static.a"))
+				self.add_path(        os.path.join(stdCppBasePath + "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "thumb", "libc++_static.a"))
 			elif target.type_arch == "mips":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "mips")
-				self.add_export_path(        os.path.join(stdCppBasePath + "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath + "libc++_static.a"))
+				self.add_path(        os.path.join(stdCppBasePath + "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath + "libc++_static.a"))
 			elif target.type_arch == "x86":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "llvm-libc++", "libcxx", "libs", "x86")
-				self.add_export_path(        os.path.join(stdCppBasePath, "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "libc++_static.a"))
+				self.add_path(        os.path.join(stdCppBasePath, "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "libc++_static.a"))
 			else:
 				debug.warning("unknow architecture: '" + str(target.arch) + "'");
 		else:
-			self.add_export_flag("c++", "-D__STDCPP_GNU__")
-			self.add_export_flag("c++-remove","-nostdlib")
-			self.add_export_flag("need-libstdc++", True)
+			self.add_flag("c++", "-D__STDCPP_GNU__")
+			self.add_flag("c++-remove","-nostdlib")
+			self.add_flag("need-libstdc++", True)
 			# GPL v3 (+ exception link for gcc compilator)
-			self.add_export_path(os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "include"))
+			self.add_path(os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "include"))
 			if target.type_arch == "armv5":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "libs", "armeabi")
-				self.add_export_path(        os.path.join(stdCppBasePath, "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
+				self.add_path(        os.path.join(stdCppBasePath, "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
 			elif target.type_arch == "armv7":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "libs", "armeabi-v7a")
-				self.add_export_path(        os.path.join(stdCppBasePath, "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
+				self.add_path(        os.path.join(stdCppBasePath, "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "thumb", "libgnustl_static.a"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "thumb", "libsupc++.a"))
 			elif target.type_arch == "mips":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "libs", "mips")
-				self.add_export_path(        os.path.join(stdCppBasePath, "include/"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "libgnustl_static.a"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "libsupc++.a"))
+				self.add_path(        os.path.join(stdCppBasePath, "include/"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "libgnustl_static.a"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "libsupc++.a"))
 			elif target.type_arch == "x86":
 				stdCppBasePath = os.path.join(target.path_ndk, "sources", "cxx-stl", "gnu-libstdc++", target.compilator_version, "libs", "x86")
-				self.add_export_path(        os.path.join(stdCppBasePath, "include"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "libgnustl_static.a"))
-				self.add_export_flag("link", os.path.join(stdCppBasePath, "libsupc++.a"))
+				self.add_path(        os.path.join(stdCppBasePath, "include"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "libgnustl_static.a"))
+				self.add_flag("link", os.path.join(stdCppBasePath, "libsupc++.a"))
 			else:
 				debug.warning("unknow architecture: '" + str(target.arch) + "'");
 			debug.warning("plop")

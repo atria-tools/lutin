@@ -26,9 +26,9 @@ class System(system.System):
 			return;
 		self.valid = True
 		if env.get_isolate_system() == False:
-			self.add_export_flag("link-lib", "asound")
+			self.add_flag("link-lib", "asound")
 		else:
-			self.add_export_flag("link-lib", "asound")
+			self.add_flag("link-lib", "asound")
 			self.add_header_file([
 			    "/usr/include/alsa/*",
 			    ],
@@ -39,7 +39,7 @@ class System(system.System):
 			    ],
 			    destination_path="dssi",
 			    recursive=True)
-			self.add_module_depend([
+			self.add_depend([
 			    'c'
 			    ])
 

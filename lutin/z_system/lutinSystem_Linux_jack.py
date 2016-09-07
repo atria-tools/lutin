@@ -24,11 +24,11 @@ class System(system.System):
 			# we did not find the library reqiested (just return) (automaticly set at false)
 			return;
 		self.valid = True
-		self.add_module_depend([
+		self.add_depend([
 		    'uuid',
 		    'c'
 		    ])
-		self.add_export_flag("link-lib", "jack")
+		self.add_flag("link-lib", "jack")
 		if env.get_isolate_system() == True:
 			self.add_header_file([
 			    "/usr/include/jack/*",

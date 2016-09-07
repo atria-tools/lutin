@@ -57,8 +57,17 @@ def get_support_multithreading():
 ## @brief Commands for running ar.
 ##
 def link(file, binary, target, depancy, flags, name, basic_path):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "lib-static")
-	#$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
+	file_src = file
+	file_dst = target.get_build_file_static(name)
+	file_depend = file_dst + target.suffix_dependence
+	file_cmd = file_dst + target.suffix_cmd_line
+	file_warning = file_dst + target.suffix_warning
+	
+	debug.extreme_verbose("file_dst     = " + file_dst)
+	debug.extreme_verbose("file_depend  = " + file_depend)
+	debug.extreme_verbose("file_cmd     = " + file_cmd)
+	debug.extreme_verbose("file_warning = " + file_warning)
+	
 	cmd = [
 		target.ar
 		]

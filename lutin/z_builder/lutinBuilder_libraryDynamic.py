@@ -57,7 +57,17 @@ def get_support_multithreading():
 ## @brief Commands for running gcc to link a shared library.
 ##
 def link(file, binary, target, depancy, flags, name, basic_path, static=False):
-	file_src, file_dst, file_depend, file_cmd, file_warning = target.generate_file(binary, name, basic_path, file, "lib-shared")
+	file_src = file
+	file_dst = target.get_build_file_dynamic(name)
+	file_depend = file_dst + target.suffix_dependence
+	file_cmd = file_dst + target.suffix_cmd_line
+	file_warning = file_dst + target.suffix_warning
+	
+	debug.extreme_verbose("file_dst     = " + file_dst)
+	debug.extreme_verbose("file_depend  = " + file_depend)
+	debug.extreme_verbose("file_cmd     = " + file_cmd)
+	debug.extreme_verbose("file_warning = " + file_warning)
+	
 	list_static = []
 	list_dynamic = []
 	if static == True:

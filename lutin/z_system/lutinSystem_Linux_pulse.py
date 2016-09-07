@@ -39,23 +39,23 @@ class System(system.System):
 			return
 		self.set_version([int(version),int(version2)])
 		self.valid = True
-		self.add_module_depend([
+		self.add_depend([
 		    'c'
 		    ])
 		if env.get_isolate_system() == False:
-			self.add_export_flag("link-lib", [
+			self.add_flag("link-lib", [
 			    "pulse-simple",
 			    "pulse"
 			    ])
 		else:
 			# todo : create a searcher of the presence of the library:
-			self.add_export_flag("link-lib", [
+			self.add_flag("link-lib", [
 			    "pulsecommon-" + version + ".0",
 			    "pulse-mainloop-glib",
 			    "pulse-simple",
 			    "pulse"
 			    ])
-			self.add_export_flag("link", "-L/usr/lib/pulseaudio")
+			self.add_flag("link", "-L/usr/lib/pulseaudio")
 			self.add_header_file([
 			    "/usr/include/pulse/*",
 			    ],

@@ -26,7 +26,7 @@ class System(system.System):
 		self.valid = True
 		if env.get_isolate_system() == False:
 			# todo : create a searcher of the presence of the library:
-			self.add_export_flag("link-lib", [
+			self.add_flag("link-lib", [
 			    "boost_system",
 			    "boost_thread",
 			    "boost_chrono"
@@ -37,7 +37,7 @@ class System(system.System):
 			    ],
 			    destination_path="boost",
 			    recursive=True)
-			self.add_module_depend([
+			self.add_depend([
 			    'cxx'
 			    ])
 		

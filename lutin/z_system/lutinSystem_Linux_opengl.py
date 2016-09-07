@@ -21,11 +21,11 @@ class System(system.System):
 		self.help = "OpenGL: Generic graphic library"
 		self.valid = True
 		# no check needed ==> just add this:
-		self.add_module_depend([
+		self.add_depend([
 		    'c',
 		    'X11'
 		    ])
-		self.add_export_flag('link-lib', 'GL')
+		self.add_flag('link-lib', 'GL')
 		if env.get_isolate_system() == True:
 				self.add_header_file([
 			    "/usr/include/GL/*"
@@ -37,16 +37,16 @@ class System(system.System):
 		if target.name=="Linux":
 			
 		elif target.name=="Android":
-			my_module.add_export_flag('link-lib', "GLESv2")
+			my_module.add_flag('link-lib', "GLESv2")
 		elif target.name=="Windows":
-			my_module.add_module_depend([
+			my_module.add_depend([
 			    "glew"
 			    ])
 		elif target.name=="MacOs":
-			my_module.add_export_flag('link', [
+			my_module.add_flag('link', [
 			    "-framework OpenGL"])
 		elif target.name=="IOs":
-			my_module.add_export_flag('link', [
+			my_module.add_flag('link', [
 			    "-framework OpenGLES"
 			    ])
 		"""

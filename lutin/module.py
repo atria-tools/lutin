@@ -39,12 +39,21 @@ class Module:
 	## @param[in] self (handle) Class handle
 	## @param[in] file (string) Plugin file name (use __file__ to get it)
 	## @param[in] module_name (string) Name of the module
-	## @param[in] moduleType (string) Type of the module
+	## @param[in] module_type (string) Type of the module:
+	##     - BINARY
+	##     - BINARY_SHARED
+	##     - BINARY_STAND_ALONE
+	##     - LIBRARY
+	##     - LIBRARY_DYNAMIC
+	##     - LIBRARY_STATIC
+	##     - PACKAGE
+	##     - PREBUILD
+	##     - DATA
 	## @return None
 	##
-	def __init__(self, file, module_name, moduleType):
+	def __init__(self, file, module_name, module_type):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
-		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + moduleType)
+		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + module_type)
 		self._origin_file=''
 		self._origin_path=''
 		# type of the module:
@@ -78,19 +87,19 @@ class Module:
 		# The module has been already build ...
 		self._isbuild = False
 		## end of basic INIT ...
-		if    moduleType == 'BINARY' \
-		   or moduleType == 'BINARY_SHARED' \
-		   or moduleType == 'BINARY_STAND_ALONE' \
-		   or moduleType == 'LIBRARY' \
-		   or moduleType == 'LIBRARY_DYNAMIC' \
-		   or moduleType == 'LIBRARY_STATIC' \
-		   or moduleType == 'PACKAGE' \
-		   or moduleType == 'PREBUILD' \
-		   or moduleType == 'DATA':
-			self._type=moduleType
+		if    module_type == 'BINARY' \
+		   or module_type == 'BINARY_SHARED' \
+		   or module_type == 'BINARY_STAND_ALONE' \
+		   or module_type == 'LIBRARY' \
+		   or module_type == 'LIBRARY_DYNAMIC' \
+		   or module_type == 'LIBRARY_STATIC' \
+		   or module_type == 'PACKAGE' \
+		   or module_type == 'PREBUILD' \
+		   or module_type == 'DATA':
+			self._type=module_type
 		else :
 			debug.error('for module "%s"' %module_name)
-			debug.error('    ==> error : "%s" ' %moduleType)
+			debug.error('    ==> error : "%s" ' %module_type)
 			raise 'Input value error'
 		self._origin_file = file;
 		self._origin_path = tools.get_current_path(self._origin_file)
@@ -184,7 +193,7 @@ class Module:
 	## @param[in] self (handle) Class handle
 	## @return None
 	##
-	def add_extra_compile_flags(self):
+	def add_extra_flags(self):
 		self.add_flag('c', [
 			"-Wall",
 			"-Wsign-compare",
@@ -514,7 +523,7 @@ class Module:
 		# optionnal dependency :
 		for dep, option, export in self._depends_optionnal:
 			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
-			inherit_list, isBuilt = target.build(dep, package_name, True)
+			inherit_list, isBuilt = target.build(dep, True)
 			if isBuilt == True:
 				self._local_heritage.add_depends(dep);
 				# TODO : Add optionnal Flags ...
@@ -527,7 +536,7 @@ class Module:
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self._depends:
 			debug.debug("module: '" + str(self._name) + "'   request: '" + dep + "'")
-			inherit_list = target.build(dep, package_name, False)
+			inherit_list = target.build(dep, False)
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		# do sub library action for automatic generating ...
@@ -927,8 +936,14 @@ class Module:
 	## @param[in] list ([string,...] or string) Name(s) of the modules dependency
 	## @return None
 	##
-	def add_module_depend(self, list):
+	def add_depend(self, list):
 		tools.list_append_to(self._depends, list, True)
+	
+	## @brief deprecated ...
+	## @return None
+	def add_module_depend(self, list):
+		debug.warning("[" + self._name + "] add_module_depend is deprecated ==> use add_depend(...)")
+		self.add_depend(list)
 	
 	##
 	## @brief Add an optionnal dependency on this module
@@ -938,8 +953,14 @@ class Module:
 	## @param[in] export (bool) export the flat that has been requested to add if module is present.
 	## @return None
 	##
-	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
+	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False):
 		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export], True)
+	
+	## @brief deprecated ...
+	## @return None
+	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
+		debug.warning("[" + self._name + "] add_optionnal_module_depend is deprecated ==> use add_optionnal_depend(...)")
+		self.add_optionnal_depend(module_name, compilation_flags, export)
 	
 	##
 	## @brief Add a path to include when build
@@ -961,7 +982,6 @@ class Module:
 		debug.warning("[" + self._name + "] add_export_path is deprecated ==> use add_path(xxx, yyy, export=True)")
 		self.add_path(list, type, export=True)
 	
-	
 	##
 	## @brief Add compilation flags
 	## @param[in] self (handle) Class handle
@@ -979,13 +999,13 @@ class Module:
 	## @brief deprecated ...
 	## @return None
 	def add_export_flag(self, type, list):
-		debug.warning("[" + self._name + "] Add_export_flag is deprecated ==> use add_flag(xxx, yyy, export=True)")
+		debug.warning("[" + self._name + "] add_export_flag is deprecated ==> use add_flag(xxx, yyy, export=True)")
 		self.add_flag(type, list, export=True)
 	
 	## @brief deprecated ...
 	## @return None
 	def compile_flags(self, type, list):
-		debug.warning("[" + self._name + "] Compile_flags is deprecated ==> use add_flag(xxx, yyy)")
+		debug.warning("[" + self._name + "] compile_flags is deprecated ==> use add_flag(xxx, yyy)")
 		self.add_flag(type, list)
 	
 	##
@@ -1345,39 +1365,6 @@ class Module:
 		else:
 			self._package_prop[variable] = [value]
 	
-	##
-	## @brief Add an external project module
-	## @param[in] self (handle) Class handle
-	## @param[in] target (handle) @ref lutin.target.Target handle
-	## @param[in] projectMng (string) name of the project manager
-	## @param[in] added_module ([string,...]) Modules to add
-	## @return None
-	##
-	def ext_project_add_module(self, target, projectMng, added_module = []):
-		if self._name in added_module:
-			return
-		added_module.append(self._name)
-		debug.verbose("add a module to the project generator :" + self._name)
-		debug.verbose("local path :" + self._origin_path)
-		projectMng.add_files(self._name, self._origin_path, self._src)
-		#projectMng.add_data_file(self.origin_path, self.files)
-		#projectMng.add_data_path(self.origin_path, self.paths)
-		"""
-		for depend in self.depends:
-			target.project_add_module(depend, projectMng, added_module)
-		"""
-	
-	##
-	## @brief Create a project for external build environement
-	## @param[in] self (handle) Class handle
-	## @param[in] target (handle) @ref lutin.target.Target handle
-	## @param[in] projectMng (string) name of the project manager
-	## @return None
-	##
-	def create_project(self, target, projectMng):
-		projectMng.set_project_name(self._name)
-		self.ext_project_add_module(target, projectMng)
-		projectMng.generate_project_file()
 
 __module_list=[]
 __start_module_name="_"

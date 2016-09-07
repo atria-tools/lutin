@@ -25,6 +25,12 @@ from . import env
 ## @brief Target class represent the buyild environement for a specific platform like Linux, or Android ....
 ##
 class Target:
+	##
+	## @brief contructor
+	## @param[in] name (string) Name of the target
+	## @param[in] config (dict) User configuration
+	## @param[in] arch (string) specific parameter for gcc -arch element
+	##
 	def __init__(self, name, config, arch):
 		self.config = config
 		
@@ -59,21 +65,6 @@ class Target:
 		# Target global variables.
 		###############################################################################
 		self.global_include_cc=[]
-		"""
-		self.global_flags_cc=['-D__TARGET_OS__'+self.name,
-		                      '-D__TARGET_ARCH__'+self.select_arch,
-		                      '-D__TARGET_ADDR__'+self.select_bus + 'BITS',
-		                      '-D_REENTRANT']
-		self.global_flags_xx=[]
-		self.global_flags_mm=[]
-		if self.name == "Windows":
-			self.global_flags_xx=['-static-libgcc', '-static-libstdc++']
-			self.global_flags_mm=[]
-		self.global_flags_m=[]
-		self.global_flags_ar=['rcs']
-		self.global_flags_ld=[]
-		self.global_flags_ld_shared=[]
-		"""
 		self.global_flags={}
 		
 		self.global_libs_ld=[]
@@ -105,8 +96,10 @@ class Target:
 		self.add_flag("ar", 'rcs')
 		
 		if self.name == "Windows":
-			self.add_flag("c++", ['-static-libgcc', '-static-libstdc++'])
-		
+			self.add_flag("c++", [
+			    '-static-libgcc',
+			    '-static-libstdc++'
+			    ])
 		if "debug" == self.config["mode"]:
 			self.add_flag("c", [
 			    "-g",
@@ -141,7 +134,7 @@ class Target:
 				    "--coverage"
 				    ])
 		
-		self.update_path_tree()
+		self._update_path_tree()
 		self.path_bin="bin"
 		self.path_lib="lib"
 		self.path_data="share"
@@ -182,7 +175,8 @@ class Target:
 	
 	##
 	## @brief Get the type of the target: ["Linux, ...]
-	## @return The current target name and other sub name type (ubuntu ...)
+	## @param[in] self (handle) Class handle
+	## @return ([string,...]) The current target name and other sub name type (ubuntu ...)
 	##
 	def get_type(self):
 		out = [self.name]
@@ -192,20 +186,40 @@ class Target:
 	
 	##
 	## @brief Get build mode of the target: ["debug", "release"]
+	## @param[in] self (handle) Class handle
 	## @return The current target build mode.
 	##
 	def get_mode(self):
 		return self.config["mode"]
 	
+	##
+	## @brief Add global target flags
+	## @param[in] self (handle) Class handle
+	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
+	## @param[in] list ([string,...] or string) List of path to include
+	## @return None
+	##
 	def add_flag(self, type, list):
 		tools.list_append_to_2(self.global_flags, type, list)
 	
-	def update_path_tree(self):
+	##
+	## @brief Update basic tree path positions on the build tree
+	## @param[in] self (handle) Class handle
+	## @return None
+	##
+	def _update_path_tree(self):
 		self.path_out = os.path.join("out", self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
 		self.path_final = os.path.join("final", self.config["compilator"])
 		self.path_staging = os.path.join("staging", self.config["compilator"])
 		self.path_build = os.path.join("build", self.config["compilator"])
 	
+	# TODO: Remove this from here ==> this is a tools
+	##
+	## @brief create a string version number with the associated list values
+	## @param[in] self (handle) Class handle
+	## @param[in] data ([int|string,...]) version basic number
+	## @return (string) version number
+	##
 	def create_number_from_version_string(self, data):
 		tmp_data = data.split("-")
 		if len(tmp_data) > 1:
@@ -225,6 +239,12 @@ class Target:
 			offset /= 1000
 		return out
 	
+	##
+	## @brief Configure the cross toolchain
+	## @param[in] self (handle) Class handle
+	## @param[in] cross (string) Path of the cross toolchain
+	## @return None
+	##
 	def set_cross_base(self, cross=""):
 		self.cross = cross
 		debug.debug("== Target='" + self.cross + "'");
@@ -258,7 +278,7 @@ class Target:
 		self.nm = self.cross + "nm"
 		self.strip = self.cross + "strip"
 		self.dlltool = self.cross + "dlltool"
-		self.update_path_tree()
+		self._update_path_tree()
 		
 		#some static libraries that is sometime needed when not use stdlib ...
 		ret = multiprocess.run_command_direct(self.xx + " -print-file-name=libgcc.a");
@@ -270,12 +290,13 @@ class Target:
 			debug.error("Can not get the g++/clang++ libsupc++.a ...")
 		self.stdlib_name_libsupc = ret;
 	
+	##
+	## @brief Get the current build mode
+	## @param[in] self (handle) Class handle
+	## @return Build mode value [debug,release]
+	##
 	def get_build_mode(self):
 		return self.config["mode"]
-	
-	def clean_module_tree(self):
-		self.build_tree_done = []
-		self.list_final_file = []
 	
 	def get_full_name_source(self, basePath, file):
 		if file[0] == '/':
@@ -312,119 +333,152 @@ class Target:
 	def get_full_dependency(self, module_name, basePath, file):
 		return self.get_build_path_object(module_name) + "/" + file + self.suffix_dependence
 	
-	"""
-		return a list of 3 elements :
-			0 : sources files (can be a list)
-			1 : destination file
-			2 : dependence files module (*.d)
-	"""
-	# TODO : Remove this it is urgent ...
-	def generate_file(self,
-	                  binary_name,
-	                  module_name,
-	                  basePath,
-	                  file,
-	                  type):
-		#debug.warning("genrate_file(" + str(binary_name) + "," + str(module_name) + "," + str(basePath) + "," + str(file) + "," + str(type) + ")")
-		list=[]
-		if (type=="bin"):
-			list.append(file)
-			list.append(self.get_build_file_bin(binary_name))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + self.suffix_dependence))
-			list.append(self.get_build_file_bin(binary_name) + self.suffix_cmd_line)
-			list.append(self.get_build_file_bin(binary_name) + self.suffix_warning)
-		elif (type=="lib-shared"):
-			list.append(file)
-			list.append(self.get_build_file_dynamic(module_name))
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
-			list.append(self.get_build_file_dynamic(module_name) + self.suffix_cmd_line)
-			list.append(self.get_build_file_dynamic(module_name) + self.suffix_warning)
-		elif (type=="lib-static"):
-			list.append(file)
-			list.append(self.get_build_file_static(module_name))
-			list.append(os.path.join(self.get_build_path(module_name), self.path_lib, module_name + self.suffix_dependence))
-			list.append(self.get_build_file_static(module_name) + self.suffix_cmd_line)
-			list.append(self.get_build_file_static(module_name) + self.suffix_warning)
-		elif (type=="jar"):
-			list.append(file)
-			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar"))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar" + self.suffix_dependence))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar" + self.suffix_cmd_line))
-			list.append(os.path.join(self.get_build_path(module_name), module_name + ".jar" + self.suffix_warning))
-		elif (type=="image"):
-			list.append(os.path.join(self.get_build_path(binary_name), "data", file + self.suffix_cmd_line))
-		else:
-			debug.error("unknow type : " + type)
-		return list
-	
 	##
-	## @brief Get the fianal path ==> contain all the generated packages
-	## @return The path of the pa
+	## @brief Get the final path ==> contain all the generated packages
+	## @param[in] self (handle) Class handle
+	## @return (string) The path
 	##
 	def get_final_path(self):
 		return os.path.join(tools.get_run_path(), self.path_out, self.path_final)
 	
-	def get_staging_path(self, binary_name):
-		return os.path.join(tools.get_run_path(), self.path_out, self.path_staging, binary_name)
+	##
+	## @brief Get the staging path ==> all install stangalone package (no dependency file, no object files, no cmdlines files
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_staging_path(self, name):
+		return os.path.join(tools.get_run_path(), self.path_out, self.path_staging, name)
 	
-	def get_build_path(self, module_name):
-		#debug.warning("A=" + str(tools.get_run_path()) + " " + str(self.path_out) + " " + str(self.path_build) + " " + str(module_name))
-		return os.path.join(tools.get_run_path(), self.path_out, self.path_build, module_name)
+	##
+	## @brief Get the build path ==> dependency file, object files, cmdlines files, generate files, local install headers ...
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path(self, name):
+		return os.path.join(tools.get_run_path(), self.path_out, self.path_build, name)
+	
+	##
+	## @brief Get the build object path where write .o files
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path_object(self, name):
+		return os.path.join(self.get_build_path(name), self.path_object)
+	
+	##
+	## @brief Get the build binary path where write .bin, .exe ... files
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path_bin(self, name):
+		return os.path.join(self.get_build_path(name), self.path_bin)
+	
+	##
+	## @brief Get the shared/static library object path where write .a / .so files
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path_lib(self, name):
+		return os.path.join(self.get_build_path(name), self.path_lib)
+	
+	##
+	## @brief Get the data path where pre-write the install "data" files
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path_data(self, name):
+		return os.path.join(self.get_build_path(name), self.path_data, name)
+	
+	##
+	## @brief Get the include path where pre-install "include" headers files
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path_include(self, name):
+		return os.path.join(self.get_build_path(name), self.path_include)
+	
+	##
+	## @brief Get the path where to generate files when needed (before compiling / installing it)
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_path_temporary_generate(self, name):
+		return os.path.join(self.get_build_path(name), self.path_temporary_generate)
+	
+	##
+	## @brief Get the path filename of the build binary name
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_file_bin(self, name):
+		return os.path.join(self.get_build_path_bin(name), name + self.suffix_binary)
+	
+	##
+	## @brief Get the path filename of the build static library name
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_file_static(self, name):
+		return os.path.join(self.get_build_path_lib(name), self.prefix_lib + name + self.suffix_lib_static)
+	
+	##
+	## @brief Get the path filename of the build shared library name
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (string) The path
+	##
+	def get_build_file_dynamic(self, name):
+		return os.path.join(self.get_build_path_lib(name), self.prefix_lib + name + self.suffix_lib_dynamic)
 	
 	
-	def get_build_path_object(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_object)
+	##
+	## @brief Get the bin path for staging step
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the package
+	## @return (string) The path
+	##
+	def get_staging_path_bin(self, name):
+		return os.path.join(self.get_staging_path(name), self.path_bin)
 	
-	def get_build_path_bin(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_bin)
+	##
+	## @brief Get the lib path for staging step
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the package
+	## @return (string) The path
+	##
+	def get_staging_path_lib(self, name):
+		return os.path.join(self.get_staging_path(name), self.path_lib, name)
 	
-	def get_build_path_lib(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_lib)
+	##
+	## @brief Get the data path for staging step
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the package
+	## @return (string) The path
+	##
+	def get_staging_path_data(self, name):
+		return os.path.join(self.get_staging_path(name), self.path_data, name)
 	
-	def get_build_path_data(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_data, binary_name)
-	
-	def get_build_path_include(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_include)
-	
-	def get_build_path_temporary_generate(self, binary_name):
-		return os.path.join(self.get_build_path(binary_name), self.path_temporary_generate)
-	
-	
-	def get_build_file_bin(self, binary_name):
-		return os.path.join(self.get_build_path_bin(binary_name), binary_name + self.suffix_binary)
-	
-	def get_build_file_static(self, binary_name):
-		return os.path.join(self.get_build_path_lib(binary_name), self.prefix_lib + binary_name + self.suffix_lib_static)
-	
-	def get_build_file_dynamic(self, binary_name):
-		return os.path.join(self.get_build_path_lib(binary_name), self.prefix_lib + binary_name + self.suffix_lib_dynamic)
-	
-	
-	
-	
-	def get_staging_path_bin(self, package_name):
-		return os.path.join(self.get_staging_path(package_name), self.path_bin)
-	
-	def get_staging_path_lib(self, package_name):
-		return os.path.join(self.get_staging_path(package_name), self.path_lib, package_name)
-	
-	def get_staging_path_data(self, package_name):
-		return os.path.join(self.get_staging_path(package_name), self.path_data, package_name)
-	
-	def get_staging_path_include(self, package_name):
-		return os.path.join(self.get_staging_path(package_name), self.path_include)
-	
-	"""
-	def get_staging_file_bin(self, package_name, binary_name):
-		return os.path.join(self.get_staging_path_bin(package_name), binary_name + self.suffix_binary)
-	"""
-	
-	
+	##
+	## @brief Get the include path for staging step
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the package
+	## @return (string) The path
+	##
+	def get_staging_path_include(self, name):
+		return os.path.join(self.get_staging_path(name), self.path_include)
 	
 	def get_doc_path(self, module_name):
 		return os.path.join(tools.get_run_path(), self.path_out, self.path_doc, module_name)
-	
 	
 	def is_module_build(self, my_module):
 		for mod in self.build_done:
@@ -440,10 +494,22 @@ class Target:
 		self.build_tree_done.append(my_module)
 		return False
 	
-	def add_module(self, newModule):
-		debug.debug("Add nodule for Taget : " + newModule.get_name())
-		self.module_list.append(newModule)
+	##
+	## @brief Add new loaded module
+	## @param[in] self (handle) Class handle
+	## @param[in] new_module (handle) pointer on the module instance
+	## @return None
+	##
+	def add_module(self, new_module):
+		debug.debug("Add nodule for Taget : " + new_module.get_name())
+		self.module_list.append(new_module)
 	
+	##
+	## @brief Get a module handle that is used in this target
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return (handle|None) @ref lutin.module.Module pointer on the module requested or None
+	##
 	def get_module(self, name):
 		for mod in self.module_list:
 			if mod.get_name() == name:
@@ -451,22 +517,26 @@ class Target:
 		debug.error("the module '" + str(name) + "'does not exist/already build")
 		return None
 	
-	# return inherit packages ...
-	"""
-	def build(self, name, packagesName):
-		for module in self.module_list:
-			if module.name == name:
-				return module.build(self, packagesName)
-		debug.error("request to build an un-existant module name : '" + name + "'")
-	"""
-	
-	def build_tree(self, name, packagesName):
+	##
+	## @brief Build data associated at the module name in a specific package
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @param[in] package_name (string) Name of the package
+	## @return None
+	##
+	def build_tree(self, name, package_name):
 		for mod in self.module_list:
 			if mod.get_name() == name:
-				mod.build_tree(self, packagesName)
+				mod.build_tree(self, package_name)
 				return
 		debug.error("request to build tree on un-existant module name : '" + name + "'")
 	
+	##
+	## @brief Clean a specific module for this target (clean all data in the "out" path)
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module
+	## @return None
+	##
 	def clean(self, name):
 		for mod in self.module_list:
 			if mod.get_name() == name:
@@ -474,6 +544,13 @@ class Target:
 				return
 		debug.error("request to clean an un-existant module name : '" + name + "'")
 	
+	##
+	## @brief Load a specific module if it accessible
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of the module to load
+	## @param[in] optionnal (bool) not create an error if the module does not exist.
+	## @return (bool) module loading status
+	##
 	def load_if_needed(self, name, optionnal=False):
 		for elem in self.module_list:
 			if elem.get_name() == name:
@@ -491,19 +568,26 @@ class Target:
 		# we did not find the module ...
 		return False;
 	
+	##
+	## @brief Load all module that are accessible in the worktree
+	## @param[in] self (handle) Class handle
+	## @return None
+	##
 	def load_all(self):
 		listOfAllTheModule = module.list_all_module()
 		for modName in listOfAllTheModule:
 			self.load_if_needed(modName)
 	
-	def project_add_module(self, name, projectMng, addedModule):
-		for mod in self.module_list:
-			if mod.get_name() == name:
-				mod.ext_project_add_module(self, projectMng, addedModule)
-				return
-	
-	
-	def build(self, name, packagesName=None, optionnal=False, actions=[]):
+	##
+	## @brief Build action on the target (execute specific actions on the modules...)
+	## @note Recursive call ...
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Module to build
+	## @param[in] optionnal (bool) If the module is not accessible, this is not a probleme ==> optionnal dependency requested
+	## @param[in] actions ([string,...]) list of action to do. ex: build, gcov, dump, all, clean, install, uninstall, run, log
+	## @return (None|Module handle| ...) complicated return ...
+	##
+	def build(self, name, optionnal=False, actions=[]):
 		if    len(name.split("?")) != 1\
 		   or len(name.split("@")) != 1:
 			debug.error("need update")
@@ -635,6 +719,23 @@ class Target:
 			if len(action_list) == 1:
 				return ret
 	
+	##
+	## @brief Add action to do for package specific part when build upper element
+	## @param[in] name_of_state (string) a state to call action
+	##     - BINARY
+	##     - BINARY_SHARED
+	##     - BINARY_STAND_ALONE
+	##     - LIBRARY
+	##     - LIBRARY_DYNAMIC
+	##     - LIBRARY_STATIC
+	##     - PACKAGE
+	##     - PREBUILD
+	##     - DATA
+	## @param[in] level (int) Value order to apply action
+	## @param[in] name (string) Name of the action
+	## @param[in] action (function handle) Function to call to execure action
+	## @return None
+	##
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
 		debug.verbose("add action : " + name)
 		if name_of_state not in self.action_on_state:
@@ -868,7 +969,7 @@ class Target:
 		return result
 
 
-target_list=[]
+__target_list=[]
 __start_target_name="Target_"
 
 ##
@@ -876,7 +977,7 @@ __start_target_name="Target_"
 ## @param[in] path_list ([string,...]) List of file that start with env.get_build_system_base_name() in the running worktree (Parse one time ==> faster)
 ##
 def import_path(path_list):
-	global target_list
+	global __target_list
 	global_base = env.get_build_system_base_name()
 	debug.debug("TARGET: Init with Files list:")
 	for elem in path_list:
@@ -894,21 +995,21 @@ def import_path(path_list):
 		# Remove local patern
 		target_name = filename[len(__start_target_name):]
 		debug.verbose("TARGET:     Integrate: '" + target_name + "' from '" + elem + "'")
-		target_list.append([target_name, elem])
+		__target_list.append([target_name, elem])
 	debug.verbose("New list TARGET: ")
-	for elem in target_list:
+	for elem in __target_list:
 		debug.verbose("    " + str(elem[0]))
 
 ##
-## @brief
+## @brief Load a specific target
 ##
 def load_target(name, config):
-	global target_list
+	global __target_list
 	debug.debug("load target: " + name)
-	if len(target_list) == 0:
+	if len(__target_list) == 0:
 		debug.error("No target to compile !!!")
-	debug.debug("list target: " + str(target_list))
-	for mod in target_list:
+	debug.debug("list target: " + str(__target_list))
+	for mod in __target_list:
 		if mod[0] == name:
 			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
 			sys.path.append(os.path.dirname(mod[1]))
@@ -920,16 +1021,16 @@ def load_target(name, config):
 	raise KeyError("No entry for : " + name)
 
 def list_all_target():
-	global target_list
+	global __target_list
 	tmpListName = []
-	for mod in target_list:
+	for mod in __target_list:
 		tmpListName.append(mod[0])
 	return tmpListName
 
 def list_all_target_with_desc():
-	global target_list
+	global __target_list
 	tmpList = []
-	for mod in target_list:
+	for mod in __target_list:
 		sys.path.append(os.path.dirname(mod[1]))
 		theTarget = __import__(env.get_build_system_base_name() + __start_target_name + mod[0])
 		try:
