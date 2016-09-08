@@ -753,7 +753,7 @@ class Module:
 		     or self._type == 'BINARY_SHARED' \
 		     or self._type == 'BINARY_STAND_ALONE':
 			shared_mode = False
-			if target.name == "Android":
+			if "Android" in target.get_type():
 				debug.warning("Android mode ...")
 				# special case for android ...
 				for elem in self._sub_heritage_list.src['src']:
@@ -809,7 +809,7 @@ class Module:
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.bin'")
 		elif self._type == "PACKAGE":
-			if target.name == "Android":
+			if "Android" in target.get_type():
 				# special case for android wrapper:
 				try:
 					tmp_builder = builder.get_builder_with_output("so");
@@ -879,7 +879,7 @@ class Module:
 		   or self._type == 'PACKAGE':
 			if target.end_generate_package == True:
 				# generate the package with his properties ...
-				if target.name=="Android":
+				if "Android" in target.get_type():
 					self._sub_heritage_list.add_heritage(self._local_heritage)
 					target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
 				else:
@@ -1260,13 +1260,27 @@ class Module:
 			self._print_list('export path "' + str(element) + '" ' + str(len(value)), value)
 	
 	##
+	## @brief Get packaging property variable
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Variable to get: "COMPAGNY_TYPE", "COMPAGNY_NAME", "ICON", "MAINTAINER", "SECTION", "PRIORITY", "DESCRIPTION", "VERSION", "VERSION_CODE", "NAME", "ANDROID_MANIFEST", "ANDROID_JAVA_FILES", "RIGHT", "ANDROID_RESOURCES", "ANDROID_APPL_TYPE", "ADMOD_ID", "APPLE_APPLICATION_IOS_ID", "LICENSE", "ANDROID_SIGN", "ADMOD_POSITION"
+	## @return (string) Value assiciated at the package
+	##
+	def get_pkg(self, name):
+		if name in self._package_prop:
+			return copy.deepcopy(self._package_prop[name])
+		return None
+	
+	def pkg_set(self, variable, value):
+		debug.warning("[" + self._name + "] DEPRECATED : pkg_set(...) replaced by set_pkg(...)")
+		self.set_pkg(variable, value)
+	##
 	## @brief Set packaging variables
 	## @param[in] self (handle) Class handle
 	## @param[in] variable (string) Variable to set: "COMPAGNY_TYPE", "COMPAGNY_NAME", "ICON", "MAINTAINER", "SECTION", "PRIORITY", "DESCRIPTION", "VERSION", "VERSION_CODE", "NAME", "ANDROID_MANIFEST", "ANDROID_JAVA_FILES", "RIGHT", "ANDROID_RESOURCES", "ANDROID_APPL_TYPE", "ADMOD_ID", "APPLE_APPLICATION_IOS_ID", "LICENSE", "ANDROID_SIGN", "ADMOD_POSITION"
 	## @param[in] value (string) Value assiciated at the package
 	## @return None
 	##
-	def pkg_set(self, variable, value):
+	def set_pkg(self, variable, value):
 		if "COMPAGNY_TYPE" == variable:
 			#	com : Commercial
 			#	net : Network??
@@ -1344,22 +1358,25 @@ class Module:
 	##
 	## @brief set a package config only if the config has not be change
 	## @param[in] self (handle) Class handle
-	## @param[in] variable (string) Variable to set: show @ref pkg_set
+	## @param[in] variable (string) Variable to set: show @ref set_pkg
 	## @param[in] value (string) Value assiciated at the package
 	## @return None
 	##
 	def _pkg_set_if_default(self, variable, value):
 		if self._package_prop_default[variable] == True:
-			self.pkg_set(variable, value)
+			self.set_pkg(variable, value)
 	
+	def pkg_add(self, variable, value):
+		debug.warning("[" + self._name + "] DEPRECATED : pkg_add(...) replaced by add_pkg(...)")
+		self.add_pkg(variable, value)
 	##
 	## @brief add an element in tha package property
 	## @param[in] self (handle) Class handle
-	## @param[in] variable (string) Variable to set: show @ref pkg_set
+	## @param[in] variable (string) Variable to set: show @ref set_pkg
 	## @param[in] value (string) Value assiciated at the package
 	## @return None
 	##
-	def pkg_add(self, variable, value):
+	def add_pkg(self, variable, value):
 		if variable in self._package_prop:
 			self._package_prop[variable].append(value)
 		else:

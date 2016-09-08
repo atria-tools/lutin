@@ -18,8 +18,8 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help = "OpenGL: Generic graphic library"
-		self.valid = True
+		self.set_help("OpenGL: Generic graphic library")
+		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend([
 		    'c',

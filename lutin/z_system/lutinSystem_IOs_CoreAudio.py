@@ -18,8 +18,8 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="CoreAudio : Ios interface for audio (all time present, just system interface)"
-		self.valid = True
+		self.set_help("CoreAudio : Ios interface for audio (all time present, just system interface)")
+		self.set_valid(True)
 		# todo : create a searcher of the presence of the library:
 		self.add_flag("link", "-framework CoreAudio")
 		self.add_flag("link", "-framework AudioToolbox")

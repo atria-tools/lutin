@@ -18,13 +18,13 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="OSS : Linux Open Sound System\n Can be install with the package:\n    - ... TODO ..."
+		self.set_help("OSS : Linux Open Sound System\n Can be install with the package:\n    - ... TODO ...")
 		# check if the library exist:
 		"""
 		if     not os.path.isfile("/usr/include/jack/jack.h"):
 			# we did not find the library reqiested (just return) (automaticly set at false)
 			return;
-		self.valid = True
+		self.set_valid(True)
 		# todo : create a searcher of the presence of the library:
 		self.add_flag("link-lib", "oss")
 		"""

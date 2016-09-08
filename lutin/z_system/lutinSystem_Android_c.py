@@ -18,6 +18,6 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help = "C: Generic C library"
-		self.valid = True
+		self.set_help("C: Generic C library")
+		self.set_valid(True)
 

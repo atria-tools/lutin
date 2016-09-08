@@ -32,16 +32,12 @@ class Target:
 	## @param[in] arch (string) specific parameter for gcc -arch element
 	##
 	def __init__(self, name, config, arch):
+		## configuration of the build
 		self.config = config
 		
-		#processor type selection (auto/arm/ppc/x86)
-		self.select_arch = config["arch"]; # TODO : Remove THIS ...
-		#bus size selection (auto/32/64)
-		self.select_bus = config["bus-size"]; # TODO : Remove THIS ...
-		
-		if config["bus-size"] == "auto":
+		if self.config["bus-size"] == "auto":
 			debug.error("system error ==> must generate the default 'bus-size' config")
-		if config["arch"] == "auto":
+		if self.config["arch"] == "auto":
 			debug.error("system error ==> must generate the default 'bus-size' config")
 		
 		debug.debug("config=" + str(config))
@@ -50,13 +46,12 @@ class Target:
 		else:
 			self.arch = ""
 		
-		# todo : remove this :
-		self.sumulator = config["simulation"]
-		self.name = name
-		self.config_based_on = name
 		self.end_generate_package = config["generate-package"]
+		# todo : remove this :
+		self._name = name
+		self._config_based_on = [name]
 		debug.info("=================================");
-		debug.info("== Target='" + self.name + "' " + config["bus-size"] + " bits for arch '" + config["arch"] + "'");
+		debug.info("== Target='" + self._name + "' " + self.config["bus-size"] + " bits for arch '" + self.config["arch"] + "'");
 		debug.info("=================================");
 		
 		self.set_cross_base()
@@ -70,8 +65,6 @@ class Target:
 		self.global_libs_ld=[]
 		self.global_libs_ld_shared=[]
 		
-		self.global_sysroot=""
-		
 		self.suffix_cmd_line='.cmd'
 		self.suffix_warning='.warning'
 		self.suffix_dependence='.d'
@@ -83,19 +76,19 @@ class Target:
 		self.suffix_package='.deb'
 		
 		self.path_generate_code="/generate_header"
-		self.path_arch="/" + self.name
+		self.path_arch = "/" + self._name
 		
 		self.add_flag("c", [
-		    '-D__TARGET_OS__' + self.name,
-		    '-D__TARGET_ARCH__' + self.select_arch,
-		    '-D__TARGET_ADDR__' + self.select_bus + 'BITS',
+		    '-D__TARGET_OS__' + self._name,
+		    '-D__TARGET_ARCH__' + self.config["arch"],
+		    '-D__TARGET_ADDR__' + self.config["bus-size"] + 'BITS',
 		    '-D_REENTRANT'
 		    ])
 		self.add_flag("c", "-nodefaultlibs")
 		self.add_flag("c++", "-nostdlib")
 		self.add_flag("ar", 'rcs')
 		
-		if self.name == "Windows":
+		if self._name == "Windows":
 			self.add_flag("c++", [
 			    '-static-libgcc',
 			    '-static-libstdc++'
@@ -179,18 +172,39 @@ class Target:
 	## @return ([string,...]) The current target name and other sub name type (ubuntu ...)
 	##
 	def get_type(self):
-		out = [self.name]
-		if self.name != self.config_based_on:
-			out.append(self.config_based_on)
-		return out
+		return self._config_based_on
+	
+	##
+	## @brief Add a type that the model is based on
+	## @param[in] self (handle) Class handle
+	## @param[in] name (string) Name of that the element is based on ...
+	##
+	def add_type(self, name):
+		self._config_based_on.append(name)
+	
+	##
+	## @brief Get the name of the target: Linux, Windows, ...
+	## @param[in] self (handle) Class handle
+	## @return (string) Name of the target
+	##
+	def get_name(self):
+		return self._name
 	
 	##
 	## @brief Get build mode of the target: ["debug", "release"]
 	## @param[in] self (handle) Class handle
-	## @return The current target build mode.
+	## @return (string) The current target build mode.
 	##
 	def get_mode(self):
 		return self.config["mode"]
+	
+	##
+	## @brief Get build for a simulator (Ios and Android for example)
+	## @param[in] self (handle) Class handle
+	## @return (bool) sumulation requested
+	##
+	def get_simulation(self):
+		return self.config["simulation"]
 	
 	##
 	## @brief Add global target flags
@@ -208,7 +222,7 @@ class Target:
 	## @return None
 	##
 	def _update_path_tree(self):
-		self.path_out = os.path.join("out", self.name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
+		self.path_out = os.path.join("out", self._name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
 		self.path_final = os.path.join("final", self.config["compilator"])
 		self.path_staging = os.path.join("staging", self.config["compilator"])
 		self.path_build = os.path.join("build", self.config["compilator"])
@@ -561,9 +575,9 @@ class Target:
 			module.load_module(self, name)
 			return True;
 		# need to import the module (or the system module ...)
-		exist = system.exist(name, self.name, self)
+		exist = system.exist(name, self._name, self)
 		if exist == True:
-			system.load(self, name, self.name)
+			system.load(self, name, self._name)
 			return True;
 		# we did not find the module ...
 		return False;
@@ -610,12 +624,12 @@ class Target:
 			debug.info("build all")
 			self.load_all()
 			for mod in self.module_list:
-				if self.name=="Android":
-					if mod.type == "PACKAGE":
+				if self._name=="Android":
+					if mod.get_type() == "PACKAGE":
 						mod.build(self, None)
 				else:
-					if    mod.type == "BINARY" \
-					   or mod.type == "PACKAGE":
+					if    mod.get_type() == "BINARY" \
+					   or mod.get_type() == "PACKAGE":
 						mod.build(self, None)
 		elif name == "clean":
 			debug.info("clean all")

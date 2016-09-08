@@ -18,14 +18,14 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="pthread : Generic multithreading system\n Can be install with the package:\n    - pthread-dev"
+		self.set_help("pthread : Generic multithreading system\n Can be install with the package:\n    - pthread-dev")
 		# check if the library exist:
 		"""
 		if     not os.path.isfile("/usr/include/pthread.h"):
 			# we did not find the library reqiested (just return) (automaticly set at false)
 			return;
 		"""
-		self.valid = True
+		self.set_valid(True)
 		# todo : create a searcher of the presence of the library:
 		#self.add_flag("link-lib", "pthread")
 		self.add_depend([

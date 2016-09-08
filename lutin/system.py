@@ -37,6 +37,41 @@ class System:
 		self._action_on_state={}
 		self._headers=[]
 		self._version=None
+	
+	##
+	## @brief Set the help of this system Module
+	## @param[in] self (handle) Class handle
+	## @param[in] help (string) Help for the user
+	## @return None
+	##
+	def set_help(self, help):
+		self._help = help;
+	
+	##
+	## @brief Get the help of this system Module
+	## @param[in] self (handle) Class handle
+	## @return (string) Help for the user
+	##
+	def get_help(self):
+		return self._help;
+	
+	##
+	## @brief Set validity state of the system Module
+	## @param[in] self (handle) Class handle
+	## @param[in] state (bool) New valididty state of the system module
+	## @return None
+	##
+	def set_valid(self, state):
+		self._valid = state
+	
+	##
+	## @brief Get validity state of the system Module
+	## @param[in] self (handle) Class handle
+	## @return (bool) New valididty state of the system module
+	##
+	def get_valid(self):
+		return self._valid
+	
 	##
 	## @brief Add source element
 	## @param[in] self (handle) Class handle
@@ -136,7 +171,7 @@ class System:
 			    clip_path=elem["clip"],
 			    recursive=elem["recursive"])
 		if self._version != None:
-			module.pkg_set("VERSION", self._version);
+			module.set_pkg("VERSION", self._version);
 		
 
 
@@ -236,7 +271,7 @@ def exist(lib_name, target_name, target) :
 				debug.verbose("SYSTEM: request: " + str(data["name"]))
 				if "System" in dir(the_system):
 					data["system"] = the_system.System(target)
-					data["exist"] = data["system"].valid
+					data["exist"] = data["system"].get_valid()
 				else:
 					debug.warning("Not find: '" + data["name"] + "' ==> get exception")
 			return data["exist"]

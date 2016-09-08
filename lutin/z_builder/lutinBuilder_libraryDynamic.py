@@ -97,7 +97,7 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 	
 	cmd.append(["-o", file_dst])
 	try:
-		cmd.append(target.global_sysroot)
+		cmd.append(target.sysroot)
 	except:
 		pass
 	try:

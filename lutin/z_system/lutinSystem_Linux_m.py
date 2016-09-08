@@ -18,9 +18,9 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="M : m library \n base of std libs (availlagle in GNU C lib and bionic"
+		self.set_help("M : m library \n base of std libs (availlagle in GNU C lib and bionic")
 		# No check ==> on the basic std libs:
-		self.valid = True
+		self.set_valid(True)
 		# todo : create a searcher of the presence of the library:
 		self.add_flag("link-lib", "m")
 		self.add_depend([

@@ -18,8 +18,8 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help = "CXX: Generic C++ library"
-		self.valid = True
+		self.set_help("CXX: Generic C++ library")
+		self.set_valid(True)
 		if target.config["compilator"] == "clang":
 			if target.board_id < 21:
 				debug.error("Clang work only with the board wersion >= 21 : android 5.x.x")

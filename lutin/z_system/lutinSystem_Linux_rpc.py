@@ -18,9 +18,9 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="rpc : generic RPC library (developed by oracle)"
+		self.set_help("rpc : generic RPC library (developed by oracle)")
 		# No check ==> on the basic std libs:
-		self.valid = True
+		self.set_valid(True)
 		self.add_depend([
 		    'c'
 		    ])

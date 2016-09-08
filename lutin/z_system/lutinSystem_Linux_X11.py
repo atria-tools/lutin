@@ -18,8 +18,8 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help = "X11: Basic interface of Linux Graphic interface"
-		self.valid = True
+		self.set_help("X11: Basic interface of Linux Graphic interface")
+		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend(['c'])
 		self.add_flag('link-lib', 'X11')

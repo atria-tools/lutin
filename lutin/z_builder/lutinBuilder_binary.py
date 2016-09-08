@@ -101,10 +101,6 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 	except:
 		pass
 	try:
-		cmd.append(target.global_sysroot)
-	except:
-		pass
-	try:
 		cmd.append(["-o", file_dst])
 	except:
 		pass

@@ -18,7 +18,7 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.help="PULSE : The Linux PulseAudio\n Can be install with the package:\n    - libpulse-dev"
+		self.set_help("PULSE : The Linux PulseAudio\n Can be install with the package:\n    - libpulse-dev")
 		# check if the library exist:
 		if     not os.path.isfile("/usr/include/pulse/pulseaudio.h"):
 			# we did not find the library reqiested (just return) (automaticly set at false)
@@ -38,7 +38,7 @@ class System(system.System):
 			debug.warning("Can not det version of Pulseaudio ... ==> remove it")
 			return
 		self.set_version([int(version),int(version2)])
-		self.valid = True
+		self.set_valid(True)
 		self.add_depend([
 		    'c'
 		    ])

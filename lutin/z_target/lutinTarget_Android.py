@@ -151,7 +151,7 @@ class Target(target.Target):
 			elif self.type_arch == "x86":
 				pass
 		
-		self.global_sysroot = "--sysroot=" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm")
+		self.sysroot = "--sysroot=" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm")
 		
 		self.add_flag("c", [
 		    "-D__ARM_ARCH_5__",
@@ -206,12 +206,6 @@ class Target(target.Target):
 		    "-fexceptions",
 		    "-Wa,--noexecstack"
 		    ])
-	
-	def check_right_package(self, pkg_properties, value):
-		for val in pkg_properties["RIGHT"]:
-			if value == val:
-				return True
-		return False
 	
 	def convert_name_application(self, pkg_name):
 		value = pkg_name.lower()
