@@ -1,9 +1,28 @@
-Lutin Build system
+Lutin Build system                               {#mainpage}
 ==================
 
+@tableofcontents
 
-What is Lutin, and how can I use it?
-------------------------------------
+`lutin` is a generic builder and package maker is a FREE software tool.
+
+
+![Py package](https://badge.fury.io/py/lutin.png) https://pypi.python.org/pypi/lutin
+
+
+Release (master)                                 {#lutin_mainpage_build_master}
+================
+
+![Build Status](https://travis-ci.org/HeeroYui/lutin.svg?branch=master) https://travis-ci.org/HeeroYui/lutin
+
+
+Developement (dev)                               {#lutin_mainpage_build_dev}
+==================
+
+![Build Status](https://travis-ci.org/HeeroYui/lutin.svg?branch=dev) https://travis-ci.org/HeeroYui/lutin
+
+
+What is Lutin?                                   {#lutin_mainpage_intro}
+==============
 
 Lutin is an application/library builder, it is designed to concurence CMake, Makefile, Ant, graddle ...
 
@@ -32,16 +51,16 @@ Compilation is availlable for:
   - gcc/g++;
   - clang/clang++.
 
-Manage [b]workspace build[/b] (in oposition of CMake/make/...)
+Manage **workspace build** (in oposition of CMake/make/...)
 
 
-Install:
---------
+Install:                                         {#lutin_mainpage_installation}
+========
 
 Requirements: ``Python >= 2.7`` and ``pip``
 
 Install lutin:
-**************
+--------------
 
 Just run:
 ```bash
@@ -49,7 +68,7 @@ Just run:
 ```
 
 Install pip:
-************
+------------
 
 Install pip on debian/ubuntu:
 ```bash
@@ -67,7 +86,7 @@ Install pip on MacOs:
 ```
 
 Install from sources:
-*********************
+---------------------
 
 ```bash
 	git clone http://github.com/HeeroYui/lutin.git
@@ -75,14 +94,21 @@ Install from sources:
 	sudo ./setup.py install
 ```
 
-Tutoral entry point:
---------------------
+git repository                                   {#lutin_mainpage_repository}
+==============
 
-[tutorial](000_basic_concept.md)
+http://github.com/HeeroYui/lutin/
+
+Tutorals:                                        {#lutin_mainpage_tutorial}
+=========
+
+  - @ref lutin_concept
+  - @ref lutin_use
+  - @ref lutin_module
 
 
-License (APACHE v2.0)
----------------------
+License (APACHE v2.0)                            {#lutin_mainpage_licence}
+=====================
 
 Copyright lutin Edouard DUPIN
 
@@ -99,8 +125,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
-History:
---------
+History:                                         {#lutin_mainpage_history}
+========
 
 I work with some builder, Every one have theire own adventages, and their problems.
 The main point I see, is that the polimorphisme of the worktree is really hard.

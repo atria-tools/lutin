@@ -1,5 +1,7 @@
-How to compile
-==============
+How to use lutin                               {#lutin_use}
+================
+
+@tableofcontents
 
 Lutin permit simply to compile applications and library.
 
@@ -10,8 +12,8 @@ To simply understand the use, we will use a simple library:
 ```
 
 
-compile a module:
------------------
+compile a module:                               {#lutin_use_compile}
+=================
 
 It is really simple:
 
@@ -23,7 +25,7 @@ It is really simple:
 
 
 
-Option working:
+Option working:                               {#lutin_use_options}
 ===============
 
 Lutin have a complex option methodologie. We can consider 3 part of the option:
@@ -32,11 +34,16 @@ Lutin have a complex option methodologie. We can consider 3 part of the option:
   - modules
 
 
-Global options:
+Global options:                               {#lutin_use_options_global}
 ---------------
 
-Display help:
-*************
+Globals option is parse first and manage global setting of the build (not specific of a target)
+
+this keep the last value config set
+
+
+Display help:                               {#lutin_use_options_help}
+-------------
 
 Availlable everywhere ...
 
@@ -51,16 +58,16 @@ But the system(OS) keep the data in cash, then the next time it is faster.
 
 At the end of the help you an see an help about the etk librery with the associated help.
 
-Build in color:
-***************
+Build in color:                               {#lutin_use_options_color}
+---------------
 
 ```bash
 	lutin -C
 	lutin --color
 ```
 
-Display build line in pretty print mode:
-****************************************
+Display build line in pretty print mode:                               {#lutin_use_options_pretty}
+----------------------------------------
 
 when an error apear, the gcc or clang compile line can be really unreadable:
 ```bash
@@ -103,8 +110,8 @@ result:
 		/home/XXX/dev/etk/etk/Color.cpp
 ```
 
-lutin log:
-**********
+lutin log:                               {#lutin_use_options_log}
+----------
 
 Lutin have an internal log system. To enable or disable it just select your debug level with the option:
 
@@ -122,8 +129,8 @@ The level availlables are:
   - 5: verbose
   - 6: extreme_verbose
 
-Select the number of CPU core used:
-***********************************
+Select the number of CPU core used:                               {#lutin_use_options_cpu}
+-----------------------------------
 
 By default lutin manage only 1 CPU core (faster to debug) but for speed requirement you can use use multiple core:
 
@@ -133,18 +140,20 @@ By default lutin manage only 1 CPU core (faster to debug) but for speed requirem
 	lutin --jobs 5
 ```
 
-Force rebuild all:
-******************
+Force rebuild all:                               {#lutin_use_options_rebuild_force}
+------------------
 
-Sometime it is needed to rebuild all the program, just do :
+Sometime it is needed to rebuild all the program, just do:
 
 ```bash
 	lutin -B
 	lutin --force-build
+	# or remove the build directory
+	rm -rf out/
 ```
 
-Force strip all library and programs:
-*************************************
+Force strip all library and programs:                               {#lutin_use_options_strip}
+-------------------------------------
 
 Force strip of output binary (remove symboles)
 
@@ -153,8 +162,8 @@ Force strip of output binary (remove symboles)
 	lutin --force-strip
 ```
 
-Manage Cross compilation:
--------------------------
+Manage Cross compilation:                               {#lutin_use_options_cross_compile}
+=========================
 
 The main objective of lutin is managing the cross compilation to build from linux to other platform:
 
@@ -165,8 +174,8 @@ For android you can use:
 	lutin -t Windows your-module
 ```
 
-Build in debug mode:
---------------------
+Build in debug mode:                               {#lutin_use_options_debug_release}
+====================
 
 To developp it is fasted with debug tools
 
@@ -181,8 +190,8 @@ You can desire to have compilation optimisation when you build in debug mode:
 	lutin -m debug --force-optimisation your-module
 ```
 
-Execute yout program after building it:
----------------------------------------
+Execute your program after building it:                               {#lutin_use_options_execute}
+=======================================
 
 You can execute some action in a single line for a module:
 
@@ -198,4 +207,23 @@ Note that the path is distinct for gcc/clang, debug/release, Linux/windows/Andro
 Then it is really easy to run the wrong binary.
 
 
-[next doc:Create a new module](030_Create_a_new_module.md)
+Install your program after building it:                               {#lutin_use_options_install}
+=======================================
+
+You can install your build module:
+
+```bash
+	lutin -m debug your-module?build?install
+```
+
+This option is not availlablke on all platform ...
+
+
+
+
+**Index:**
+  - @ref mainpage
+  - @ref lutin_concept
+  - @ref lutin_use
+  - @ref lutin_module
+

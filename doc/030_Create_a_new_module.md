@@ -1,5 +1,11 @@
-Create a new Module:
+Create a new Module:                                   {#lutin_module}
 ====================
+
+@tableofcontents
+
+
+Base of the module file:                               {#lutin_module_base_file}
+========================
 
 To create a new module you will use a generic naming:
 
@@ -85,8 +91,8 @@ def create(target, module_name):
 
 Thes it is simple to specify build for:
 
-Create a new Module (LIBRARY):
------------------------------
+Create a new Module (LIBRARY):                               {#lutin_module_library}
+==============================
 
 What to change:
 ```python
@@ -99,11 +105,11 @@ By default the library is compile in shared and static. The binary select the mo
 You can force the library to be compile as a dll/so: ```LIBRARY_DYNAMIC``` or a basic include lib: .a ```LIBRARY_STATIC```
 
 
-Create a new Module (BINARY):
------------------------------
+Create a new Module (BINARY):                               {#lutin_module_binary}
+=============================
 
-Generic Binary:
-***************
+Generic Binary:                                             {#lutin_module_binary_base}
+---------------
 
 What to change:
 ```python
@@ -114,8 +120,8 @@ The Binay is compile by default target mode (note that the IOs target generate a
 
 You can force the Binary to be use dynamic library when possible: ```BINARY_SHARED``` or create a single binary with no .so depenency: ```BINARY_STAND_ALONE```
 
-Create a new Module (TEST-BINARY / TOOL-BINARY):
-************************************************
+Create a new Module (TEST-BINARY / TOOL-BINARY):            {#lutin_module_binary_tools}
+------------------------------------------------
 
 Two binary are really usefull in developpement, the tools and the test-unit, This is the reason why we specify for this 2 cases.
 
@@ -137,8 +143,8 @@ def get_sub_type():
 ```
 
 
-Create a new Module (DATA):
----------------------------
+Create a new Module (DATA):                                  {#lutin_module_data}
+===========================
 
 This pode permit to only copy data and no dependency with compilling system
 
@@ -149,10 +155,10 @@ def get_type():
 ```
 
 
-Module internal specifications:
+Module internal specifications:                               {#lutin_module_internal}
 ===============================
 
-Add file to compile:
+Add file to compile:                                          {#lutin_module_internal_compile}
 --------------------
 
 This is simple: (you just need to specify all the file to compile)
@@ -171,7 +177,7 @@ def create(target, module_name):
 	...
 ```
 
-Include directory & install header:
+Include directory & install header:                           {#lutin_module_internal_header}
 -----------------------------------
 
 A big point to understand is that your library will be used by an other module, then it need to use headers.
@@ -203,7 +209,7 @@ def create(target, module_name):
 ```
 
 
-Add Sub-dependency:
+Add Sub-dependency:                                           {#lutin_module_internal_depend}
 -------------------
 
 All library need to add at minimum of a simple library (C lib) and other if needed. To do it jus call:
@@ -237,7 +243,7 @@ def create(target, module_name):
 	...
 ```
 
-Compilation adn link flags/libs:
+Compilation adn link flags/libs:                              {#lutin_module_internal_flag}
 --------------------------------
 
 It is possible to define local and external flags (external are set internal too):
@@ -248,13 +254,13 @@ def create(target, module_name):
 	my_module.add_flag('link-lib', "pthread", export=True)
 	my_module.add_flag('c++', "-DHELLO_FLAG=\"kljlkj\"", export=True)
 	# internal flags:
-	my_module.add_flags('c', "-DMODE_RELEASE")
+	my_module.add_flag('c', "-DMODE_RELEASE")
 	
 	...
 ```
 
-build dependency mode and/or target:
-------------------------------------
+build mode (release/debug):                                   {#lutin_module_internal_target_mode}
+---------------------------
 
 To add somes element dependent of the build mode:
 ```python
@@ -268,6 +274,9 @@ def create(target, module_name):
 	
 	...
 ```
+
+build type target:                                            {#lutin_module_internal_target_type}
+------------------
 
 To add somes element dependent of the target type:
 
@@ -294,7 +303,7 @@ A "Debian" herited of a "Linux" then it will return ["Linux", "Debian"]
 
 
 
-Add some data in the install path (share path):
+Add some data in the install path (share path):                {#lutin_module_internal_data}
 -----------------------------------------------
 
 You can install a simple file:
@@ -320,7 +329,7 @@ def create(target, module_name):
 	...
 ```
 
-display some debug to help writing code:
+display some debug to help writing code:                       {#lutin_module_internal_write_log}
 ----------------------------------------
 
 
@@ -337,13 +346,15 @@ def function(...):
 	
 ```
 
-A Full template:
+A Full template:                                               {#lutin_module_full_template}
 ================
 
+Create the file:
 ```
 	lutin_module-name.py
 ```
 
+With:
 ```python
 #!/usr/bin/python
 import lutin.module as module
@@ -477,4 +488,10 @@ def create(target, module_name):
 	return my_module
 ```
 
+
+**Index:**
+  - @ref mainpage
+  - @ref lutin_concept
+  - @ref lutin_use
+  - @ref lutin_module
 

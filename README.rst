@@ -43,7 +43,7 @@ http://github.com/HeeroYui/lutin/
 Documentation
 -------------
 
-http://github.com/HeeroYui/lutin/tree/master/doc/
+http://HeeroYui.github.io/lutin/
 
 Installation
 ------------
