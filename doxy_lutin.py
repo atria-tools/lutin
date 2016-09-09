@@ -6,7 +6,7 @@ import doxy.tools as tools
 
 def create(target, module_name):
 	my_module = module.Module(__file__, module_name)
-	my_module.set_version([2.0.0])
+	my_module.set_version([2,0,0])
 	my_module.set_title("lutin: build system and packager")
 	my_module.set_website("http://HeeroYui.github.io/" + module_name)
 	my_module.set_website_sources("http://github.com/HeeroYui/" + module_name)
