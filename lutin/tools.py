@@ -349,3 +349,65 @@ def list_append_to_2(listout, module, list, order=False):
 		listout[module] = []
 	# add elements...
 	list_append_to(listout[module], list, order)
+
+
+##
+## @brief The vertion number can be set in an external file to permit to have a singe position to change when create a vew version
+## @param[in] path_module (string) Path of the module position
+## @param[in] filename_or_version (string or list) Path of the version or the real version lint parameter
+## @return (list) List of version number
+##
+def get_version_from_file_or_direct(path_module, filename_or_version):
+	# check case of iser set the version directly
+	if type(filename_or_version) == list:
+		return filename_or_version
+	# this use a version file
+	file_data = file_read_data(os.path.join(path_module, filename_or_version))
+	if len(file_data) == 0:
+		debug.warning("not enought data in the file version size=0 " + path_module + " / " + filename_or_version)
+		return [0,0,0]
+	lines = file_data.split("\n")
+	if len(lines) != 1:
+		debug.warning("More thatn one line in the file version ==> bas case use mode: 'XX', XX.YYY', 'XX.Y.ZZZ' or 'XX.Y-dev' : " + path_module + " / " + filename_or_version)
+		return [0,0,0]
+	line = lines[0]
+	debug.debug("Parse line: '" + line + "'")
+	#check if we have "-dev"
+	dev_mode = False
+	if line[-4:] == "-dev":
+		dev_mode = True
+		line = line[:-4]
+	out = []
+	list_elem = line.split('.')
+	for elem in list_elem:
+		out.append(int(elem))
+	if dev_mode == True:
+		out.append("dev")
+	debug.debug("    ==> " + str(out))
+	return out
+
+##
+## @brief Get the list of the authors frim an input list or a file
+## @param[in] path_module (string) Path of the module position
+## @param[in] filename_or_version (string or list) Path of the author file or the real list of authors
+## @return (list) List of authors
+##
+def get_maintainer_from_file_or_direct(path_module, filename_or_author):
+	# check case of iser set the version directly
+	if type(filename_or_author) == list:
+		return filename_or_author
+	# this use a version file
+	file_data = file_read_data(os.path.join(path_module, filename_or_author))
+	if len(file_data) == 0:
+		debug.warning("not enought data in the file author size=0 " + path_module + " / " + filename_or_author)
+		return []
+	# One user by line and # for comment line
+	out = []
+	for elem in file_data.split('\n'):
+		if len(elem) == 0:
+			continue
+		if elem[0] == "#":
+			# comment ...
+			continue
+		out.append(elem)
+	return out

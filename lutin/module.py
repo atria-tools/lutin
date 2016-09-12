@@ -1443,7 +1443,7 @@ def load_module(target, name):
 			the_module_file = mod[1]
 			the_module = __import__(env.get_build_system_base_name() + __start_module_name + name)
 			# get basic module properties:
-			property = get_module_option(the_module, name)
+			property = get_module_option(os.path.dirname(mod[1]), the_module, name)
 			# configure the module:
 			if "create" in dir(the_module):
 				tmp_element = the_module.create(target, name)
@@ -1509,17 +1509,18 @@ def list_all_module_with_desc():
 	for mod in __module_list:
 		sys.path.append(os.path.dirname(mod[1]))
 		the_module = __import__(env.get_build_system_base_name() + __start_module_name + mod[0])
-		tmpList.append(get_module_option(the_module, mod[0]))
+		tmpList.append(get_module_option(os.path.dirname(mod[1]), the_module, mod[0]))
 	return tmpList
 
 
 ##
 ## @brief Get a specific module options
+## @param[in] path (string) Pathof the module
 ## @param[in] the_module (handle) @ref Module handle
 ## @param[in] name (string) Name of the module
 ## @return a Map with the keys: "name", "description", "type", "sub-type", "license", "compagny-type", "compagny-name", "maintainer", "version", "version-id"
 ##
-def get_module_option(the_module, name):
+def get_module_option(path, the_module, name):
 	type = None
 	sub_type = None
 	description = None
@@ -1564,10 +1565,10 @@ def get_module_option(the_module, name):
 		compagny_name = the_module.get_compagny_name()
 	
 	if "get_maintainer" in list_of_function_in_factory:
-		maintainer = the_module.get_maintainer()
+		maintainer = tools.get_maintainer_from_file_or_direct(path, the_module.get_maintainer())
 	
 	if "get_version" in list_of_function_in_factory:
-		version = the_module.get_version()
+		version = tools.get_version_from_file_or_direct(path, the_module.get_version())
 	
 	if "get_version_id" in list_of_function_in_factory:
 		version_id = the_module.get_version_id()
