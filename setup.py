@@ -16,7 +16,7 @@ def readme():
 
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='2.0.0',
+      version='2.0.1',
       description='Lutin generic builder (might replace makefile, CMake ...)',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
