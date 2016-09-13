@@ -9,7 +9,7 @@ Base of the module file:                               {#lutin_module_base_file}
 
 To create a new module you will use a generic naming:
 
-```
+```{.sh}
 	lutin_module-name.py
 ```
 
@@ -17,7 +17,7 @@ Replace your ``module-name`` with the delivery you want. The name can contain [a
 
 In the module name you must define some values:
 
-```python
+```{.py}
 #!/usr/bin/python
 import lutin.module as module
 import lutin.tools as tools
@@ -95,7 +95,7 @@ Create a new Module (LIBRARY):                               {#lutin_module_libr
 ==============================
 
 What to change:
-```python
+```{.py}
 def get_type():
 	return "LIBRARY"
 ```
@@ -112,7 +112,7 @@ Generic Binary:                                             {#lutin_module_binar
 ---------------
 
 What to change:
-```python
+```{.py}
 def get_type():
 	return "BINARY"
 ```
@@ -126,7 +126,7 @@ Create a new Module (TEST-BINARY / TOOL-BINARY):            {#lutin_module_binar
 Two binary are really usefull in developpement, the tools and the test-unit, This is the reason why we specify for this 2 cases.
 
 Add the subElement description:
-```python
+```{.py}
 def get_type():
 	return "BINARY"
 
@@ -134,7 +134,7 @@ def get_sub_type():
 	return "TEST"
 ```
 or:
-```python
+```{.py}
 def get_type():
 	return "BINARY"
 
@@ -149,7 +149,7 @@ Create a new Module (DATA):                                  {#lutin_module_data
 This pode permit to only copy data and no dependency with compilling system
 
 What to change:
-```python
+```{.py}
 def get_type():
 	return "DATA"
 ```
@@ -163,7 +163,7 @@ Add file to compile:                                          {#lutin_module_int
 
 This is simple: (you just need to specify all the file to compile)
 
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -186,7 +186,7 @@ The developper must isolate the external include and internal include, then luti
 This permit to check error inclusion directly in developpement and separate the ```#include "XXX.h"``` and the ```#include <lib-xxx/XXX.h>```
 
 Add file to external include:
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -199,7 +199,7 @@ def create(target, module_name):
 ```
 
 You can add a path to your local include:
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -213,7 +213,7 @@ Add Sub-dependency:                                           {#lutin_module_int
 -------------------
 
 All library need to add at minimum of a simple library (C lib) and other if needed. To do it jus call:
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -230,7 +230,7 @@ def create(target, module_name):
 ```
 
 The system can have optinnal sub-library, then if you just want to add an optionnal dependency:
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -247,7 +247,7 @@ Compilation adn link flags/libs:                              {#lutin_module_int
 --------------------------------
 
 It is possible to define local and external flags (external are set internal too):
-```python
+```{.py}
 def create(target, module_name):
 	...
 	# external flags:
@@ -263,7 +263,7 @@ build mode (release/debug):                                   {#lutin_module_int
 ---------------------------
 
 To add somes element dependent of the build mode:
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -280,7 +280,7 @@ build type target:                                            {#lutin_module_int
 
 To add somes element dependent of the target type:
 
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -308,7 +308,7 @@ Add some data in the install path (share path):                {#lutin_module_in
 
 You can install a simple file:
 
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -320,7 +320,7 @@ def create(target, module_name):
 
 Copy multiple files (change path)
 
-```python
+```{.py}
 def create(target, module_name):
 	...
 	
@@ -333,7 +333,7 @@ display some debug to help writing code:                       {#lutin_module_in
 ----------------------------------------
 
 
-```python
+```{.py}
 import lutin.debug as debug
 
 def function(...):
@@ -350,12 +350,12 @@ A Full template:                                               {#lutin_module_fu
 ================
 
 Create the file:
-```
+```{.sh}
 	lutin_module-name.py
 ```
 
 With:
-```python
+```{.py}
 #!/usr/bin/python
 import lutin.module as module
 import lutin.tools as tools

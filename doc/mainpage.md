@@ -63,7 +63,7 @@ Install lutin:
 --------------
 
 Just run:
-```bash
+```{.sh}
 	pip install lutin
 ```
 
@@ -71,24 +71,24 @@ Install pip:
 ------------
 
 Install pip on debian/ubuntu:
-```bash
+```{.sh}
 	sudo apt-get install pip
 ```
 
 Install pip on ARCH-linux:
-```bash
+```{.sh}
 	sudo pacman -S pip
 ```
 
 Install pip on MacOs:
-```bash
+```{.sh}
 	sudo easy_install pip
 ```
 
 Install from sources:
 ---------------------
 
-```bash
+```{.sh}
 	git clone http://github.com/HeeroYui/lutin.git
 	cd lutin
 	sudo ./setup.py install

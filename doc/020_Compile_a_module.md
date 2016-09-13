@@ -7,7 +7,7 @@ Lutin permit simply to compile applications and library.
 
 To simply understand the use, we will use a simple library:
 
-```bash
+```{.sh}
 	git clone http://github.con/atria-soft/etk.git
 ```
 
@@ -17,7 +17,7 @@ compile a module:                               {#lutin_use_compile}
 
 It is really simple:
 
-```bash
+```{.sh}
 	lutin yourModuleName
 	#example:
 	lutin etk
@@ -47,7 +47,7 @@ Display help:                               {#lutin_use_options_help}
 
 Availlable everywhere ...
 
-```bash
+```{.sh}
 	lutin -h
 	lutin --help
 ```
@@ -61,7 +61,7 @@ At the end of the help you an see an help about the etk librery with the associa
 Build in color:                               {#lutin_use_options_color}
 ---------------
 
-```bash
+```{.sh}
 	lutin -C
 	lutin --color
 ```
@@ -70,19 +70,19 @@ Display build line in pretty print mode:                               {#lutin_u
 ----------------------------------------
 
 when an error apear, the gcc or clang compile line can be really unreadable:
-```bash
+```{.sh}
 	g++ -o /home/heero/dev/plop/out/Linux_x86_64/release/build/gcc/etk/obj/etk/Color.cpp.o -I/home/heero/dev/plop/etk -std=c++11 -D__CPP_VERSION__=2011 -D__TARGET_OS__Linux -D__TARGET_ARCH__x86 -D__TARGET_ADDR__64BITS -D_REENTRANT -DNDEBUG -O3 -fpic -D__STDCPP_GNU__ -Wall -Wsign-compare -Wreturn-type -Wno-write-strings -Woverloaded-virtual -Wnon-virtual-dtor -Wno-unused-variable -DMODE_RELEASE -c -MMD -MP /home/heero/dev/plop/etk/etk/Color.cpp
 ```
 
 whith this option you can transform this not obvious line in a readable line:
 
-```bash
+```{.sh}
 	lutin -P
 	lutin --pretty
 ```
 
 result:
-```bash
+```{.sh}
 	g++ \
 		-o /home/XXX/dev/out/Linux_x86_64/release/build/gcc/etk/obj/etk/Color.cpp.o \
 		-I/home/XXX/dev/etk \
@@ -115,7 +115,7 @@ lutin log:                               {#lutin_use_options_log}
 
 Lutin have an internal log system. To enable or disable it just select your debug level with the option:
 
-```bash
+```{.sh}
 	lutin -v4
 	lutin --verbose 4
 ```
@@ -134,7 +134,7 @@ Select the number of CPU core used:                               {#lutin_use_op
 
 By default lutin manage only 1 CPU core (faster to debug) but for speed requirement you can use use multiple core:
 
-```bash
+```{.sh}
 	#for 5 core
 	lutin -j5
 	lutin --jobs 5
@@ -145,7 +145,7 @@ Force rebuild all:                               {#lutin_use_options_rebuild_for
 
 Sometime it is needed to rebuild all the program, just do:
 
-```bash
+```{.sh}
 	lutin -B
 	lutin --force-build
 	# or remove the build directory
@@ -157,7 +157,7 @@ Force strip all library and programs:                               {#lutin_use_
 
 Force strip of output binary (remove symboles)
 
-```bash
+```{.sh}
 	lutin -s
 	lutin --force-strip
 ```
@@ -169,7 +169,7 @@ The main objective of lutin is managing the cross compilation to build from linu
 
 For android you can use:
 
-```bash
+```{.sh}
 	lutin -t Android your-module
 	lutin -t Windows your-module
 ```
@@ -179,14 +179,14 @@ Build in debug mode:                               {#lutin_use_options_debug_rel
 
 To developp it is fasted with debug tools
 
-```bash
+```{.sh}
 	lutin -m debug your-module
 	lutin -m release your-module
 ```
 
 You can desire to have compilation optimisation when you build in debug mode:
 
-```bash
+```{.sh}
 	lutin -m debug --force-optimisation your-module
 ```
 
@@ -212,7 +212,7 @@ Install your program after building it:                               {#lutin_us
 
 You can install your build module:
 
-```bash
+```{.sh}
 	lutin -m debug your-module?build?install
 ```
 
