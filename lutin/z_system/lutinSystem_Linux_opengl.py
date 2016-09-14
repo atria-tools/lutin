@@ -34,14 +34,8 @@ class System(system.System):
 			    recursive=True)
 		
 		"""
-		if target.name=="Linux":
-			
-		elif target.name=="Android":
+		if target.name=="Android":
 			my_module.add_flag('link-lib', "GLESv2")
-		elif target.name=="Windows":
-			my_module.add_depend([
-			    "glew"
-			    ])
 		elif target.name=="MacOs":
 			my_module.add_flag('link', [
 			    "-framework OpenGL"])
