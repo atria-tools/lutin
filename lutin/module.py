@@ -1022,7 +1022,7 @@ class Module:
 		   or compilator_type == "C++":
 			cpp_version_list = [1999, 2003, 2011, 2014, 2017]
 			if version not in cpp_version_list:
-				debug.error("can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
+				debug.error("[" + self._name + "] Can not select CPP version : " + str(version) + " not in " + str(cpp_version_list))
 			# select API version:
 			api_version = 1999
 			if same_as_api == True:
@@ -1032,12 +1032,12 @@ class Module:
 			                                      }
 			self._flags["export"]["c++-version"] = api_version
 			if gnu == True and same_as_api == True:
-				debug.warning("Can not propagate the gnu extention of the CPP vesion for API");
+				debug.debug("[" + self._name + "] Can not propagate the gnu extention of the CPP vesion for API");
 		elif    compilator_type == "c" \
 		     or compilator_type == "C":
 			c_version_list = [1989, 1990, 1999, 2011]
 			if version not in c_version_list:
-				debug.error("can not select C version : " + str(version) + " not in " + str(c_version_list))
+				debug.error("[" + self._name + "] Can not select C version : " + str(version) + " not in " + str(c_version_list))
 			# select API version:
 			api_version = 1999
 			if same_as_api == True:
@@ -1047,9 +1047,9 @@ class Module:
 			                                    }
 			self._flags["export"]["c-version"] = api_version
 			if gnu == True and same_as_api == True:
-				debug.warning("Can not propagate the gnu extention of the C vesion for API");
+				debug.debug("[" + self._name + "] Can not propagate the gnu extention of the C vesion for API");
 		else:
-			debug.warning("Can not set version of compilator:" + str(compilator_type));
+			debug.warning("[" + self._name + "] Can not set version of compilator:" + str(compilator_type));
 	
 	##
 	## @brief Add source file to compile
