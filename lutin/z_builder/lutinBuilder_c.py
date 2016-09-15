@@ -85,19 +85,30 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		cmd.append(get_version_compilation_flags(flags, depancy.flags))
 	except:
 		pass
-	try:
-		cmd.append(target.global_flags["c"])
-	except:
-		pass
-	try:
-		cmd.append(depancy.flags["c"])
-	except:
-		pass
+	list_flags = [];
+	if "c" in target.global_flags:
+		list_flags.append(target.global_flags["c"])
+	if "c" in depancy.flags:
+		list_flags.append(depancy.flags["c"])
 	for view in ["local", "export"]:
-		try:
-			cmd.append(flags[view]["c"])
-		except:
-			pass
+		if view in flags:
+			if "c" in flags[view]:
+				list_flags.append(flags[view]["c"])
+	# get blacklist of flags
+	list_flags_blacklist = [];
+	if "c-remove" in target.global_flags:
+		list_flags_blacklist.append(target.global_flags["c-remove"])
+	if "c-remove" in depancy.flags:
+		list_flags_blacklist.append(depancy.flags["c-remove"])
+	for view in ["local", "export"]:
+		if view in flags:
+			if "c-remove" in flags[view]:
+				list_flags_blacklist.append(flags[view]["c-remove"])
+	# apply blacklisting of data and add it on the cmdLine
+	clean_flags = tools.remove_element(list_flags, list_flags_blacklist)
+	#debug.warning("plop " + str(list_flags_blacklist) + "       " + str(list_flags) + "  --> " + str(clean_flags) )
+	cmd.append(clean_flags);
+	
 	cmd.append("-c")
 	cmd.append("-MMD")
 	cmd.append("-MP")

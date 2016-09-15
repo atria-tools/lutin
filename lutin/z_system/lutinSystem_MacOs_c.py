@@ -18,12 +18,7 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.set_help("CXX: Generic C++ library")
+		self.set_help("C: Generic C library")
+		self.add_flag("c-remove","-nodefaultlibs")
 		self.set_valid(True)
-		# no check needed ==> just add this:
-		self.add_depend("c")
-		self.add_flag("c++","-D__STDCPP_LLVM__")
-		self.add_flag("c++-remove","-nostdlib")
-		self.add_flag("need-libstdc++", True)
-
 

@@ -411,3 +411,28 @@ def get_maintainer_from_file_or_direct(path_module, filename_or_author):
 			continue
 		out.append(elem)
 	return out
+
+
+
+def remove_element(data, to_remove):
+	base_data = []
+	for elem in data:
+		if type(elem) == list:
+			for elem2 in elem:
+				base_data.append(elem2)
+		else:
+			base_data.append(elem)
+	base_remove = []
+	for elem in to_remove:
+		if type(elem) == list:
+			for elem2 in elem:
+				base_remove.append(elem2)
+		else:
+			base_remove.append(elem)
+	out = []
+	for elem in base_data:
+		if elem not in base_remove:
+			out.append(elem)
+	return out;
+
+

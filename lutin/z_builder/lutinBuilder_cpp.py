@@ -54,12 +54,6 @@ def get_output_type():
 def get_support_multithreading():
 	return True
 
-def remove_element(data, to_remove):
-	out = []
-	for elem in data:
-		if elem not in to_remove:
-			out.append(elem)
-	return out;
 
 ##
 ## @brief Commands for running gcc to compile a C++ file in object file.
@@ -94,48 +88,36 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	except:
 		pass
 	list_flags = [];
-	try:
+	if "c" in target.global_flags:
 		list_flags.append(target.global_flags["c"])
-	except:
-		pass
-	try:
+	if "c++" in target.global_flags:
 		list_flags.append(target.global_flags["c++"])
-	except:
-		pass
 	for type in ["c", "c++"]:
-		try:
+		if type in depancy.flags:
 			list_flags.append(depancy.flags[type])
-		except:
-			pass
 	for view in ["local", "export"]:
-		for type in ["c", "c++"]:
-			try:
-				list_flags.append(flags[view][type])
-			except:
-				pass
+		if view in flags:
+			for type in ["c", "c++"]:
+				if type in flags[view]:
+					list_flags.append(flags[view][type])
 	# get blacklist of flags
 	list_flags_blacklist = [];
-	try:
+	if "c-remove" in target.global_flags:
 		list_flags_blacklist.append(target.global_flags["c-remove"])
-	except:
-		pass
-	try:
+	if "c++-remove" in target.global_flags:
 		list_flags_blacklist.append(target.global_flags["c++-remove"])
-	except:
-		pass
 	for type in ["c-remove", "c++-remove"]:
-		try:
+		if type in depancy.flags:
 			list_flags_blacklist.append(depancy.flags[type])
-		except:
-			pass
 	for view in ["local", "export"]:
-		for type in ["c-remove", "c++-remove"]:
-			try:
-				list_flags_blacklist.append(flags[view][type])
-			except:
-				pass
+		if view in flags:
+			for type in ["c-remove", "c++-remove"]:
+				if type in flags[view]:
+					list_flags_blacklist.append(flags[view][type])
 	# apply blacklisting of data and add it on the cmdLine
-	cmd.append(remove_element(list_flags, list_flags_blacklist));
+	clean_flags = tools.remove_element(list_flags, list_flags_blacklist)
+	#debug.warning("plop " + str(list_flags_blacklist) + "       " + str(list_flags) + "  --> " + str(clean_flags) )
+	cmd.append(clean_flags);
 	cmd.append(["-c", "-MMD", "-MP"])
 	cmd.append(file_src)
 	# Create cmd line
