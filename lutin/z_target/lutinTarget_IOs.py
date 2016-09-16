@@ -55,7 +55,7 @@ class Target(target.Target):
 		#self.suffix_binary=''
 		#self.suffix_package=''
 		
-		if self.sumulator == True:
+		if False: #self.simulator == True:
 			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
 			self.add_flag("link", "-mios-simulator-version-min=8.0")
 			self.add_flag("c", "-mios-simulator-version-min=8.0")
