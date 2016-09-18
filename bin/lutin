@@ -41,7 +41,7 @@ myArgs.add("i", "isolate-system", desc="Isolate system build (copy header of c a
 
 myArgs.add_section("properties", "keep in the sequency of the cible")
 myArgs.add("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'")
-myArgs.add("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default gcc will be used)")
+myArgs.add("c", "compilator", list=[["clang",""],["gcc",""]], desc="Compile with clang or Gcc mode (by default " + lutinHost.HOST_DEFAULT_COMPILATOR + " will be used)")
 myArgs.add("", "compilator-version", haveParam=True, desc="With travis we need to specify the name of the version if we want to compile with gcc 4.9 ==> --compilator-version=4.9")
 myArgs.add("m", "mode", list=[["debug",""],["release",""]], desc="Compile in release or debug mode (default release)")
 myArgs.add("a", "arch", list=[["auto","Automatic choice"],["arm","Arm processer"],["x86","Generic PC : AMD/Intel"],["ppc","Power PC"]], desc="Architecture to compile")
@@ -323,7 +323,7 @@ lutin.init()
 #available target : Linux / MacOs / Windows / Android ...
 targetName = host.OS
 config = {
-	"compilator":"gcc",
+	"compilator":lutinHost.HOST_DEFAULT_COMPILATOR,
 	"mode":"release",
 	"bus-size":"auto",
 	"arch":"auto",
@@ -364,7 +364,7 @@ for argument in localArgument:
 			debug.debug("change target ==> '" + targetName + "' & reset mode : gcc&release")
 			#reset properties by defauult:
 			config = {
-			             "compilator":"gcc",
+			             "compilator":lutinHost.HOST_DEFAULT_COMPILATOR,
 			             "mode":"release",
 			             "bus-size":"auto",
 			             "arch":"auto",

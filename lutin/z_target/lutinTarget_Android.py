@@ -514,6 +514,6 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("cmd: " + self.path_sdk + "/platform-tools/adb shell logcat ")
 		cmdLine = self.path_sdk + "/platform-tools/adb shell logcat "
-		multiprocess.run_command(cmdLine)
+		multiprocess.run_command_no_lock_out(cmdLine)
 
 

@@ -55,8 +55,9 @@ def run_command_no_lock_out(cmd_line):
 		p = subprocess.Popen(args)
 	except subprocess.CalledProcessError as e:
 		debug.error("subprocess.CalledProcessError : " + str(args))
-	except:
-		debug.error("Exception on : " + str(args))
+		return
+	#except:
+	#	debug.error("Exception on : " + str(args))
 	# launch the subprocess:
 	p.communicate()
 

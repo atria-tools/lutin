@@ -30,6 +30,9 @@ class Target(target.Target):
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
 			config["bus-size"] = "64"
+		if config["compilator"] != "clang":
+			debug.warning("compilator is not clang ==> force it...")
+			config["compilator"] = "clang"
 		
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
@@ -55,7 +58,7 @@ class Target(target.Target):
 		#self.suffix_binary=''
 		#self.suffix_package=''
 		
-		if False: #self.simulator == True:
+		if self.get_simulation() == True:
 			self.sysroot = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
 			self.add_flag("link", "-mios-simulator-version-min=8.0")
 			self.add_flag("c", "-mios-simulator-version-min=8.0")
@@ -69,7 +72,7 @@ class Target(target.Target):
 		    "-objc_abi_version",
 		    "-Xlinker 2",
 		    "-Xlinker",
-		    "-no_implicit_dylibs",
+		    #"-no_implicit_dylibs",
 		    "-stdlib=libc++",
 		    "-fobjc-arc",
 		    "-fobjc-link-runtime"
@@ -186,7 +189,7 @@ class Target(target.Target):
 		data_file += "			\n"
 		data_file += "			<key>CFBundleResourceSpecification</key>\n"
 		data_file += "			<string>ResourceRules.plist</string>\n"
-		if self.sumulator == False:
+		if self.get_simulation() == False:
 			data_file += "			<key>LSRequiresIPhoneOS</key>\n"
 			data_file += "			<true/>\n"
 		else:
@@ -239,7 +242,7 @@ class Target(target.Target):
 		cmdLine += " -genpkginfo " + self.get_staging_path(pkg_name) + "/PkgInfo"
 		cmdLine += " -expandbuildsettings "
 		cmdLine += " -format binary "
-		if self.sumulator == False:
+		if self.get_simulation() == False:
 			cmdLine += " -platform iphonesimulator "
 		else:
 			cmdLine += " -platform iphoneos "
@@ -315,7 +318,7 @@ class Target(target.Target):
 		# Must create the tarball of the application 
 		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
 		#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
-		if self.sumulator == False:
+		if self.get_simulation() == False:
 			if "APPLE_APPLICATION_IOS_ID" not in pkg_properties:
 				pkg_properties["APPLE_APPLICATION_IOS_ID"] = "00000000"
 				debug.warning("Missing package property : APPLE_APPLICATION_IOS_ID USE " + pkg_properties["APPLE_APPLICATION_IOS_ID"] + " ID ... ==> CAN NOT WORK ..." )
@@ -363,7 +366,7 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		if self.sumulator == False:
+		if self.get_simulation() == False:
 			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
 				cmdLine = 'cd ewol/ios-deploy ; make ; cd ../.. '
@@ -407,7 +410,7 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		if self.sumulator == False:
+		if self.get_simulation() == False:
 			debug.warning("not implemented")
 		else:
 			simulatorIdFile = ".iosSimutatorId_" + pkg_name + ".txt"
@@ -420,7 +423,7 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("log of iOs board")
 		debug.debug("------------------------------------------------------------------------")
-		if self.sumulator == False:
+		if self.get_simulation() == False:
 			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
 				cmdLine = 'cd ewol/ios-deploy ; make ; cd ../.. '

@@ -87,22 +87,45 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 		cmd.append(local_ref_on_builder_cpp.get_version_compilation_flags(flags, depancy.flags))
 	except:
 		pass
+	list_flags = [];
+	if "c" in target.global_flags:
+		list_flags.append(target.global_flags["c"])
+	if "c++" in target.global_flags:
+		list_flags.append(target.global_flags["c++"])
+	if "m" in target.global_flags:
+		list_flags.append(target.global_flags["m"])
+	if "mm" in target.global_flags:
+		list_flags.append(target.global_flags["mm"])
 	for type in ["c", "c++", "m", "mm"]:
-		try:
-			cmd.append(target.global_flags[type])
-		except:
-			pass
-	for type in ["c", "c++", "m", "mm"]:
-		try:
-			cmd.append(depancy.flags[type])
-		except:
-			pass
-	for view in ["export", "local"]:
-		for type in ["c", "c++", "m", "mm"]:
-			try:
-				cmd.append(flags[view][type])
-			except:
-				pass
+		if type in depancy.flags:
+			list_flags.append(depancy.flags[type])
+	for view in ["local", "export"]:
+		if view in flags:
+			for type in ["c", "c++", "m", "mm"]:
+				if type in flags[view]:
+					list_flags.append(flags[view][type])
+	# get blacklist of flags
+	list_flags_blacklist = [];
+	if "c-remove" in target.global_flags:
+		list_flags_blacklist.append(target.global_flags["c-remove"])
+	if "c++-remove" in target.global_flags:
+		list_flags_blacklist.append(target.global_flags["c++-remove"])
+	if "m-remove" in target.global_flags:
+		list_flags_blacklist.append(target.global_flags["m-remove"])
+	if "mm-remove" in target.global_flags:
+		list_flags_blacklist.append(target.global_flags["mm-remove"])
+	for type in ["c-remove", "c++-remove","m-remove", "mm-remove"]:
+		if type in depancy.flags:
+			list_flags_blacklist.append(depancy.flags[type])
+	for view in ["local", "export"]:
+		if view in flags:
+			for type in ["c-remove", "c++-remove","m-remove", "mm-remove"]:
+				if type in flags[view]:
+					list_flags_blacklist.append(flags[view][type])
+	# apply blacklisting of data and add it on the cmdLine
+	clean_flags = tools.remove_element(list_flags, list_flags_blacklist)
+	#debug.warning("plop " + str(list_flags_blacklist) + "       " + str(list_flags) + "  --> " + str(clean_flags) )
+	cmd.append(clean_flags);
 	cmd.append("-c -MMD -MP")
 	cmd.append("-x objective-c++")
 	cmd.append(file_src)

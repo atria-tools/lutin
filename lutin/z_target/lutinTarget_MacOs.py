@@ -25,6 +25,9 @@ class Target(target.Target):
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
 			config["bus-size"] = str(host.BUS_SIZE)
+		if config["compilator"] != "clang":
+			debug.warning("compilator is not clang ==> force it...")
+			config["compilator"] = "clang"
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
 		target.Target.__init__(self, "MacOs", config, "")
@@ -133,11 +136,11 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("copy " + tools.get_run_path() + self.path_out + self.path_staging + "/" + pkg_name + ".app in /Applications/")
+		debug.info("copy " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app") + " in /Applications/")
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
 		# copy the application in the basic application path : /Applications/xxx.app
-		shutil.copytree(os.path.join(tools.get_run_path(),self.path_out,self.path_staging,pkg_name + ".app"), os.path.join("/Applications", pkg_name + ".app"))
+		shutil.copytree(os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app"), os.path.join("/Applications", pkg_name + ".app"))
 	
 	def un_install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
@@ -152,7 +155,8 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
-		appl_path = os.path.join(tools.get_run_path(),self.path_out,self.path_staging,pkg_name + ".app", "bin", pkg_name)
+		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app" , "Contents", "MacOS", pkg_name)
+		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "Contents", "MacOS", pkg_name)
 		cmd = appl_path + " "
 		for elem in option_list:
 			cmd += elem + " "
