@@ -966,6 +966,30 @@ class Target:
 		       or ret_readme \
 		       or ret_changelog
 	
+	def install_package(self, pkg_name):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Install package '" + pkg_name + "'")
+		debug.debug("------------------------------------------------------------------------")
+		debug.error("action not implemented ...")
+	
+	def un_install_package(self, pkg_name):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Un-Install package '" + pkg_name + "'")
+		debug.debug("------------------------------------------------------------------------")
+		debug.error("action not implemented ...")
+	
+	def run(self, pkg_name, option_list):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
+		debug.debug("------------------------------------------------------------------------")
+		debug.error("action not implemented ...")
+	
+	def show_log(self, pkg_name):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Show log logcat '" + pkg_name + "'")
+		debug.debug("------------------------------------------------------------------------")
+		debug.error("action not implemented ...")
+	
 	##
 	## @brief convert a s list of string in a string separated by a ","
 	## @param[in] list List of element to transform
