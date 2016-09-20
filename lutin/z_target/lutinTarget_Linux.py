@@ -36,7 +36,7 @@ class Target(target.Target):
 			if host.BUS_SIZE != 32:
 				self.add_flag("c", "-m32")
 		
-		self.add_flag("c", "-fpic")
+		self.add_flag("c", "-fPIC")
 		
 		self.pkg_path_data = "share"
 		self.pkg_path_bin = "bin"

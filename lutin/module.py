@@ -521,17 +521,14 @@ class Module:
 		list_sub_file_needed_to_build = []
 		self._sub_heritage_list = heritage.HeritageList()
 		# optionnal dependency :
-		for dep, option, export in self._depends_optionnal:
+		for dep, option, export, src_file, header_file in self._depends_optionnal:
 			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
 			inherit_list, isBuilt = target.build(dep, True)
 			if isBuilt == True:
 				self._local_heritage.add_depends(dep);
-				# TODO : Add optionnal Flags ...
-				#     ==> do it really better ...
-				if export == False:
-					self.add_flag(option[0], option[1]);
-				else:
-					self.add_flag(option[0], option[1], export=True);
+				self.add_flag(option[0], option[1], export=export);
+				self.add_src_file(src_file)
+				self.add_header_file(header_file)
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self._depends:
@@ -951,10 +948,12 @@ class Module:
 	## @param[in] module_name (string) Name of the optionnal dependency
 	## @param[in] compilation_flags ([string,string]) flag to add if dependency if find.
 	## @param[in] export (bool) export the flat that has been requested to add if module is present.
+	## @param[in] src_file ([string,...]) File to compile if the dependecy if found.
+	## @param[in] header_file ([string,...]) File to add in header if the dependecy if found.
 	## @return None
 	##
-	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False):
-		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export], True)
+	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False, src_file=[], header_file=[]):
+		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export, src_file, header_file], True)
 	
 	## @brief deprecated ...
 	## @return None

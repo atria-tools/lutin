@@ -218,13 +218,13 @@ def create(target, module_name):
 	...
 	
 	# add dependency of the generic C library:
-	my_module.add_module_depend('c')
+	my_module.add_depend('c')
 	# add dependency of the generic C++ library:
-	my_module.add_module_depend('cxx')
+	my_module.add_depend('cxx')
 	# add dependency of the generic math library:
-	my_module.add_module_depend('m')
+	my_module.add_depend('m')
 	# or other user lib:
-	my_module.add_module_depend('lib-name')
+	my_module.add_depend('lib-name')
 	
 	...
 ```
@@ -235,10 +235,10 @@ def create(target, module_name):
 	...
 	
 	# Add an optionnal dependency (set flag in CPP build if the subLib exist) ==> flag is locally set
-	my_module.add_optionnal_module_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"])
+	my_module.add_optionnal_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"])
 	
 	# Add an optionnal dependency (set flag in CPP build if the subLib exist) ==> flag is exported in external upper build
-	my_module.add_optionnal_module_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"], export=True)
+	my_module.add_optionnal_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"], export=True)
 	
 	...
 ```
@@ -441,28 +441,28 @@ def create(target, module_name):
 	my_module.add_path(os.path.join(tools.get_current_path(__file__), "lib-name"))
 	
 	# add dependency of the generic C library:
-	my_module.add_module_depend('c')
+	my_module.add_depend('c')
 	# add dependency of the generic C++ library:
-	my_module.add_module_depend('cxx')
+	my_module.add_depend('cxx')
 	# add dependency of the generic math library:
-	my_module.add_module_depend('m')
+	my_module.add_depend('m')
 	# or other user lib:
-	my_module.add_module_depend([
+	my_module.add_depend([
 	    'lib-name1',
 	    'lib-name2'
 	    ])
 	
 	# Add an optionnal dependency (set flag in CPP build if the subLib exist) ==> flag is locally set
-	my_module.add_optionnal_module_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"])
+	my_module.add_optionnal_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"])
 	
 	# Add an optionnal dependency (set flag in CPP build if the subLib exist) ==> flag is exported in external upper build
-	my_module.add_optionnal_module_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"], export=True)
+	my_module.add_optionnal_depend('z', ["c++", "-DLIB_NAME_BUILD_ZLIB"], export=True)
 	
 	# external flags:
 	my_module.add_flag('link-lib', "pthread", export=True)
 	my_module.add_flag('c++', "-DHELLO_FLAG=\"kljlkj\"", export=True)
 	# internal flags:
-	my_module.add_flags('c', "-DMODE_RELEASE")
+	my_module.add_flag('c', "-DMODE_RELEASE")
 	
 	if target.get_mode() == "release":
 		pass
