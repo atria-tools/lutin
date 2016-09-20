@@ -323,7 +323,7 @@ class Target(target.Target):
 				pkg_properties["APPLE_APPLICATION_IOS_ID"] = "00000000"
 				debug.warning("Missing package property : APPLE_APPLICATION_IOS_ID USE " + pkg_properties["APPLE_APPLICATION_IOS_ID"] + " ID ... ==> CAN NOT WORK ..." )
 			# Create the info file
-			tmpFile = open(os.path.join(target_outpath, pkg_name + ".xcent"), 'w')
+			tmpFile = open(os.path.join(self.get_build_path(pkg_name), pkg_name + ".xcent"), 'w')
 			tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 			tmpFile.write("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n")
 			tmpFile.write("<plist version=\"1.0\">\n")
@@ -352,8 +352,8 @@ class Target(target.Target):
 				cmdLine  = 'codesign --force --sign '
 				# to get this key ; certtool y | grep "Developer"
 				cmdLine += ' "' + signatureKey + '" '
-				cmdLine += ' --entitlements ' + self.get_build_path(pkg_name) + '/worddown.xcent'
-				cmdLine += ' ' + self.get_staging_path(pkg_name)
+				cmdLine += ' --entitlements ' + os.path.join(self.get_build_path(pkg_name), pkg_name + ".xcent")
+				cmdLine += ' ' + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
 				multiprocess.run_command(cmdLine)
 	
 	def create_random_number(self, len):

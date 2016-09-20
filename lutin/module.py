@@ -244,7 +244,14 @@ class Module:
 			if sizeX > 0:
 				debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
 				fileName, fileExtension = os.path.splitext(os.path.join(self._origin_path,source))
-				image.resize(source, os.path.join(target.get_build_path_data(self._name), destination), sizeX, sizeY, file_cmd)
+				# Create the resized file in a temporary path to auto-copy when needed
+				temporary_file = os.path.join(target.get_build_path_temporary_generate(self._name), "image_generation", destination)
+				image.resize(source, temporary_file, sizeX, sizeY, file_cmd)
+				# Copy file in statndard mode
+				tools.copy_file(temporary_file,
+				                os.path.join(target.get_build_path_data(self._name), destination),
+				                file_cmd,
+				                in_list=copy_list)
 			else:
 				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 				tools.copy_file(source,
@@ -857,7 +864,7 @@ class Module:
 		# ----------------------------------------------------
 		debug.debug("install datas")
 		copy_list={}
-		self.image_to_build(target, copy_list) # TODO : When file is resized, the final file is not removed if the file is not needed anymore
+		self.image_to_build(target, copy_list)
 		self.files_to_build(target, copy_list)
 		self.paths_to_build(target, copy_list)
 		#real copy files
