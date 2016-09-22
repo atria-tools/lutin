@@ -367,14 +367,14 @@ class Target(target.Target):
 		debug.info("Install package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == False:
-			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
-				cmdLine = 'cd ewol/ios-deploy ; make ; cd ../.. '
+				cmdLine = 'cd framework/tools/ios-deploy ; xcodemake ; cd ../.. '
 				multiprocess.run_command(cmdLine)
-			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
-			cmdLine = './ewol/ios-deploy/ios-deploy --bundle ' + self.get_staging_path(pkg_name)
+			cmdLine = './framework/tools/ios-deploy/ios-deploy --bundle ' + os.path.join(self.get_staging_path(pkg_name),pkg_name + ".app")
 			multiprocess.run_command(cmdLine)
 		else:
 			simulatorIdFile = ".iosSimutatorId_" + pkg_name + ".txt"
@@ -424,14 +424,14 @@ class Target(target.Target):
 		debug.info("log of iOs board")
 		debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == False:
-			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+			if tools.file_size("framework/tools/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
-				cmdLine = 'cd ewol/ios-deploy ; make ; cd ../.. '
+				cmdLine = 'cd framework/tools/ios-deploy ; xcodebuild ; cd ../.. '
 				multiprocess.run_command(cmdLine)
-			if tools.file_size("ewol/ios-deploy/ios-deploy") == 0:
+			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
-			cmdLine = './ewol/ios-deploy/ios-deploy --debug --bundle ' + self.get_staging_path(pkg_name)
+			cmdLine = './framework/tools/ios-deploy/build/Release/ios-deploy --debug --bundle ' + os.path.join(self.get_staging_path(pkg_name),pkg_name + ".app")
 			multiprocess.run_command(cmdLine)
 		else:
 			cmdLine = "tail -f ~/Library/Logs/iOS\ Simulator/7.1/system.log"

@@ -105,6 +105,7 @@ Tutorals:                                        {#lutin_mainpage_tutorial}
   - @ref lutin_concept
   - @ref lutin_use
   - @ref lutin_module
+  - @ref lutin_ios
 
 
 License (APACHE v2.0)                            {#lutin_mainpage_licence}
@@ -138,3 +139,6 @@ Some other problem example:
   - none is really simple to write.
 
 Then I create a simple interface that manage all I need. and written in python to permit to be faster on every platform.
+
+
+[link macos account developper](https://developer.apple.com/library/content/documentation/IDEs/Conceptual/AppStoreDistributionTutorial/AddingYourAccounttoXcode/AddingYourAccounttoXcode.html)
