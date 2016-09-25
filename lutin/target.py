@@ -207,6 +207,14 @@ class Target:
 		return self.config["simulation"]
 	
 	##
+	## @brief Get compilator name (clang / gcc)
+	## @param[in] self (handle) Class handle
+	## @return (bool) name of the compilator requested
+	##
+	def get_compilator(self):
+		return self.config["compilator"]
+	
+	##
 	## @brief Add global target flags
 	## @param[in] self (handle) Class handle
 	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
