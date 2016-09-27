@@ -43,10 +43,14 @@ class Target(target.Target):
 			if self.config["bus-size"] == "64":
 				# 64 bits
 				self.set_cross_base("x86_64-w64-mingw32-")
+				self.base_path = "x86_64-w64-mingw32"
 			else:
 				# 32 bits
 				self.set_cross_base("i686-w64-mingw32-")
-		
+				self.base_path = "i686-w64-mingw32"
+		self.add_flag("c", [
+		    "-DWIN32=1"
+		    ])
 		self.pkg_path_data = "data"
 		self.pkg_path_bin = ""
 		self.pkg_path_lib = "lib"
