@@ -47,6 +47,13 @@ class Target(target.Target):
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
 		
+		self.add_flag("link-lib", [
+		    "dl"
+		    ])
+		self.add_flag("link", [
+		    "-rdynamic"
+		    ])
+		
 	"""
 	def get_staging_path(self, binary_name):
 		return tools.get_run_path() + self.path_out + self.path_staging + "/" + binary_name + ".app/Contents/"

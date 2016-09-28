@@ -41,6 +41,13 @@ class Target(target.Target):
 		self.pkg_path_bin = "bin"
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
+		
+		self.add_flag("link-lib", [
+		    "dl"
+		    ])
+		self.add_flag("link", [
+		    "-rdynamic"
+		    ])
 	
 	"""
 	.local/application

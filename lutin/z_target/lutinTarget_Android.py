@@ -184,7 +184,14 @@ class Target(target.Target):
 				    "-mfloat-abi=softfp",
 				    "-Wl,--fix-cortex-a8",
 				    ])
-		
+		"""
+		self.add_flag("link-lib", [
+		    "dl"
+		    ])
+		self.add_flag("link", [
+		    "-rdynamic"
+		    ])
+		"""
 		# the -mthumb must be set for all the android produc, some ot the not work coretly without this one ... (all android code is generated with this flags)
 		self.add_flag("c", "-mthumb")
 		# -----------------------

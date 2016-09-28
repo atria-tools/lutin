@@ -20,15 +20,7 @@ class System(system.System):
 		# create some HELP:
 		self.set_help("OpenGL: Generic graphic library")
 		self.set_valid(True)
-		self.add_depend([
-		    'c'
-		    ])
-		self.add_flag('link-lib', 'opengl32')
-		if env.get_isolate_system() == True:
-			self.add_header_file([
-			    "/usr/" + target.base_path + "/include/GL/*"
-			    ],
-			    destination_path="GL",
-			    recursive=True)
+		self.add_flag('link-lib', 'gdi32')
+		
 
 

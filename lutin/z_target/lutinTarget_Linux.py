@@ -46,6 +46,12 @@ class Target(target.Target):
 		if env.get_isolate_system() == True:
 			self.sysroot = "--sysroot=/aDirectoryThatDoesNotExist/"
 		
+		self.add_flag("link-lib", [
+		    "dl"
+		    ])
+		self.add_flag("link", [
+		    "-rdynamic"
+		    ])
 	
 	"""
 	.local/application

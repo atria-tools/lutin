@@ -51,6 +51,11 @@ class Target(target.Target):
 		self.add_flag("c", [
 		    "-DWIN32=1"
 		    ])
+		"""
+		self.add_flag("link-lib", [
+		    "dl"
+		    ])
+		"""
 		self.pkg_path_data = "data"
 		self.pkg_path_bin = ""
 		self.pkg_path_lib = "lib"
@@ -60,6 +65,8 @@ class Target(target.Target):
 		self.suffix_lib_dynamic='.dll'
 		self.suffix_binary='.exe'
 		#self.suffix_package=''
+		# TODO : Remove this ==> pb with openSSL shared lib ...
+		self.support_dynamic_link = False
 	
 	
 	def get_staging_path_data(self, binary_name, heritage_list):

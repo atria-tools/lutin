@@ -88,6 +88,13 @@ class Target(target.Target):
 		
 		# Disable capabiliteis to compile in shared mode
 		self.support_dynamic_link = False
+		
+		self.add_flag("link-lib", [
+		    "dl"
+		    ])
+		self.add_flag("link", [
+		    "-rdynamic"
+		    ])
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
