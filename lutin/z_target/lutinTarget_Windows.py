@@ -16,6 +16,7 @@ import os
 import stat
 import sys
 from lutin import zip
+from lutin import multiprocess
 
 class Target(target.Target):
 	def __init__(self, config):
@@ -56,15 +57,16 @@ class Target(target.Target):
 		    "dl"
 		    ])
 		"""
+		
 		self.pkg_path_data = "data"
 		self.pkg_path_bin = ""
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
 		
-		self.suffix_lib_static='.a'
-		self.suffix_lib_dynamic='.dll'
-		self.suffix_binary='.exe'
-		#self.suffix_package=''
+		self.suffix_lib_static = '.a'
+		self.suffix_lib_dynamic = '.dll'
+		self.suffix_binary = '.exe'
+		#self.suffix_package = ''
 		# TODO : Remove this ==> pb with openSSL shared lib ...
 		self.support_dynamic_link = False
 	
@@ -165,4 +167,19 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
-
+	
+	def run(self, pkg_name, option_list):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
+		debug.debug("------------------------------------------------------------------------")
+		if host.OS == "Windows":
+			debug.error("action not implemented ...")
+			return
+		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", pkg_name + self.suffix_binary)
+		cmd = "wine " + appl_path + " "
+		for elem in option_list:
+			cmd += elem + " "
+		multiprocess.run_command_no_lock_out(cmd)
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' Finished")
+		debug.debug("------------------------------------------------------------------------")
