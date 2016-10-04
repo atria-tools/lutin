@@ -1360,7 +1360,20 @@ class Module:
 			self._package_prop["COMPAGNY_NAME2"] = val2
 			self._package_prop_default["COMPAGNY_NAME2"] = False
 		elif "ICON" == variable:
-			self._package_prop[variable] = value
+			if     len(value) > 1 \
+			   and value[0] == '/':
+				# unix case
+				debug.warning(" set_pkg('ICON', " + value + ")")
+				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 2.x)")
+				self._package_prop[variable] = value
+			elif     len(value) > 2 \
+			     and value[1] == ':':
+				# windows case :
+				debug.warning(" set_pkg('ICON', " + value + ")")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				self._package_prop[variable] = value
+			else:
+				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
 			self._package_prop_default[variable] = False
 		elif "MAINTAINER" == variable:
 			self._package_prop[variable] = value
@@ -1386,6 +1399,22 @@ class Module:
 			else:
 				self._package_prop[variable] = value
 				self._package_prop_default[variable] = False
+		elif "ANDROID_SIGN" == variable:
+			if     len(value) > 1 \
+			   and value[0] == '/':
+				# unix case
+				debug.warning(" set_pkg('ANDROID_SIGN', " + value + ")")
+				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 2.x)")
+				self._package_prop[variable] = value
+			elif     len(value) > 2 \
+			     and value[1] == ':':
+				# windows case :
+				debug.warning(" set_pkg('ANDROID_SIGN', " + value + ")")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				self._package_prop[variable] = value
+			else:
+				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
+			self._package_prop_default[variable] = False
 		elif variable in ["DESCRIPTION",
 		                  "VERSION",
 		                  "VERSION_CODE",
@@ -1397,8 +1426,7 @@ class Module:
 		                  "ANDROID_APPL_TYPE",
 		                  "ADMOD_ID",
 		                  "APPLE_APPLICATION_IOS_ID",
-		                  "LICENSE",
-		                  "ANDROID_SIGN"]:
+		                  "LICENSE"]:
 			self._package_prop[variable] = value
 			self._package_prop_default[variable] = False
 		elif "ADMOD_POSITION" == variable:
