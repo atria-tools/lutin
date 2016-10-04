@@ -984,13 +984,13 @@ class Module:
 				   and elem[0] == '/':
 					# unix case
 					debug.warning(" add_path(" + in_list + ")")
-					debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
+					debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 3.x)")
 					add_list.append(elem)
 				elif     len(elem) > 2 \
 				     and elem[1] == ':':
 					# windows case :
 					debug.warning(" add_path(" + in_list + ")")
-					debug.warning("[" + self._name + "] Not permited to add a path that start in '" + elem[0] + ":' directory (only relative path) (compatibility until 2.x)")
+					debug.warning("[" + self._name + "] Not permited to add a path that start in '" + elem[0] + ":' directory (only relative path) (compatibility until 3.x)")
 					add_list.append(elem)
 				if elem == ".":
 					add_list.append(tools.get_current_path(self._origin_file))
@@ -1001,13 +1001,13 @@ class Module:
 			   and in_list[0] == '/':
 				# unix case
 				debug.warning(" add_path(" + in_list + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 3.x)")
 				add_list = in_list
 			elif     len(in_list) > 2 \
 			     and in_list[1] == ':':
 				# windows case :
 				debug.warning(" add_path(" + in_list + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + in_list[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + in_list[0] + ":' directory (only relative path) (compatibility until 3.x)")
 				add_list = in_list
 			elif in_list == ".":
 				add_list = tools.get_current_path(self._origin_file)
@@ -1364,13 +1364,13 @@ class Module:
 			   and value[0] == '/':
 				# unix case
 				debug.warning(" set_pkg('ICON', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 2.x)")
+				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 3.x)")
 				self._package_prop[variable] = value
 			elif     len(value) > 2 \
 			     and value[1] == ':':
 				# windows case :
 				debug.warning(" set_pkg('ICON', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 3.x)")
 				self._package_prop[variable] = value
 			else:
 				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
@@ -1404,13 +1404,13 @@ class Module:
 			   and value[0] == '/':
 				# unix case
 				debug.warning(" set_pkg('ANDROID_SIGN', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 2.x)")
+				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 3.x)")
 				self._package_prop[variable] = value
 			elif     len(value) > 2 \
 			     and value[1] == ':':
 				# windows case :
 				debug.warning(" set_pkg('ANDROID_SIGN', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 3.x)")
 				self._package_prop[variable] = value
 			else:
 				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
@@ -1553,7 +1553,7 @@ def load_module(target, name):
 					tmp_element = None
 			elif "create" in dir(the_module):
 				# parse in a second time to permit to implement retro-compat build
-				debug.warning("[DEPRECATED] (" + name + ") module creation: function 'create', use 'configure' ... (remove compatibility in next major version (2.x)")
+				debug.warning("[DEPRECATED] (" + name + ") module creation: function 'create', use 'configure' ... (remove compatibility in next major version (3.x)")
 				tmp_element = the_module.create(target, name)
 				if tmp_element != None:
 					# overwrite some package default property (if not set by user)
