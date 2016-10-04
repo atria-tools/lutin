@@ -82,11 +82,12 @@ def get_version():
 
 # create the module
 # @param[in] target reference on the Target that is currently build
-# @param[in] module_name Name of the module that is extract from the file name (to be generic)
-def create(target, module_name):
-	my_module = module.Module(__file__, module_name, get_type())
+# @param[in] my_module Module handle that migh be configured
+# @return True The module is welled configure
+# @return False The module is Not availlable (for this target or ...)
+def configure(target, my_module):
 	...
-	return my_module
+	return True
 ```
 
 Thes it is simple to specify build for:
@@ -164,7 +165,7 @@ Add file to compile:                                          {#lutin_module_int
 This is simple: (you just need to specify all the file to compile)
 
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	# add the file to compile:
@@ -187,7 +188,7 @@ This permit to check error inclusion directly in developpement and separate the 
 
 Add file to external include:
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	my_module.add_header_file([
@@ -200,7 +201,7 @@ def create(target, module_name):
 
 You can add a path to your local include:
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	my_module.add_path(os.path.join(tools.get_current_path(__file__), "lib-name"))
@@ -214,7 +215,7 @@ Add Sub-dependency:                                           {#lutin_module_int
 
 All library need to add at minimum of a simple library (C lib) and other if needed. To do it jus call:
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	# add dependency of the generic C library:
@@ -231,7 +232,7 @@ def create(target, module_name):
 
 The system can have optinnal sub-library, then if you just want to add an optionnal dependency:
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	# Add an optionnal dependency (set flag in CPP build if the subLib exist) ==> flag is locally set
@@ -248,7 +249,7 @@ Compilation adn link flags/libs:                              {#lutin_module_int
 
 It is possible to define local and external flags (external are set internal too):
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	# external flags:
 	my_module.add_flag('link-lib', "pthread", export=True)
@@ -264,7 +265,7 @@ build mode (release/debug):                                   {#lutin_module_int
 
 To add somes element dependent of the build mode:
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	if target.get_mode() == "release":
@@ -281,7 +282,7 @@ build type target:                                            {#lutin_module_int
 To add somes element dependent of the target type:
 
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	if "Windows" in target.get_type():
@@ -309,7 +310,7 @@ Add some data in the install path (share path):                {#lutin_module_in
 You can install a simple file:
 
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	# copy file in the share/binanyName/ path (no sub path)
@@ -321,7 +322,7 @@ def create(target, module_name):
 Copy multiple files (change path)
 
 ```{.py}
-def create(target, module_name):
+def configure(target, my_module):
 	...
 	
 	my_module.copy_path('data/*', 'destinationPath')
@@ -414,17 +415,20 @@ def get_compagny_name():
 # Note: this fucntion is optionnal.
 def get_maintainer():
 	return ["Mr NAME SurName <my-email@group.com>"]
+	# return "authors.txt"
 
 # Version of the library
 # Note: this fucntion is optionnal.
 def get_version():
 	return [0,1,"dev"]
+	# return "version.txt"
 
 # create the module
 # @param[in] target reference on the Target that is currently build
-# @param[in] module_name Name of the module that is extract from the file name (to be generic)
-def create(target, module_name):
-	my_module = module.Module(__file__, module_name, get_type())
+# @param[in] my_module Module handle that migh be configured
+# @return True The module is welled configure
+# @return False The module is Not availlable (for this target or ...)
+def configure(target, my_module):
 	
 	# add the file to compile:
 	my_module.add_src_file([
@@ -485,7 +489,8 @@ def create(target, module_name):
 	
 	my_module.copy_path('data/*', 'destinationPath')
 	
-	return my_module
+	# Return True if the module is compatible with the target or ...
+	return True
 ```
 
 

@@ -1451,7 +1451,32 @@ def load_module(target, name):
 			# get basic module properties:
 			property = get_module_option(os.path.dirname(mod[1]), the_module, name)
 			# configure the module:
-			if "create" in dir(the_module):
+			if "configure" in dir(the_module):
+				# create the module:
+				tmp_element = Module(the_module_file, name, property["type"])
+				# overwrite some package default property (if not set by user)
+				if property["compagny-type"] != None:
+					tmp_element._pkg_set_if_default("COMPAGNY_TYPE", property["compagny-type"])
+				if property["compagny-name"] != None:
+					tmp_element._pkg_set_if_default("COMPAGNY_NAME", property["compagny-name"])
+				if property["maintainer"] != None:
+					tmp_element._pkg_set_if_default("MAINTAINER", property["maintainer"])
+				if property["name"] != None:
+					tmp_element._pkg_set_if_default("NAME", property["name"])
+				if property["description"] != None:
+					tmp_element._pkg_set_if_default("DESCRIPTION", property["description"])
+				if property["license"] != None:
+					tmp_element._pkg_set_if_default("LICENSE", property["license"])
+				if property["version"] != None:
+					tmp_element._pkg_set_if_default("VERSION", property["version"])
+				# call user to configure it:
+				ret = the_module.configure(target, tmp_element)
+				if ret == False:
+					# the user request remove the capabilities of this module for this platform
+					tmp_element = None
+			elif "create" in dir(the_module):
+				# parse in a second time to permit to implement retro-compat build
+				debug.warning("[DEPRECATED] (" + name + ") module creation: function 'create', use 'configure' ... (remove compatibility in next major version (2.x)")
 				tmp_element = the_module.create(target, name)
 				if tmp_element != None:
 					# overwrite some package default property (if not set by user)
@@ -1542,7 +1567,7 @@ def get_module_option(path, the_module, name):
 	if "get_type" in list_of_function_in_factory:
 		type = the_module.get_type()
 	else:
-		debug.debug(" function get_type() must be provided in the module: " + name)
+		debug.error(" function get_type() must be provided in the module: " + name)
 	
 	if "get_sub_type" in list_of_function_in_factory:
 		sub_type = the_module.get_sub_type()

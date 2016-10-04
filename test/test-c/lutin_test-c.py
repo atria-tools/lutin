@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import lutin.module as module
 import lutin.tools as tools
 import lutin.debug as debug
 import os
@@ -8,10 +7,9 @@ def get_type():
 	return "BINARY"
 
 def get_desc():
-	return "Text C compilation"
+	return "Test C compilation"
 
-def create(target, module_name):
-	my_module = module.Module(__file__, module_name, get_type())
+def configure(target, my_module):
 	my_module.add_extra_compile_flags()
 	my_module.add_src_file([
 		'test.c'

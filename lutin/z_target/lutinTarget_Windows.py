@@ -175,6 +175,7 @@ class Target(target.Target):
 		if host.OS == "Windows":
 			debug.error("action not implemented ...")
 			return
+		debug.debug(" think to configure your wine : 'winecfg' : https://www.winehq.org/docs/wineusr-guide/config-wine-main")
 		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", pkg_name + self.suffix_binary)
 		cmd = "wine " + appl_path + " "
 		for elem in option_list:
@@ -183,3 +184,4 @@ class Target(target.Target):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
 		debug.debug("------------------------------------------------------------------------")
+
