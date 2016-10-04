@@ -155,11 +155,15 @@ class System:
 			debug.verbose("add element :" + str(elem) + " elems=" + str(self._export_flags[elem]))
 			module.add_flag(elem, self._export_flags[elem], export=True)
 		# add module dependency
-		module.add_depend(self._export_depends)
+		if self._export_depends != []:
+			module.add_depend(self._export_depends)
 		# add exporting sources
-		module.add_src_file(self._export_src)
+		if self._export_src != []:
+			module.add_src_file(self._export_src)
 		# add export path
-		module.add_path(self._export_path, export=True)
+		if self._export_path != []:
+			# no control on API
+			module._add_path(self._export_path, export=True)
 		# Export all actions ...
 		for elem in self._action_on_state:
 			level, name, action = self._action_on_state[elem]

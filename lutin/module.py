@@ -603,7 +603,7 @@ class Module:
 				if elem_generate["install"] == True:
 					have_only_generate_file = True
 		if have_only_generate_file == True:
-			self.add_path(generate_path)
+			self._add_path(generate_path)
 		
 		# ---------------------------------------------------------------------------
 		# -- install header (do it first for extern lib and gcov better interface) --
@@ -629,7 +629,7 @@ class Module:
 		# remove unneded files (NOT folder ...)
 		tools.clean_directory(include_path, copy_list)
 		# add the pat to the usable dirrectory
-		self.add_path(include_path)
+		self._add_path(include_path)
 		
 		# ---------------------------------------------------------------------------
 		# -- Sources compilation                                                   --
@@ -660,7 +660,7 @@ class Module:
 						if res_file["action"] == "add":
 							list_sub_file_needed_to_build.append(res_file["file"])
 						elif res_file["action"] == "path":
-							self.add_path(res_file["path"], type='c')
+							self._add_path(res_file["path"], type='c')
 						else:
 							debug.error("an not do action for : " + str(res_file))
 					except ValueError:
@@ -689,7 +689,7 @@ class Module:
 					if res_file["action"] == "add":
 						list_sub_file_needed_to_build.append(res_file["file"])
 					elif res_file["action"] == "path":
-						self.add_path(res_file["path"], type='c')
+						self._add_path(res_file["path"], type='c')
 					else:
 						debug.error("an not do action for : " + str(res_file))
 				except ValueError:
@@ -928,26 +928,26 @@ class Module:
 	##
 	## @brief Add a tools in dependency
 	## @param[in] self (handle) Class handle
-	## @param[in] list ([string,...] or string) Name(s) of the tools
+	## @param[in] in_list ([string,...] or string) Name(s) of the tools
 	## @return None
 	##
-	def add_tools(self, list):
-		tools.list_append_to(self._tools, list, True)
+	def add_tools(self, in_list):
+		tools.list_append_to(self._tools, in_list, True)
 	
 	##
 	## @brief Add a dependency on this module
 	## @param[in] self (handle) Class handle
-	## @param[in] list ([string,...] or string) Name(s) of the modules dependency
+	## @param[in] in_list ([string,...] or string) Name(s) of the modules dependency
 	## @return None
 	##
-	def add_depend(self, list):
-		tools.list_append_to(self._depends, list, True)
+	def add_depend(self, in_list):
+		tools.list_append_to(self._depends, in_list, True)
 	
 	## @brief deprecated ...
 	## @return None
-	def add_module_depend(self, list):
+	def add_module_depend(self, in_list):
 		debug.warning("[" + self._name + "] add_module_depend is deprecated ==> use add_depend(...)")
-		self.add_depend(list)
+		self.add_depend(in_list)
 	
 	##
 	## @brief Add an optionnal dependency on this module
@@ -971,17 +971,66 @@ class Module:
 	##
 	## @brief Add a path to include when build
 	## @param[in] self (handle) Class handle
-	## @param[in] list ([string,...] or string) List of path to include
-	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
+	## @param[in] in_list ([string,...] or string) List of path to include (default: local path) only relative path...
+	## @param[in] in_type (string) inclusion group name 'c', 'c++', 'java' ...
 	## @param[in] export (bool) export the include path.
 	## @return None
 	##
-	def add_path(self, list, type='c', export=False):
-		if export == True:
-			tools.list_append_to_2(self._path["export"], type, list)
+	def add_path(self, in_list=".", in_type='c', export=False):
+		if type(in_list) == list:
+			add_list = []
+			for elem in in_list:
+				if     len(elem) > 1 \
+				   and elem[0] == '/':
+					# unix case
+					debug.warning(" add_path(" + in_list + ")")
+					debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
+					add_list.append(elem)
+				elif     len(elem) > 2 \
+				     and elem[1] == ':':
+					# windows case :
+					debug.warning(" add_path(" + in_list + ")")
+					debug.warning("[" + self._name + "] Not permited to add a path that start in '" + elem[0] + ":' directory (only relative path) (compatibility until 2.x)")
+					add_list.append(elem)
+				if elem == ".":
+					add_list.append(tools.get_current_path(self._origin_file))
+				else:
+					add_list.append(os.path.join(tools.get_current_path(self._origin_file), elem))
 		else:
-			tools.list_append_to_2(self._path["local"], type, list)
+			if     len(in_list) > 1 \
+			   and in_list[0] == '/':
+				# unix case
+				debug.warning(" add_path(" + in_list + ")")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
+				add_list = in_list
+			elif     len(in_list) > 2 \
+			     and in_list[1] == ':':
+				# windows case :
+				debug.warning(" add_path(" + in_list + ")")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + in_list[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				add_list = in_list
+			elif in_list == ".":
+				add_list = tools.get_current_path(self._origin_file)
+			else:
+				add_list = os.path.join(tools.get_current_path(self._origin_file), in_list)
+		debug.verbose("Convert path : " + str(in_list) + " in " + str(add_list))
+		self._add_path(add_list, in_type, export)
 	
+	##
+	## @brief (INTERNAL API) Add a path to include when build
+	## @param[in] self (handle) Class handle
+	## @param[in] in_list ([string,...] or string) List of path to include (default: local path)
+	## @param[in] in_type (string) inclusion group name 'c', 'c++', 'java' ...
+	## @param[in] export (bool) export the include path.
+	## @return None
+	##
+	def _add_path(self, in_list=".", in_type='c', export=False):
+		if export == True:
+			tools.list_append_to_2(self._path["export"], in_type, in_list)
+		else:
+			tools.list_append_to_2(self._path["local"], in_type, in_list)
+	
+	##
 	## @brief deprecated ...
 	## @return None
 	def add_export_path(self, list, type='c'):
@@ -992,27 +1041,27 @@ class Module:
 	## @brief Add compilation flags
 	## @param[in] self (handle) Class handle
 	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
-	## @param[in] list ([string,...] or string) List of path to include
+	## @param[in] in_list ([string,...] or string) List of path to include
 	## @param[in] export (bool) export the flat that has been requested to add if module is present.
 	## @return None
 	##
-	def add_flag(self, type, list, export=False):
+	def add_flag(self, type, in_list, export=False):
 		if export == True:
-			tools.list_append_to_2(self._flags["export"], type, list)
+			tools.list_append_to_2(self._flags["export"], type, in_list)
 		else:
-			tools.list_append_to_2(self._flags["local"], type, list)
+			tools.list_append_to_2(self._flags["local"], type, in_list)
 	
 	## @brief deprecated ...
 	## @return None
-	def add_export_flag(self, type, list):
+	def add_export_flag(self, type, in_list):
 		debug.warning("[" + self._name + "] add_export_flag is deprecated ==> use add_flag(xxx, yyy, export=True)")
-		self.add_flag(type, list, export=True)
+		self.add_flag(type, in_list, export=True)
 	
 	## @brief deprecated ...
 	## @return None
-	def compile_flags(self, type, list):
+	def compile_flags(self, type, in_list):
 		debug.warning("[" + self._name + "] compile_flags is deprecated ==> use add_flag(xxx, yyy)")
-		self.add_flag(type, list)
+		self.add_flag(type, in_list)
 	
 	##
 	## @brief Set the compilation version of the 
@@ -1060,15 +1109,15 @@ class Module:
 	##
 	## @brief Add source file to compile
 	## @param[in] self (handle) Class handle
-	## @param[in] list ([string,...] or string) File(s) to compile
+	## @param[in] in_list ([string,...] or string) File(s) to compile
 	## @return None
 	##
-	def add_src_file(self, list):
-		tools.list_append_to(self._src, list, True)
+	def add_src_file(self, in_list):
+		tools.list_append_to(self._src, in_list, True)
 	##
 	## @brief An an header file in the install directory
 	## @param[in] self (handle) Class handle
-	## @param[in] list ([string,...] or string) List of element that is needed to install
+	## @param[in] in_list ([string,...] or string) List of element that is needed to install
 	## @param[in] destination_path (string) Path to install the files (remove all the path of the file)
 	## @param[in] clip_path (string) Remove a part of the path set in the list and install data in generic include path
 	## @param[in] recursive (bool) when use regexp in file list ==> we can add recursive property
@@ -1111,13 +1160,13 @@ class Module:
 	## 
 	## @return None
 	##
-	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
+	def add_header_file(self, in_list, destination_path=None, clip_path=None, recursive=False):
 		if destination_path != None:
 			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
-		if type(list) == str:
-			list = [list]
-		for elem in list:
+		if type(in_list) == str:
+			in_list = [in_list]
+		for elem in in_list:
 			base = os.path.basename(elem)
 			if destination_path != None:
 				if clip_path != None:
@@ -1536,12 +1585,12 @@ def list_all_module():
 ##
 def list_all_module_with_desc():
 	global __module_list
-	tmpList = []
+	tmp_list = []
 	for mod in __module_list:
 		sys.path.append(os.path.dirname(mod[1]))
 		the_module = __import__(env.get_build_system_base_name() + __start_module_name + mod[0])
-		tmpList.append(get_module_option(os.path.dirname(mod[1]), the_module, mod[0]))
-	return tmpList
+		tmp_list.append(get_module_option(os.path.dirname(mod[1]), the_module, mod[0]))
+	return tmp_list
 
 
 ##

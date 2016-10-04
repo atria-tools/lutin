@@ -339,16 +339,16 @@ def list_append_to(out_list, in_list, order=False):
 	else:
 		debug.warning("can not add in list other than {list/dict/str} : " + str(type(in_list)))
 
-def list_append_to_2(listout, module, list, order=False):
+def list_append_to_2(listout, module, in_list, order=False):
 	# sepcial cse of bool
-	if type(list) == bool:
-		listout[module] = list
+	if type(in_list) == bool:
+		listout[module] = in_list
 		return
 	# add list in the Map
 	if module not in listout:
 		listout[module] = []
 	# add elements...
-	list_append_to(listout[module], list, order)
+	list_append_to(listout[module], in_list, order)
 
 
 ##

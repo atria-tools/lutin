@@ -218,11 +218,11 @@ class Target:
 	## @brief Add global target flags
 	## @param[in] self (handle) Class handle
 	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
-	## @param[in] list ([string,...] or string) List of path to include
+	## @param[in] in_list ([string,...] or string) List of path to include
 	## @return None
 	##
-	def add_flag(self, type, list):
-		tools.list_append_to_2(self.global_flags, type, list)
+	def add_flag(self, in_type, in_list):
+		tools.list_append_to_2(self.global_flags, in_type, in_list)
 	
 	##
 	## @brief Update basic tree path positions on the build tree
