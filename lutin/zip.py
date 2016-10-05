@@ -33,7 +33,7 @@ def create_zip(path, outputFile):
 				zf.write(file, file[basePathlen:])
 	zf.close()
 
-def create_zip_file(files, outputFile):
+def create_zip_file(files, base_output, outputFile):
 	debug.debug("Create Zip : '" + outputFile + "'")
 	tools.create_directory_of_file(outputFile)
 	debug.debug("    from '" + str(files) + "'")
@@ -41,8 +41,8 @@ def create_zip_file(files, outputFile):
 		files = [files]
 	zf = zipfile.ZipFile(outputFile, mode='w')
 	for elem in files:
-		debug.verbose("    ADD zip = " + str(elem) + " ==> " + elem[len(os.path.dirname(elem)):])
-		zf.write(elem, elem[len(os.path.dirname(elem)):])
+		debug.verbose("    ADD zip = " + str(elem) + " ==> " + base_output + "/" + elem[len(os.path.dirname(elem)):])
+		zf.write(elem, base_output + "/" + elem[len(os.path.dirname(elem)):])
 	zf.close()
 	
 

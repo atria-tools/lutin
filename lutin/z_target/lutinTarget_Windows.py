@@ -72,15 +72,15 @@ class Target(target.Target):
 		self.support_dynamic_link = False
 	
 	
-	def get_staging_path_data(self, binary_name):
-		return os.path.join(self.get_staging_path(binary_name), binary_name + ".app", self.pkg_path_data)
+	def get_staging_path_data(self, binary_name, tmp=False):
+		return os.path.join(self.get_staging_path(binary_name, tmp), binary_name + ".app", self.pkg_path_data)
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
 		debug.debug("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
-		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
+		target_outpath = os.path.join(self.get_staging_path(pkg_name, tmp=True), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
@@ -105,19 +105,26 @@ class Target(target.Target):
 		   or ret_file \
 		   or need_generate_package:
 			# Zip the data
-			debug.print_element("zip", "data.zip", "<==", self.get_staging_path_data(pkg_name) + "/*")
-			zip_path = os.path.join(self.get_staging_path(pkg_name), "data.zip")
+			debug.print_element("zip", "data.zip", "<==", self.get_staging_path_data(pkg_name, tmp=True) + "/*")
+			zip_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "data.zip")
 			zip.create_zip([
-			    self.get_staging_path_data(pkg_name),
+			    self.get_staging_path_data(pkg_name, tmp=True),
 			    target_outpath+"/pkg"
 			    ], zip_path)
+			# copy if needed the binary:
+			tools.copy_file(
+			    os.path.join(self.get_staging_path(pkg_name, tmp=True), pkg_name + ".app", pkg_name + self.suffix_binary),
+			    os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", pkg_name + self.suffix_binary),
+			    force_identical=True)
+			
 			zip_path_final = os.path.join(self.get_final_path(), pkg_name + ".zip")
 			# generate deployed zip (for user)
-			debug.print_element("zip", pkg_name + ".zip", "<==", self.get_staging_path(pkg_name))
+			debug.print_element("zip", pkg_name + ".zip", "<==", self.get_staging_path(pkg_name), pkg_name + ".app")
 			zip.create_zip_file([
 			    zip_path,
-			    os.path.join(target_outpath, pkg_name + self.suffix_binary)
+			    os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", pkg_name + self.suffix_binary)
 			    ],
+			    pkg_name + ".app",
 			    zip_path_final)
 			
 			tools.file_write_data(build_package_path_done, "done...")

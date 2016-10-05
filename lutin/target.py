@@ -239,6 +239,7 @@ class Target:
 		self.path_out = os.path.join("out", self._name + "_" + self.config["arch"] + "_" + self.config["bus-size"], self.config["mode"])
 		self.path_final = os.path.join("final", self.config["compilator"])
 		self.path_staging = os.path.join("staging", self.config["compilator"])
+		self.path_staging_tmp = os.path.join("staging_tmp", self.config["compilator"])
 		self.path_build = os.path.join("build", self.config["compilator"])
 	
 	# TODO: Remove this from here ==> this is a tools
@@ -375,8 +376,11 @@ class Target:
 	## @param[in] name (string) Name of the module
 	## @return (string) The path
 	##
-	def get_staging_path(self, name):
-		return os.path.join(tools.get_run_path(), self.path_out, self.path_staging, name)
+	def get_staging_path(self, name, tmp=False):
+		if tmp == False:
+			return os.path.join(tools.get_run_path(), self.path_out, self.path_staging, name)
+		else:
+			return os.path.join(tools.get_run_path(), self.path_out, self.path_staging_tmp, name)
 	
 	##
 	## @brief Get the build path ==> dependency file, object files, cmdlines files, generate files, local install headers ...
@@ -475,8 +479,8 @@ class Target:
 	## @param[in] name (string) Name of the package
 	## @return (string) The path
 	##
-	def get_staging_path_bin(self, name):
-		return os.path.join(self.get_staging_path(name), self.path_bin)
+	def get_staging_path_bin(self, name, tmp=False):
+		return os.path.join(self.get_staging_path(name, tmp), self.path_bin)
 	
 	##
 	## @brief Get the lib path for staging step
@@ -484,8 +488,8 @@ class Target:
 	## @param[in] name (string) Name of the package
 	## @return (string) The path
 	##
-	def get_staging_path_lib(self, name):
-		return os.path.join(self.get_staging_path(name), self.path_lib, name)
+	def get_staging_path_lib(self, name, tmp=False):
+		return os.path.join(self.get_staging_path(name, tmp), self.path_lib, name)
 	
 	##
 	## @brief Get the data path for staging step
@@ -493,8 +497,8 @@ class Target:
 	## @param[in] name (string) Name of the package
 	## @return (string) The path
 	##
-	def get_staging_path_data(self, name):
-		return os.path.join(self.get_staging_path(name), self.path_data, name)
+	def get_staging_path_data(self, name, tmp=False):
+		return os.path.join(self.get_staging_path(name, tmp), self.path_data, name)
 	
 	##
 	## @brief Get the include path for staging step
