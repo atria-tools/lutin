@@ -71,73 +71,86 @@ class Target(target.Target):
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
-		self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_share = self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## copy binary files:
-		self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_bin = self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create libraries:
-		self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_lib = self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create generic files:
-		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
+		ret_file = self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
 		
-		## Create icon (no convertion ==> TODO: must test if png is now supported):
-		if     "ICON" in pkg_properties.keys() \
-		   and pkg_properties["ICON"] != "":
-			tools.copy_file(pkg_properties["ICON"], os.path.join(target_outpath, "icon.icns"), force=True)
+		## end of the package generation
+		build_package_path_done = os.path.join(self.get_build_path(pkg_name), "generatePackageDone.txt")
+		#Check date between the current file "list of action to generate package and the end of package generation
+		need_generate_package = depend.need_re_package(build_package_path_done, [__file__], True)
 		
-		## Create info.plist file:
-		# http://www.sandroid.org/imcross/#Deployment
-		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		data_file += "<plist version=\"1.0\">\n"
-		data_file += "    <dict>\n"
-		data_file += "        <key>CFBundleExecutableFile</key>\n"
-		data_file += "        <string>"+pkg_name+"</string>\n"
-		data_file += "        <key>CFBundleName</key>\n"
-		data_file += "        <string>"+pkg_name+"</string>\n"
-		data_file += "        <key>CFBundleIdentifier</key>\n"
-		data_file += "        <string>" + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
-		data_file += "        <key>CFBundleSignature</key>\n"
-		data_file += "        <string>????</string>\n"
-		data_file += "        <key>CFBundleIconFile</key>\n"
-		data_file += "        <string>icon.icns</string>\n"
-		data_file += "    </dict>\n"
-		data_file += "</plist>\n"
-		data_file += "\n\n"
-		tools.file_write_data(os.path.join(target_outpath, "Info.plist"),
-		                      data_file,
-		                      only_if_new=True)
-		
-		## Create PkgInfo file:
-		tools.file_write_data(os.path.join(target_outpath, "PkgInfo"),
-		                      "APPL????",
-		                      only_if_new=True)
-		
-		## Create a simple interface to localy install the aplication for the shell (a shell command line interface):
-		data_file  = "#!/bin/bash\n"
-		data_file += "# Simply open the real application in the correct way (a link does not work ...)\n"
-		data_file += "/Applications/" + pkg_name + ".app/Contents/MacOS/" + pkg_name + " $*\n"
-		tools.file_write_data(os.path.join(target_outpath, "shell", pkg_name),
-		                      data_file,
-		                      only_if_new=True)
-		
-		## Create the disk image of the application:
-		debug.info("Generate disk image for '" + pkg_name + "'")
-		output_file_name = os.path.join(self.get_final_path(), pkg_name + ".dmg")
-		cmd = "hdiutil create -volname "
-		cmd += pkg_name + " -srcpath "
-		cmd += os.path.join(tools.get_run_path(), self.path_out,  self.path_staging, pkg_name + ".app")
-		cmd += " -ov -format UDZO "
-		cmd += output_file_name
-		tools.create_directory_of_file(output_file_name)
-		multiprocess.run_command_direct(cmd)
-		debug.info("disk image: " + output_file_name)
-		
-		## user information:
-		#debug.info("You can have an shell interface by executing : ")
-		#debug.info("    sudo cp " + shell_file_name + " /usr/local/bin")
+		## create the package:
+		if    ret_share \
+		   or ret_bin \
+		   or ret_lib \
+		   or ret_file \
+		   or need_generate_package:
+			
+			## Create icon (no convertion ==> TODO: must test if png is now supported):
+			if     "ICON" in pkg_properties.keys() \
+			   and pkg_properties["ICON"] != "":
+				tools.copy_file(pkg_properties["ICON"], os.path.join(target_outpath, "icon.icns"), force=True)
+			
+			## Create info.plist file:
+			# http://www.sandroid.org/imcross/#Deployment
+			data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+			data_file += "<plist version=\"1.0\">\n"
+			data_file += "    <dict>\n"
+			data_file += "        <key>CFBundleExecutableFile</key>\n"
+			data_file += "        <string>"+pkg_name+"</string>\n"
+			data_file += "        <key>CFBundleName</key>\n"
+			data_file += "        <string>"+pkg_name+"</string>\n"
+			data_file += "        <key>CFBundleIdentifier</key>\n"
+			data_file += "        <string>" + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
+			data_file += "        <key>CFBundleSignature</key>\n"
+			data_file += "        <string>????</string>\n"
+			data_file += "        <key>CFBundleIconFile</key>\n"
+			data_file += "        <string>icon.icns</string>\n"
+			data_file += "    </dict>\n"
+			data_file += "</plist>\n"
+			data_file += "\n\n"
+			tools.file_write_data(os.path.join(target_outpath, "Info.plist"),
+			                      data_file,
+			                      only_if_new=True)
+			
+			## Create PkgInfo file:
+			tools.file_write_data(os.path.join(target_outpath, "PkgInfo"),
+			                      "APPL????",
+			                      only_if_new=True)
+			
+			## Create a simple interface to localy install the aplication for the shell (a shell command line interface):
+			data_file  = "#!/bin/bash\n"
+			data_file += "# Simply open the real application in the correct way (a link does not work ...)\n"
+			data_file += "/Applications/" + pkg_name + ".app/Contents/MacOS/" + pkg_name + " $*\n"
+			tools.file_write_data(os.path.join(target_outpath, "shell", pkg_name),
+			                      data_file,
+			                      only_if_new=True)
+			
+			## Create the disk image of the application:
+			debug.info("Generate disk image for '" + pkg_name + "'")
+			output_file_name = os.path.join(self.get_final_path(), pkg_name + ".dmg")
+			cmd = "hdiutil create -volname "
+			cmd += pkg_name + " -srcpath "
+			cmd += os.path.join(tools.get_run_path(), self.path_out,  self.path_staging, pkg_name + ".app")
+			cmd += " -ov -format UDZO "
+			cmd += output_file_name
+			tools.create_directory_of_file(output_file_name)
+			multiprocess.run_command_direct(cmd)
+			debug.info("disk image: " + output_file_name)
+			
+			## user information:
+			#debug.info("You can have an shell interface by executing : ")
+			#debug.info("    sudo cp " + shell_file_name + " /usr/local/bin")
+			tools.file_write_data(build_package_path_done, "done...")
 	
 	def install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")

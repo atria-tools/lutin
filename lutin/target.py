@@ -780,6 +780,7 @@ class Target:
 	## @param[in] static The package is build in static mode
 	##
 	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
+		debug.debug("make_package [START]")
 		#The package generated depend of the type of the element:
 		end_point_module_name = heritage_list.list_heritage[-1].name
 		module = self.get_module(end_point_module_name)
@@ -801,6 +802,7 @@ class Target:
 		if module.get_type() == 'PACKAGE':
 			debug.info("Can not create package for package");
 			return
+		debug.debug("make_package [STOP]")
 		return
 	
 	##
@@ -813,6 +815,7 @@ class Target:
 	## @return False Nothing has been copied
 	##
 	def make_package_binary_data(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
+		debug.debug("make_package_binary_data [START]")
 		target_shared_path = os.path.join(path_package, self.pkg_path_data)
 		if static == True:
 			path_package_data = os.path.join(target_shared_path, pkg_name)
@@ -847,6 +850,7 @@ class Target:
 		ret_copy = tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
 		ret_remove = tools.clean_directory(target_shared_path, copy_list)
+		debug.debug("make_package_binary_data [STOP]")
 		return ret_copy or ret_remove
 	
 	##
@@ -859,6 +863,7 @@ class Target:
 	## @return False Nothing has been copied
 	##
 	def make_package_binary_bin(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
+		debug.debug("make_package_binary_bin [START]")
 		copy_list={}
 		path_package_bin = os.path.join(path_package, self.pkg_path_bin)
 		tools.create_directory_of_file(path_package_bin)
@@ -874,6 +879,7 @@ class Target:
 		if self.pkg_path_bin != "":
 			# remove unneded files (NOT folder ...)
 			ret_remove = tools.clean_directory(path_package_bin, copy_list)
+		debug.debug("make_package_binary_bin [STOP]")
 		return ret_copy or ret_remove
 	
 	##
@@ -886,6 +892,7 @@ class Target:
 	## @return False Nothing has been copied
 	##
 	def make_package_binary_lib(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
+		debug.debug("make_package_binary_lib [START]")
 		copy_list={}
 		path_package_lib = os.path.join(path_package, self.pkg_path_lib)
 		if static == False:
@@ -909,10 +916,12 @@ class Target:
 		if self.pkg_path_lib != "":
 			# remove unneded files (NOT folder ...)
 			ret_remove = tools.clean_directory(path_package_lib, copy_list)
+		debug.debug("make_package_binary_lib [STOP]")
 		return ret_copy or ret_remove
 	
 	
 	def make_package_generic_files(self, path_package, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
+		debug.debug("make_package_generic_files [START]")
 		## Create version file:
 		ret_version = tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
 		                                    tools.version_to_string(pkg_properties["VERSION"]),
@@ -973,6 +982,7 @@ class Target:
 			ret_changelog = tools.file_write_data(change_log_file_dest,
 			                                      "No changelog data " + pkg_name + "\n",
 			                                      only_if_new=True)
+		debug.debug("make_package_generic_files [STOP]")
 		return    ret_version \
 		       or ret_maintainer \
 		       or ret_appl_name \

@@ -105,264 +105,277 @@ class Target(target.Target):
 		tools.create_directory_of_file(target_outpath)
 		
 		## Create share datas:
-		self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_share = self.make_package_binary_data(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## copy binary files:
-		self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_bin = self.make_package_binary_bin(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create libraries:
-		self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
+		ret_lib = self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create generic files:
-		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
+		ret_file = self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
 		
-		## Create icon:
-		if    "ICON" in pkg_properties.keys() \
-		   and pkg_properties["ICON"] != "":
-			# Resize all icon needed for Ios ...
-			# TODO : Do not regenerate if source resource is not availlable
-			# TODO : Add a colored background ...
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "iTunesArtwork.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork.png"), 512, 512)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "iTunesArtwork@2x.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork@2x.png"), 1024, 1024)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-60@2x.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-60@2x.png"), 120, 120)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-76.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76.png"), 76, 76)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-76@2x.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76@2x.png"), 152, 152)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small-40.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40.png"), 40, 40)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small-40@2x.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40@2x.png"), 80, 80)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small.png"), 29, 29)
-			debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small@2x.png")
-			image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small@2x.png"), 58, 58)
+		## end of the package generation
+		build_package_path_done = os.path.join(self.get_build_path(pkg_name), "generatePackageDone.txt")
+		#Check date between the current file "list of action to generate package and the end of package generation
+		need_generate_package = depend.need_re_package(build_package_path_done, [__file__], True)
 		
-		## Create the info file:
-		debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
-		tools.file_write_data(os.path.join(target_outpath, "PkgInfo"),
-		                      "APPL????",
-		                      only_if_new=True)
-		
-		## Create Info.plist (in XML mode)
-		debug.print_element("pkg", "Info.plist", "<==", "Package properties")
-		# http://www.sandroid.org/imcross/#Deployment
-		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		data_file += "<plist version=\"1.0\">\n"
-		data_file += "		<dict>\n"
-		data_file += "			<key>CFBundleDevelopmentRegion</key>\n"
-		data_file += "			<string>en</string>\n"
-		data_file += "			<key>CFBundleDisplayName</key>\n"
-		data_file += "			<string>" + pkg_properties["NAME"] + "</string>\n"
-		data_file += "			<key>CFBundleExecutable</key>\n"
-		data_file += "			<string>" + pkg_name + "</string>\n"
-		data_file += "			<key>CFBundleIdentifier</key>\n"
-		data_file += "			<string>com." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
-		
-		data_file += "			<key>CFBundleIconFiles</key>\n"
-		data_file += "			<array>\n"
-		data_file += "				<string>Icon-60@2x.png</string>\n"
-		data_file += "				<string>Icon-76.png</string>\n"
-		data_file += "				<string>Icon-76@2x.png</string>\n"
-		data_file += "				<string>Icon-Small-40.png</string>\n"
-		data_file += "				<string>Icon-Small-40@2x.png</string>\n"
-		data_file += "				<string>Icon-Small.png</string>\n"
-		data_file += "				<string>Icon-Small@2x.png</string>\n"
-		data_file += "				<string>iTunesArtwork.png</string>\n"
-		data_file += "				<string>iTunesArtwork@2x.png</string>\n"
-		data_file += "			</array>\n"
-		
-		data_file += "			<key>CFBundleInfoDictionaryVersion</key>\n"
-		data_file += "			<string>6.0</string>\n"
-		data_file += "			<key>CFBundleName</key>\n"
-		data_file += "			<string>" + pkg_name + "</string>\n"
-		data_file += "			<key>CFBundlePackageType</key>\n"
-		data_file += "			<string>APPL</string>\n"
-		data_file += "			<key>CFBundleSignature</key>\n"
-		data_file += "			<string>????</string>\n"
-		data_file += "			<key>CFBundleSupportedPlatforms</key>\n"
-		data_file += "			<array>\n"
-		data_file += "				<string>iPhoneSimulator</string>\n"
-		data_file += "			</array>\n"
-		data_file += "			\n"
-		data_file += "			<key>CFBundleShortVersionString</key>\n"
-		data_file += "			<string>"+tools.version_to_string(pkg_properties["VERSION"])+"</string>\n"
-		data_file += "			<key>CFBundleVersion</key>\n"
-		data_file += "			<string>"+str(pkg_properties["VERSION_CODE"])+"</string>\n"
-		data_file += "			\n"
-		data_file += "			<key>CFBundleResourceSpecification</key>\n"
-		data_file += "			<string>ResourceRules.plist</string>\n"
-		if self.get_simulation() == False:
-			data_file += "			<key>LSRequiresIPhoneOS</key>\n"
+		## create the package:
+		if    ret_share \
+		   or ret_bin \
+		   or ret_lib \
+		   or ret_file \
+		   or need_generate_package:
+			## Create icon:
+			if    "ICON" in pkg_properties.keys() \
+			   and pkg_properties["ICON"] != "":
+				# Resize all icon needed for Ios ...
+				# TODO : Do not regenerate if source resource is not availlable
+				# TODO : Add a colored background ...
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "iTunesArtwork.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork.png"), 512, 512)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "iTunesArtwork@2x.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "iTunesArtwork@2x.png"), 1024, 1024)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-60@2x.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-60@2x.png"), 120, 120)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-76.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76.png"), 76, 76)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-76@2x.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-76@2x.png"), 152, 152)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small-40.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40.png"), 40, 40)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small-40@2x.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small-40@2x.png"), 80, 80)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small.png"), 29, 29)
+				debug.print_element("pkg", os.path.relpath(pkg_properties["ICON"]), "==>", "Icon-Small@2x.png")
+				image.resize(pkg_properties["ICON"], os.path.join(target_outpath, "Icon-Small@2x.png"), 58, 58)
+			
+			## Create the info file:
+			debug.print_element("pkg", "PkgInfo", "<==", "APPL????")
+			tools.file_write_data(os.path.join(target_outpath, "PkgInfo"),
+			                      "APPL????",
+			                      only_if_new=True)
+			
+			## Create Info.plist (in XML mode)
+			debug.print_element("pkg", "Info.plist", "<==", "Package properties")
+			# http://www.sandroid.org/imcross/#Deployment
+			data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+			data_file += "<plist version=\"1.0\">\n"
+			data_file += "		<dict>\n"
+			data_file += "			<key>CFBundleDevelopmentRegion</key>\n"
+			data_file += "			<string>en</string>\n"
+			data_file += "			<key>CFBundleDisplayName</key>\n"
+			data_file += "			<string>" + pkg_properties["NAME"] + "</string>\n"
+			data_file += "			<key>CFBundleExecutable</key>\n"
+			data_file += "			<string>" + pkg_name + "</string>\n"
+			data_file += "			<key>CFBundleIdentifier</key>\n"
+			data_file += "			<string>com." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
+			
+			data_file += "			<key>CFBundleIconFiles</key>\n"
+			data_file += "			<array>\n"
+			data_file += "				<string>Icon-60@2x.png</string>\n"
+			data_file += "				<string>Icon-76.png</string>\n"
+			data_file += "				<string>Icon-76@2x.png</string>\n"
+			data_file += "				<string>Icon-Small-40.png</string>\n"
+			data_file += "				<string>Icon-Small-40@2x.png</string>\n"
+			data_file += "				<string>Icon-Small.png</string>\n"
+			data_file += "				<string>Icon-Small@2x.png</string>\n"
+			data_file += "				<string>iTunesArtwork.png</string>\n"
+			data_file += "				<string>iTunesArtwork@2x.png</string>\n"
+			data_file += "			</array>\n"
+			
+			data_file += "			<key>CFBundleInfoDictionaryVersion</key>\n"
+			data_file += "			<string>6.0</string>\n"
+			data_file += "			<key>CFBundleName</key>\n"
+			data_file += "			<string>" + pkg_name + "</string>\n"
+			data_file += "			<key>CFBundlePackageType</key>\n"
+			data_file += "			<string>APPL</string>\n"
+			data_file += "			<key>CFBundleSignature</key>\n"
+			data_file += "			<string>????</string>\n"
+			data_file += "			<key>CFBundleSupportedPlatforms</key>\n"
+			data_file += "			<array>\n"
+			data_file += "				<string>iPhoneSimulator</string>\n"
+			data_file += "			</array>\n"
+			data_file += "			\n"
+			data_file += "			<key>CFBundleShortVersionString</key>\n"
+			data_file += "			<string>"+tools.version_to_string(pkg_properties["VERSION"])+"</string>\n"
+			data_file += "			<key>CFBundleVersion</key>\n"
+			data_file += "			<string>"+str(pkg_properties["VERSION_CODE"])+"</string>\n"
+			data_file += "			\n"
+			data_file += "			<key>CFBundleResourceSpecification</key>\n"
+			data_file += "			<string>ResourceRules.plist</string>\n"
+			if self.get_simulation() == False:
+				data_file += "			<key>LSRequiresIPhoneOS</key>\n"
+				data_file += "			<true/>\n"
+			else:
+				data_file += "			<key>DTPlatformName</key>\n"
+				data_file += "			<string>iphonesimulator</string>\n"
+				data_file += "			<key>DTSDKName</key>\n"
+				data_file += "			<string>iphonesimulator7.0</string>\n"
+			data_file += "			\n"
+			data_file += "			<key>UIDeviceFamily</key>\n"
+			data_file += "			<array>\n"
+			data_file += "				<integer>1</integer>\n"
+			data_file += "				<integer>2</integer>\n"
+			data_file += "			</array>\n"
+			data_file += "			<key>UIRequiredDeviceCapabilities</key>\n"
+			data_file += "			<array>\n"
+			data_file += "				<string>armv7</string>\n"
+			data_file += "			</array>\n"
+			data_file += "			<key>UIStatusBarHidden</key>\n"
 			data_file += "			<true/>\n"
-		else:
-			data_file += "			<key>DTPlatformName</key>\n"
-			data_file += "			<string>iphonesimulator</string>\n"
-			data_file += "			<key>DTSDKName</key>\n"
-			data_file += "			<string>iphonesimulator7.0</string>\n"
-		data_file += "			\n"
-		data_file += "			<key>UIDeviceFamily</key>\n"
-		data_file += "			<array>\n"
-		data_file += "				<integer>1</integer>\n"
-		data_file += "				<integer>2</integer>\n"
-		data_file += "			</array>\n"
-		data_file += "			<key>UIRequiredDeviceCapabilities</key>\n"
-		data_file += "			<array>\n"
-		data_file += "				<string>armv7</string>\n"
-		data_file += "			</array>\n"
-		data_file += "			<key>UIStatusBarHidden</key>\n"
-		data_file += "			<true/>\n"
-		data_file += "			<key>UISupportedInterfaceOrientations</key>\n"
-		data_file += "			<array>\n"
-		data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
-		data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
-		data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
-		data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
-		data_file += "			</array>\n"
-		data_file += "			<key>UISupportedInterfaceOrientations~ipad</key>\n"
-		data_file += "			<array>\n"
-		data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
-		data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
-		data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
-		data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
-		data_file += "			</array>\n"
-		data_file += "    </dict>\n"
-		data_file += "</plist>\n"
-		data_file += "\n\n"
-		tools.file_write_data(os.path.join(target_outpath, "Info.plist"),
-		                      data_file,
-		                      only_if_new=True)
-		
-		"""
-		infoFile = self.get_staging_path(pkg_name) + "/" + pkg_name + "-Info.plist"
-		# Create the info file
-		tmpFile = open(infoFile, 'w')
-		tmpFile.write(data_file)
-		tmpFile.flush()
-		tmpFile.close()
-		cmdLine  = "builtin-infoPlistUtility "
-		cmdLine += " " + self.get_staging_path(pkg_name) + "/" + pkg_name + "-Info.plist "
-		cmdLine += " -genpkginfo " + self.get_staging_path(pkg_name) + "/PkgInfo"
-		cmdLine += " -expandbuildsettings "
-		cmdLine += " -format binary "
-		if self.get_simulation() == False:
-			cmdLine += " -platform iphonesimulator "
-		else:
-			cmdLine += " -platform iphoneos "
-		cmdLine += " -o " + self.get_staging_path(pkg_name) + "/" + "Info.plist"
-		multiprocess.run_command(cmdLine)
-		"""
-		"""
-		
-			/Users/edouarddupin/dev/exampleProjectXcode/projectName/projectName/projectName-Info.plist
-			-genpkginfo
-			/Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/PkgInfo
-			-expandbuildsettings
-			-format binary
-			-platform iphonesimulator
-		    -additionalcontentfile /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Intermediates/projectName.build/Debug-iphonesimulator/projectName.build/assetcatalog_generated_info.plist
-			-o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/Info.plist
-		 -additionalcontentfile /Users/edouarddupin/Library/Developer/Xcode/DerivedData/zdzdzd-bjuyukzpzhnyerdmxohjyuxfdllv/Build/Intermediates/zdzdzd.build/Debug-iphoneos/zdzdzd.build/assetcatalog_generated_info.plist -o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/zdzdzd-bjuyukzpzhnyerdmxohjyuxfdllv/Build/Products/Debug-iphoneos/zdzdzd.app/Info.plist
+			data_file += "			<key>UISupportedInterfaceOrientations</key>\n"
+			data_file += "			<array>\n"
+			data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
+			data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
+			data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
+			data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
+			data_file += "			</array>\n"
+			data_file += "			<key>UISupportedInterfaceOrientations~ipad</key>\n"
+			data_file += "			<array>\n"
+			data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
+			data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
+			data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
+			data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
+			data_file += "			</array>\n"
+			data_file += "    </dict>\n"
+			data_file += "</plist>\n"
+			data_file += "\n\n"
+			tools.file_write_data(os.path.join(target_outpath, "Info.plist"),
+			                      data_file,
+			                      only_if_new=True)
 			
 			"""
-		#/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/projectName -o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app.dSYM
-			
-		debug.print_element("pkg", "ResourceRules.plist", "<==", "Resources autorisation")
-		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		data_file += "<plist version=\"1.0\">\n"
-		data_file += "	<dict>\n"
-		data_file += "		<key>rules</key>\n"
-		data_file += "		<dict>\n"
-		data_file += "			<key>.*</key>\n"
-		data_file += "			<true/>\n"
-		data_file += "			<key>Info.plist</key>\n"
-		data_file += "			<dict>\n"
-		data_file += "				<key>omit</key>\n"
-		data_file += "				<true/>\n"
-		data_file += "				<key>weight</key>\n"
-		data_file += "				<real>10</real>\n"
-		data_file += "			</dict>\n"
-		data_file += "			<key>ResourceRules.plist</key>\n"
-		data_file += "			<dict>\n"
-		data_file += "				<key>omit</key>\n"
-		data_file += "				<true/>\n"
-		data_file += "				<key>weight</key>\n"
-		data_file += "				<real>100</real>\n"
-		data_file += "			</dict>\n"
-		data_file += "		</dict>\n"
-		data_file += "	</dict>\n"
-		data_file += "</plist>\n"
-		data_file += "\n\n"
-		tools.file_write_data(os.path.join(target_outpath, "ResourceRules.plist"),
-		                      data_file,
-		                      only_if_new=True)
-
-		debug.print_element("pkg", "Entitlements.plist", "<==", "application mode")
-		data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-		data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-		data_file += "<plist version=\"1.0\">\n"
-		data_file += "	<dict>\n"
-		data_file += "		<key>get-task-allow</key>\n"
-		data_file += "		<true/>\n"
-		data_file += "    </dict>\n"
-		data_file += "</plist>\n"
-		data_file += "\n\n"
-		tools.file_write_data(os.path.join(target_outpath, "Entitlements.plist"),
-		                      data_file,
-		                      only_if_new=True)
-
-		# Simulateur path :
-		#~/Library/Application\ Support/iPhone\ Simulator/7.0.3/Applications/
-		# must have a 'uuidgen' UID generate value with this elemennt ...
-		# get the bundle path : ==> maybe usefull in MocOS ...
-		# NSLog(@"%@",[[NSBundle mainBundle] bundlePath]);
-		
-		# Must create the tarball of the application 
-		#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
-		#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
-		if self.get_simulation() == False:
-			if "APPLE_APPLICATION_IOS_ID" not in pkg_properties:
-				pkg_properties["APPLE_APPLICATION_IOS_ID"] = "00000000"
-				debug.warning("Missing package property : APPLE_APPLICATION_IOS_ID USE " + pkg_properties["APPLE_APPLICATION_IOS_ID"] + " ID ... ==> CAN NOT WORK ..." )
+			infoFile = self.get_staging_path(pkg_name) + "/" + pkg_name + "-Info.plist"
 			# Create the info file
-			tmpFile = open(os.path.join(self.get_build_path(pkg_name), pkg_name + ".xcent"), 'w')
-			tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-			tmpFile.write("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n")
-			tmpFile.write("<plist version=\"1.0\">\n")
-			tmpFile.write("    <dict>\n")
-			tmpFile.write("        <key>application-identifier</key>\n")
-			tmpFile.write("        <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
-			tmpFile.write("        <key>get-task-allow</key>\n")
-			tmpFile.write("        <true/>\n")
-			tmpFile.write("        <key>keychain-access-groups</key>\n")
-			tmpFile.write("        <array>\n")
-			tmpFile.write("            <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
-			tmpFile.write("        </array>\n")
-			tmpFile.write("    </dict>\n")
-			tmpFile.write("</plist>\n")
+			tmpFile = open(infoFile, 'w')
+			tmpFile.write(data_file)
 			tmpFile.flush()
 			tmpFile.close()
-			# application signing :
-			debug.print_element("pkg(signed)", "pkg", "<==", "Signing application")
-			iosDevelopperKeyFile = ".iosKey.txt"
-			if tools.file_size(iosDevelopperKeyFile) < 10:
-				debug.warning("To sign an application we need to have a signing key in the file '" + iosDevelopperKeyFile + "' \n it is represented like: 'iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)'\n you can obtain it with : 'certtool y | grep \"Developer\"'")
-				debug.warning("Can not be install ... not runnable")
+			cmdLine  = "builtin-infoPlistUtility "
+			cmdLine += " " + self.get_staging_path(pkg_name) + "/" + pkg_name + "-Info.plist "
+			cmdLine += " -genpkginfo " + self.get_staging_path(pkg_name) + "/PkgInfo"
+			cmdLine += " -expandbuildsettings "
+			cmdLine += " -format binary "
+			if self.get_simulation() == False:
+				cmdLine += " -platform iphonesimulator "
 			else:
-				signatureKey = tools.file_read_data(iosDevelopperKeyFile)
-				signatureKey = re.sub('\n', '', signatureKey)
-				cmdLine  = 'codesign --force --sign '
-				# to get this key ; certtool y | grep "Developer"
-				cmdLine += ' "' + signatureKey + '" '
-				cmdLine += ' --entitlements ' + os.path.join(self.get_build_path(pkg_name), pkg_name + ".xcent")
-				cmdLine += ' ' + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
-				multiprocess.run_command(cmdLine)
-	
+				cmdLine += " -platform iphoneos "
+			cmdLine += " -o " + self.get_staging_path(pkg_name) + "/" + "Info.plist"
+			multiprocess.run_command(cmdLine)
+			"""
+			"""
+			
+				/Users/edouarddupin/dev/exampleProjectXcode/projectName/projectName/projectName-Info.plist
+				-genpkginfo
+				/Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/PkgInfo
+				-expandbuildsettings
+				-format binary
+				-platform iphonesimulator
+			    -additionalcontentfile /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Intermediates/projectName.build/Debug-iphonesimulator/projectName.build/assetcatalog_generated_info.plist
+				-o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/Info.plist
+			 -additionalcontentfile /Users/edouarddupin/Library/Developer/Xcode/DerivedData/zdzdzd-bjuyukzpzhnyerdmxohjyuxfdllv/Build/Intermediates/zdzdzd.build/Debug-iphoneos/zdzdzd.build/assetcatalog_generated_info.plist -o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/zdzdzd-bjuyukzpzhnyerdmxohjyuxfdllv/Build/Products/Debug-iphoneos/zdzdzd.app/Info.plist
+				
+				"""
+			#/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app/projectName -o /Users/edouarddupin/Library/Developer/Xcode/DerivedData/projectName-gwycnyyzohokcmalgodeucqppxro/Build/Products/Debug-iphonesimulator/projectName.app.dSYM
+				
+			debug.print_element("pkg", "ResourceRules.plist", "<==", "Resources autorisation")
+			data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+			data_file += "<plist version=\"1.0\">\n"
+			data_file += "	<dict>\n"
+			data_file += "		<key>rules</key>\n"
+			data_file += "		<dict>\n"
+			data_file += "			<key>.*</key>\n"
+			data_file += "			<true/>\n"
+			data_file += "			<key>Info.plist</key>\n"
+			data_file += "			<dict>\n"
+			data_file += "				<key>omit</key>\n"
+			data_file += "				<true/>\n"
+			data_file += "				<key>weight</key>\n"
+			data_file += "				<real>10</real>\n"
+			data_file += "			</dict>\n"
+			data_file += "			<key>ResourceRules.plist</key>\n"
+			data_file += "			<dict>\n"
+			data_file += "				<key>omit</key>\n"
+			data_file += "				<true/>\n"
+			data_file += "				<key>weight</key>\n"
+			data_file += "				<real>100</real>\n"
+			data_file += "			</dict>\n"
+			data_file += "		</dict>\n"
+			data_file += "	</dict>\n"
+			data_file += "</plist>\n"
+			data_file += "\n\n"
+			tools.file_write_data(os.path.join(target_outpath, "ResourceRules.plist"),
+			                      data_file,
+			                      only_if_new=True)
+			
+			debug.print_element("pkg", "Entitlements.plist", "<==", "application mode")
+			data_file  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			data_file += "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+			data_file += "<plist version=\"1.0\">\n"
+			data_file += "	<dict>\n"
+			data_file += "		<key>get-task-allow</key>\n"
+			data_file += "		<true/>\n"
+			data_file += "    </dict>\n"
+			data_file += "</plist>\n"
+			data_file += "\n\n"
+			tools.file_write_data(os.path.join(target_outpath, "Entitlements.plist"),
+			                      data_file,
+			                      only_if_new=True)
+			
+			# Simulateur path :
+			#~/Library/Application\ Support/iPhone\ Simulator/7.0.3/Applications/
+			# must have a 'uuidgen' UID generate value with this elemennt ...
+			# get the bundle path : ==> maybe usefull in MocOS ...
+			# NSLog(@"%@",[[NSBundle mainBundle] bundlePath]);
+			
+			# Must create the tarball of the application 
+			#cd $(TARGET_OUT_FINAL)/; tar -cf $(PROJECT_NAME).tar $(PROJECT_NAME).app
+			#cd $(TARGET_OUT_FINAL)/; tar -czf $(PROJECT_NAME).tar.gz $(PROJECT_NAME).app
+			if self.get_simulation() == False:
+				if "APPLE_APPLICATION_IOS_ID" not in pkg_properties:
+					pkg_properties["APPLE_APPLICATION_IOS_ID"] = "00000000"
+					debug.warning("Missing package property : APPLE_APPLICATION_IOS_ID USE " + pkg_properties["APPLE_APPLICATION_IOS_ID"] + " ID ... ==> CAN NOT WORK ..." )
+				# Create the info file
+				tmpFile = open(os.path.join(self.get_build_path(pkg_name), pkg_name + ".xcent"), 'w')
+				tmpFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+				tmpFile.write("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n")
+				tmpFile.write("<plist version=\"1.0\">\n")
+				tmpFile.write("    <dict>\n")
+				tmpFile.write("        <key>application-identifier</key>\n")
+				tmpFile.write("        <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
+				tmpFile.write("        <key>get-task-allow</key>\n")
+				tmpFile.write("        <true/>\n")
+				tmpFile.write("        <key>keychain-access-groups</key>\n")
+				tmpFile.write("        <array>\n")
+				tmpFile.write("            <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
+				tmpFile.write("        </array>\n")
+				tmpFile.write("    </dict>\n")
+				tmpFile.write("</plist>\n")
+				tmpFile.flush()
+				tmpFile.close()
+				# application signing :
+				debug.print_element("pkg(signed)", "pkg", "<==", "Signing application")
+				iosDevelopperKeyFile = ".iosKey.txt"
+				if tools.file_size(iosDevelopperKeyFile) < 10:
+					debug.warning("To sign an application we need to have a signing key in the file '" + iosDevelopperKeyFile + "' \n it is represented like: 'iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)'\n you can obtain it with : 'certtool y | grep \"Developer\"'")
+					debug.warning("Can not be install ... not runnable")
+				else:
+					signatureKey = tools.file_read_data(iosDevelopperKeyFile)
+					signatureKey = re.sub('\n', '', signatureKey)
+					cmdLine  = 'codesign --force --sign '
+					# to get this key ; certtool y | grep "Developer"
+					cmdLine += ' "' + signatureKey + '" '
+					cmdLine += ' --entitlements ' + os.path.join(self.get_build_path(pkg_name), pkg_name + ".xcent")
+					cmdLine += ' ' + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
+					multiprocess.run_command(cmdLine)
+			# package is done corectly ...
+			tools.file_write_data(build_package_path_done, "done...")
+		
 	def create_random_number(self, len):
 		out = ""
 		for iii in range(0,len):

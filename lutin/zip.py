@@ -18,15 +18,31 @@ from . import tools
 
 def create_zip(path, outputFile):
 	debug.debug("Create Zip : '" + outputFile + "'")
-	debug.debug("    from '" + path + "'")
-	basePathlen = len(path)
+	tools.create_directory_of_file(outputFile)
+	debug.debug("    from '" + str(path) + "'")
+	if tools.get_type_string(path) == "string":
+		path = [path]
 	zf = zipfile.ZipFile(outputFile, mode='w')
-	for root, dirnames, filenames in os.walk(path):
-		# List all files :
-		for filename in filenames:
-			file = os.path.join(root, filename)
-			debug.verbose("    ADD zip = " + str(file))
-			zf.write(file, file[basePathlen:])
+	for elem in path:
+		basePathlen = len(elem)
+		for root, dirnames, filenames in os.walk(elem):
+			# List all files :
+			for filename in filenames:
+				file = os.path.join(root, filename)
+				debug.verbose("    ADD zip = " + str(file) + " ==> " +file[basePathlen:])
+				zf.write(file, file[basePathlen:])
+	zf.close()
+
+def create_zip_file(files, outputFile):
+	debug.debug("Create Zip : '" + outputFile + "'")
+	tools.create_directory_of_file(outputFile)
+	debug.debug("    from '" + str(files) + "'")
+	if tools.get_type_string(files) == "string":
+		files = [files]
+	zf = zipfile.ZipFile(outputFile, mode='w')
+	for elem in files:
+		debug.verbose("    ADD zip = " + str(elem) + " ==> " + elem[len(os.path.dirname(elem)):])
+		zf.write(elem, elem[len(os.path.dirname(elem)):])
 	zf.close()
 	
 

@@ -12,6 +12,7 @@ from lutin import debug
 from lutin import target
 from lutin import tools
 from lutin import host
+from lutin import depend
 import os
 import stat
 import sys
@@ -71,8 +72,8 @@ class Target(target.Target):
 		self.support_dynamic_link = False
 	
 	
-	def get_staging_path_data(self, binary_name, heritage_list):
-		return self.get_staging_path(binary_name) + self.path_data
+	def get_staging_path_data(self, binary_name):
+		return os.path.join(self.get_staging_path(binary_name), binary_name + ".app", self.pkg_path_data)
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
@@ -92,14 +93,34 @@ class Target(target.Target):
 		ret_lib = self.make_package_binary_lib(target_outpath, pkg_name, base_pkg_path, heritage_list, static)
 		
 		## Create generic files:
-		ret_file = self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
+		ret_file = self.make_package_generic_files(target_outpath+"/pkg", pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
 		
+		build_package_path_done = os.path.join(self.get_build_path(pkg_name), "generatePackageDone.txt")
+		#Check date between the current file "list of action to generate package and the end of package generation
+		need_generate_package = depend.need_re_package(build_package_path_done, [__file__], True)
 		## create the package:
 		if    ret_share \
 		   or ret_bin \
 		   or ret_lib \
-		   or ret_file:
-			debug.info("TODO: create a windows pkg ...")
+		   or ret_file \
+		   or need_generate_package:
+			# Zip the data
+			debug.print_element("zip", "data.zip", "<==", self.get_staging_path_data(pkg_name) + "/*")
+			zip_path = os.path.join(self.get_staging_path(pkg_name), "data.zip")
+			zip.create_zip([
+			    self.get_staging_path_data(pkg_name),
+			    target_outpath+"/pkg"
+			    ], zip_path)
+			zip_path_final = os.path.join(self.get_final_path(), pkg_name + ".zip")
+			# generate deployed zip (for user)
+			debug.print_element("zip", pkg_name + ".zip", "<==", self.get_staging_path(pkg_name))
+			zip.create_zip_file([
+			    zip_path,
+			    os.path.join(target_outpath, pkg_name + self.suffix_binary)
+			    ],
+			    zip_path_final)
+			
+			tools.file_write_data(build_package_path_done, "done...")
 	
 	def make_package_single_file(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
 		debug.debug("------------------------------------------------------------------------")

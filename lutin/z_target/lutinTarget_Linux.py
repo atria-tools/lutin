@@ -103,16 +103,24 @@ class Target(target.Target):
 		## Create generic files:
 		ret_file = self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
 		
+		## end of the package generation
+		build_package_path_done = os.path.join(self.get_build_path(pkg_name), "generatePackageDone.txt")
+		#Check date between the current file "list of action to generate package and the end of package generation
+		need_generate_package = depend.need_re_package(build_package_path_done, [__file__], True)
+		
 		## create the package:
 		if    ret_share \
 		   or ret_bin \
 		   or ret_lib \
-		   or ret_file:
+		   or ret_file \
+		   or need_generate_package:
 			debug.debug("package : " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.pkg"))
 			os.system("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
 			#multiprocess.run_command("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
 			tools.create_directory_of_file(self.get_final_path())
 			tools.copy_file(os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.tar.gz"), os.path.join(self.get_final_path(), pkg_name + ".app.gpkg"))
+			# package is done corectly ...
+			tools.file_write_data(build_package_path_done, "done...")
 	
 	def install_package(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
