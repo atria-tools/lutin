@@ -19,7 +19,7 @@ from lutin import zip
 from lutin import multiprocess
 
 class Target(target.Target):
-	def __init__(self, config):
+	def __init__(self, config, sub_name=[]):
 		if config["compilator"] != "gcc":
 			debug.error("Windows does not support '" + config["compilator"] + "' compilator ... availlable : [gcc]")
 			config["compilator"] = "gcc"
@@ -31,7 +31,7 @@ class Target(target.Target):
 		if config["bus-size"] == "auto":
 			config["bus-size"] = str(host.BUS_SIZE)
 		
-		target.Target.__init__(self, "Windows", config, "")
+		target.Target.__init__(self, ["Windows"] + sub_name, config, "")
 		
 		# on windows board the basic path is not correct 
 		# TODO : get external PATH for the minGW path

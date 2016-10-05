@@ -928,26 +928,26 @@ class Module:
 	##
 	## @brief Add a tools in dependency
 	## @param[in] self (handle) Class handle
-	## @param[in] in_list ([string,...] or string) Name(s) of the tools
+	## @param[in] list ([string,...] or string) Name(s) of the tools
 	## @return None
 	##
-	def add_tools(self, in_list):
-		tools.list_append_to(self._tools, in_list, True)
+	def add_tools(self, list):
+		tools.list_append_to(self._tools, list, True)
 	
 	##
 	## @brief Add a dependency on this module
 	## @param[in] self (handle) Class handle
-	## @param[in] in_list ([string,...] or string) Name(s) of the modules dependency
+	## @param[in] list ([string,...] or string) Name(s) of the modules dependency
 	## @return None
 	##
-	def add_depend(self, in_list):
-		tools.list_append_to(self._depends, in_list, True)
+	def add_depend(self, list):
+		tools.list_append_to(self._depends, list, True)
 	
 	## @brief deprecated ...
 	## @return None
-	def add_module_depend(self, in_list):
+	def add_module_depend(self, list):
 		debug.warning("[" + self._name + "] add_module_depend is deprecated ==> use add_depend(...)")
-		self.add_depend(in_list)
+		self.add_depend(list)
 	
 	##
 	## @brief Add an optionnal dependency on this module
@@ -971,64 +971,64 @@ class Module:
 	##
 	## @brief Add a path to include when build
 	## @param[in] self (handle) Class handle
-	## @param[in] in_list ([string,...] or string) List of path to include (default: local path) only relative path...
-	## @param[in] in_type (string) inclusion group name 'c', 'c++', 'java' ...
+	## @param[in] list ([string,...] or string) List of path to include (default: local path) only relative path...
+	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
 	## @param[in] export (bool) export the include path.
 	## @return None
 	##
-	def add_path(self, in_list=".", in_type='c', export=False):
-		if type(in_list) == list:
+	def add_path(self, list=".", type='c', export=False):
+		if tools.get_type_string(list) == "list":
 			add_list = []
-			for elem in in_list:
+			for elem in list:
 				if     len(elem) > 1 \
 				   and elem[0] == '/':
 					# unix case
-					debug.warning(" add_path(" + in_list + ")")
-					debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 3.x)")
+					debug.warning(" add_path(" + list + ")")
+					debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
 					add_list.append(elem)
 				elif     len(elem) > 2 \
 				     and elem[1] == ':':
 					# windows case :
-					debug.warning(" add_path(" + in_list + ")")
-					debug.warning("[" + self._name + "] Not permited to add a path that start in '" + elem[0] + ":' directory (only relative path) (compatibility until 3.x)")
+					debug.warning(" add_path(" + list + ")")
+					debug.warning("[" + self._name + "] Not permited to add a path that start in '" + elem[0] + ":' directory (only relative path) (compatibility until 2.x)")
 					add_list.append(elem)
 				if elem == ".":
 					add_list.append(tools.get_current_path(self._origin_file))
 				else:
 					add_list.append(os.path.join(tools.get_current_path(self._origin_file), elem))
 		else:
-			if     len(in_list) > 1 \
-			   and in_list[0] == '/':
+			if     len(list) > 1 \
+			   and list[0] == '/':
 				# unix case
-				debug.warning(" add_path(" + in_list + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 3.x)")
-				add_list = in_list
-			elif     len(in_list) > 2 \
-			     and in_list[1] == ':':
+				debug.warning(" add_path(" + list + ")")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
+				add_list = list
+			elif     len(list) > 2 \
+			     and list[1] == ':':
 				# windows case :
-				debug.warning(" add_path(" + in_list + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + in_list[0] + ":' directory (only relative path) (compatibility until 3.x)")
-				add_list = in_list
-			elif in_list == ".":
+				debug.warning(" add_path(" + list + ")")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + list[0] + ":' directory (only relative path) (compatibility until 2.x)")
+				add_list = list
+			elif list == ".":
 				add_list = tools.get_current_path(self._origin_file)
 			else:
-				add_list = os.path.join(tools.get_current_path(self._origin_file), in_list)
-		debug.verbose("Convert path : " + str(in_list) + " in " + str(add_list))
-		self._add_path(add_list, in_type, export)
+				add_list = os.path.join(tools.get_current_path(self._origin_file), list)
+		debug.verbose("Convert path : " + str(list) + " in " + str(add_list))
+		self._add_path(add_list, type, export)
 	
 	##
 	## @brief (INTERNAL API) Add a path to include when build
 	## @param[in] self (handle) Class handle
-	## @param[in] in_list ([string,...] or string) List of path to include (default: local path)
-	## @param[in] in_type (string) inclusion group name 'c', 'c++', 'java' ...
+	## @param[in] list ([string,...] or string) List of path to include (default: local path)
+	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
 	## @param[in] export (bool) export the include path.
 	## @return None
 	##
-	def _add_path(self, in_list=".", in_type='c', export=False):
+	def _add_path(self, list=".", type='c', export=False):
 		if export == True:
-			tools.list_append_to_2(self._path["export"], in_type, in_list)
+			tools.list_append_to_2(self._path["export"], type, list)
 		else:
-			tools.list_append_to_2(self._path["local"], in_type, in_list)
+			tools.list_append_to_2(self._path["local"], type, list)
 	
 	##
 	## @brief deprecated ...
@@ -1041,27 +1041,27 @@ class Module:
 	## @brief Add compilation flags
 	## @param[in] self (handle) Class handle
 	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
-	## @param[in] in_list ([string,...] or string) List of path to include
+	## @param[in] list ([string,...] or string) List of path to include
 	## @param[in] export (bool) export the flat that has been requested to add if module is present.
 	## @return None
 	##
-	def add_flag(self, type, in_list, export=False):
+	def add_flag(self, type, list, export=False):
 		if export == True:
-			tools.list_append_to_2(self._flags["export"], type, in_list)
+			tools.list_append_to_2(self._flags["export"], type, list)
 		else:
-			tools.list_append_to_2(self._flags["local"], type, in_list)
+			tools.list_append_to_2(self._flags["local"], type, list)
 	
 	## @brief deprecated ...
 	## @return None
-	def add_export_flag(self, type, in_list):
+	def add_export_flag(self, type, list):
 		debug.warning("[" + self._name + "] add_export_flag is deprecated ==> use add_flag(xxx, yyy, export=True)")
-		self.add_flag(type, in_list, export=True)
+		self.add_flag(type, list, export=True)
 	
 	## @brief deprecated ...
 	## @return None
-	def compile_flags(self, type, in_list):
+	def compile_flags(self, type, list):
 		debug.warning("[" + self._name + "] compile_flags is deprecated ==> use add_flag(xxx, yyy)")
-		self.add_flag(type, in_list)
+		self.add_flag(type, list)
 	
 	##
 	## @brief Set the compilation version of the 
@@ -1109,15 +1109,15 @@ class Module:
 	##
 	## @brief Add source file to compile
 	## @param[in] self (handle) Class handle
-	## @param[in] in_list ([string,...] or string) File(s) to compile
+	## @param[in] list ([string,...] or string) File(s) to compile
 	## @return None
 	##
-	def add_src_file(self, in_list):
-		tools.list_append_to(self._src, in_list, True)
+	def add_src_file(self, list):
+		tools.list_append_to(self._src, list, True)
 	##
 	## @brief An an header file in the install directory
 	## @param[in] self (handle) Class handle
-	## @param[in] in_list ([string,...] or string) List of element that is needed to install
+	## @param[in] list ([string,...] or string) List of element that is needed to install
 	## @param[in] destination_path (string) Path to install the files (remove all the path of the file)
 	## @param[in] clip_path (string) Remove a part of the path set in the list and install data in generic include path
 	## @param[in] recursive (bool) when use regexp in file list ==> we can add recursive property
@@ -1160,13 +1160,13 @@ class Module:
 	## 
 	## @return None
 	##
-	def add_header_file(self, in_list, destination_path=None, clip_path=None, recursive=False):
+	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
 		if destination_path != None:
 			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
-		if type(in_list) == str:
-			in_list = [in_list]
-		for elem in in_list:
+		if tools.get_type_string(list) == "string":
+			list = [list]
+		for elem in list:
 			base = os.path.basename(elem)
 			if destination_path != None:
 				if clip_path != None:
@@ -1270,7 +1270,7 @@ class Module:
 	## @return None
 	##
 	def _print_list(self, description, input_list):
-		if type(input_list) == list:
+		if tools.get_type_string(input_list) == "list":
 			if len(input_list) > 0:
 				print('        ' + str(description))
 				for elem in input_list:
@@ -1364,13 +1364,13 @@ class Module:
 			   and value[0] == '/':
 				# unix case
 				debug.warning(" set_pkg('ICON', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 3.x)")
+				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 2.x)")
 				self._package_prop[variable] = value
 			elif     len(value) > 2 \
 			     and value[1] == ':':
 				# windows case :
 				debug.warning(" set_pkg('ICON', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 3.x)")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 2.x)")
 				self._package_prop[variable] = value
 			else:
 				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
@@ -1404,13 +1404,13 @@ class Module:
 			   and value[0] == '/':
 				# unix case
 				debug.warning(" set_pkg('ANDROID_SIGN', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 3.x)")
+				debug.warning("[" + self._name + "] Not permited to add an ICON that start in / directory (only relative path) (compatibility until 2.x)")
 				self._package_prop[variable] = value
 			elif     len(value) > 2 \
 			     and value[1] == ':':
 				# windows case :
 				debug.warning(" set_pkg('ANDROID_SIGN', " + value + ")")
-				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 3.x)")
+				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + value[0] + ":' directory (only relative path) (compatibility until 2.x)")
 				self._package_prop[variable] = value
 			else:
 				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
@@ -1553,7 +1553,7 @@ def load_module(target, name):
 					tmp_element = None
 			elif "create" in dir(the_module):
 				# parse in a second time to permit to implement retro-compat build
-				debug.warning("[DEPRECATED] (" + name + ") module creation: function 'create', use 'configure' ... (remove compatibility in next major version (3.x)")
+				debug.warning("[DEPRECATED] (" + name + ") module creation: function 'create', use 'configure' ... (remove compatibility in next major version (2.x)")
 				tmp_element = the_module.create(target, name)
 				if tmp_element != None:
 					# overwrite some package default property (if not set by user)

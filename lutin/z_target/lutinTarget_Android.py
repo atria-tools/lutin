@@ -18,7 +18,7 @@ import os
 import sys
 
 class Target(target.Target):
-	def __init__(self, config):
+	def __init__(self, config, sub_name=[]):
 		#processor type selection (auto/arm/ppc/x86)
 		if config["arch"] == "auto":
 			config["arch"] = "arm"
@@ -26,7 +26,7 @@ class Target(target.Target):
 		if config["bus-size"] == "auto":
 			config["bus-size"] = "32"
 		self.type_arch = ""
-		target.Target.__init__(self, "Android", config, self.type_arch)
+		target.Target.__init__(self, ["Android"] + sub_name, config, self.type_arch)
 		
 		if config["bus-size"] == "32":
 			self.type_arch="armv7"
@@ -330,10 +330,10 @@ class Target(target.Target):
 			debug.error("missing parameter 'ANDROID_MANIFEST' in the properties ... ")
 		
 		#add properties on wallpaper :
-		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", key, title, summary, [["key","value display"],["key2","value display 2"]])
-		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["list", "testpattern", "Select test pattern", "Choose which test pattern to display", [["key","value display"],["key2","value display 2"]]])
-		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])
-		# myModule.pkg_add("ANDROID_WALLPAPER_PROPERTIES", ["bool", "movement", "Motion", "Apply movement to test pattern", ["Moving test pattern", "Still test pattern"]
+		# myModule.add_pkg("ANDROID_WALLPAPER_PROPERTIES", ["list", key, title, summary, [["key","value display"],["key2","value display 2"]])
+		# myModule.add_pkg("ANDROID_WALLPAPER_PROPERTIES", ["list", "testpattern", "Select test pattern", "Choose which test pattern to display", [["key","value display"],["key2","value display 2"]]])
+		# myModule.add_pkg("ANDROID_WALLPAPER_PROPERTIES", ["bool", key, title, summary, ["enable string", "disable String"])
+		# myModule.add_pkg("ANDROID_WALLPAPER_PROPERTIES", ["bool", "movement", "Motion", "Apply movement to test pattern", ["Moving test pattern", "Still test pattern"]
 		#copy needed resources :
 		for res_source, res_dest in pkg_properties["ANDROID_RESOURCES"]:
 			if res_source == "":

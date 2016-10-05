@@ -254,52 +254,67 @@ def display():
 ##
 ## @brief Check if a system Module is availlable for a specific target
 ## @param[in] lib_name (string) Name of the Library
-## @param[in] target_name (string) Name of the target
+## @param[in] list_target_name ([string,...]) list of name of the target (ordered by request order)
 ## @param[in] target (handle) Handle on the @ref Target build engine
 ## @return (bool) find the system lib or not
 ##
-def exist(lib_name, target_name, target) :
+def exist(lib_name, list_target_name, target) :
 	global __system_list
-	debug.verbose("exist= " + lib_name + " in " + target_name)
-	if target_name not in __system_list:
+	debug.verbose("exist= " + lib_name + " in " + str(list_target_name))
+	find_target = False
+	for target_name in list_target_name:
+		if target_name in __system_list:
+			find_target = True
+	if find_target == False:
 		return False
-	for data in __system_list[target_name]:
-		if data["name"] == lib_name:
-			# we find it in the List ==> need to check if it is present in the system :
-			if data["loaded"] == False:
-				debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
-				sys.path.append(os.path.dirname(data["path"]))
-				debug.verbose("import system : '" + data["name"] + "'")
-				the_system = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
-				#create the system module
-				debug.verbose("SYSTEM: request: " + str(data["name"]))
-				if "System" in dir(the_system):
-					data["system"] = the_system.System(target)
-					data["exist"] = data["system"].get_valid()
-				else:
-					debug.warning("Not find: '" + data["name"] + "' ==> get exception")
-			return data["exist"]
+	for target_name in reversed(list_target_name):
+		if target_name not in __system_list:
+			continue
+		for data in __system_list[target_name]:
+			if data["name"] == lib_name:
+				# we find it in the List ==> need to check if it is present in the system :
+				if data["loaded"] == False:
+					debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
+					sys.path.append(os.path.dirname(data["path"]))
+					debug.verbose("import system : '" + data["name"] + "'")
+					the_system = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
+					#create the system module
+					debug.verbose("SYSTEM: request: " + str(data["name"]))
+					if "System" in dir(the_system):
+						data["system"] = the_system.System(target)
+						data["exist"] = data["system"].get_valid()
+					else:
+						debug.warning("Not find: '" + data["name"] + "' ==> get exception")
+				return data["exist"]
 	return False
 
 ##
 ## @brief Load a system Module for a specific target
 ## @param[in] target (handle) Handle on the @ref Target build engine
 ## @param[in] lib_name (string) Name of the Library
-## @param[in] target_name (string) Name of the target
+## @param[in] list_target_name ([string,...]) list of name of the target (ordered by request order)
 ## @return None
 ##
-def load(target, lib_name, target_name):
+def load(target, lib_name, list_target_name):
 	global __system_list
-	if target_name not in __system_list:
+	find_target = False
+	for target_name in list_target_name:
+		if target_name in __system_list:
+			find_target = True
+	if find_target == False:
 		debug.error("you must call this function after checking of the system exist() !1!")
-	for data in __system_list[target_name]:
-		if data["name"] == lib_name:
-			if data["exist"] == False:
-				debug.error("you must call this function after checking of the system exist() !2!")
-			if data["module"] == None:
-				# create a module from the system interface...
-				data["module"] = create_module_from_system(target, data)
-				data["loaded"] = True
-			target.add_module(data["module"])
-			return
+		return
+	for target_name in reversed(list_target_name):
+		if target_name not in __system_list:
+			continue
+		for data in __system_list[target_name]:
+			if data["name"] == lib_name:
+				if data["exist"] == False:
+					debug.error("you must call this function after checking of the system exist() !2!")
+				if data["module"] == None:
+					# create a module from the system interface...
+					data["module"] = create_module_from_system(target, data)
+					data["loaded"] = True
+				target.add_module(data["module"])
+				return
 

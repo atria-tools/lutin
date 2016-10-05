@@ -20,7 +20,7 @@ import random
 import re
 
 class Target(target.Target):
-	def __init__(self, config):
+	def __init__(self, config, sub_name=[]):
 		if config["compilator"] == "gcc":
 			debug.info("compile only with clang for IOs");
 			config["compilator"] = "clang"
@@ -41,7 +41,7 @@ class Target(target.Target):
 		else:
 			arch="arm64" # for ipad air
 			#arch="armv7" # for Iphone 4
-		target.Target.__init__(self, "IOs", config, arch)
+		target.Target.__init__(self, ["IOs"] + sub_name, config, arch)
 		if self.config["simulation"] == True:
 			self.set_cross_base("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/")
 		else:

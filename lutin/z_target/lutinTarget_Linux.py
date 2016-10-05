@@ -19,14 +19,14 @@ from lutin import host
 from lutin import multiprocess
 
 class Target(target.Target):
-	def __init__(self, config):
+	def __init__(self, config, sub_name=[]):
 		#processor type selection (auto/arm/ppc/x86)
 		if config["arch"] == "auto":
 			config["arch"] = "x86"
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
 			config["bus-size"] = str(host.BUS_SIZE)
-		target.Target.__init__(self, "Linux", config, "")
+		target.Target.__init__(self, ["Linux"] + sub_name, config, "")
 		if self.config["bus-size"] == "64":
 			# 64 bits
 			if host.BUS_SIZE != 64:

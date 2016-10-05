@@ -16,38 +16,11 @@ import stat
 import re
 from lutin import host
 from lutin import multiprocess
+import lutinTarget_Linux
 
-class Target(target.Target):
-	def __init__(self, config):
-		#processor type selection (auto/arm/ppc/x86)
-		if config["arch"] == "auto":
-			config["arch"] = "x86"
-		#bus size selection (auto/32/64)
-		if config["bus-size"] == "auto":
-			config["bus-size"] = str(host.BUS_SIZE)
-		target.Target.__init__(self, "Linux", config, "")
-		if self.config["bus-size"] == "64":
-			# 64 bits
-			if host.BUS_SIZE != 64:
-				self.add_flag("c", "-m64")
-		else:
-			# 32 bits
-			if host.BUS_SIZE != 32:
-				self.add_flag("c", "-m32")
-		
-		self.add_flag("c", "-fpic")
-		
-		self.pkg_path_data = "share"
-		self.pkg_path_bin = "bin"
-		self.pkg_path_lib = "lib"
-		self.pkg_path_license = "license"
-		
-		self.add_flag("link-lib", [
-		    "dl"
-		    ])
-		self.add_flag("link", [
-		    "-rdynamic"
-		    ])
+class Target(lutinTarget_Linux.Target):
+	def __init__(self, config, sub_name=[]):
+		lutinTarget_Linux.Target.__init__(self, config, ["Debian"] + sub_name)
 	
 	"""
 	.local/application
@@ -80,6 +53,8 @@ class Target(target.Target):
 	        *--> sources
 	"""
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
+		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
+		debianpkg_name = re.sub("_", "-", pkg_name)
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
@@ -98,23 +73,15 @@ class Target(target.Target):
 		
 		## Create generic files:
 		self.make_package_generic_files(target_outpath, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)
-		
+		"""
 		## create the package:
 		debug.debug("package : " + self.get_staging_path(pkg_name) + "/" + pkg_name + ".app.pkg")
 		os.system("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
 		#multiprocess.run_command("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
 		tools.create_directory_of_file(self.get_final_path())
 		tools.copy_file(self.get_staging_path(pkg_name) + "/" + pkg_name + ".app.tar.gz", self.get_final_path() + "/" + pkg_name + ".app.gpkg")
-	
-	
-	
-	
-	def make_package_debian(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
-		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
-		debianpkg_name = re.sub("_", "-", pkg_name)
-		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + debianpkg_name + "' v"+pkg_properties["VERSION"])
-		debug.debug("------------------------------------------------------------------------")
+		def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
+		"""
 		self.get_staging_path(pkg_name)
 		target_outpathDebian = self.get_staging_path(pkg_name) + "/DEBIAN/"
 		finalFileControl = target_outpathDebian + "control"
@@ -126,7 +93,7 @@ class Target(target.Target):
 		tools.create_directory_of_file(finalFileControl)
 		tmpFile = open(finalFileControl, 'w')
 		tmpFile.write("Package: " + debianpkg_name + "\n")
-		tmpFile.write("Version: " + pkg_properties["VERSION"] + "\n")
+		tmpFile.write("Version: " + tools.version_to_string(pkg_properties["VERSION"]) + "\n")
 		tmpFile.write("Section: " + self.generate_list_separate_coma(pkg_properties["SECTION"]) + "\n")
 		tmpFile.write("Priority: " + pkg_properties["PRIORITY"] + "\n")
 		tmpFile.write("Architecture: all\n")

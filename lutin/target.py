@@ -27,11 +27,15 @@ from . import env
 class Target:
 	##
 	## @brief contructor
-	## @param[in] name (string) Name of the target
+	## @param[in] name ([string,...]) Name of the target
 	## @param[in] config (dict) User configuration
 	## @param[in] arch (string) specific parameter for gcc -arch element
 	##
 	def __init__(self, name, config, arch):
+		if tools.get_type_string(name) != "list":
+			debug.error("You must define a name in a list ...")
+		if len(name) < 1:
+			debug.error("You must define a name for your target ...")
 		## configuration of the build
 		self.config = config
 		
@@ -48,10 +52,11 @@ class Target:
 		
 		self.end_generate_package = config["generate-package"]
 		# todo : remove this :
-		self._name = name
-		self._config_based_on = [name]
+		self._name = name[-1]
+		self._config_based_on = name
 		debug.info("=================================");
 		debug.info("== Target='" + self._name + "' " + self.config["bus-size"] + " bits for arch '" + self.config["arch"] + "'");
+		debug.info("== Target list=" + str(self._config_based_on))
 		debug.info("=================================");
 		
 		self.set_cross_base()
@@ -78,8 +83,9 @@ class Target:
 		self.path_generate_code="/generate_header"
 		self.path_arch = "/" + self._name
 		
+		for elem in self._config_based_on:
+			self.add_flag("c", '-D__TARGET_OS__' + elem)
 		self.add_flag("c", [
-		    '-D__TARGET_OS__' + self._name,
 		    '-D__TARGET_ARCH__' + self.config["arch"],
 		    '-D__TARGET_ADDR__' + self.config["bus-size"] + 'BITS',
 		    '-D_REENTRANT'
@@ -583,9 +589,9 @@ class Target:
 			module.load_module(self, name)
 			return True;
 		# need to import the module (or the system module ...)
-		exist = system.exist(name, self._name, self)
+		exist = system.exist(name, self._config_based_on, self)
 		if exist == True:
-			system.load(self, name, self._name)
+			system.load(self, name, self._config_based_on)
 			return True;
 		# we did not find the module ...
 		return False;

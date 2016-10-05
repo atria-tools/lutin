@@ -316,6 +316,14 @@ def store_warning(file, output, err):
 	file2.flush()
 	file2.close()
 
+def get_type_string(in_type):
+	if type(in_type) == str:
+		return "string"
+	elif type(in_type) == list:
+		return "list"
+	elif type(in_type) == dict:
+		return "dict"
+	return "unknow"
 
 ## List tools:
 def list_append_and_check(listout, newElement, order):

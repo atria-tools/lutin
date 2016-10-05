@@ -18,7 +18,7 @@ import stat
 import shutil
 
 class Target(target.Target):
-	def __init__(self, config):
+	def __init__(self, config, sub_name=[]):
 		#processor type selection (auto/arm/ppc/x86)
 		if config["arch"] == "auto":
 			config["arch"] = "x86"
@@ -30,7 +30,7 @@ class Target(target.Target):
 			config["compilator"] = "clang"
 		# http://biolpc22.york.ac.uk/pub/linux-mac-cross/
 		# http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.txt
-		target.Target.__init__(self, "MacOs", config, "")
+		target.Target.__init__(self, ["MacOs"] + sub_name, config, "")
 		
 		#self.path_bin="MacOS"
 		#self.path_lib="lib"
