@@ -13,6 +13,7 @@ from lutin import target
 from lutin import tools
 from lutin import host
 from lutin import multiprocess
+from lutin import depend
 import os
 import stat
 import shutil

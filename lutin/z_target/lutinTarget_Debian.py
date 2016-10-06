@@ -14,6 +14,7 @@ from lutin import tools
 import os
 import stat
 import re
+from lutin import depend
 from lutin import host
 from lutin import multiprocess
 import lutinTarget_Linux

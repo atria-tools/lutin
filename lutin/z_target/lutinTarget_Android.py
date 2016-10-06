@@ -14,6 +14,7 @@ from lutin import tools
 from lutin import image
 from lutin import multiprocess
 from lutin import host
+from lutin import depend
 import os
 import sys
 

@@ -16,6 +16,7 @@ import os
 import stat
 import re
 from lutin import host
+from lutin import depend
 from lutin import multiprocess
 
 class Target(target.Target):
