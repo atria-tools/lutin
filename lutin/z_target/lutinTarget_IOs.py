@@ -391,12 +391,12 @@ class Target(target.Target):
 			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
 				cmdLine = 'cd framework/tools/ios-deploy ; xcodemake ; cd ../.. '
-				multiprocess.run_command(cmdLine)
+				multiprocess.run_command_no_lock_out(cmdLine)
 			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
 			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
 			cmdLine = './framework/tools/ios-deploy/ios-deploy --bundle ' + os.path.join(self.get_staging_path(pkg_name),pkg_name + ".app")
-			multiprocess.run_command(cmdLine)
+			multiprocess.run_command_no_lock_out(cmdLine)
 		else:
 			simulatorIdFile = ".iosSimutatorId_" + pkg_name + ".txt"
 			if tools.file_size(simulatorIdFile) < 10:
@@ -421,9 +421,9 @@ class Target(target.Target):
 			debug.info("install in simulator : " + destinationpath)
 			tools.create_directory_of_file(destinationpath + "/plop.txt")
 			cmdLine = "cp -rf " + self.get_staging_path(pkg_name) + " " + destinationpath2
-			multiprocess.run_command(cmdLine)
+			multiprocess.run_command_no_lock_out(cmdLine)
 			cmdLine = "touch " + destinationpathBase
-			multiprocess.run_command(cmdLine)
+			multiprocess.run_command_no_lock_out(cmdLine)
 			
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
@@ -440,24 +440,44 @@ class Target(target.Target):
 		
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 		
-	def Log(self, pkg_name):
+	def show_log(self, pkg_name):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("log of iOs board")
+		debug.info("-- log of iOs board")
 		debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == False:
 			if tools.file_size("framework/tools/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
 				cmdLine = 'cd framework/tools/ios-deploy ; xcodebuild ; cd ../.. '
-				multiprocess.run_command(cmdLine)
+				multiprocess.run_command_no_lock_out(cmdLine)
 			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.error("Can not create ios-deploy external software ...")
-			debug.print_element("deploy", "iphone/ipad", "<==", "aplication")
-			cmdLine = './framework/tools/ios-deploy/build/Release/ios-deploy --debug --bundle ' + os.path.join(self.get_staging_path(pkg_name),pkg_name + ".app")
-			multiprocess.run_command(cmdLine)
+			debug.print_element("LOG", "iphone/ipad", "<==", "aplication")
+			cmdLine = './framework/tools/ios-deploy/build/Release/ios-deploy --noinstall --debug --bundle ' + os.path.join(self.get_staging_path(pkg_name),pkg_name + ".app")
+			multiprocess.run_command_no_lock_out(cmdLine)
 		else:
 			cmdLine = "tail -f ~/Library/Logs/iOS\ Simulator/7.1/system.log"
-			multiprocess.run_command(cmdLine)
-
-
-
+			multiprocess.run_command_no_lock_out(cmdLine)
+	
+	def run(self, pkg_name, option_list):
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
+		debug.debug("------------------------------------------------------------------------")
+		if self.get_simulation() == True:
+			debug.error (" can not run in simulation mode ....")
+			return
+		if tools.file_size("framework/tools/ios-deploy/ios-deploy") == 0:
+			debug.print_element("tool", "ios-deploy", "<==", "external sources")
+			cmdLine = 'cd framework/tools/ios-deploy ; xcodebuild ; cd ../.. '
+			multiprocess.run_command_no_lock_out(cmdLine)
+		if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
+			debug.error("Can not create ios-deploy external software ...")
+		debug.print_element("run", "iphone/ipad", "<==", "aplication")
+		cmd = './framework/tools/ios-deploy/build/Release/ios-deploy --noinstall --debug --bundle ' + os.path.join(self.get_staging_path(pkg_name),pkg_name + ".app --args ")
+		for elem in option_list:
+			cmd += elem + " "
+		multiprocess.run_command_no_lock_out(cmd)
+		debug.debug("------------------------------------------------------------------------")
+		debug.info("-- Run package '" + pkg_name + "' Finished")
+		debug.debug("------------------------------------------------------------------------")
+	
 
