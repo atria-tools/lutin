@@ -221,6 +221,21 @@ class Target:
 		return self.config["compilator"]
 	
 	##
+	## @brief Get architecture name (x86 / arm / ...)
+	## @param[in] self (handle) Class handle
+	## @return (bool) name of the arch requested
+	##
+	def get_arch(self):
+		return self.config["arch"]
+	##
+	## @brief Get architecture name (x86 / arm / ...)
+	## @param[in] self (handle) Class handle
+	## @return (bool) name of the arch requested
+	##
+	def get_bus_size(self):
+		return self.config["bus-size"]
+	
+	##
 	## @brief Add global target flags
 	## @param[in] self (handle) Class handle
 	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
