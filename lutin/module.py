@@ -1313,6 +1313,8 @@ class Module:
 		for element in self._path["export"]:
 			value = self._path["export"][element]
 			self._print_list('export path "' + str(element) + '" ' + str(len(value)), value)
+		print('-----------------------------------------------')
+		return True
 	
 	##
 	## @brief Get packaging property variable

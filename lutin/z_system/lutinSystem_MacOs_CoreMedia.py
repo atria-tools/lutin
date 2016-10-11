@@ -25,7 +25,7 @@ class System(system.System):
 		    'c'
 		    ])
 		self.add_flag('link', [
-		    "-framework OpenGL"
+		    "-framework CoreMedia"
 		    ])
 	
 

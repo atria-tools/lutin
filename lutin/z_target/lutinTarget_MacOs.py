@@ -26,6 +26,7 @@ class Target(target.Target):
 		#bus size selection (auto/32/64)
 		if config["bus-size"] == "auto":
 			config["bus-size"] = str(host.BUS_SIZE)
+		#config["bus-size"] = str(32)
 		if config["compilator"] != "clang":
 			debug.warning("compilator is not clang ==> force it...")
 			config["compilator"] = "clang"

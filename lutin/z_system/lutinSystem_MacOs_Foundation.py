@@ -18,15 +18,10 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.set_help("OpenGL: Generic graphic library")
+		self.set_help("CoreAudio : Ios interface for fundation (all time present, just system interface)")
 		self.set_valid(True)
-		# no check needed ==> just add this:
-		self.add_depend([
-		    'c'
-		    ])
-		self.add_flag('link', [
-		    "-framework OpenGL"
-		    ])
-	
+		# todo : create a searcher of the presence of the library:
+		self.add_flag("link", "-framework Foundation")
+		self.add_depend("QuartzCore")
 
 
