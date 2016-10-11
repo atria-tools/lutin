@@ -154,6 +154,12 @@ class Target(target.Target):
 		
 		self.sysroot = "--sysroot=" + os.path.join(self.path_ndk, "platforms", "android-" + str(self.board_id), "arch-arm")
 		
+		if True:
+			self._mode_arm = "thumb"
+		else:
+			self._mode_arm = "arm"
+		
+		
 		self.add_flag("c", [
 		    "-D__ARM_ARCH_5__",
 		    "-D__ARM_ARCH_5T__",
@@ -174,9 +180,12 @@ class Target(target.Target):
 				# -- arm V7 (Neon) :
 				# -----------------------
 				self.add_flag("c", [
+				    "-m"+self._mode_arm,
 				    "-mfpu=neon",
 				    "-march=armv7-a",
+				    "-mtune=cortex-a8",
 				    "-mfloat-abi=softfp",
+				    "-mvectorize-with-neon-quad",
 				    "-D__ARM_ARCH_7__",
 				    "-D__ARM_NEON__"
 				    ])
@@ -194,7 +203,7 @@ class Target(target.Target):
 		    ])
 		"""
 		# the -mthumb must be set for all the android produc, some ot the not work coretly without this one ... (all android code is generated with this flags)
-		self.add_flag("c", "-mthumb")
+		#self.add_flag("c", "-mthumb")
 		# -----------------------
 		# -- Common flags :
 		# -----------------------
@@ -205,7 +214,7 @@ class Target(target.Target):
 			    "-funwind-tables",
 			    "-fstack-protector",
 			    "-Wno-psabi",
-			    "-mtune=xscale",
+			    #"-mtune=xscale",
 			    "-fomit-frame-pointer",
 			    "-fno-strict-aliasing"
 			    ])
@@ -214,6 +223,13 @@ class Target(target.Target):
 		    "-fexceptions",
 		    "-Wa,--noexecstack"
 		    ])
+	
+	##
+	## @brief Get the arm mode that is build
+	## @return "thumb" for thumb mode and "arm for normal mode
+	##
+	def get_arm_mode(self):
+		return self._mode_arm
 	
 	def convert_name_application(self, pkg_name):
 		value = pkg_name.lower()
