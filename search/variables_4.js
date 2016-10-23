@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['type',['type',['../classlutin_1_1module_1_1_module.html#af9f2bf40ab89a60f5b614a3e16b114d7',1,'lutin::module::Module']]]
+  ['sumulator',['sumulator',['../classlutin_1_1z__target_1_1lutin_target___i_os_1_1_target.html#afeba28a56778de62ab43c58112906395',1,'lutin::z_target::lutinTarget_IOs::Target']]]
 ];

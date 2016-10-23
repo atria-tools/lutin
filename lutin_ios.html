@@ -8,7 +8,7 @@
         <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
         <meta name="generator" content="Doxygen 1.8.11"/>
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <title>lutin: build system and packager: Class Index</title>
+        <title>lutin: build system and packager: Build and deploy for IOS</title>
         <!--<link href="tabs.css" rel="stylesheet" type="text/css"/>-->
         <script type="text/javascript" src="dynsections.js"></script>
         <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -109,8 +109,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="annotated.html"><span>Classes</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -129,14 +129,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-  <div id="navrow2" class="tabs2">
-    <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li class="current"><a href="classes.html"><span>Class&#160;Index</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
-    </ul>
-  </div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -151,23 +143,46 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title">Class Index</div>  </div>
+<div class="title">Build and deploy for IOS </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="qindex"><a class="qindex" href="#letter_M">M</a>&#160;|&#160;<a class="qindex" href="#letter_S">S</a>&#160;|&#160;<a class="qindex" href="#letter_T">T</a></div>
-<table class="classindex">
-<tr><td rowspan="2" valign="bottom"><a name="letter_M"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;M&#160;&#160;</div></td></tr></table>
-</td><td rowspan="2" valign="bottom"><a name="letter_S"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;S&#160;&#160;</div></td></tr></table>
-</td><td rowspan="2" valign="bottom"><a name="letter_T"></a><table border="0" cellspacing="0" cellpadding="0"><tr><td><div class="ah">&#160;&#160;T&#160;&#160;</div></td></tr></table>
-</td><td></td></tr>
-<tr><td></td></tr>
-<tr><td valign="top"><a class="el" href="classlutin_1_1module_1_1_module.html">Module</a> (lutin.module)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classlutin_1_1system_1_1_system.html">System</a> (lutin.system)&#160;&#160;&#160;</td><td valign="top"><a class="el" href="classlutin_1_1target_1_1_target.html">Target</a> (lutin.target)&#160;&#160;&#160;</td><td></td></tr>
-<tr><td></td><td></td><td></td><td></td></tr>
-</table>
-<div class="qindex"><a class="qindex" href="#letter_M">M</a>&#160;|&#160;<a class="qindex" href="#letter_S">S</a>&#160;|&#160;<a class="qindex" href="#letter_T">T</a></div>
-</div><!-- contents -->
+<div class="toc"><h3>Table of Contents</h3>
+<ul><li class="level1"><a href="#lutin_ios_xcode">Step 1: deploy your application with Xcode             </a></li>
+<li class="level1"><a href="#lutin_ios_build">step 2: Build for IOs                                  </a></li>
+<li class="level1"><a href="#lutin_ios_deploy">step 3: Deploy                                  </a></li>
+</ul>
+</div>
+<div class="textblock"><p>Deploy on IOs is a little complicated, due to the fact Apple demand a developper licence.</p>
+<p>To deploy you need to buy a <a href="https://developer.apple.com/account">developper licence</a> nearly 99€ / year</p>
+<h1><a class="anchor" id="lutin_ios_xcode"></a>
+Step 1: deploy your application with Xcode             </h1>
+<p>it can be conplicated to do the first deploy (register tablette:watch ... or user ...) Then the best way is now to create your first game sample application with XCode and deploy it on your device ...</p>
+<p>when all your problem are solved, I can help you...</p>
+<p><b>Note:</b></p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;To add a device, in xcode select your top project, and in the section &quot;signing&quot; select &quot;automatic manage signing&quot;, select your team and activate your device ...</div></div><!-- fragment --><h1><a class="anchor" id="lutin_ios_build"></a>
+step 2: Build for IOs                                  </h1>
+<p>This step is simpliest... All is integrated:</p>
+<p>Select the target IOs</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;lutin -C -D -tIOs yourApplication?build</div></div><!-- fragment --><p>This is done .... now deploy ...</p>
+<h1><a class="anchor" id="lutin_ios_deploy"></a>
+step 3: Deploy                                  </h1>
+<p>Do it ... it does not work ...</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;lutin -C -D -tIOs yourApplication?install</div></div><!-- fragment --><h2>Appliocation ID </h2>
+<p>It miss some things to do:</p>
+<p>create a reference of you application in <a href="https://developer.apple.com/account/ios/identifier/bundle/create">apple interface</a></p>
+<p>your application id is:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;get_compagny_type() + <span class="stringliteral">&quot;.&quot;</span> + get_compagny_name() + <span class="stringliteral">&quot;.&quot;</span> + module.get_name()</div></div><!-- fragment --><p>For example if you module is named: <code>lutin_application.py</code></p>
+<p>And you set description:</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="keyword">def </span>get_compagny_type():</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;com&quot;</span></div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="keyword">def </span>get_compagny_name():</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;compagny NAME&quot;</span></div></div><!-- fragment --><p>your id is: <code>com.compagnyname.application</code></p>
+<p>When you have create the application, it will generate for you a unique ID, you can see it on the webpage, it is like: <code>DFGDSFGSDFGS.com.compagnyname.application</code></p>
+<p>In your module definition you need to add: </p><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;my_module.set_pkg(<span class="stringliteral">&quot;APPLE_APPLICATION_IOS_ID&quot;</span>, <span class="stringliteral">&quot;DFGDSFGSDFGS&quot;</span>);</div></div><!-- fragment --><h2>Team signing ID </h2>
+<p>the second point to do is creating the file: <code>.iosKey.txt</code> in you root path of your workspace (where you execute lutin)</p>
+<p>it will contain sothing like: </p><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;&#39;iPhone Developer: Francis DUGENOUX (YRRQE5KGTH)&#39;</div></div><!-- fragment --><p>you can optain it with executing: </p><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;certtool y | grep &quot;Developer&quot;</div></div><!-- fragment --><h2>Install: </h2>
+<p>Now it works ...</p>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;lutin -C -D -tIOs yourApplication?build</div></div><!-- fragment --> </div></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.8-->
 <!-- start footer part -->
 </div>
@@ -176,7 +191,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 </div>
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Oct 23 2016 14:08:32 for lutin: build system and packager by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Oct 23 2016 14:08:31 for lutin: build system and packager by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.11
 </small></address>

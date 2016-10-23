@@ -24,11 +24,75 @@
         <script type="text/javascript" src="doxy-boot.js"></script>
     </head>
     <body>
-        <nav class="navbar navbar-default" role="navigation">
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand">lutin: build system and packager 2.0.0</a>
+                    <a class="navbar-brand">lutin: build system and packager 2.2.0</a>
                 </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="index.html">Main&nbsp;Page</a></li>
+                        <li><a href="pages.html">Related&nbsp;Pages</a></li>
+                        <li><a href="namespaces.html">Namespaces</a></li>
+                        <li><a href="annotated.html">Classes</a></li>
+                        <li><a href="files.html">Files</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                Link-libs<span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://HeeroYui.github.io/lutin">lutin</a></li>
+                                <li><a href="http://atria-soft.github.io/ewol">ewol</a></li>
+                                <li><a href="http://atria-soft.github.io/etk">etk</a></li>
+                                <li><a href="http://atria-soft.github.io/ejson">ejson</a></li>
+                                <li><a href="http://atria-soft.github.io/exml">exml</a></li>
+                                <li><a href="http://atria-soft.github.io/esvg">esvg</a></li>
+                                <li><a href="http://atria-soft.github.io/egami">egami</a></li>
+                                <li><a href="http://atria-soft.github.io/gale">gale</a></li>
+                                <li><a href="http://atria-soft.github.io/ege">ege</a></li>
+                                <li><a href="http://atria-soft.github.io/elog">elog</a></li>
+                                <li><a href="http://atria-soft.github.io/ememory">ememory</a></li>
+                                <li><a href="http://atria-soft.github.io/enet">enet</a></li>
+                                <li><a href="http://atria-soft.github.io/eproperty">eproperty</a></li>
+                                <li><a href="http://atria-soft.github.io/esignal">esignal</a></li>
+                                <li><a href="http://atria-soft.github.io/zeus">zeus</a></li>
+                                <li><a href="http://atria-soft.github.io/audio-ess">audio-ess</a></li>
+                                <li><a href="http://musicdsp.github.io/audio">audio</a></li>
+                                <li><a href="http://musicdsp.github.io/audio-drain">audio-drain</a></li>
+                                <li><a href="http://musicdsp.github.io/audio-orchestra">audio-orchestra</a></li>
+                                <li><a href="http://musicdsp.github.io/audio-river">audio-river</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div id="search-box" class="input-group">
+                        <div class="input-group-btn">
+                            <button aria-expanded="false" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="glyphicon glyphicon-search"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">All</a></li>
+                                <li><a href="#">Classes</a></li>
+                                <li><a href="#">Namespaces</a></li>
+                                <li><a href="#">Files</a></li>
+                                <li><a href="#">Functions</a></li>
+                                <li><a href="#">Variables</a></li>
+                                <li><a href="#">Typedefs</a></li>
+                                <li><a href="#">Enumerations</a></li>
+                                <li><a href="#">Enumerator</a></li>
+                                <li><a href="#">Friends</a></li>
+                                <li><a href="#">Macros</a></li>
+                                <li><a href="#">Pages</a></li>
+                            </ul>
+                        </div>
+                        <button id="search-close" type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                        <input id="search-field" class="form-control" accesskey="S" onkeydown="searchBox.OnSearchFieldChange(event);" placeholder="Search ..." type="text">
+                    </div>
+                </div><!--/.nav-collapse -->
             </div>
         </nav>
         <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -122,19 +186,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a56556f0ed561230bd538d493661738d7">lutin.module.Module</a>
 , <a class="el" href="classlutin_1_1system_1_1_system.html#a0340bf88c6e379594a8c8e3538781ae6">lutin.system.System</a>
 </li>
-<li>add_export_flag()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#a84d37c55a7e70291003f247bf8a252ea">lutin.module.Module</a>
-</li>
-<li>add_export_path()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#ab2b8e558891c9e800da64c0361c5d16e">lutin.module.Module</a>
-</li>
 <li>add_extra_flags()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a6ce142d23b9a88ae27885dcdef88697b">lutin.module.Module</a>
 </li>
 <li>add_flag()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a2203a6c76d0193913e32cb444106e75a">lutin.module.Module</a>
 , <a class="el" href="classlutin_1_1system_1_1_system.html#a6c3db2b80fbffce2b90c8420610340d5">lutin.system.System</a>
-, <a class="el" href="classlutin_1_1target_1_1_target.html#a17d3e2de0355f980f74d2fd5484c5ce5">lutin.target.Target</a>
+, <a class="el" href="classlutin_1_1target_1_1_target.html#a5f7c2724b48edaa0fe0363d4a2d072ff">lutin.target.Target</a>
 </li>
 <li>add_generated_header_file()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a91a15aa2db44e1e1f168427a52928819">lutin.module.Module</a>
@@ -146,17 +204,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>add_module()
 : <a class="el" href="classlutin_1_1target_1_1_target.html#a88e9a21801adfc6c0e77dbab9a3e7337">lutin.target.Target</a>
 </li>
-<li>add_module_depend()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#a7f45fcb1e44b6c6e1bf525d5ce2149d5">lutin.module.Module</a>
-</li>
 <li>add_optionnal_depend()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#a34e6c4cc51d72f695ab1c559e6c42a98">lutin.module.Module</a>
-</li>
-<li>add_optionnal_module_depend()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#afed5ebeda11ccca0d18999b5d450134d">lutin.module.Module</a>
+: <a class="el" href="classlutin_1_1module_1_1_module.html#a70ce88dffdb2d783e1a778633bb4987c">lutin.module.Module</a>
 </li>
 <li>add_path()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#af8eff8717c691ff35792b6eb6dcae263">lutin.module.Module</a>
+: <a class="el" href="classlutin_1_1module_1_1_module.html#a056c0c6c2bfda817e800a57fb81dd6df">lutin.module.Module</a>
 , <a class="el" href="classlutin_1_1system_1_1_system.html#a8273f51c134a5e65e98584adca6cde31">lutin.system.System</a>
 </li>
 <li>add_pkg()
@@ -192,9 +244,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>clean()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a988feea29f53e5f11a28860fd944ca84">lutin.module.Module</a>
 , <a class="el" href="classlutin_1_1target_1_1_target.html#a5d70bb8b5ab4611ce38289bb301ace7c">lutin.target.Target</a>
-</li>
-<li>compile_flags()
-: <a class="el" href="classlutin_1_1module_1_1_module.html#a6efe252de96318d939db01e90aa31a7e">lutin.module.Module</a>
 </li>
 <li>compile_version()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a8d2ecaa92322a775c225a23be5e889c2">lutin.module.Module</a>
@@ -241,6 +290,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>generate_list_separate_coma()
 : <a class="el" href="classlutin_1_1target_1_1_target.html#a90e7e8492b2572c252af8c25db8e3f2b">lutin.target.Target</a>
 </li>
+<li>get_arch()
+: <a class="el" href="classlutin_1_1target_1_1_target.html#afdfa45b7565d8c142200857c6f7949d3">lutin.target.Target</a>
+</li>
 <li>get_build_file_bin()
 : <a class="el" href="classlutin_1_1target_1_1_target.html#a66964b1808503b9d062ab634cd630f64">lutin.target.Target</a>
 </li>
@@ -274,6 +326,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>get_build_path_temporary_generate()
 : <a class="el" href="classlutin_1_1target_1_1_target.html#a0f33f7c05d8767551a1f7d91c3bd6470">lutin.target.Target</a>
 </li>
+<li>get_bus_size()
+: <a class="el" href="classlutin_1_1target_1_1_target.html#a78fabab62e9deb4cbb4aa4c4041baf9f">lutin.target.Target</a>
+</li>
+<li>get_compilator()
+: <a class="el" href="classlutin_1_1target_1_1_target.html#a28bc98e7aa7e4db396a5fa240d8798c3">lutin.target.Target</a>
+</li>
 <li>get_depends()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#af70d18272d1602160f328b05bdbb2748">lutin.module.Module</a>
 </li>
@@ -303,19 +361,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="classlutin_1_1target_1_1_target.html#a52beda7b529cfed398a1bf0081e096c0">lutin.target.Target</a>
 </li>
 <li>get_staging_path()
-: <a class="el" href="classlutin_1_1target_1_1_target.html#a33e77905588bb2aafc8630b564183a28">lutin.target.Target</a>
+: <a class="el" href="classlutin_1_1target_1_1_target.html#a0c56899d9e365f78d0afe57d08dc8b64">lutin.target.Target</a>
 </li>
 <li>get_staging_path_bin()
-: <a class="el" href="classlutin_1_1target_1_1_target.html#adff98a2d5e9e246e8f3bded49ac66292">lutin.target.Target</a>
+: <a class="el" href="classlutin_1_1target_1_1_target.html#a52bb6ecdce8327d3f1aa295585716386">lutin.target.Target</a>
 </li>
 <li>get_staging_path_data()
-: <a class="el" href="classlutin_1_1target_1_1_target.html#a5d806c316c37a4827fde3ccf7746dec3">lutin.target.Target</a>
+: <a class="el" href="classlutin_1_1target_1_1_target.html#a66a45ebf76081981f532b4a3fb7d52e9">lutin.target.Target</a>
 </li>
 <li>get_staging_path_include()
 : <a class="el" href="classlutin_1_1target_1_1_target.html#a1060469908dfbfb2dc84f0f6c4381e42">lutin.target.Target</a>
 </li>
 <li>get_staging_path_lib()
-: <a class="el" href="classlutin_1_1target_1_1_target.html#aa1499d062acadb07923ce97adda3811b">lutin.target.Target</a>
+: <a class="el" href="classlutin_1_1target_1_1_target.html#adf0a5ed95e4c7f0fde810fafc2b6db8a">lutin.target.Target</a>
 </li>
 <li>get_type()
 : <a class="el" href="classlutin_1_1module_1_1_module.html#a0aac170fd25f353844df790bc01f250b">lutin.module.Module</a>
@@ -406,7 +464,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 </div>
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 9 2016 12:15:03 for lutin: build system and packager by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Oct 23 2016 14:08:32 for lutin: build system and packager by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.11
 </small></address>

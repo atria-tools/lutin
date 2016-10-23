@@ -24,11 +24,75 @@
         <script type="text/javascript" src="doxy-boot.js"></script>
     </head>
     <body>
-        <nav class="navbar navbar-default" role="navigation">
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand">lutin: build system and packager 2.0.0</a>
+                    <a class="navbar-brand">lutin: build system and packager 2.2.0</a>
                 </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="index.html">Main&nbsp;Page</a></li>
+                        <li><a href="pages.html">Related&nbsp;Pages</a></li>
+                        <li><a href="namespaces.html">Namespaces</a></li>
+                        <li><a href="annotated.html">Classes</a></li>
+                        <li><a href="files.html">Files</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                Link-libs<span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://HeeroYui.github.io/lutin">lutin</a></li>
+                                <li><a href="http://atria-soft.github.io/ewol">ewol</a></li>
+                                <li><a href="http://atria-soft.github.io/etk">etk</a></li>
+                                <li><a href="http://atria-soft.github.io/ejson">ejson</a></li>
+                                <li><a href="http://atria-soft.github.io/exml">exml</a></li>
+                                <li><a href="http://atria-soft.github.io/esvg">esvg</a></li>
+                                <li><a href="http://atria-soft.github.io/egami">egami</a></li>
+                                <li><a href="http://atria-soft.github.io/gale">gale</a></li>
+                                <li><a href="http://atria-soft.github.io/ege">ege</a></li>
+                                <li><a href="http://atria-soft.github.io/elog">elog</a></li>
+                                <li><a href="http://atria-soft.github.io/ememory">ememory</a></li>
+                                <li><a href="http://atria-soft.github.io/enet">enet</a></li>
+                                <li><a href="http://atria-soft.github.io/eproperty">eproperty</a></li>
+                                <li><a href="http://atria-soft.github.io/esignal">esignal</a></li>
+                                <li><a href="http://atria-soft.github.io/zeus">zeus</a></li>
+                                <li><a href="http://atria-soft.github.io/audio-ess">audio-ess</a></li>
+                                <li><a href="http://musicdsp.github.io/audio">audio</a></li>
+                                <li><a href="http://musicdsp.github.io/audio-drain">audio-drain</a></li>
+                                <li><a href="http://musicdsp.github.io/audio-orchestra">audio-orchestra</a></li>
+                                <li><a href="http://musicdsp.github.io/audio-river">audio-river</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div id="search-box" class="input-group">
+                        <div class="input-group-btn">
+                            <button aria-expanded="false" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="glyphicon glyphicon-search"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">All</a></li>
+                                <li><a href="#">Classes</a></li>
+                                <li><a href="#">Namespaces</a></li>
+                                <li><a href="#">Files</a></li>
+                                <li><a href="#">Functions</a></li>
+                                <li><a href="#">Variables</a></li>
+                                <li><a href="#">Typedefs</a></li>
+                                <li><a href="#">Enumerations</a></li>
+                                <li><a href="#">Enumerator</a></li>
+                                <li><a href="#">Friends</a></li>
+                                <li><a href="#">Macros</a></li>
+                                <li><a href="#">Pages</a></li>
+                            </ul>
+                        </div>
+                        <button id="search-close" type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                        <input id="search-field" class="form-control" accesskey="S" onkeydown="searchBox.OnSearchFieldChange(event);" placeholder="Search ..." type="text">
+                    </div>
+                </div><!--/.nav-collapse -->
             </div>
         </nav>
         <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -113,8 +177,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a504147dc49c08dfaeea97f91b4119ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52beda7b529cfed398a1bf0081e096c0"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a52beda7b529cfed398a1bf0081e096c0">get_simulation</a> (self)</td></tr>
 <tr class="separator:a52beda7b529cfed398a1bf0081e096c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17d3e2de0355f980f74d2fd5484c5ce5"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a17d3e2de0355f980f74d2fd5484c5ce5">add_flag</a> (self, type, list)</td></tr>
-<tr class="separator:a17d3e2de0355f980f74d2fd5484c5ce5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28bc98e7aa7e4db396a5fa240d8798c3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a28bc98e7aa7e4db396a5fa240d8798c3">get_compilator</a> (self)</td></tr>
+<tr class="separator:a28bc98e7aa7e4db396a5fa240d8798c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdfa45b7565d8c142200857c6f7949d3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#afdfa45b7565d8c142200857c6f7949d3">get_arch</a> (self)</td></tr>
+<tr class="separator:afdfa45b7565d8c142200857c6f7949d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78fabab62e9deb4cbb4aa4c4041baf9f"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a78fabab62e9deb4cbb4aa4c4041baf9f">get_bus_size</a> (self)</td></tr>
+<tr class="separator:a78fabab62e9deb4cbb4aa4c4041baf9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f7c2724b48edaa0fe0363d4a2d072ff"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a5f7c2724b48edaa0fe0363d4a2d072ff">add_flag</a> (self, in_type, in_list)</td></tr>
+<tr class="separator:a5f7c2724b48edaa0fe0363d4a2d072ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3f2df7aad919e32c11360fdaf46ef34"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#ab3f2df7aad919e32c11360fdaf46ef34">create_number_from_version_string</a> (self, data)</td></tr>
 <tr class="separator:ab3f2df7aad919e32c11360fdaf46ef34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4b3136aa350554514c7d45c60b5921c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#ab4b3136aa350554514c7d45c60b5921c">set_cross_base</a> (self, cross=&quot;&quot;)</td></tr>
@@ -138,8 +208,8 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>get_full_dependency</b
 <tr class="separator:a8a9fadc6e007a70add1a9441b03492f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3654d912f7813e696172ffa8f7c52bd4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a3654d912f7813e696172ffa8f7c52bd4">get_final_path</a> (self)</td></tr>
 <tr class="separator:a3654d912f7813e696172ffa8f7c52bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33e77905588bb2aafc8630b564183a28"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a33e77905588bb2aafc8630b564183a28">get_staging_path</a> (self, name)</td></tr>
-<tr class="separator:a33e77905588bb2aafc8630b564183a28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c56899d9e365f78d0afe57d08dc8b64"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a0c56899d9e365f78d0afe57d08dc8b64">get_staging_path</a> (self, name, tmp=False)</td></tr>
+<tr class="separator:a0c56899d9e365f78d0afe57d08dc8b64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39a6304a7f4faed42fe683fe83180df9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a39a6304a7f4faed42fe683fe83180df9">get_build_path</a> (self, name)</td></tr>
 <tr class="separator:a39a6304a7f4faed42fe683fe83180df9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5aa8dae31d18ae60a35c6f3303dd5030"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a5aa8dae31d18ae60a35c6f3303dd5030">get_build_path_object</a> (self, name)</td></tr>
@@ -160,12 +230,12 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>get_full_dependency</b
 <tr class="separator:a186d7697f434e56c468be9e7a1254cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f09f3377208ecc8a7d668fb3444c2c9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a4f09f3377208ecc8a7d668fb3444c2c9">get_build_file_dynamic</a> (self, name)</td></tr>
 <tr class="separator:a4f09f3377208ecc8a7d668fb3444c2c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adff98a2d5e9e246e8f3bded49ac66292"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#adff98a2d5e9e246e8f3bded49ac66292">get_staging_path_bin</a> (self, name)</td></tr>
-<tr class="separator:adff98a2d5e9e246e8f3bded49ac66292"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1499d062acadb07923ce97adda3811b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#aa1499d062acadb07923ce97adda3811b">get_staging_path_lib</a> (self, name)</td></tr>
-<tr class="separator:aa1499d062acadb07923ce97adda3811b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d806c316c37a4827fde3ccf7746dec3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a5d806c316c37a4827fde3ccf7746dec3">get_staging_path_data</a> (self, name)</td></tr>
-<tr class="separator:a5d806c316c37a4827fde3ccf7746dec3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52bb6ecdce8327d3f1aa295585716386"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a52bb6ecdce8327d3f1aa295585716386">get_staging_path_bin</a> (self, name, tmp=False)</td></tr>
+<tr class="separator:a52bb6ecdce8327d3f1aa295585716386"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf0a5ed95e4c7f0fde810fafc2b6db8a"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#adf0a5ed95e4c7f0fde810fafc2b6db8a">get_staging_path_lib</a> (self, name, tmp=False)</td></tr>
+<tr class="separator:adf0a5ed95e4c7f0fde810fafc2b6db8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a45ebf76081981f532b4a3fb7d52e9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a66a45ebf76081981f532b4a3fb7d52e9">get_staging_path_data</a> (self, name, tmp=False)</td></tr>
+<tr class="separator:a66a45ebf76081981f532b4a3fb7d52e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1060469908dfbfb2dc84f0f6c4381e42"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a1060469908dfbfb2dc84f0f6c4381e42">get_staging_path_include</a> (self, name)</td></tr>
 <tr class="separator:a1060469908dfbfb2dc84f0f6c4381e42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad67c5cc1443dd25c3871eea9de83a6d3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad67c5cc1443dd25c3871eea9de83a6d3"></a>
@@ -204,6 +274,18 @@ def&#160;</td><td class="memItemRight" valign="bottom"><b>is_module_build_tree</
 <tr class="memitem:acd9ee4e8f3cdb4266d3d1527bf995f69"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd9ee4e8f3cdb4266d3d1527bf995f69"></a>
 def&#160;</td><td class="memItemRight" valign="bottom"><b>make_package_generic_files</b> (self, path_package, pkg_properties, pkg_name, base_pkg_path, heritage_list, static)</td></tr>
 <tr class="separator:acd9ee4e8f3cdb4266d3d1527bf995f69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a184de8c089309eb3b59df9a6de61169e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a184de8c089309eb3b59df9a6de61169e"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>install_package</b> (self, pkg_name)</td></tr>
+<tr class="separator:a184de8c089309eb3b59df9a6de61169e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66915d237daf568cb76774894dad1931"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a66915d237daf568cb76774894dad1931"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>un_install_package</b> (self, pkg_name)</td></tr>
+<tr class="separator:a66915d237daf568cb76774894dad1931"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7628828f4b69638d607352ea1d0cea4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa7628828f4b69638d607352ea1d0cea4"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>run</b> (self, pkg_name, option_list)</td></tr>
+<tr class="separator:aa7628828f4b69638d607352ea1d0cea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa766bb0bde61081529abb87eeedaae14"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa766bb0bde61081529abb87eeedaae14"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>show_log</b> (self, pkg_name)</td></tr>
+<tr class="separator:aa766bb0bde61081529abb87eeedaae14"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90e7e8492b2572c252af8c25db8e3f2b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classlutin_1_1target_1_1_target.html#a90e7e8492b2572c252af8c25db8e3f2b">generate_list_separate_coma</a> (self, list)</td></tr>
 <tr class="separator:a90e7e8492b2572c252af8c25db8e3f2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -329,6 +411,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a48c6131bc971060be8c3f971c8586166"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a48c6131bc971060be8c3f971c8586166"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>path_staging</b></td></tr>
 <tr class="separator:a48c6131bc971060be8c3f971c8586166"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85d2406a7e105133ec71ae6709b0330b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85d2406a7e105133ec71ae6709b0330b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>path_staging_tmp</b></td></tr>
+<tr class="separator:a85d2406a7e105133ec71ae6709b0330b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee43fd021eec68e592803c32721c3603"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aee43fd021eec68e592803c32721c3603"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>path_build</b></td></tr>
 <tr class="separator:aee43fd021eec68e592803c32721c3603"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -448,7 +533,7 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a17d3e2de0355f980f74d2fd5484c5ce5"></a>
+<a class="anchor" id="a5f7c2724b48edaa0fe0363d4a2d072ff"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -462,13 +547,13 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
+          <td class="paramname"><em>in_type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>list</em>&#160;</td>
+          <td class="paramname"><em>in_list</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -483,7 +568,7 @@ Public Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">self</td><td>(handle) Class handle </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>(string) inclusion group name 'c', 'c++', 'java' ... </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">list</td><td>([string,...] or string) List of path to include </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">in_list</td><td>([string,...] or string) List of path to include </td></tr>
   </table>
   </dd>
 </dl>
@@ -760,6 +845,31 @@ Public Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The requested string </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="afdfa45b7565d8c142200857c6f7949d3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def lutin.target.Target.get_arch </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get architecture name (x86 / arm / ...) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">self</td><td>(handle) Class handle </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>(bool) name of the arch requested </dd></dl>
 
 </div>
 </div>
@@ -1148,6 +1258,56 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a78fabab62e9deb4cbb4aa4c4041baf9f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def lutin.target.Target.get_bus_size </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get architecture name (x86 / arm / ...) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">self</td><td>(handle) Class handle </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>(bool) name of the arch requested </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a28bc98e7aa7e4db396a5fa240d8798c3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def lutin.target.Target.get_compilator </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get compilator name (clang / gcc) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">self</td><td>(handle) Class handle </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>(bool) name of the compilator requested </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a3654d912f7813e696172ffa8f7c52bd4"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1284,7 +1444,7 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a33e77905588bb2aafc8630b564183a28"></a>
+<a class="anchor" id="a0c56899d9e365f78d0afe57d08dc8b64"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1298,7 +1458,13 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>tmp</em> = <code>False</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1320,7 +1486,7 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="adff98a2d5e9e246e8f3bded49ac66292"></a>
+<a class="anchor" id="a52bb6ecdce8327d3f1aa295585716386"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1334,7 +1500,13 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>tmp</em> = <code>False</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1356,7 +1528,7 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5d806c316c37a4827fde3ccf7746dec3"></a>
+<a class="anchor" id="a66a45ebf76081981f532b4a3fb7d52e9"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1370,7 +1542,13 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>tmp</em> = <code>False</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1428,7 +1606,7 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa1499d062acadb07923ce97adda3811b"></a>
+<a class="anchor" id="adf0a5ed95e4c7f0fde810fafc2b6db8a"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1442,7 +1620,13 @@ Public Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>tmp</em> = <code>False</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1896,7 +2080,7 @@ False Nothing has been copied </dd></dl>
 </div>
 </div>
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 9 2016 12:15:03 for lutin: build system and packager by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Oct 23 2016 14:08:32 for lutin: build system and packager by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.11
 </small></address>
