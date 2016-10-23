@@ -943,12 +943,6 @@ class Module:
 	def add_depend(self, list):
 		tools.list_append_to(self._depends, list, True)
 	
-	## @brief deprecated ...
-	## @return None
-	def add_module_depend(self, list):
-		debug.warning("[" + self._name + "] add_module_depend is deprecated ==> use add_depend(...)")
-		self.add_depend(list)
-	
 	##
 	## @brief Add an optionnal dependency on this module
 	## @param[in] self (handle) Class handle
@@ -961,12 +955,6 @@ class Module:
 	##
 	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False, src_file=[], header_file=[]):
 		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export, src_file, header_file], True)
-	
-	## @brief deprecated ...
-	## @return None
-	def add_optionnal_module_depend(self, module_name, compilation_flags=["", ""], export=False):
-		debug.warning("[" + self._name + "] add_optionnal_module_depend is deprecated ==> use add_optionnal_depend(...)")
-		self.add_optionnal_depend(module_name, compilation_flags, export)
 	
 	##
 	## @brief Add a path to include when build
@@ -1031,13 +1019,6 @@ class Module:
 			tools.list_append_to_2(self._path["local"], type, list)
 	
 	##
-	## @brief deprecated ...
-	## @return None
-	def add_export_path(self, list, type='c'):
-		debug.warning("[" + self._name + "] add_export_path is deprecated ==> use add_path(xxx, yyy, export=True)")
-		self.add_path(list, type, export=True)
-	
-	##
 	## @brief Add compilation flags
 	## @param[in] self (handle) Class handle
 	## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
@@ -1050,18 +1031,6 @@ class Module:
 			tools.list_append_to_2(self._flags["export"], type, list)
 		else:
 			tools.list_append_to_2(self._flags["local"], type, list)
-	
-	## @brief deprecated ...
-	## @return None
-	def add_export_flag(self, type, list):
-		debug.warning("[" + self._name + "] add_export_flag is deprecated ==> use add_flag(xxx, yyy, export=True)")
-		self.add_flag(type, list, export=True)
-	
-	## @brief deprecated ...
-	## @return None
-	def compile_flags(self, type, list):
-		debug.warning("[" + self._name + "] compile_flags is deprecated ==> use add_flag(xxx, yyy)")
-		self.add_flag(type, list)
 	
 	##
 	## @brief Set the compilation version of the 
@@ -1327,9 +1296,6 @@ class Module:
 			return copy.deepcopy(self._package_prop[name])
 		return None
 	
-	def pkg_set(self, variable, value):
-		debug.warning("[" + self._name + "] DEPRECATED : pkg_set(...) replaced by set_pkg(...)")
-		self.set_pkg(variable, value)
 	##
 	## @brief Set packaging variables
 	## @param[in] self (handle) Class handle
@@ -1451,9 +1417,6 @@ class Module:
 		if self._package_prop_default[variable] == True:
 			self.set_pkg(variable, value)
 	
-	def pkg_add(self, variable, value):
-		debug.warning("[" + self._name + "] DEPRECATED : pkg_add(...) replaced by add_pkg(...)")
-		self.add_pkg(variable, value)
 	##
 	## @brief add an element in tha package property
 	## @param[in] self (handle) Class handle
@@ -1553,26 +1516,6 @@ def load_module(target, name):
 				if ret == False:
 					# the user request remove the capabilities of this module for this platform
 					tmp_element = None
-			elif "create" in dir(the_module):
-				# parse in a second time to permit to implement retro-compat build
-				debug.warning("[DEPRECATED] (" + name + ") module creation: function 'create', use 'configure' ... (remove compatibility in next major version (2.x)")
-				tmp_element = the_module.create(target, name)
-				if tmp_element != None:
-					# overwrite some package default property (if not set by user)
-					if property["compagny-type"] != None:
-						tmp_element._pkg_set_if_default("COMPAGNY_TYPE", property["compagny-type"])
-					if property["compagny-name"] != None:
-						tmp_element._pkg_set_if_default("COMPAGNY_NAME", property["compagny-name"])
-					if property["maintainer"] != None:
-						tmp_element._pkg_set_if_default("MAINTAINER", property["maintainer"])
-					if property["name"] != None:
-						tmp_element._pkg_set_if_default("NAME", property["name"])
-					if property["description"] != None:
-						tmp_element._pkg_set_if_default("DESCRIPTION", property["description"])
-					if property["license"] != None:
-						tmp_element._pkg_set_if_default("LICENSE", property["license"])
-					if property["version"] != None:
-						tmp_element._pkg_set_if_default("VERSION", property["version"])
 			else:
 				debug.warning(" no function 'create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
 				continue
