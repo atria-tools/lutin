@@ -40,8 +40,12 @@ class Target(target.Target):
 		if config["simulation"] == True:
 			arch = "i386"
 		else:
-			arch="arm64" # for ipad air
-			#arch="armv7" # for Iphone 4
+			if config["bus-size"] == "32":
+				# for Iphone 4
+				arch="armv7"
+			else:
+				# for ipad air
+				arch="arm64"
 		target.Target.__init__(self, ["IOs"] + sub_name, config, arch)
 		if self.config["simulation"] == True:
 			self.set_cross_base("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/")
