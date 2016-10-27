@@ -10,11 +10,11 @@ def get_desc():
 	return "Test C compilation"
 
 def configure(target, my_module):
-	my_module.add_extra_compile_flags()
+	my_module.add_extra_flags()
 	my_module.add_src_file([
 		'test.c'
 		])
-	if target.name=="Android":
+	if "Android" in target.get_type():
 		my_module.compile_version("c", 1999)
 	return my_module
 
