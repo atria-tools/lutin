@@ -1,6 +1,8 @@
-#language: python
+language: cpp
 
-sudo: false
+#sudo: false
+sudo: required
+dist: trusty
 
 branches:
   only:
@@ -24,14 +26,14 @@ addons:
 matrix:
   include:
     - os: linux
-      env: CONF=release BUILDER=gcc TARGET=Linux TAG=Linux
+      env: CONF=release BUILDER=gcc TARGET=Linux TAG=Linux COMPILATOR_OPTION="--compilator-version=4.9"
       compiler: gcc
     - os: linux
       env: CONF=debug BUILDER=clang TARGET=Linux
       compiler: clang
     - os: linux
       env: CONF=release BUILDER=gcc TARGET=Windows TAG=Mingw
-      compiler: gcc
+      compiler: x86_64-w64-mingw32-gcc
     - os: linux
       env: CONF=release BUILDER=gcc TARGET=Android TAG=Android DISABLE_PACKAGE=-p
       compiler: gcc
@@ -43,6 +45,8 @@ matrix:
       compiler: clang
 
 install:
+  - ./setup.py build
+  - export PYTHONPATH=$PYTHONPATH:./lutin/build/lib.linux-x86_64-2.7/:./lutin/build/lib.linux-x86_64-2.7/lutin/:./lutin/build/lib:./lutin/build/lib/lutin/
   - cd ..
   # download NDK
   - if [ "$TAG" == "Android" ]; then
@@ -53,15 +57,16 @@ install:
   - cd -
 
 before_script:
-  - ./setup.py build
-  - export PYTHONPATH=$PYTHONPATH:./lutin/build/lib.linux-x86_64-2.7/:./lutin/build/lib.linux-x86_64-2.7/lutin/:./lutin/build/lib:./lutin/build/lib/lutin/
   - cd ..
   - pwd
-  - ls -l *
+  - ls -l
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        export PATH=$PATH:/Users/travis/Library/Python/2.7/bin/;
+    fi
   - ./ci/build_send.py --tag=$TAG --status=START;
 
 script:
-  - ./lutin/build/scripts-2.7/lutin -w -j4 -C -P -t$TARGET -c $BUILDER $COMPILATOR_OPTION $BUS -m $CONF $GCOV $DISABLE_PACKAGE test-c; STATUS=$?
+  - ./lutin/build/scripts-2.7/lutin -w -j4 -C -P -t $TARGET -c $BUILDER $COMPILATOR_OPTION $BUS -m $CONF $GCOV $DISABLE_PACKAGE test-c; STATUS=$?
   - ./ci/build_send.py --tag=$TAG --status="$STATUS";
 
 notifications:
