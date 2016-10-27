@@ -69,6 +69,15 @@ def usage(full=False):
 	print("			clean all (same as previous)")
 	print("		" + color['green'] + "dump" + color['default'])
 	print("			Dump all the module dependency and properties")
+	print("		" + color['green'] + "dependency" + color['default'])
+	print("			generate a file dependency.dot that represent all the dependency link")
+	print("			Select what in included: 'dependency:LPBDK'")
+	print("				L: Library")
+	print("				P: Pre-build")
+	print("				D: Data")
+	print("				B: Binary")
+	print("				K: Package")
+	print("			eg: lutin dependency:LD ; dot -Tsvg dependency.dot -o dependency.svg ; firefox dependency.svg")
 	print("		" + color['green'] + "gcov" + color['default'])
 	print("			Parse all the code of the library with the gcov resolution")
 	listOfAllModule = module.list_all_module_with_desc()
@@ -169,18 +178,18 @@ def check_boolean(value):
 def parseGenericArg(argument, active):
 	debug.extreme_verbose("parse arg : " + argument.get_option_name() + " " + argument.get_arg() + " active=" + str(active))
 	if argument.get_option_name() == "help":
-		if active==False:
+		if active == False:
 			usage()
 		return True
 	if argument.get_option_name() == "HELP":
-		if active==False:
+		if active == False:
 			usage(True)
 		return True
 	if argument.get_option_name() == "list-module":
-		if active==False:
-			listOfModule = module.list_all_module()
+		if active == False:
+			list_of_module = module.list_all_module()
 			retValue = ""
-			for moduleName in listOfModule:
+			for moduleName in list_of_module:
 				if retValue != "":
 					retValue += " "
 				retValue += moduleName
@@ -188,10 +197,10 @@ def parseGenericArg(argument, active):
 			exit(0)
 		return True
 	if argument.get_option_name() == "list-target":
-		if active==False:
-			listOfTarget = target.list_all_target()
+		if active == False:
+			list_of_target = target.list_all_target()
 			retValue = ""
-			for targetName in listOfTarget:
+			for targetName in list_of_target:
 				if retValue != "":
 					retValue += " "
 				retValue += targetName
@@ -199,61 +208,61 @@ def parseGenericArg(argument, active):
 			exit(0)
 		return True
 	elif argument.get_option_name()=="jobs":
-		if active==True:
+		if active == True:
 			multiprocess.set_core_number(int(argument.get_arg()))
 		return True
 	elif argument.get_option_name()=="depth":
-		if active==True:
+		if active == True:
 			env.set_parse_depth(int(argument.get_arg()))
 		return True
 	elif argument.get_option_name() == "verbose":
-		if active==True:
+		if active == True:
 			debug.set_level(int(argument.get_arg()))
 		return True
 	elif argument.get_option_name() == "color":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				debug.enable_color()
 			else:
 				debug.disable_color()
 		return True
 	elif argument.get_option_name() == "force-build":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				env.set_force_mode(True)
 			else:
 				env.set_force_mode(False)
 		return True
 	elif argument.get_option_name() == "pretty":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				env.set_print_pretty_mode(True)
 			else:
 				env.set_print_pretty_mode(False)
 		return True
 	elif argument.get_option_name() == "force-optimisation":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				env.set_force_optimisation(True)
 			else:
 				env.set_force_optimisation(False)
 		return True
 	elif argument.get_option_name() == "isolate-system":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				env.set_isolate_system(True)
 			else:
 				env.set_isolate_system(False)
 		return True
 	elif argument.get_option_name() == "force-strip":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				env.set_force_strip_mode(True)
 			else:
 				env.set_force_strip_mode(False)
 		return True
 	elif argument.get_option_name() == "warning":
-		if active==True:
+		if active == True:
 			if check_boolean(argument.get_arg()) == True:
 				env.set_warning_mode(True)
 			else:

@@ -1285,6 +1285,107 @@ class Module:
 		print('-----------------------------------------------')
 		return True
 	
+	def check_rules(self, type, rules):
+		if    (     (    type == 'LIBRARY' \
+		              or type == 'LIBRARY_DYNAMIC' \
+		              or type == 'LIBRARY_STATIC' ) \
+		        and "L" not in rules ) \
+		   or (     type == 'DATA' \
+		        and "D" not in rules ) \
+		   or (     type == 'PREBUILD'\
+		        and "P" not in rules ) \
+		   or (     type == 'PACKAGE'\
+		        and "K" not in rules) \
+		   or (     (    type == 'BINARY' \
+		              or type == 'BINARY_SHARED' \
+		              or type == 'BINARY_STAND_ALONE')\
+		        and "B" not in rules ) :
+			return True
+		return False
+	
+	# TODO: Add to simplify the display the possibility to check if an element already depend in dependency of an element ???
+	def dependency_generate(self, target, tmp_file, step, rules):
+		debug.print_element("dot", "dependency.dot", "<<<", self._name)
+		if self.check_rules(self._type, rules) == True:
+			return
+		if step == 1:
+			if self._type == 'DATA':
+				tmp_file.write('	node [\n');
+				tmp_file.write('		shape=Mdiamond;\n');
+				tmp_file.write('		style=filled;\n');
+				tmp_file.write('		color=red;\n');
+				tmp_file.write('		];\n');
+			elif self._type == 'PREBUILD':
+				tmp_file.write('	node [\n');
+				tmp_file.write('		shape=square;\n');
+				tmp_file.write('		style=filled;\n');
+				tmp_file.write('		color=gray;\n');
+				tmp_file.write('		];\n');
+			elif    self._type == 'LIBRARY' \
+			     or self._type == 'LIBRARY_DYNAMIC' \
+			     or self._type == 'LIBRARY_STATIC':
+				tmp_file.write('	node [\n');
+				tmp_file.write('		shape=ellipse;\n');
+				tmp_file.write('		style=filled;\n');
+				tmp_file.write('		color=lightblue;\n');
+				tmp_file.write('		];\n');
+			elif    self._type == 'BINARY' \
+			     or self._type == 'BINARY_SHARED' \
+			     or self._type == 'BINARY_STAND_ALONE':
+				tmp_file.write('	node [\n');
+				tmp_file.write('		shape=rectangle;\n');
+				tmp_file.write('		style=filled;\n');
+				tmp_file.write('		color=green;\n');
+				tmp_file.write('		];\n');
+			elif self._type == 'PACKAGE':
+				return
+			tmp_file.write('	' + copy.deepcopy(self._name).replace('-','_')+ ';\n');
+		else:
+			for elem in self._depends:
+				debug.verbose("add depend on: " + elem);
+				tmp_module = None
+				try:
+					tmp_module = target.get_module(elem)
+				except:
+					target.load_if_needed(elem, optionnal=True)
+					try:
+						tmp_module = target.get_module(elem)
+					except:
+						debug.verbose("    ==> get error");
+				if tmp_module == None:
+					debug.verbose("    ==> notFound");
+					continue
+				if self.check_rules(tmp_module._type, rules) == True:
+					debug.verbose("    ==> not in rules");
+					continue
+				tmp_file.write('	' + copy.deepcopy(self._name).replace('-','_') + ' -> ' + copy.deepcopy(elem).replace('-','_') + ';\n');
+			for elem in self._depends_optionnal:
+				elem = elem[0]
+				debug.verbose("add depend on: " + elem);
+				tmp_module = None
+				try:
+					tmp_module = target.get_module(elem)
+				except:
+					target.load_if_needed(elem, optionnal=True)
+					try:
+						tmp_module = target.get_module(elem)
+					except:
+						debug.verbose("    ==> get error");
+				if tmp_module == None:
+					debug.verbose("    ==> notFound");
+					continue
+				if self.check_rules(tmp_module._type, rules) == True:
+					debug.verbose("    ==> not in rules");
+					continue
+				tmp_file.write('	' + copy.deepcopy(self._name).replace('-','_') + ' -> ' + copy.deepcopy(elem).replace('-','_') + ';\n');
+		"""
+		tmp_file.write('	module_' + self._name.replace('-','_') + ' {\n');
+		tmp_file.write('		style=filled;\n');
+		tmp_file.write('		color=blue;\n');
+		tmp_file.write('		label="' + self._name + '";\n');
+		tmp_file.write('	}\n');
+		"""
+	
 	##
 	## @brief Get packaging property variable
 	## @param[in] self (handle) Class handle

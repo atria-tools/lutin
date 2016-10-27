@@ -653,11 +653,42 @@ class Target:
 			for mod in self.module_list:
 				mod.display()
 			return
+		if name[:10] == "dependency":
+			if len(name) > 10:
+				rules = name.split(":")[1]
+			else:
+				rules = "LBDPK"
+				# L for library
+				# B for binary
+				# D for Data
+				# P for prebuild
+				# K for package
+			debug.print_element("dot", "", "---", "dependency.dot")
+			self.load_all()
+			tmp_file = open("dependency.dot", 'w')
+			tmp_file.write('digraph G {\n')
+			tmp_file.write('	rankdir=\"LR\";\n')
+			for mod in self.module_list:
+				mod.dependency_generate(self, tmp_file, 1, rules)
+			# TODO : do it better ==> system library hook (do a oad of all avillable system library)
+			tmp_file.write('	node [\n');
+			tmp_file.write('		shape=square;\n');
+			tmp_file.write('		style=filled;\n');
+			tmp_file.write('		color=gray;\n');
+			tmp_file.write('		];\n');
+			# TODO : End hook
+			for mod in self.module_list:
+				mod.dependency_generate(self, tmp_file, 2, rules)
+			tmp_file.write('}\n')
+			tmp_file.flush()
+			tmp_file.close()
+			debug.print_element("dot", "", "---", "dependency.dot")
+			return
 		if name == "all":
 			debug.info("build all")
 			self.load_all()
 			for mod in self.module_list:
-				if self._name=="Android":
+				if self._name == "Android":
 					if mod.get_type() == "PACKAGE":
 						mod.build(self, None)
 				else:
