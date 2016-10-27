@@ -381,16 +381,19 @@ def get_version_from_file_or_direct(path_module, filename_or_version):
 	line = lines[0]
 	debug.debug("Parse line: '" + line + "'")
 	#check if we have "-dev"
-	dev_mode = False
-	if line[-4:] == "-dev":
-		dev_mode = True
-		line = line[:-4]
+	dev_mode = ""
+	list_tiret = line.split('-')
+	if len(list_tiret) > 2:
+		debug.warning("more than one '-' in version file " + str(filename_or_version) + " : '" + str(list_tiret) + "' in '" + path_module + "'")
+	if len(list_tiret) >= 2:
+		dev_mode = list_tiret[1]
+		line = list_tiret[0]
 	out = []
 	list_elem = line.split('.')
 	for elem in list_elem:
 		out.append(int(elem))
-	if dev_mode == True:
-		out.append("dev")
+	if dev_mode != "":
+		out.append(dev_mode)
 	debug.debug("    ==> " + str(out))
 	return out
 
