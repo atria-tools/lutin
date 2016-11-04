@@ -888,7 +888,6 @@ class Module:
 					target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
 				else:
 					target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
-		
 		# return local dependency ...
 		return copy.deepcopy(self._sub_heritage_list)
 	

@@ -923,6 +923,18 @@ class Target:
 		tools.copy_file(path_src,
 		                path_dst,
 		                in_list=copy_list)
+		try:
+			path_src = self.get_build_file_bin(pkg_name)
+			path_src = path_src[:len(path_src)-4] + "js"
+			path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary2)
+			debug.verbose("path_dst: " + str(path_dst))
+			tools.copy_file(path_src,
+			                path_dst,
+			                in_list=copy_list)
+		except:
+			debug.extreme_verbose("can not find : " + path_src)
+			pass
+		
 		#real copy files
 		ret_copy = tools.copy_list(copy_list)
 		ret_remove = False
