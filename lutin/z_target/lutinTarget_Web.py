@@ -40,7 +40,7 @@ class Target(lutinTarget_Linux.Target):
 		self.xx_version = [0,0,0]
 		self.ld = self.cross + "ld"
 		self.nm = self.cross + "nm"
-		self.strip = self.cross + "strip"
+		self.strip = ""#self.cross + "strip"
 		self.dlltool = self.cross + "dlltool"
 		self._update_path_tree()
 		

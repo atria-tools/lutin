@@ -171,6 +171,51 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 	return True
 
 ##
+## @brief Get list of all Files in a specific path (with a regex)
+## @param[in] path (string) Full path of the machine to search files (start with / or x:)
+## @param[in] regex (string) Regular expression to search data
+## @param[in] recursive (bool) List file with recursive search
+## @param[in] remove_path (string) Data to remove in the path
+## @return (list) return files requested
+##
+def get_list_of_file_in_path(path, regex="*", recursive = False, remove_path=""):
+	out = []
+	debug.verbose(" List all in : '" + str(path) + "'")
+	if os.path.isdir(os.path.realpath(path)):
+		tmp_path = os.path.realpath(path)
+		tmp_rule = regex
+	else:
+		debug.error("path does not exist : '" + str(path) + "'")
+	
+	debug.verbose("    " + str(tmp_path) + ":")
+	for root, dirnames, filenames in os.walk(tmp_path):
+		deltaRoot = root[len(tmp_path):]
+		while     len(deltaRoot) > 0 \
+		      and (    deltaRoot[0] == '/' \
+		            or deltaRoot[0] == '\\' ):
+			deltaRoot = deltaRoot[1:]
+		if     recursive == False \
+		   and deltaRoot != "":
+			return
+		debug.verbose("     root='" + str(deltaRoot) + "'")
+		debug.extreme_verbose("         files=" + str(filenames))
+		tmpList = filenames
+		if len(tmp_rule) > 0:
+			tmpList = fnmatch.filter(filenames, tmp_rule)
+		# Import the module :
+		for cycleFile in tmpList:
+			#for cycleFile in filenames:
+			add_file = os.path.join(tmp_path, deltaRoot, cycleFile)
+			if len(remove_path) != 0:
+				if add_file[:len(remove_path)] != remove_path:
+					debug.error("Request remove start of a path that is not the same: '" + add_file[:len(remove_path)] + "' demand remove of '" + str(remove_path) + "'")
+				else:
+					add_file = add_file[len(remove_path)+1:]
+			debug.verbose("        '" + add_file + "'")
+			out.append(add_file)
+	return out;
+
+##
 ## @brief Copy a compleate directory in a specific folder
 ## @param[in] src Input folder path
 ## @param[in] dst Output folder path

@@ -54,12 +54,25 @@ class Module:
 	def __init__(self, file, module_name, module_type):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
 		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + module_type)
-		self._origin_file=''
-		self._origin_path=''
+		self._origin_file = file;
+		self._origin_path = tools.get_current_path(self._origin_file)
 		# type of the module:
-		self._type='LIBRARY'
+		if    module_type == 'BINARY' \
+		   or module_type == 'BINARY_SHARED' \
+		   or module_type == 'BINARY_STAND_ALONE' \
+		   or module_type == 'LIBRARY' \
+		   or module_type == 'LIBRARY_DYNAMIC' \
+		   or module_type == 'LIBRARY_STATIC' \
+		   or module_type == 'PACKAGE' \
+		   or module_type == 'PREBUILD' \
+		   or module_type == 'DATA':
+			self._type=module_type
+		else :
+			debug.error('for module "%s"' %module_name)
+			debug.error('    ==> error : "%s" ' %module_type)
+			raise 'Input value error'
 		# Name of the module
-		self._name=module_name
+		self._name = module_name
 		# Tools list:
 		self._tools = []
 		# Dependency list:
@@ -86,25 +99,9 @@ class Module:
 		self._paths = []
 		# The module has been already build ...
 		self._isbuild = False
-		## end of basic INIT ...
-		if    module_type == 'BINARY' \
-		   or module_type == 'BINARY_SHARED' \
-		   or module_type == 'BINARY_STAND_ALONE' \
-		   or module_type == 'LIBRARY' \
-		   or module_type == 'LIBRARY_DYNAMIC' \
-		   or module_type == 'LIBRARY_STATIC' \
-		   or module_type == 'PACKAGE' \
-		   or module_type == 'PREBUILD' \
-		   or module_type == 'DATA':
-			self._type=module_type
-		else :
-			debug.error('for module "%s"' %module_name)
-			debug.error('    ==> error : "%s" ' %module_type)
-			raise 'Input value error'
-		self._origin_file = file;
-		self._origin_path = tools.get_current_path(self._origin_file)
+		# configure default heritage
 		self._local_heritage = None
-		# TODO : Do a better dynamic property system => not really versatil
+		# TODO : Do a better dynamic property system => not really versatile
 		self._package_prop = { "COMPAGNY_TYPE" : "",
 		                       "COMPAGNY_NAME" : "",
 		                       "COMPAGNY_NAME2" : "",
@@ -1082,6 +1079,25 @@ class Module:
 	##
 	def add_src_file(self, list):
 		tools.list_append_to(self._src, list, True)
+	
+	##
+	## @brief Add all files in a specific path as source file to compile
+	## @param[in] self (handle) Class handle
+	## @param[in] base_path (string) Path where to search files
+	## @param[in] regex (string) regular expression of the search
+	## @param[in] recursive (bool) Search in resursive mode
+	## @return None
+	##
+	def add_src_path(self, base_path, regex="*", recursive=False):
+		if len(base_path) == 0:
+			debug.error("[" + self.get_name() + "] ==> no path set for function add_src_path")
+		if    base_path[0] == '/' \
+		   or base_path[0] == '\\':
+			debug.error("[" + self.get_name() + "] ==> use relative path for function add_src_path")
+		list_of_file = tools.get_list_of_file_in_path(os.path.join(self._origin_path, base_path), regex=regex, recursive=recursive, remove_path=self._origin_path)
+		debug.debug("[" + self.get_name() + "] add " + str(len(list_of_file)) + " file(s)")
+		self.add_src_file(list_of_file)
+	
 	##
 	## @brief An an header file in the install directory
 	## @param[in] self (handle) Class handle
@@ -1089,6 +1105,8 @@ class Module:
 	## @param[in] destination_path (string) Path to install the files (remove all the path of the file)
 	## @param[in] clip_path (string) Remove a part of the path set in the list and install data in generic include path
 	## @param[in] recursive (bool) when use regexp in file list ==> we can add recursive property
+	##
+	## @note see add_header_path for a simple integration
 	##
 	## @code
 	##  	my_module.add_header_file([
@@ -1182,6 +1200,21 @@ class Module:
 						                 "recursive":recursive})
 		tools.list_append_to(self._header, new_list, True)
 	
+	##
+	## @brief An an header path in the install directory
+	## @param[in] self (handle) Class handle
+	## @param[in] base_path (string) Path where to search files
+	## @param[in] regex (string) regular expression of the search
+	## @param[in] clip_path (string) Remove a part of the path set in the list and install data in generic include path
+	## @param[in] recursive (bool) Search in resursive mode
+	## @return None
+	##
+	def add_header_path(self, base_path, regex="*", clip_path=None, recursive=False):
+		if    base_path[-1] == '/' \
+		   or base_path[-1] == '\\':
+			self.add_header_file(base_path + regex, clip_path=clip_path, recursive=recursive)
+		else:
+			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive)
 	##
 	## @brief Many library need to generate dynamic file configuration, use this to generat your configuration and add it in the include path
 	## @param[in] self (handle) Class handle
