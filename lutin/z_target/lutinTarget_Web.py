@@ -54,14 +54,14 @@ class Target(lutinTarget_Linux.Target):
 		# Disable capabiliteis to compile in shared mode
 		self.support_dynamic_link = False
 		# create temporary file:
-		self._file_data_tmp = os.path.join(self.get_build_path_temporary_generate(""), "tmp_file_data.zip")
-		tools.file_write_data(self._file_data_tmp, "coucou", only_if_new=True)
+		self._file_data_tmp = "tmp_file_data.zip"
+		tools.file_write_data(os.path.join(self.get_build_path_temporary_generate(""), self._file_data_tmp), "coucou", only_if_new=True)
 		# add default file (need to generate a empty file to add it before loading:
 		self.add_flag("link", [
-		    "--preload-file " + self._file_data_tmp,
+		    "--preload-file " + os.path.join(self.get_build_path_temporary_generate(""), self._file_data_tmp) + "@tmp_file_data.zip",
 		    #" -s FULL_ES2=1 "
 		    ])
-		# in the output.js this generate a section '{"audio": 0, "start": 0, "crunched": 0, "end": 6, "filename": "/out/Web_x86_64/debug/build/gcc/generate/tmp_file_data.zip"}], "remote_package_size": 6' ==> that will be replaced by the corretc data in the file 'module.data'
+		# in the output.js this generate a section '{"audio": 0, "start": 0, "crunched": 0, "end": 6, "filename": "tmp_file_data.zip"}], "remote_package_size": 6' ==> that will be replaced by the corretc data in the file 'module.data'
 	
 	"""
 	.local/application
@@ -139,7 +139,7 @@ class Target(lutinTarget_Linux.Target):
 			
 			# patch the .js file to update the new real data ...
 			js_file_data = tools.file_read_data(os.path.join(self.get_staging_path(pkg_name, tmp=True), pkg_name + ".app", pkg_name + self.suffix_binary2))
-			data_to_replace = '"end": 6, "filename": "/' + os.path.relpath(self._file_data_tmp) + '"}], "remote_package_size": 6'
+			data_to_replace = '"end": 6, "filename": "/' + self._file_data_tmp + '"}], "remote_package_size": 6'
 			data_size = str(tools.file_size(zip_path))
 			replace_with = '"end": ' + data_size + ', "filename": "/data.zip"}], "remote_package_size": ' + data_size
 			debug.print_element("js", pkg_name + ".data", "<==", "correct zip name and data")
