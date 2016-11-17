@@ -90,7 +90,9 @@ class Target:
 		    '-D__TARGET_ADDR__' + self.config["bus-size"] + 'BITS',
 		    '-D_REENTRANT'
 		    ])
-		self.add_flag("c++", "-Wno-undefined-var-template")
+		if     self.config["compilator"] == "clang" \
+		   and self.xx_version >= 4002001: # >= 4.2.1
+			self.add_flag("c++", "-Wno-undefined-var-template")
 		self.add_flag("c", "-nodefaultlibs")
 		self.add_flag("c++", "-nostdlib")
 		self.add_flag("ar", 'rcs')
@@ -317,7 +319,7 @@ class Target:
 		if ret == False:
 			debug.error("Can not get the g++/clang++ version ...")
 		self.xx_version = self.create_number_from_version_string(ret)
-		debug.verbose(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
+		debug.debug(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
 		
 		self.ld = self.cross + "ld"
 		self.nm = self.cross + "nm"
