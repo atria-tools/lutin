@@ -525,7 +525,7 @@ class Module:
 		list_sub_file_needed_to_build = []
 		self._sub_heritage_list = heritage.HeritageList()
 		# optionnal dependency :
-		for dep, option, export, src_file, header_file in self._depends_optionnal:
+		for dep, option, export, src_file, header_file, option_not_found in self._depends_optionnal:
 			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
 			inherit_list, isBuilt = target.build(dep, True)
 			if isBuilt == True:
@@ -533,6 +533,8 @@ class Module:
 				self.add_flag(option[0], option[1], export=export);
 				self.add_src_file(src_file)
 				self.add_header_file(header_file)
+			else:
+				self.add_flag(option_not_found[0], option_not_found[1], export=export);
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self._depends:
@@ -943,14 +945,15 @@ class Module:
 	## @brief Add an optionnal dependency on this module
 	## @param[in] self (handle) Class handle
 	## @param[in] module_name (string) Name of the optionnal dependency
-	## @param[in] compilation_flags ([string,string]) flag to add if dependency if find.
+	## @param[in] compilation_flags ([string,string]) flag to add if dependency is found.
+	## @param[in] compilation_flags_not_found ([string,string]) flag to add if dependency is NOT found.
 	## @param[in] export (bool) export the flat that has been requested to add if module is present.
 	## @param[in] src_file ([string,...]) File to compile if the dependecy if found.
 	## @param[in] header_file ([string,...]) File to add in header if the dependecy if found.
 	## @return None
 	##
-	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False, src_file=[], header_file=[]):
-		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export, src_file, header_file], True)
+	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False, src_file=[], header_file=[], compilation_flags_not_found=["", ""]):
+		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export, src_file, header_file, compilation_flags_not_found], True)
 	
 	##
 	## @brief Add a path to include when build
@@ -1095,6 +1098,9 @@ class Module:
 		   or base_path[0] == '\\':
 			debug.error("[" + self.get_name() + "] ==> use relative path for function add_src_path")
 		list_of_file = tools.get_list_of_file_in_path(os.path.join(self._origin_path, base_path), regex=regex, recursive=recursive, remove_path=self._origin_path)
+		if list_of_file == None:
+			debug.warning("[" + self.get_name() + "] ==> Can not find any file : " + os.path.join(self._origin_path, base_path) + " " + regex)
+			return
 		debug.debug("[" + self.get_name() + "] add " + str(len(list_of_file)) + " file(s)")
 		self.add_src_file(list_of_file)
 	
@@ -1207,14 +1213,15 @@ class Module:
 	## @param[in] regex (string) regular expression of the search
 	## @param[in] clip_path (string) Remove a part of the path set in the list and install data in generic include path
 	## @param[in] recursive (bool) Search in resursive mode
+	## @param[in] destination_path (string) Path to install the files (remove all the path of the file)
 	## @return None
 	##
-	def add_header_path(self, base_path, regex="*", clip_path=None, recursive=False):
+	def add_header_path(self, base_path, regex="*", clip_path=None, recursive=False, destination_path=None):
 		if    base_path[-1] == '/' \
 		   or base_path[-1] == '\\':
-			self.add_header_file(base_path + regex, clip_path=clip_path, recursive=recursive)
+			self.add_header_file(base_path + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path)
 		else:
-			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive)
+			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path)
 	##
 	## @brief Many library need to generate dynamic file configuration, use this to generat your configuration and add it in the include path
 	## @param[in] self (handle) Class handle

@@ -26,7 +26,7 @@ class Target(lutinTarget_Linux.Target):
 	def __init__(self, config, sub_name=[]):
 		lutinTarget_Linux.Target.__init__(self, config, ["Web"] + sub_name)
 		
-		self.cross ="/home/heero/dev/perso/emsdk_portable/emscripten/master/em"
+		self.cross ="./emsdk_portable/emscripten/master/em"
 		debug.debug("== Target='em'");
 		self.java = "javac"
 		self.javah = "javah"

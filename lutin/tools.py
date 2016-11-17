@@ -196,7 +196,7 @@ def get_list_of_file_in_path(path, regex="*", recursive = False, remove_path="")
 			deltaRoot = deltaRoot[1:]
 		if     recursive == False \
 		   and deltaRoot != "":
-			return
+			return out
 		debug.verbose("     root='" + str(deltaRoot) + "'")
 		debug.extreme_verbose("         files=" + str(filenames))
 		tmpList = filenames

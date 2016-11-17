@@ -90,6 +90,7 @@ class Target:
 		    '-D__TARGET_ADDR__' + self.config["bus-size"] + 'BITS',
 		    '-D_REENTRANT'
 		    ])
+		self.add_flag("c++", "-Wno-undefined-var-template")
 		self.add_flag("c", "-nodefaultlibs")
 		self.add_flag("c++", "-nostdlib")
 		self.add_flag("ar", 'rcs')
