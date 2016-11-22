@@ -512,13 +512,14 @@ class Module:
 		# create the package heritage
 		self._local_heritage = heritage.heritage(self, target)
 		
-		if     package_name==None \
+		if     package_name == None \
 		   and (    self._type == 'BINARY'
 		         or self._type == 'BINARY_SHARED' \
 		         or self._type == 'BINARY_STAND_ALONE' \
 		         or self._type == 'PACKAGE' ) :
 			# this is the endpoint binary ...
 			package_name = self._name
+			debug.warning("package name = " + package_name)
 		else:
 			pass
 		# build dependency before
@@ -527,7 +528,7 @@ class Module:
 		# optionnal dependency :
 		for dep, option, export, src_file, header_file, option_not_found in self._depends_optionnal:
 			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
-			inherit_list, isBuilt = target.build(dep, True)
+			inherit_list, isBuilt = target.build(dep, True, package_name=package_name)
 			if isBuilt == True:
 				self._local_heritage.add_depends(dep);
 				self.add_flag(option[0], option[1], export=export);
@@ -539,7 +540,7 @@ class Module:
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self._depends:
 			debug.debug("module: '" + str(self._name) + "'   request: '" + dep + "'")
-			inherit_list = target.build(dep, False)
+			inherit_list = target.build(dep, False, package_name=package_name)
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		# do sub library action for automatic generating ...
@@ -633,7 +634,8 @@ class Module:
 		# ---------------------------------------------------------------------------
 		# -- Sources compilation                                                   --
 		# ---------------------------------------------------------------------------
-		if self._type != 'PREBUILD':
+		if     self._type != 'PREBUILD' \
+		   and self._type != 'PACKAGE':
 			# build local sources in a specific order:
 			for extention_local in self._extention_order_build:
 				list_file = tools.filter_extention(self._src, [extention_local])
@@ -699,7 +701,7 @@ class Module:
 		# ----------------------------------------------------
 		# -- Generation point                               --
 		# ----------------------------------------------------
-		if self._type=='PREBUILD':
+		if self._type == 'PREBUILD':
 			self._local_heritage.add_sources(self._src)
 		elif    self._type == 'LIBRARY' \
 		     or self._type == 'LIBRARY_DYNAMIC' \
@@ -797,7 +799,7 @@ class Module:
 						                            basic_path = self._origin_path)
 						self._local_heritage.add_sources(res_file)
 				except ValueError:
-					debug.error(" UN-SUPPORTED link format:  '.jar'")
+					debug.error("UN-SUPPORTED link format: '.jar'")
 			else:
 				try:
 					tmp_builder = builder.get_builder_with_output("bin");
@@ -810,7 +812,7 @@ class Module:
 					                            basic_path = self._origin_path,
 					                            static = static_mode)
 				except ValueError:
-					debug.error(" UN-SUPPORTED link format:  '.bin'")
+					debug.error("UN-SUPPORTED link format: '.bin'")
 		elif self._type == "PACKAGE":
 			if "Android" in target.get_type():
 				# special case for android wrapper:
@@ -826,7 +828,7 @@ class Module:
 					                            basic_path = self._origin_path)
 					self._local_heritage.add_sources(res_file)
 				except ValueError:
-					debug.error(" UN-SUPPORTED link format:  '.so'")
+					debug.error("UN-SUPPORTED link format: '.so'")
 				try:
 					tmp_builder = builder.get_builder_with_output("jar");
 					list_file = tools.filter_extention(list_sub_file_needed_to_build, tmp_builder.get_input_type())
@@ -842,6 +844,9 @@ class Module:
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  '.jar'")
 			else:
+				pass
+				# TODO : Check this but I this this is not needed ==> a package can not have build stage ...
+				"""
 				try:
 					tmp_builder = builder.get_builder_with_output("bin");
 					res_file = tmp_builder.link(list_sub_file_needed_to_build,
@@ -853,6 +858,7 @@ class Module:
 					                            basic_path = self._origin_path)
 				except ValueError:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
+				"""
 		elif self._type == "DATA":
 			debug.debug("Data package have noting to build... just install")
 		else:

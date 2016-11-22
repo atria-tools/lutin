@@ -635,9 +635,10 @@ class Target:
 	## @param[in] name (string) Module to build
 	## @param[in] optionnal (bool) If the module is not accessible, this is not a probleme ==> optionnal dependency requested
 	## @param[in] actions ([string,...]) list of action to do. ex: build, gcov, dump, all, clean, install, uninstall, run, log
+	## @param[in] package_name Current package name that request the build
 	## @return (None|Module handle| ...) complicated return ...
 	##
-	def build(self, name, optionnal=False, actions=[]):
+	def build(self, name, optionnal=False, actions=[], package_name=None):
 		if    len(name.split("?")) != 1\
 		   or len(name.split("@")) != 1:
 			debug.error("need update")
@@ -693,11 +694,11 @@ class Target:
 			for mod in self.module_list:
 				if self._name == "Android":
 					if mod.get_type() == "PACKAGE":
-						mod.build(self, None)
+						mod.build(self, package_name)
 				else:
 					if    mod.get_type() == "BINARY" \
 					   or mod.get_type() == "PACKAGE":
-						mod.build(self, None)
+						mod.build(self, package_name)
 		elif name == "clean":
 			debug.info("clean all")
 			self.load_all()
@@ -786,9 +787,9 @@ class Target:
 										debug.warning("action 'build' does not support options ... : '" + action_name + "'")
 									debug.debug("build module '" + module_name + "'")
 									if optionnal == True:
-										ret = [mod.build(self, None), True]
+										ret = [mod.build(self, package_name), True]
 									else:
-										ret = mod.build(self, None)
+										ret = mod.build(self, package_name)
 									break
 						if     optionnal == True \
 						   and ret == None:
