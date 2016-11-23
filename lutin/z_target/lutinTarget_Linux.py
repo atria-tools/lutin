@@ -162,11 +162,13 @@ class Target(target.Target):
 			# remove executable link version:
 			tools.remove_file(target_bin_link)
 	
-	def run(self, pkg_name, option_list):
+	def run(self, pkg_name, option_list, binary_name = None):
+		if binary_name == None:
+			binary_name = pkg_name;
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
+		debug.info("-- Run package '" + pkg_name + "' executable: '" + binary_name + "' + option: " + str(option_list))
 		debug.debug("------------------------------------------------------------------------")
-		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "bin", pkg_name)
+		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "bin", binary_name)
 		cmd = appl_path + " "
 		for elem in option_list:
 			cmd += elem + " "

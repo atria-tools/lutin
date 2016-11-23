@@ -173,7 +173,7 @@ class Target(target.Target):
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
 	
-	def run(self, pkg_name, option_list):
+	def run(self, pkg_name, option_list, binary_name = None):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "'")
 		debug.debug("------------------------------------------------------------------------")

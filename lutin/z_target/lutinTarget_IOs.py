@@ -462,7 +462,7 @@ class Target(target.Target):
 			cmdLine = "tail -f ~/Library/Logs/iOS\ Simulator/7.1/system.log"
 			multiprocess.run_command_no_lock_out(cmdLine)
 	
-	def run(self, pkg_name, option_list):
+	def run(self, pkg_name, option_list, binary_name = None):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
 		debug.debug("------------------------------------------------------------------------")

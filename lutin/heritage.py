@@ -157,7 +157,10 @@ class HeritageList:
 	## @return (string) string of str() convertion
 	##
 	def __repr__(self):
-		return "{HeritageList:" + str(self.list_heritage) + "}"
+		dep = []
+		for elem in reversed(self.list_heritage):
+			dep.append(str(elem.name))
+		return "{HeritageList: " + str(dep) + "}"
 
 class heritage:
 	def __init__(self, module, target):
@@ -258,6 +261,6 @@ class heritage:
 	## @return (string) string of str() convertion
 	##
 	def __repr__(self):
-		return "{Heritage:" + str(self.name) + " ... }"
+		return "{Heritage:" + str(self.name) + " depend on: " + str(reversed(self.depends)) + " ... }"
 
 

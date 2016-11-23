@@ -469,8 +469,10 @@ class Target:
 	## @param[in] name (string) Name of the module
 	## @return (string) The path
 	##
-	def get_build_file_bin(self, name):
-		return os.path.join(self.get_build_path_bin(name), name + self.suffix_binary)
+	def get_build_file_bin(self, name, static):
+		if static == True:
+			return os.path.join(self.get_build_path_bin(name), name + "_static" + self.suffix_binary)
+		return os.path.join(self.get_build_path_bin(name), name + "_dynamic" + self.suffix_binary)
 	
 	##
 	## @brief Get the path filename of the build static library name
@@ -721,12 +723,20 @@ class Target:
 					except AttributeError:
 						debug.error("target have no 'un_install_package' instruction")
 				elif action_name[:3] == "run":
+					bin_name = None
 					if len(action_name) > 3:
+						if action_name[3] == '%':
+							bin_name = ""
+							for elem in action_name[4:]:
+								if elem == ":":
+									break;
+								bin_name += elem
 						# we have option:
 						action_name2 = action_name.replace("\:", "1234COLUMN4321")
 						option_list = action_name2.split(":")
 						if len(option_list) == 0:
-							debug.warning("action 'run' wrong options options ... : '" + action_name + "' might be separate with ':'")
+							if bin_name != None:
+								debug.warning("action 'run' wrong options options ... : '" + action_name + "' might be separate with ':'")
 							option_list = []
 						else:
 							option_list_tmp = option_list[1:]
@@ -736,7 +746,7 @@ class Target:
 					else:
 						option_list = []
 					#try:
-					self.run(module_name, option_list)
+					self.run(module_name, option_list, bin_name)
 					#except AttributeError:
 					#	debug.error("target have no 'run' instruction")
 				elif action_name == "log":
@@ -843,19 +853,18 @@ class Target:
 		if module.get_type() == 'PREBUILD':
 			#nothing to do ...
 			return
-		if    module.get_type() == 'LIBRARY' \
-		   or module.get_type() == 'LIBRARY_DYNAMIC' \
-		   or module.get_type() == 'LIBRARY_STATIC':
+		elif    module.get_type() == 'LIBRARY' \
+		     or module.get_type() == 'LIBRARY_DYNAMIC' \
+		     or module.get_type() == 'LIBRARY_STATIC':
 			debug.info("Can not create package for library");
 			return
-		if    module.get_type() == 'BINARY' \
-		   or module.get_type() == 'BINARY_STAND_ALONE':
+		elif    module.get_type() == 'BINARY' \
+		     or module.get_type() == 'BINARY_STAND_ALONE':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
-		if module.get_type() == 'BINARY_SHARED':
+		elif module.get_type() == 'BINARY_SHARED':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
-		if module.get_type() == 'PACKAGE':
-			debug.info("Can not create package for package");
-			return
+		elif module.get_type() == 'PACKAGE':
+			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
 		debug.debug("make_package [STOP]")
 		return
 	
@@ -919,26 +928,60 @@ class Target:
 	def make_package_binary_bin(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
 		debug.debug("make_package_binary_bin [START]")
 		copy_list={}
+		# creata basic output path
 		path_package_bin = os.path.join(path_package, self.pkg_path_bin)
 		tools.create_directory_of_file(path_package_bin)
-		path_src = self.get_build_file_bin(pkg_name)
-		path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary)
-		debug.verbose("path_dst: " + str(path_dst))
-		tools.copy_file(path_src,
-		                path_dst,
-		                in_list=copy_list)
-		try:
-			path_src = self.get_build_file_bin(pkg_name)
+		# Local module binary
+		path_src = self.get_build_file_bin(pkg_name, static)
+		if os.path.exists(path_src) == True:
+			try:
+				path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary)
+				debug.verbose("path_dst: " + str(path_dst))
+				tools.copy_file(path_src,
+				                path_dst,
+				                in_list=copy_list)
+			except:
+				debug.extreme_verbose("can not find : " + path_src)
+				pass
+		path_src = self.get_build_file_bin(pkg_name, static)
+		path_src = path_src[:len(path_src)-4] + "js"
+		if os.path.exists(path_src) == True:
+			try:
+				path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary2)
+				debug.verbose("path_dst: " + str(path_dst))
+				tools.copy_file(path_src,
+				                path_dst,
+				                in_list=copy_list)
+			except:
+				debug.extreme_verbose("can not find : " + path_src)
+				pass
+		# heritage binary
+		debug.debug("heritage for " + str(pkg_name) + ":")
+		for heritage in heritage_list.list_heritage:
+			debug.debug("sub elements: " + str(heritage.name))
+			path_src = self.get_build_file_bin(heritage.name, static)
+			if os.path.exists(path_src) == True:
+				try:
+					path_dst = os.path.join(path_package_bin, heritage.name + self.suffix_binary)
+					debug.verbose("path_dst: " + str(path_dst))
+					tools.copy_file(path_src,
+					                path_dst,
+					                in_list=copy_list)
+				except:
+					debug.extreme_verbose("can not find : " + path_src)
+					pass
+			path_src = self.get_build_file_bin(heritage.name, static)
 			path_src = path_src[:len(path_src)-4] + "js"
-			path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary2)
-			debug.verbose("path_dst: " + str(path_dst))
-			tools.copy_file(path_src,
-			                path_dst,
-			                in_list=copy_list)
-		except:
-			debug.extreme_verbose("can not find : " + path_src)
-			pass
-		
+			if os.path.exists(path_src) == True:
+				try:
+					path_dst = os.path.join(path_package_bin, heritage.name + self.suffix_binary2)
+					debug.verbose("path_dst: " + str(path_dst))
+					tools.copy_file(path_src,
+					                path_dst,
+					                in_list=copy_list)
+				except:
+					debug.extreme_verbose("can not find : " + path_src)
+					pass
 		#real copy files
 		ret_copy = tools.copy_list(copy_list)
 		ret_remove = False
@@ -1068,7 +1111,7 @@ class Target:
 		debug.debug("------------------------------------------------------------------------")
 		debug.error("action not implemented ...")
 	
-	def run(self, pkg_name, option_list):
+	def run(self, pkg_name, option_list, binary_name = None):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
 		debug.debug("------------------------------------------------------------------------")

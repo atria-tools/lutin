@@ -59,7 +59,7 @@ def get_support_multithreading():
 ##
 def link(file, binary, target, depancy, flags, name, basic_path, static = False):
 	file_src = file
-	file_dst = target.get_build_file_bin(binary)
+	file_dst = target.get_build_file_bin(name, static)
 	file_depend = file_dst + target.suffix_dependence
 	file_cmd = file_dst + target.suffix_cmd_line
 	file_warning = file_dst + target.suffix_warning
@@ -128,7 +128,7 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 				cmd.append("-Wl,-R$ORIGIN/../lib/")
 	except:
 		pass
-	cmd.append("-Wl,-rpath,\"\$ORIGIN/../lib\"")
+	cmd.append("-Wl,-rpath,\"$ORIGIN/../lib\"")
 	try:
 		cmd.append(flags["local"]["link"])
 	except:

@@ -213,7 +213,7 @@ class Target(lutinTarget_Linux.Target):
 			# remove executable link version:
 			tools.remove_file(target_bin_link)
 	
-	def run(self, pkg_name, option_list):
+	def run(self, pkg_name, option_list, binary_name = None):
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
 		debug.debug("------------------------------------------------------------------------")

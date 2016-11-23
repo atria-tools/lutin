@@ -801,6 +801,21 @@ class Module:
 				except ValueError:
 					debug.error("UN-SUPPORTED link format: '.jar'")
 			else:
+				# try to build the binary with dependency of .so and the standalone binary (Not package dependent)
+				if target.support_dynamic_link == True:
+					try:
+						tmp_builder = builder.get_builder_with_output("bin");
+						res_file = tmp_builder.link(list_sub_file_needed_to_build,
+						                            package_name,
+						                            target,
+						                            self._sub_heritage_list,
+						                            flags = self._flags,
+						                            name = self._name,
+						                            basic_path = self._origin_path,
+						                            static = True)
+						#self._local_heritage.add_sources(res_file)
+					except ValueError:
+						debug.error("UN-SUPPORTED link format: '.bin'")
 				try:
 					tmp_builder = builder.get_builder_with_output("bin");
 					res_file = tmp_builder.link(list_sub_file_needed_to_build,
@@ -810,7 +825,8 @@ class Module:
 					                            flags = self._flags,
 					                            name = self._name,
 					                            basic_path = self._origin_path,
-					                            static = static_mode)
+					                            static = False)
+					#self._local_heritage.add_sources(res_file)
 				except ValueError:
 					debug.error("UN-SUPPORTED link format: '.bin'")
 		elif self._type == "PACKAGE":
@@ -886,13 +902,17 @@ class Module:
 		# ----------------------------------------------------
 		if    self._type[:6] == 'BINARY' \
 		   or self._type == 'PACKAGE':
+			debug.verbose("Request creating of package : " + str(self._name))
+			debug.extreme_verbose("Heritage : " + str(self._local_heritage))
+			# TODO : Do package for library ...
 			if target.end_generate_package == True:
 				# generate the package with his properties ...
 				if "Android" in target.get_type():
 					self._sub_heritage_list.add_heritage(self._local_heritage)
-					target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
-				else:
-					target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
+				elif self._type == 'PACKAGE':
+					self._sub_heritage_list.add_heritage(self._local_heritage)
+				debug.extreme_verbose("HeritageList : " + str(self._sub_heritage_list))
+				target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
 		# return local dependency ...
 		return copy.deepcopy(self._sub_heritage_list)
 	
