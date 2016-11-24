@@ -75,6 +75,8 @@ class Module:
 		self._name = module_name
 		# Tools list:
 		self._tools = []
+		# list of action to do:
+		self._actions = []
 		# Dependency list:
 		self._depends = []
 		# Dependency list (optionnal module):
@@ -160,6 +162,14 @@ class Module:
 	##
 	def get_name(self):
 		return self._name
+	
+	##
+	## @brief Get origin path of the module declaration
+	## @param[in] self (handle) Class handle
+	## @return (string) path of the module
+	##
+	def get_origin_path(self):
+		return self._origin_path
 	
 	##
 	## @brief Get type of the module ("BINARY", "LIBRARY", ...)
@@ -511,7 +521,10 @@ class Module:
 			return copy.deepcopy(self._sub_heritage_list)
 		# create the package heritage
 		self._local_heritage = heritage.heritage(self, target)
-		
+		if len(self._actions) != 0:
+			debug.warning("execute actions: " + str(len(self._actions)))
+			for action in self._actions:
+				action["action"](target, self, action["data"]);
 		if     package_name == None \
 		   and (    self._type == 'BINARY'
 		         or self._type == 'BINARY_SHARED' \
@@ -602,6 +615,8 @@ class Module:
 				                  "need_copy":ret_write}
 				if elem_generate["install"] == True:
 					have_only_generate_file = True
+					# TODO : Do it better, we force the include path in the heritage to permit to have a correct inclusion ...
+					self._local_heritage.include = target.get_build_path_include(self._name)
 		if have_only_generate_file == True:
 			self._add_path(generate_path)
 		
@@ -1265,6 +1280,20 @@ class Module:
 		    });
 	
 	##
+	## @brief Add action to do for the module
+	## @param[in] action (function handle) Function to call to execure action
+	## @param[in] data (*) Data to set at the action function
+	## @return None
+	##
+	def add_action(self, action, data=None, name=None):
+		debug.verbose("add action : " + str(name))
+		self._actions.append({
+		    "name":name,
+		    "action":action,
+		    "data":data
+		    })
+	
+	##
 	## @brief copy image in the module datas
 	## @param[in] self (handle) Class handle
 	## @param[in] source (string) Source filename of the image
@@ -1328,6 +1357,7 @@ class Module:
 		
 		self._print_list('depends',self._depends)
 		self._print_list('depends_optionnal', self._depends_optionnal)
+		print('    action count=' + str(self._actions))
 		
 		for element in self._flags["local"]:
 			value = self._flags["local"][element]

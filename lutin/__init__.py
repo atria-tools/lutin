@@ -11,6 +11,7 @@ import os
 import sys
 import fnmatch
 # Local import
+from . import macro
 from . import target
 from . import builder
 from . import system
@@ -148,6 +149,7 @@ def init():
 	module.import_path(list_of_lutin_files)
 	system.import_path(list_of_lutin_files)
 	target.import_path(list_of_lutin_files)
+	macro.import_path(list_of_lutin_files)
 	
 	builder.init()
 	is_init = True
