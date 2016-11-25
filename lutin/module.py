@@ -522,7 +522,7 @@ class Module:
 		# create the package heritage
 		self._local_heritage = heritage.heritage(self, target)
 		if len(self._actions) != 0:
-			debug.warning("execute actions: " + str(len(self._actions)))
+			debug.verbose("execute actions: " + str(len(self._actions)))
 			for action in self._actions:
 				action["action"](target, self, action["data"]);
 		if     package_name == None \
@@ -604,19 +604,24 @@ class Module:
 		include_path = target.get_build_path_include(self._name)
 		have_only_generate_file = False
 		if len(self._generate_file) > 0:
-			debug.debug("install GENERATED headers ...")
+			debug.debug("install GENERATED headers / src ...")
 			for elem_generate in self._generate_file:
+				
 				ret_write = tools.file_write_data(os.path.join(generate_path, elem_generate["filename"]), elem_generate["data"], only_if_new=True)
 				if ret_write == True:
 					debug.print_element("generate", self._name, "##", elem_generate["filename"])
-				dst = os.path.join(include_path, elem_generate["filename"])
-				copy_list[dst] = {"src":os.path.join(generate_path, elem_generate["filename"]),
-				                  "cmd_file":None,
-				                  "need_copy":ret_write}
-				if elem_generate["install"] == True:
-					have_only_generate_file = True
-					# TODO : Do it better, we force the include path in the heritage to permit to have a correct inclusion ...
-					self._local_heritage.include = target.get_build_path_include(self._name)
+				if elem_generate["type"] == "header":
+					dst = os.path.join(include_path, elem_generate["filename"])
+					copy_list[dst] = {"src":os.path.join(generate_path, elem_generate["filename"]),
+					                  "cmd_file":None,
+					                  "need_copy":ret_write}
+					if elem_generate["install"] == True:
+						have_only_generate_file = True
+						# TODO : Do it better, we force the include path in the heritage to permit to have a correct inclusion ...
+						self._local_heritage.include = target.get_build_path_include(self._name)
+				else:
+					# add file to compile
+					self.add_src_file(os.path.join(generate_path, elem_generate["filename"]))
 		if have_only_generate_file == True:
 			self._add_path(generate_path)
 		
@@ -1264,7 +1269,7 @@ class Module:
 		else:
 			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path)
 	##
-	## @brief Many library need to generate dynamic file configuration, use this to generat your configuration and add it in the include path
+	## @brief Many library need to generate dynamic file configuration, use this to generate your configuration and add it in the include path
 	## @param[in] self (handle) Class handle
 	## @param[in] data_file (string) Data of the file that is generated
 	## @param[in] destination_path (string) Path where to install data
@@ -1274,9 +1279,25 @@ class Module:
 	##
 	def add_generated_header_file(self, data_file, destination_path, install_element=False):
 		self._generate_file.append({
+		    "type":"header",
 		    "data":data_file,
 		    "filename":destination_path,
 		    "install":install_element
+		    });
+	##
+	## @brief Many library need to generate dynamic file to compile, use this to create and add to build your files
+	## @param[in] self (handle) Class handle
+	## @param[in] data_file (string) Data of the file that is generated
+	## @param[in] destination_path (string) Path where to install data
+	## @note this does not rewrite the file if it is not needed
+	## @return None
+	##
+	def add_generated_src_file(self, data_file, destination_path):
+		self._generate_file.append({
+		    "type":"src",
+		    "data":data_file,
+		    "filename":destination_path,
+		    "install":False
 		    });
 	
 	##
