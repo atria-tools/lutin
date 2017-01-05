@@ -5,7 +5,7 @@
 ##
 ## @copyright 2012, Edouard DUPIN, all right reserved
 ##
-## @license APACHE v2.0 (see license file)
+## @license MPL v2.0 (see license file)
 ##
 
 from setuptools import setup
@@ -22,14 +22,14 @@ setup(name='lutin',
       url='http://github.com/HeeroYui/lutin',
       author='Edouard DUPIN',
       author_email='yui.heero@gmail.com',
-      license='APACHE-2',
+      license='MPL-2',
       packages=['lutin',
                 'lutin/z_builder',
                 'lutin/z_system',
                 'lutin/z_target'],
       classifiers=[
-        'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: Apache Software License',
+        'Development Status :: 5 - Beta',
+        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Programming Language :: Python',
         'Topic :: Software Development :: Compilers',
       ],

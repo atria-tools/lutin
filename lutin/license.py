@@ -5,7 +5,7 @@
 ##
 ## @copyright 2012, Edouard DUPIN, all right reserved
 ##
-## @license APACHE v2.0 (see license file)
+## @license MPL v2.0 (see license file)
 ##
 
 license_base = {
@@ -14,7 +14,7 @@ license_base = {
 		"contaminate-static":False,
 		"contaminate-dynamic":False,
 		"redistribute-source":False,
-		"title":"APACHE v2.0 license",
+		"title":"MPL v2.0 license",
 		"licence-file":"licence/apache-2.txt"
 		},
 	"GPL-2": {
@@ -88,7 +88,31 @@ license_base = {
 		"redistribute-source":False,
 		"title":"PNG License",
 		"licence-file":"licence/png.txt"
-		}
+		},
+	"MPL-1": {
+		"generic":True,
+		"contaminate-static":False,
+		"contaminate-dynamic":False,
+		"redistribute-source":True,
+		"title":"MPL: Mozilla Public Licence v1.0",
+		"licence-file":"licence/MPL-1.txt"
+		},
+	"MPL-1.1": {
+		"generic":True,
+		"contaminate-static":False,
+		"contaminate-dynamic":False,
+		"redistribute-source":True,
+		"title":"MPL: Mozilla Public Licence v1.1",
+		"licence-file":"licence/MPL-1.1.txt"
+		},
+	"MPL-2": {
+		"generic":True,
+		"contaminate-static":False,
+		"contaminate-dynamic":False,
+		"redistribute-source":True,
+		"title":"MPL: Mozilla Public Licence v2.0",
+		"licence-file":"licence/MPL-2.txt"
+		},
 }
 
 def get_basic_list():

@@ -45,6 +45,7 @@ def get_desc():
 #    "BSD-1" / "BSD-2" / "BSD-3" / "BSD-4"
 #    "GPL-1" / "GPL-2" / "GPL-3"
 #    "LGPL-1" / "LGPL-2" / "LGPL-3"
+#    "MPL-1" / "MPL-1.1" / "MPL-2"
 #    PROPRIETARY
 #    ...
 # Note: this fucntion is optionnal.
@@ -386,6 +387,7 @@ def get_desc():
 #    "BSD-1" / "BSD-2" / "BSD-3" / "BSD-4"
 #    "GPL-1" / "GPL-2" / "GPL-3"
 #    "LGPL-1" / "LGPL-2" / "LGPL-3"
+#    "MPL-1" / "MPL-1.1" / "MPL-2"
 #    PROPRIETARY
 #    ...
 # Note: this fucntion is optionnal.
