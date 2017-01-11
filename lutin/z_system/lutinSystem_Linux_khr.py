@@ -24,12 +24,12 @@ class System(system.System):
 		self.add_depend([
 		    'c',
 		    ])
-		self.add_flag('link-lib', 'GL')
+		self.add_flag('link-lib', 'wayland-egl')
 		if env.get_isolate_system() == True:
 			self.add_header_file([
-			    "/usr/include/GL/*"
+			    "/usr/include/KHR/*"
 			    ],
-			    destination_path="GL",
+			    destination_path="KHR",
 			    recursive=True)
 	
 

@@ -28,7 +28,7 @@ setup(name='lutin',
                 'lutin/z_system',
                 'lutin/z_target'],
       classifiers=[
-        'Development Status :: 5 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Programming Language :: Python',
         'Topic :: Software Development :: Compilers',

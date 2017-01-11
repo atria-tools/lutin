@@ -18,19 +18,16 @@ class System(system.System):
 	def __init__(self, target):
 		system.System.__init__(self)
 		# create some HELP:
-		self.set_help("OpenGL: Generic graphic library")
+		self.set_help("wayland: Basic interface of Linux Graphic interface (replace X11)")
 		self.set_valid(True)
 		# no check needed ==> just add this:
-		self.add_depend([
-		    'c',
-		    ])
-		self.add_flag('link-lib', 'GL')
+		self.add_depend(['c'])
+		self.add_flag('link-lib', 'wayland-client')
 		if env.get_isolate_system() == True:
 			self.add_header_file([
-			    "/usr/include/GL/*"
+			    "/usr/include/wayland-*"
 			    ],
-			    destination_path="GL",
+			    destination_path="",
 			    recursive=True)
-	
 
 

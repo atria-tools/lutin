@@ -22,14 +22,14 @@ class System(system.System):
 		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend([
-		    'c',
+		    'opengl',
 		    ])
-		self.add_flag('link-lib', 'GL')
+		self.add_flag('link-lib', 'GLESv2')
 		if env.get_isolate_system() == True:
 			self.add_header_file([
-			    "/usr/include/GL/*"
+			    "/usr/include/GLES2/*"
 			    ],
-			    destination_path="GL",
+			    destination_path="GLES2",
 			    recursive=True)
 	
 

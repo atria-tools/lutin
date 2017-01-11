@@ -22,14 +22,14 @@ class System(system.System):
 		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend([
-		    'c',
+		    'khr',
 		    ])
-		self.add_flag('link-lib', 'GL')
+		self.add_flag('link-lib', 'EGL')
 		if env.get_isolate_system() == True:
 			self.add_header_file([
-			    "/usr/include/GL/*"
+			    "/usr/include/EGL/*"
 			    ],
-			    destination_path="GL",
+			    destination_path="EGL",
 			    recursive=True)
 	
 
