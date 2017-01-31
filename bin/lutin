@@ -23,6 +23,7 @@ import lutin.multiprocess as multiprocess
 import lutin.tools as tools
 import lutin.host as lutinHost
 import lutin.tools as lutinTools
+import lutin.depend as depend
 
 myArgs = arguments.LutinArg()
 myArgs.add("h", "help", desc="Display this help")
@@ -385,6 +386,7 @@ for argument in localArgument:
 			          }
 			#remove previous target
 			my_target = None
+			depend.clear_cache_file_date()
 	elif argument.get_option_name() == "mode":
 		if config["mode"] != argument.get_arg():
 			config["mode"] = argument.get_arg()
