@@ -34,7 +34,7 @@ __start_builder_name="Builder_"
 def import_path(path_list):
 	global builder_list
 	global_base = env.get_build_system_base_name()
-	debug.debug("BUILDER: Init with Files list:")
+	#debug.debug("BUILDER: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
@@ -46,19 +46,20 @@ def import_path(path_list):
 		filename = filename[len(global_base):]
 		# Check if it start with the local patern:
 		if filename[:len(__start_builder_name)] != __start_builder_name:
-			debug.extreme_verbose("BUILDER:     Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			#debug.extreme_verbose("BUILDER:     Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
 			continue
 		# Remove local patern
 		builder_name = filename[len(__start_builder_name):]
-		debug.verbose("BUILDER:     Integrate: '" + builder_name + "' from '" + elem + "'")
+		#debug.verbose("BUILDER:     Integrate: '" + builder_name + "' from '" + elem + "'")
 		the_builder = __import__(base_file_name)
 		builder_list.append({"name":builder_name,
 		                     "element":the_builder
 		                    })
-		debug.debug('BUILDER:     type=' + the_builder.get_type() + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
-	debug.verbose("List of BUILDER: ")
+		#debug.debug('BUILDER:     type=' + the_builder.get_type() + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
+	#debug.verbose("List of BUILDER: ")
 	for elem in builder_list:
-		debug.verbose("    " + str(elem["name"]))
+		#debug.verbose("    " + str(elem["name"]))
+		pass
 
 
 ##
@@ -66,7 +67,7 @@ def import_path(path_list):
 ##
 def init():
 	global builder_list
-	debug.debug('BUILDER: Initialize all ...')
+	#debug.debug('BUILDER: Initialize all ...')
 	for element in builder_list:
 		if element["element"] != None:
 			element["element"].init()

@@ -45,7 +45,7 @@ def get_list_sub_path(path):
 
 def remove_path_and_sub_path(path):
 	if os.path.isdir(path):
-		debug.verbose("remove path : '" + path + "'")
+		#debug.verbose("remove path : '" + path + "'")
 		shutil.rmtree(path)
 
 def remove_file(path):
@@ -143,12 +143,14 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 	cmd_line = "copy \"" + src + "\" \"" + dst + "\""
 	if     force == False \
 	   and depend.need_re_build(dst, src, file_cmd=cmd_file , cmd_line=cmd_line, force_identical=force_identical) == False:
-		debug.verbose("no need to copy ...")
+		#debug.verbose("no need to copy ...")
 		if in_list != None:
 			if dst in in_list:
-				debug.verbose("replace copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+				#debug.verbose("replace copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+				pass
 			else:
-				debug.verbose("append copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+				#debug.verbose("append copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+				pass
 			# update element in dictionnary:
 			in_list[dst] = {"src":src,
 			                "cmd_file":cmd_file,
@@ -163,7 +165,7 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 		os.chmod(dst, stat_info.st_mode)
 		store_command(cmd_line, cmd_file)
 	else:
-		debug.verbose("append copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
+		#debug.verbose("append copy file " + os.path.relpath(src) + " ==> " + os.path.relpath(dst))
 		# update element in dictionnary:
 		in_list[dst] = {"src":src,
 		                "cmd_file":cmd_file,
@@ -180,14 +182,14 @@ def copy_file(src, dst, cmd_file=None, force=False, force_identical=False, in_li
 ##
 def get_list_of_file_in_path(path, regex="*", recursive = False, remove_path=""):
 	out = []
-	debug.verbose(" List all in : '" + str(path) + "'")
+	#debug.verbose(" List all in : '" + str(path) + "'")
 	if os.path.isdir(os.path.realpath(path)):
 		tmp_path = os.path.realpath(path)
 		tmp_rule = regex
 	else:
 		debug.error("path does not exist : '" + str(path) + "'")
 	
-	debug.verbose("    " + str(tmp_path) + ":")
+	#debug.verbose("    " + str(tmp_path) + ":")
 	for root, dirnames, filenames in os.walk(tmp_path):
 		deltaRoot = root[len(tmp_path):]
 		while     len(deltaRoot) > 0 \
@@ -197,8 +199,8 @@ def get_list_of_file_in_path(path, regex="*", recursive = False, remove_path="")
 		if     recursive == False \
 		   and deltaRoot != "":
 			return out
-		debug.verbose("     root='" + str(deltaRoot) + "'")
-		debug.extreme_verbose("         files=" + str(filenames))
+		#debug.verbose("     root='" + str(deltaRoot) + "'")
+		#debug.extreme_verbose("         files=" + str(filenames))
 		tmpList = filenames
 		if len(tmp_rule) > 0:
 			tmpList = fnmatch.filter(filenames, tmp_rule)
@@ -211,7 +213,7 @@ def get_list_of_file_in_path(path, regex="*", recursive = False, remove_path="")
 					debug.error("Request remove start of a path that is not the same: '" + add_file[:len(remove_path)] + "' demand remove of '" + str(remove_path) + "'")
 				else:
 					add_file = add_file[len(remove_path)+1:]
-			debug.verbose("        '" + add_file + "'")
+			#debug.verbose("        '" + add_file + "'")
 			out.append(add_file)
 	return out;
 
@@ -224,8 +226,8 @@ def get_list_of_file_in_path(path, regex="*", recursive = False, remove_path="")
 ## @param[in,out] in_list (default None) Not real copy: set the request copy in the input list
 ##
 def copy_anything(src, dst, recursive = False, force_identical=False, in_list=None):
-	debug.verbose(" copy anything : '" + str(src) + "'")
-	debug.verbose("            to : '" + str(dst) + "'")
+	#debug.verbose(" copy anything : '" + str(src) + "'")
+	#debug.verbose("            to : '" + str(dst) + "'")
 	if os.path.isdir(os.path.realpath(src)):
 		tmp_path = os.path.realpath(src)
 		tmp_rule = ""
@@ -233,7 +235,7 @@ def copy_anything(src, dst, recursive = False, force_identical=False, in_list=No
 		tmp_path = os.path.dirname(os.path.realpath(src))
 		tmp_rule = os.path.basename(src)
 	
-	debug.verbose("    " + str(tmp_path) + ":")
+	#debug.verbose("    " + str(tmp_path) + ":")
 	for root, dirnames, filenames in os.walk(tmp_path):
 		deltaRoot = root[len(tmp_path):]
 		while     len(deltaRoot) > 0 \
@@ -243,16 +245,16 @@ def copy_anything(src, dst, recursive = False, force_identical=False, in_list=No
 		if     recursive == False \
 		   and deltaRoot != "":
 			return
-		debug.verbose("     root='" + str(deltaRoot) + "'")
-		debug.verbose("         files=" + str(filenames))
+		#debug.verbose("     root='" + str(deltaRoot) + "'")
+		#debug.verbose("         files=" + str(filenames))
 		tmpList = filenames
 		if len(tmp_rule) > 0:
 			tmpList = fnmatch.filter(filenames, tmp_rule)
 		# Import the module :
 		for cycleFile in tmpList:
 			#for cycleFile in filenames:
-			debug.verbose("        '" + cycleFile + "'")
-			debug.extreme_verbose("Might copy : '" + tmp_path + "  " + deltaRoot + "  " + cycleFile + "' ==> '" + dst + "'")
+			#debug.verbose("        '" + cycleFile + "'")
+			#debug.extreme_verbose("Might copy : '" + tmp_path + "  " + deltaRoot + "  " + cycleFile + "' ==> '" + dst + "'")
 			copy_file(os.path.join(tmp_path, deltaRoot, cycleFile),
 			          os.path.join(dst, deltaRoot, cycleFile),
 			          force_identical=force_identical,
@@ -328,7 +330,7 @@ def store_command(cmd_line, file):
 	if    file == "" \
 	   or file == None:
 		return;
-	debug.verbose("create cmd file: " + file)
+	#debug.verbose("create cmd file: " + file)
 	# Create directory:
 	create_directory_of_file(file)
 	# Store the command Line:
@@ -343,11 +345,11 @@ def store_warning(file, output, err):
 	   or file == None:
 		return;
 	if env.get_warning_mode() == False:
-		debug.verbose("remove warning file: " + file)
+		#debug.verbose("remove warning file: " + file)
 		# remove file if exist...
 		remove_file(file);
 		return;
-	debug.verbose("create warning file: " + file)
+	#debug.verbose("create warning file: " + file)
 	# Create directory:
 	create_directory_of_file(file)
 	# Store the command Line:
@@ -424,7 +426,7 @@ def get_version_from_file_or_direct(path_module, filename_or_version):
 		debug.warning("More thatn one line in the file version ==> bas case use mode: 'XX', XX.YYY', 'XX.Y.ZZZ' or 'XX.Y-dev' : " + path_module + " / " + filename_or_version)
 		return [0,0,0]
 	line = lines[0]
-	debug.debug("Parse line: '" + line + "'")
+	#debug.debug("Parse line: '" + line + "'")
 	#check if we have "-dev"
 	dev_mode = ""
 	list_tiret = line.split('-')
@@ -439,7 +441,7 @@ def get_version_from_file_or_direct(path_module, filename_or_version):
 		out.append(int(elem))
 	if dev_mode != "":
 		out.append(dev_mode)
-	debug.debug("    ==> " + str(out))
+	#debug.debug("    ==> " + str(out))
 	return out
 
 ##

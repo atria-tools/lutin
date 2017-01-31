@@ -259,16 +259,16 @@ class LutinArg:
 			if NotparseNextElement==True:
 				NotparseNextElement = False
 				continue
-			debug.verbose("parse [" + str(iii) + "]=" + sys.argv[iii])
+			#debug.verbose("parse [" + str(iii) + "]=" + sys.argv[iii])
 			argument = sys.argv[iii]
 			optionList = argument.split("=")
-			debug.verbose(str(optionList))
+			#debug.verbose(str(optionList))
 			if type(optionList) == type(str()):
 				option = optionList
 			else:
 				option = optionList[0]
 			optionParam = argument[len(option)+1:]
-			debug.verbose(option)
+			#debug.verbose(option)
 			argumentFound=False;
 			if option[:2]=="--":
 				# big argument
@@ -277,7 +277,7 @@ class LutinArg:
 						continue
 					if prop.get_option_big() == option[2:]:
 						# find it
-						debug.verbose("find argument 2 : " + option[2:])
+						#debug.verbose("find argument 2 : " + option[2:])
 						if prop.need_parameters()==True:
 							internalSub = option[2+len(prop.get_option_big()):]
 							if len(internalSub)!=0:
@@ -319,7 +319,7 @@ class LutinArg:
 						continue
 					if prop.get_option_small() == option[1:1+len(prop.get_option_small())]:
 						# find it
-						debug.verbose("find argument 1 : " + option[1:1+len(prop.get_option_small())])
+						#debug.verbose("find argument 1 : " + option[1:1+len(prop.get_option_small())])
 						if prop.need_parameters()==True:
 							internalSub = option[1+len(prop.get_option_small()):]
 							if len(internalSub)!=0:
@@ -355,7 +355,7 @@ class LutinArg:
 			
 			if argumentFound==False:
 				#unknow element ... ==> just add in the list ...
-				debug.verbose("unknow argument : " + argument)
+				#debug.verbose("unknow argument : " + argument)
 				listArgument.append(ArgElement("", argument))
 			
 		#for argument in listArgument:

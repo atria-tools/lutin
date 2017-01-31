@@ -57,14 +57,14 @@ def create_dependency_files(target, src, heritage_src, basic_path):
 		extention = elem.split('.')[-1]
 		if    extention == 'jar' \
 		   or extention == 'java':
-			debug.extreme_verbose("add java depedence ... " + elem)
+			#debug.extreme_verbose("add java depedence ... " + elem)
 			depend.append(target.get_full_name_source(basic_path, elem))
 	
 	for elem in heritage_src:
 		extention = elem.split('.')[-1]
 		if    extention == 'jar' \
 		   or extention == 'java':
-			debug.extreme_verbose("add java depedence ... " + elem)
+			#debug.extreme_verbose("add java depedence ... " + elem)
 			depend.append(elem)
 	return depend
 
@@ -107,7 +107,7 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	                         store_output_file = file_warning,
 	                         depend_data = {"file":file_depend,
 	                                        "data":depend_files})
-	debug.verbose("file= " + file_dst)
+	#debug.verbose("file= " + file_dst)
 	#return file_dst
 	return {"action":"path", "path":target.get_build_path(name) + target.path_generate_code}
 

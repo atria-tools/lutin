@@ -65,9 +65,9 @@ class Target(target.Target):
 	"""
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app/Contents")
 		tools.create_directory_of_file(target_outpath)
@@ -155,9 +155,9 @@ class Target(target.Target):
 			tools.file_write_data(build_package_path_done, "done...")
 	
 	def install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("copy " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app") + " in /Applications/")
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
@@ -165,27 +165,27 @@ class Target(target.Target):
 		shutil.copytree(os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app"), os.path.join("/Applications", pkg_name + ".app"))
 	
 	def un_install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("remove OLD application /Applications/" + pkg_name + ".app")
 		# Remove the application in the basic application path : /Applications/xxx.app
 		if os.path.exists("/Applications/" + pkg_name + ".app") == True:
 			shutil.rmtree("/Applications/" + pkg_name + ".app")
 	
 	def run(self, pkg_name, option_list, binary_name = None):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app" , "Contents", "MacOS", pkg_name)
 		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "Contents", "MacOS", pkg_name)
 		cmd = appl_path + " "
 		for elem in option_list:
 			cmd += elem + " "
 		multiprocess.run_command_no_lock_out(cmd)
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 
 
 

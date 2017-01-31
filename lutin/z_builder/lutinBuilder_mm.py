@@ -24,7 +24,7 @@ local_ref_on_builder_cpp = None
 ##
 def init():
 	global local_ref_on_builder_cpp
-	debug.debug("mm builder get dependency on the CPP builder")
+	#debug.debug("mm builder get dependency on the CPP builder")
 	local_ref_on_builder_cpp = builder.get_builder("cpp")
 
 ##

@@ -67,7 +67,7 @@ def run_command_no_lock_out(cmd_line):
 def run_command_direct(cmd_line):
 	# prepare command line:
 	args = shlex.split(cmd_line)
-	debug.verbose("cmd = " + str(args))
+	#debug.verbose("cmd = " + str(args))
 	try:
 		# create the subprocess
 		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -96,7 +96,7 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 	global error_execution
 	# prepare command line:
 	args = shlex.split(cmd_line)
-	debug.verbose("cmd = " + str(args))
+	#debug.verbose("cmd = " + str(args))
 	try:
 		# create the subprocess
 		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -113,7 +113,7 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 	tools.store_warning(store_output_file, output, err)
 	# Check error :
 	if p.returncode == 0:
-		debug.debug(env.print_pretty(cmd_line))
+		#debug.debug(env.print_pretty(cmd_line))
 		queue_lock.acquire()
 		if depend_data != None:
 			depend.create_dependency_file(depend_data['file'], depend_data['data'])
@@ -130,7 +130,7 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 		exit_flag = True
 		# if No ID : Not in a multiprocess mode ==> just stop here
 		if build_id < 0:
-			debug.debug(env.print_pretty(cmd_line), force=True)
+			#debug.debug(env.print_pretty(cmd_line), force=True)
 			debug.print_compilator(output)
 			debug.print_compilator(err)
 			if p.returncode == 2:
@@ -153,7 +153,7 @@ def run_command(cmd_line, store_cmd_line="", build_id=-1, file="", store_output_
 			queue_lock.release()
 		# not write the command file...
 		return
-	debug.verbose("done 3")
+	#debug.verbose("done 3")
 	# write cmd line only after to prevent errors ...
 	tools.store_command(cmd_line, store_cmd_line)
 
@@ -167,7 +167,7 @@ class myThread(threading.Thread):
 		self.queue = queue
 		self.lock = lock
 	def run(self):
-		debug.verbose("Starting " + self.name)
+		#debug.verbose("Starting " + self.name)
 		global exit_flag
 		global current_thread_working
 		working_set = False
@@ -179,7 +179,7 @@ class myThread(threading.Thread):
 					working_set = True
 				data = self.queue.get()
 				self.lock.release()
-				debug.verbose(self.name + " processing '" + data[0] + "'")
+				#debug.verbose(self.name + " processing '" + data[0] + "'")
 				if data[0]=="cmd_line":
 					comment = data[2]
 					cmd_line = data[1]
@@ -204,7 +204,7 @@ class myThread(threading.Thread):
 				self.lock.release()
 				time.sleep(0.2)
 		# kill requested ...
-		debug.verbose("Exiting " + self.name)
+		#debug.verbose("Exiting " + self.name)
 
 
 def set_error_occured():
@@ -214,7 +214,7 @@ def set_error_occured():
 def set_core_number(number_of_core):
 	global processor_availlable
 	processor_availlable = number_of_core
-	debug.debug(" set number of core for multi process compilation : " + str(processor_availlable))
+	#debug.debug(" set number of core for multi process compilation : " + str(processor_availlable))
 	# nothing else to do
 
 def init():
@@ -244,9 +244,9 @@ def un_init():
 	if processor_availlable > 1:
 		# Wait for all threads to complete
 		for tmp in threads:
-			debug.verbose("join thread ...")
+			#debug.verbose("join thread ...")
 			tmp.join()
-		debug.verbose("Exiting ALL Threads")
+		#debug.verbose("Exiting ALL Threads")
 
 
 
@@ -260,7 +260,7 @@ def run_in_pool(cmd_line, comment, store_cmd_line="", store_output_file="", depe
 	init()
 	# Fill the queue
 	queue_lock.acquire()
-	debug.verbose("add : in pool cmd_line")
+	#debug.verbose("add : in pool cmd_line")
 	work_queue.put(["cmd_line", cmd_line, comment, store_cmd_line, current_id_execution, store_output_file, depend_data])
 	current_id_execution +=1;
 	queue_lock.release()
@@ -273,7 +273,7 @@ def pool_synchrosize():
 		#in this case : nothing to synchronise
 		return
 	
-	debug.verbose("wait queue process ended\n")
+	#debug.verbose("wait queue process ended\n")
 	# Wait for queue to empty
 	while not work_queue.empty() \
 	      and error_occured == False:
@@ -285,15 +285,16 @@ def pool_synchrosize():
 		time.sleep(0.2)
 		pass
 	if error_occured == False:
-		debug.verbose("queue is empty")
+		#debug.verbose("queue is empty")
+		pass
 	else:
 		un_init()
-		debug.debug("Thread return with error ... ==> stop all the pool")
+		#debug.debug("Thread return with error ... ==> stop all the pool")
 		if error_execution["id"] == -1:
 			debug.error("Pool error occured ... (No return information on Pool)")
 			return
 		debug.error("Error in an pool element : [" + str(error_execution["id"]) + "]", crash=False)
-		debug.debug(env.print_pretty(error_execution["cmd"]), force=True)
+		#debug.debug(env.print_pretty(error_execution["cmd"]), force=True)
 		debug.print_compilator(str(error_execution["out"][0]))
 		debug.print_compilator(str(error_execution["err"][0]))
 		if error_execution["return"] == 2:

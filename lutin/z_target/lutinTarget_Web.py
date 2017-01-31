@@ -27,7 +27,7 @@ class Target(lutinTarget_Linux.Target):
 		lutinTarget_Linux.Target.__init__(self, config, ["Web"] + sub_name)
 		
 		self.cross ="./emsdk_portable/emscripten/master/em"
-		debug.debug("== Target='em'");
+		#debug.debug("== Target='em'");
 		self.java = "javac"
 		self.javah = "javah"
 		self.jar = "jar"
@@ -94,9 +94,9 @@ class Target(lutinTarget_Linux.Target):
 	        *--> sources
 	"""
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
-		debug.debug("------------------------------------------------------------------------")
-		debug.debug("-- Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
+		#debug.debug("-- Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		#debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name, tmp=True), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
@@ -165,7 +165,7 @@ class Target(lutinTarget_Linux.Target):
 		   or ret_lib \
 		   or ret_file \
 		   or need_generate_package:
-			debug.debug("package : " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.pkg"))
+			#debug.debug("package : " + os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app.pkg"))
 			os.system("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
 			#multiprocess.run_command("cd " + self.get_staging_path(pkg_name) + " ; tar -czf " + pkg_name + ".app.tar.gz " + pkg_name + ".app")
 			tools.create_directory_of_file(self.get_final_path())
@@ -175,9 +175,9 @@ class Target(lutinTarget_Linux.Target):
 		"""
 	
 	def install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		# this is temporary ... Will call:
 		if False:
 			os.system("lutin-pkg -i " + os.path.join(self.get_final_path(), + pkg_name + ".app.gpkg"))
@@ -198,9 +198,9 @@ class Target(lutinTarget_Linux.Target):
 			os.symlink(target_bin_path, target_bin_link)
 	
 	def un_install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Un-Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		# this is temporary ... Will call:
 		if False:
 			os.system("lutin-pkg -r " + pkg_name)
@@ -214,16 +214,16 @@ class Target(lutinTarget_Linux.Target):
 			tools.remove_file(target_bin_link)
 	
 	def run(self, pkg_name, option_list, binary_name = None):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", pkg_name + ".html")
 		cmd = "firefox " + appl_path + " "
 		for elem in option_list:
 			cmd += elem + " "
 		multiprocess.run_command_no_lock_out(cmd)
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 
 

@@ -102,9 +102,9 @@ class Target(target.Target):
 		    ])
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
@@ -388,9 +388,9 @@ class Target(target.Target):
 		return out
 	
 	def install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == False:
 			if tools.file_size("framework/tools/ios-deploy/build/Release/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
@@ -432,9 +432,9 @@ class Target(target.Target):
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
 	def un_install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == False:
 			debug.warning("not implemented")
 		else:
@@ -445,9 +445,9 @@ class Target(target.Target):
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 		
 	def show_log(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- log of iOs board")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == False:
 			if tools.file_size("framework/tools/ios-deploy/ios-deploy") == 0:
 				debug.print_element("tool", "ios-deploy", "<==", "external sources")
@@ -463,9 +463,9 @@ class Target(target.Target):
 			multiprocess.run_command_no_lock_out(cmdLine)
 	
 	def run(self, pkg_name, option_list, binary_name = None):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		if self.get_simulation() == True:
 			debug.error (" can not run in simulation mode ....")
 			return
@@ -480,8 +480,8 @@ class Target(target.Target):
 		for elem in option_list:
 			cmd += elem + " "
 		multiprocess.run_command_no_lock_out(cmd)
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 	
 

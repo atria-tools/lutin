@@ -24,7 +24,7 @@ local_ref_on_builder_c = None
 ##
 def init():
 	global local_ref_on_builder_c
-	debug.debug("m builder get dependency on the C builder")
+	#debug.debug("m builder get dependency on the C builder")
 	local_ref_on_builder_c = builder.get_builder("c")
 
 ##

@@ -63,10 +63,10 @@ def link(file, binary, target, depancy, flags, name, basic_path):
 	file_cmd = file_dst + target.suffix_cmd_line
 	file_warning = file_dst + target.suffix_warning
 	
-	debug.extreme_verbose("file_dst     = " + file_dst)
-	debug.extreme_verbose("file_depend  = " + file_depend)
-	debug.extreme_verbose("file_cmd     = " + file_cmd)
-	debug.extreme_verbose("file_warning = " + file_warning)
+	#debug.extreme_verbose("file_dst     = " + file_dst)
+	#debug.extreme_verbose("file_depend  = " + file_depend)
+	#debug.extreme_verbose("file_cmd     = " + file_cmd)
+	#debug.extreme_verbose("file_warning = " + file_warning)
 	
 	cmd = [
 		target.ar

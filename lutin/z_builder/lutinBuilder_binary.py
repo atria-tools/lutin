@@ -64,7 +64,7 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 	file_cmd = file_dst + target.suffix_cmd_line
 	file_warning = file_dst + target.suffix_warning
 	
-	debug.extreme_verbose("list files = " + str(depancy.src))
+	#debug.extreme_verbose("list files = " + str(depancy.src))
 	list_static = []
 	list_dynamic = []
 	if static == True:
@@ -181,7 +181,7 @@ def link(file, binary, target, depancy, flags, name, basic_path, static = False)
 		multiprocess.run_command(cmd_lineStrip, store_output_file=file_warning)
 		# get the stip size of the binary
 		strip_size = tools.file_size(file_dst)
-		debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(strip_size/1024) + "ko")
+		#debug.debug("file reduce size : " + str(originSize/1024) + "ko ==> " + str(strip_size/1024) + "ko")
 	# write cmd line only after to prevent errors ...
 	tools.store_command(cmd_line, file_cmd)
 	

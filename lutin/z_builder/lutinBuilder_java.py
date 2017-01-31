@@ -57,14 +57,14 @@ def create_dependency_files(target, src, heritage_src, basic_path):
 		extention = elem.split('.')[-1]
 		if    extention == 'jar' \
 		   or extention == 'java':
-			debug.extreme_verbose("add java depedence ... " + elem)
+			#debug.extreme_verbose("add java depedence ... " + elem)
 			depend.append(target.get_full_name_source(basic_path, elem))
 	
 	for elem in heritage_src:
 		extention = elem.split('.')[-1]
 		if    extention == 'jar' \
 		   or extention == 'java':
-			debug.extreme_verbose("add java depedence ... " + elem)
+			#debug.extreme_verbose("add java depedence ... " + elem)
 			depend.append(elem)
 	return depend
 

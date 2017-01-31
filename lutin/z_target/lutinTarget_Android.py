@@ -100,11 +100,11 @@ class Target(target.Target):
 				debug.error("Specify PROJECT_NDK_BOARD_ID env variable and the BOARD_ID does not exit ... : " + str(self.board_id) + "==> auto-search")
 				self.board_id = 0
 		if self.board_id == 0:
-			debug.debug("Auto-search BOARD-ID")
+			#debug.debug("Auto-search BOARD-ID")
 			for iii in reversed(range(0, 50)):
-				debug.debug("try: " + os.path.join(self.path_sdk, "platforms", "android-" + str(iii)))
+				#debug.debug("try: " + os.path.join(self.path_sdk, "platforms", "android-" + str(iii)))
 				if os.path.isdir(os.path.join(self.path_sdk, "platforms", "android-" + str(iii))):
-					debug.debug("Find BOARD-ID : " + str(iii))
+					#debug.debug("Find BOARD-ID : " + str(iii))
 					self.board_id = iii
 					break;
 		if self.board_id == 0:
@@ -244,9 +244,9 @@ class Target(target.Target):
 	"""
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = self.get_staging_path(pkg_name)
 		tools.create_directory_of_file(target_outpath)
@@ -264,20 +264,20 @@ class Target(target.Target):
 		# copy application lib: (needed to lunch ...)
 		file_src = self.get_build_file_dynamic(pkg_name)
 		if os.path.isfile(file_src):
-			debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
+			#debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
 			tools.copy_file(file_src,
 			                os.path.join(target_outpath_lib, os.path.basename(file_src)),
 			                in_list=copy_list)
 		# copy other if needed:
 		if static == False:
 			#copy all shared libsh...
-			debug.verbose("libs for " + str(pkg_name) + ":")
+			#debug.verbose("libs for " + str(pkg_name) + ":")
 			for heritage in heritage_list.list_heritage:
-				debug.debug("sub elements: " + str(heritage.name))
+				#debug.debug("sub elements: " + str(heritage.name))
 				file_src = self.get_build_file_dynamic(heritage.name)
-				debug.verbose("      has directory: " + file_src)
+				#debug.verbose("      has directory: " + file_src)
 				if os.path.isfile(file_src):
-					debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
+					#debug.debug("      need copy: " + file_src + " to " + target_outpath_lib)
 					#copy all data:
 					# TODO : We can have a problem when writing over library files ...
 					tools.copy_file(file_src,
@@ -370,7 +370,7 @@ class Target(target.Target):
 			debug.error("An error occured when getting the tools for android")
 		elif len(dirnames) > 1:
 			dirnames = sorted(dirnames, reverse=True)
-			debug.debug("sort tools directory: '" + str(dirnames) + "' ==> select : " + str(dirnames[0]))
+			#debug.debug("sort tools directory: '" + str(dirnames) + "' ==> select : " + str(dirnames[0]))
 		android_tool_path += dirnames[0] + "/"
 		
 		# this is to create resource file for android ... (we did not use aset in jar with ewol ...
@@ -412,8 +412,8 @@ class Target(target.Target):
 		          + self.get_staging_path(pkg_name) + "/src/R.java "
 		multiprocess.run_command(cmdLine)
 		"""
-		debug.verbose("heritage .so=" + str(tools.filter_extention(heritage_list.src['dynamic'], ["so"])))
-		debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage_list.src['src'], ["jar"])))
+		#debug.verbose("heritage .so=" + str(tools.filter_extention(heritage_list.src['dynamic'], ["so"])))
+		#debug.verbose("heritage .jar=" + str(tools.filter_extention(heritage_list.src['src'], ["jar"])))
 		
 		class_extern = ""
 		upper_jar = tools.filter_extention(heritage_list.src['src'], ["jar"])
@@ -512,9 +512,9 @@ class Target(target.Target):
 		                force=True)
 	
 	def install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
@@ -523,9 +523,9 @@ class Target(target.Target):
 		multiprocess.run_command(cmdLine)
 	
 	def un_install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		pkg_name_application_name = pkg_name
 		if self.config["mode"] == "debug":
 			pkg_name_application_name += "debug"
@@ -533,9 +533,9 @@ class Target(target.Target):
 		Rmultiprocess.run_command(cmdLine)
 	
 	def show_log(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("logcat of android board")
-		debug.debug("------------------------------------------------------------------------")
+		#debug.debug("------------------------------------------------------------------------")
 		debug.info("cmd: " + self.path_sdk + "/platform-tools/adb shell logcat ")
 		cmdLine = self.path_sdk + "/platform-tools/adb shell logcat "
 		multiprocess.run_command_no_lock_out(cmdLine)

@@ -53,7 +53,7 @@ class Module:
 	##
 	def __init__(self, file, module_name, module_type):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
-		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + module_type)
+		#debug.verbose("Create a new module : '" + module_name + "' TYPE=" + module_type)
 		self._origin_file = file;
 		self._origin_path = tools.get_current_path(self._origin_file)
 		# type of the module:
@@ -245,11 +245,11 @@ class Module:
 			source = self._origin_path + "/" + source
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
-				debug.verbose("Regenerate Destination : '" + destination + "'")
+				#debug.verbose("Regenerate Destination : '" + destination + "'")
 			# TODO : set it back : file_cmd = target.get_build_path_data(self.name)
 			file_cmd = ""
 			if sizeX > 0:
-				debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
+				#debug.verbose("Image file : " + display_source + " ==> " + destination + " resize=(" + str(sizeX) + "," + str(sizeY) + ")")
 				fileName, fileExtension = os.path.splitext(os.path.join(self._origin_path,source))
 				# Create the resized file in a temporary path to auto-copy when needed
 				temporary_file = os.path.join(target.get_build_path_temporary_generate(self._name), "image_generation", destination)
@@ -260,7 +260,7 @@ class Module:
 				                file_cmd,
 				                in_list=copy_list)
 			else:
-				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
+				#debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 				tools.copy_file(source,
 				                os.path.join(target.get_build_path_data(self._name), destination),
 				                file_cmd,
@@ -279,10 +279,10 @@ class Module:
 			source = os.path.join(self._origin_path, source)
 			if destination == "":
 				destination = source[source.rfind('/')+1:]
-				debug.verbose("Regenerate Destination : '" + destination + "'")
+				#debug.verbose("Regenerate Destination : '" + destination + "'")
 			# TODO : set it back : file_cmd = target.get_build_path_data(self.name)
 			file_cmd = ""
-			debug.verbose("Might copy file : " + display_source + " ==> " + destination)
+			#debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 			tools.copy_file(source,
 			                os.path.join(target.get_build_path_data(self._name), destination),
 			                force_identical=True,
@@ -297,18 +297,18 @@ class Module:
 	##
 	def paths_to_build(self, target, copy_list):
 		for source, destination in self._paths:
-			debug.debug("Might copy path : " + source + "==>" + destination)
+			#debug.debug("Might copy path : " + source + "==>" + destination)
 			tmp_path = os.path.dirname(os.path.realpath(os.path.join(self._origin_path, source)))
 			tmp_rule = os.path.basename(source)
 			for root, dirnames, filenames in os.walk(tmp_path):
-				debug.extreme_verbose(" root='" + str(root) + "' tmp_path='" + str(tmp_path))
+				#debug.extreme_verbose(" root='" + str(root) + "' tmp_path='" + str(tmp_path))
 				if root != tmp_path:
 					break
-				debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
+				#debug.verbose(" root='" + str(root) + "' dir='" + str(dirnames) + "' filenames=" + str(filenames))
 				list_files = filenames
 				if len(tmp_rule)>0:
 					list_files = fnmatch.filter(filenames, tmp_rule)
-				debug.verbose("       filenames=" + str(filenames))
+				#debug.verbose("       filenames=" + str(filenames))
 				# Import the module :
 				for cycle_file in list_files:
 					#for cycle_file in filenames:
@@ -316,7 +316,7 @@ class Module:
 					# TODO : maybe an error when changing subdirectory ...
 					#if root[len(source)-1:] != "":
 					#	new_destination = os.path.join(new_destination, root[len(source)-1:])
-					debug.verbose("Might copy : '" + os.path.join(root, cycle_file) + "' ==> '" + os.path.join(target.get_build_path_data(self._name), new_destination, cycle_file) + "'" )
+					#debug.verbose("Might copy : '" + os.path.join(root, cycle_file) + "' ==> '" + os.path.join(target.get_build_path_data(self._name), new_destination, cycle_file) + "'" )
 					file_cmd = "" # TODO : ...
 					tools.copy_file(os.path.join(root, cycle_file),
 					                os.path.join(target.get_build_path_data(self._name), new_destination, cycle_file),
@@ -343,28 +343,28 @@ class Module:
 		# squash header and src...
 		full_list_file = []
 		for elem in self._header:
-			debug.extreme_verbose("plop H : " +str(elem['src']))
+			#debug.extreme_verbose("plop H : " +str(elem['src']))
 			full_list_file.append([self._name, elem['src']])
 		for elem in self._src:
-			debug.extreme_verbose("plop S : " +str(elem))
+			#debug.extreme_verbose("plop S : " +str(elem))
 			full_list_file.append([self._name, elem])
 		for mod_name in self._tools:
 			tool_module = load_module(target, mod_name)
 			if tool_module == None:
 				continue
 			for elem in tool_module.header:
-				debug.extreme_verbose("plop HH: " + ":" + str(elem['src']))
+				#debug.extreme_verbose("plop HH: " + ":" + str(elem['src']))
 				full_list_file.append([tool_module.name, elem['src']])
 			for elem in tool_module.src:
-				debug.extreme_verbose("plop SS: " + tool_module.name + ":" + str(elem))
+				#debug.extreme_verbose("plop SS: " + tool_module.name + ":" + str(elem))
 				full_list_file.append([tool_module.name, elem])
-		debug.extreme_verbose("plop F : " +str(self._extention_order_build))
+		#debug.extreme_verbose("plop F : " +str(self._extention_order_build))
 		# remove uncompilable elements:
 		# TODO: list_file = tools.filter_extention(full_list_file, self.extention_order_build, True)
 		list_file = full_list_file;
 		global_list_file = ""
 		for file in list_file:
-			debug.verbose(" gcov : " + self._name + " <== " + str(file));
+			#debug.verbose(" gcov : " + self._name + " <== " + str(file));
 			file_dst = target.get_full_name_destination(file[0], self._origin_path, file[1], "o")
 			global_list_file += file_dst + " "
 		cmd = "gcov"
@@ -375,22 +375,22 @@ class Module:
 		if generate_output == False:
 			cmd += "--no-output "
 		cmd += global_list_file
-		debug.extreme_verbose("      " + cmd);
+		#debug.extreme_verbose("      " + cmd);
 		ret = multiprocess.run_command_direct(cmd)
 		# parsing ret :
-		debug.extreme_verbose("result: " + str(ret));
+		#debug.extreme_verbose("result: " + str(ret));
 		ret = ret.split('\n');
-		debug.verbose("*** Gcov result parsing ...");
+		#debug.verbose("*** Gcov result parsing ...");
 		useful_list = []
 		remove_next = False
 		last_file = ""
 		executed_lines = 0
 		executable_lines = 0
 		for elem in ret:
-			debug.debug("line: " + elem)
+			#debug.debug("line: " + elem)
 			if remove_next == True:
 				remove_next = False
-				debug.debug("--------------------------")
+				#debug.debug("--------------------------")
 				continue;
 			if    elem[:10] == "Creating '" \
 			   or elem[:10] == "Removing '" \
@@ -409,12 +409,12 @@ class Module:
 							last_file = last_file[:-1]
 				if path_finder == False:
 					remove_next = True
-					debug.verbose("    REMOVE: '" + str(elem[6:len(self._origin_path)+1]) + "' not in " + str(gcov_path_file))
+					#debug.verbose("    REMOVE: '" + str(elem[6:len(self._origin_path)+1]) + "' not in " + str(gcov_path_file))
 					continue
 				continue
 			if    elem[:7] == "Aucune " \
 			   or elem[:19] == "No executable lines":
-				debug.verbose("    Nothing to execute");
+				#debug.verbose("    Nothing to execute");
 				continue
 			start_with = ["Lines executed:", "Lignes exécutées:"]
 			find = False
@@ -423,7 +423,7 @@ class Module:
 					find = True
 					elem = elem[len(line_base):]
 					break;
-			debug.verbose(" temp Value: " + str(elem))
+			#debug.verbose(" temp Value: " + str(elem))
 			if find == False:
 				debug.warning("    gcov ret : " + str(elem));
 				debug.warning("         ==> does not start with : " + str(start_with));
@@ -436,31 +436,31 @@ class Module:
 					debug.warning("    gcov ret : " + str(elem));
 					debug.warning("         Parsing error of '% of '");
 					continue
-			debug.verbose("property : " + str(out))
+			#debug.verbose("property : " + str(out))
 			pourcent = float(out[0])
 			total_line_count = int(out[1])
 			total_executed_line = int(float(total_line_count)*pourcent/100.0)
 			# check if in source or header:
 			in_source_file = False
-			debug.verbose("    ??> Check: " + str(last_file))
+			#debug.verbose("    ??> Check: " + str(last_file))
 			for elem_header in self._header:
-				debug.verbose("        ==> Check: " + str(elem_header['src']))
+				#debug.verbose("        ==> Check: " + str(elem_header['src']))
 				if elem_header['src'] == last_file:
 					in_source_file = True
 			for elem_src in self._src:
-				debug.verbose("        ==> Check: " + str(elem_src))
+				#debug.verbose("        ==> Check: " + str(elem_src))
 				if elem_src == last_file:
 					in_source_file = True
 			if in_source_file == False:
-				debug.verbose("        ==> Remove not in source: " + str(out))
+				#debug.verbose("        ==> Remove not in source: " + str(out))
 				continue
 			useful_list.append([last_file, pourcent, total_executed_line, total_line_count])
 			executed_lines += total_executed_line
 			executable_lines += total_line_count
 			last_file = ""
-			debug.debug("--------------------------")
+			#debug.debug("--------------------------")
 		ret = useful_list[:-1]
-		debug.verbose("plopppp " + str(useful_list))
+		#debug.verbose("plopppp " + str(useful_list))
 		#for elem in ret:
 		#	debug.info("    " + str(elem));
 		for elem in ret:
@@ -470,14 +470,14 @@ class Module:
 				debug.info("   %  " + str(elem[1]) + "\r\t\t" + str(elem[0]));
 			else:
 				debug.info("   % " + str(elem[1]) + "\r\t\t" + str(elem[0]));
-			debug.verbose("       " + str(elem[2]) + " / " + str(elem[3]));
+			#debug.verbose("       " + str(elem[2]) + " / " + str(elem[3]));
 		try:
 			pourcent = 100.0*float(executed_lines)/float(executable_lines)
 		except ZeroDivisionError:
 			pourcent = 0.0
 		# generate json file:
 		json_file_name = target.get_build_path(self._name) + "/" + self._name + "_coverage.json"
-		debug.debug("generate json file : " + json_file_name)
+		#debug.debug("generate json file : " + json_file_name)
 		tmp_file = open(json_file_name, 'w')
 		tmp_file.write('{\n')
 		tmp_file.write('	"lib-name":"' + self._name + '",\n')
@@ -522,7 +522,7 @@ class Module:
 		# create the package heritage
 		self._local_heritage = heritage.heritage(self, target)
 		if len(self._actions) != 0:
-			debug.verbose("execute actions: " + str(len(self._actions)))
+			#debug.verbose("execute actions: " + str(len(self._actions)))
 			for action in self._actions:
 				action["action"](target, self, action["data"]);
 		if     package_name == None \
@@ -540,7 +540,7 @@ class Module:
 		self._sub_heritage_list = heritage.HeritageList()
 		# optionnal dependency :
 		for dep, option, export, src_file, header_file, option_not_found in self._depends_optionnal:
-			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
+			#debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
 			inherit_list, isBuilt = target.build(dep, True, package_name=package_name)
 			if isBuilt == True:
 				self._local_heritage.add_depends(dep);
@@ -552,7 +552,7 @@ class Module:
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self._depends:
-			debug.debug("module: '" + str(self._name) + "'   request: '" + dep + "'")
+			#debug.debug("module: '" + str(self._name) + "'   request: '" + dep + "'")
 			inherit_list = target.build(dep, False, package_name=package_name)
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
@@ -570,7 +570,7 @@ class Module:
 			for lvl in range(0,100):
 				for level, action_name, action in target.action_on_state[local_type]:
 					if level == lvl:
-						debug.debug("level=" + str(level) + " Do Action : " + action_name)
+						#debug.debug("level=" + str(level) + " Do Action : " + action_name)
 						elem = action(target, self, package_name);
 		# ----------------------------------------------------
 		# -- Generic library help                           --
@@ -604,7 +604,7 @@ class Module:
 		include_path = target.get_build_path_include(self._name)
 		have_only_generate_file = False
 		if len(self._generate_file) > 0:
-			debug.debug("install GENERATED headers / src ...")
+			#debug.debug("install GENERATED headers / src ...")
 			for elem_generate in self._generate_file:
 				
 				ret_write = tools.file_write_data(os.path.join(generate_path, elem_generate["filename"]), elem_generate["data"], only_if_new=True)
@@ -628,7 +628,7 @@ class Module:
 		# ---------------------------------------------------------------------------
 		# -- install header (do it first for extern lib and gcov better interface) --
 		# ---------------------------------------------------------------------------
-		debug.debug("install headers ...")
+		#debug.debug("install headers ...")
 		for file in self._header:
 			src_path = os.path.join(self._origin_path, file["src"])
 			if "multi-dst" in file:
@@ -896,14 +896,15 @@ class Module:
 					debug.error(" UN-SUPPORTED link format:  'binary'")
 				"""
 		elif self._type == "DATA":
-			debug.debug("Data package have noting to build... just install")
+			#debug.debug("Data package have noting to build... just install")
+			pass
 		else:
 			debug.error("Did not known the element type ... (impossible case) type=" + self._type)
 		
 		# ----------------------------------------------------
 		# -- install data                                   --
 		# ----------------------------------------------------
-		debug.debug("install datas")
+		#debug.debug("install datas")
 		copy_list={}
 		self.image_to_build(target, copy_list)
 		self.files_to_build(target, copy_list)
@@ -922,8 +923,8 @@ class Module:
 		# ----------------------------------------------------
 		if    self._type[:6] == 'BINARY' \
 		   or self._type == 'PACKAGE':
-			debug.verbose("Request creating of package : " + str(self._name))
-			debug.extreme_verbose("Heritage : " + str(self._local_heritage))
+			#debug.verbose("Request creating of package : " + str(self._name))
+			#debug.extreme_verbose("Heritage : " + str(self._local_heritage))
 			# TODO : Do package for library ...
 			if target.end_generate_package == True:
 				# generate the package with his properties ...
@@ -931,7 +932,7 @@ class Module:
 					self._sub_heritage_list.add_heritage(self._local_heritage)
 				elif self._type == 'PACKAGE':
 					self._sub_heritage_list.add_heritage(self._local_heritage)
-				debug.extreme_verbose("HeritageList : " + str(self._sub_heritage_list))
+				#debug.extreme_verbose("HeritageList : " + str(self._sub_heritage_list))
 				target.make_package(self._name, self._package_prop, os.path.join(self._origin_path, ".."), self._sub_heritage_list)
 		# return local dependency ...
 		return copy.deepcopy(self._sub_heritage_list)
@@ -1046,7 +1047,7 @@ class Module:
 				add_list = tools.get_current_path(self._origin_file)
 			else:
 				add_list = os.path.join(tools.get_current_path(self._origin_file), list)
-		debug.verbose("Convert path : " + str(list) + " in " + str(add_list))
+		#debug.verbose("Convert path : " + str(list) + " in " + str(add_list))
 		self._add_path(add_list, type, export)
 	
 	##
@@ -1101,7 +1102,8 @@ class Module:
 			                                      }
 			self._flags["export"]["c++-version"] = api_version
 			if gnu == True and same_as_api == True:
-				debug.debug("[" + self._name + "] Can not propagate the gnu extention of the CPP vesion for API");
+				#debug.debug("[" + self._name + "] Can not propagate the gnu extention of the CPP vesion for API");
+				pass
 		elif    compilator_type == "c" \
 		     or compilator_type == "C":
 			c_version_list = [1989, 1990, 1999, 2011]
@@ -1116,7 +1118,8 @@ class Module:
 			                                    }
 			self._flags["export"]["c-version"] = api_version
 			if gnu == True and same_as_api == True:
-				debug.debug("[" + self._name + "] Can not propagate the gnu extention of the C vesion for API");
+				#debug.debug("[" + self._name + "] Can not propagate the gnu extention of the C vesion for API");
+				pass
 		else:
 			debug.warning("[" + self._name + "] Can not set version of compilator:" + str(compilator_type));
 	
@@ -1147,7 +1150,7 @@ class Module:
 		if list_of_file == None:
 			debug.warning("[" + self.get_name() + "] ==> Can not find any file : " + os.path.join(self._origin_path, base_path) + " " + regex)
 			return
-		debug.debug("[" + self.get_name() + "] add " + str(len(list_of_file)) + " file(s)")
+		#debug.debug("[" + self.get_name() + "] add " + str(len(list_of_file)) + " file(s)")
 		self.add_src_file(list_of_file)
 	
 	##
@@ -1200,7 +1203,8 @@ class Module:
 	##
 	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
 		if destination_path != None:
-			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
+			#debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
+			pass
 		new_list = []
 		if tools.get_type_string(list) == "string":
 			list = [list]
@@ -1307,7 +1311,7 @@ class Module:
 	## @return None
 	##
 	def add_action(self, action, data=None, name=None):
-		debug.verbose("add action : " + str(name))
+		#debug.verbose("add action : " + str(name))
 		self._actions.append({
 		    "name":name,
 		    "action":action,
@@ -1458,7 +1462,7 @@ class Module:
 			tmp_file.write('	' + copy.deepcopy(self._name).replace('-','_')+ ';\n');
 		else:
 			for elem in self._depends:
-				debug.verbose("add depend on: " + elem);
+				#debug.verbose("add depend on: " + elem);
 				tmp_module = None
 				try:
 					tmp_module = target.get_module(elem)
@@ -1467,17 +1471,18 @@ class Module:
 					try:
 						tmp_module = target.get_module(elem)
 					except:
-						debug.verbose("    ==> get error");
+						#debug.verbose("    ==> get error");
+						pass
 				if tmp_module == None:
-					debug.verbose("    ==> notFound");
+					#debug.verbose("    ==> notFound");
 					continue
 				if self.check_rules(tmp_module._type, rules) == True:
-					debug.verbose("    ==> not in rules");
+					#debug.verbose("    ==> not in rules");
 					continue
 				tmp_file.write('	' + copy.deepcopy(self._name).replace('-','_') + ' -> ' + copy.deepcopy(elem).replace('-','_') + ';\n');
 			for elem in self._depends_optionnal:
 				elem = elem[0]
-				debug.verbose("add depend on: " + elem);
+				#debug.verbose("add depend on: " + elem);
 				tmp_module = None
 				try:
 					tmp_module = target.get_module(elem)
@@ -1486,12 +1491,13 @@ class Module:
 					try:
 						tmp_module = target.get_module(elem)
 					except:
-						debug.verbose("    ==> get error");
+						#debug.verbose("    ==> get error");
+						pass
 				if tmp_module == None:
-					debug.verbose("    ==> notFound");
+					#debug.verbose("    ==> notFound");
 					continue
 				if self.check_rules(tmp_module._type, rules) == True:
-					debug.verbose("    ==> not in rules");
+					#debug.verbose("    ==> not in rules");
 					continue
 				tmp_file.write('	' + copy.deepcopy(self._name).replace('-','_') + ' -> ' + copy.deepcopy(elem).replace('-','_') + ';\n');
 		"""
@@ -1659,7 +1665,7 @@ __start_module_name="_"
 def import_path(path_list):
 	global __module_list
 	global_base = env.get_build_system_base_name()
-	debug.debug("MODULE: Init with Files list:")
+	#debug.debug("MODULE: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
@@ -1670,15 +1676,16 @@ def import_path(path_list):
 		filename = filename[len(global_base):]
 		# Check if it start with the local patern:
 		if filename[:len(__start_module_name)] != __start_module_name:
-			debug.extreme_verbose("MODULE:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			#debug.extreme_verbose("MODULE:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
 			continue
 		# Remove local patern
 		module_name = filename[len(__start_module_name):]
-		debug.verbose("MODULE:     Integrate: '" + module_name + "' from '" + elem + "'")
+		#debug.verbose("MODULE:     Integrate: '" + module_name + "' from '" + elem + "'")
 		__module_list.append([module_name, elem])
-	debug.verbose("New list module: ")
+	#debug.verbose("New list module: ")
 	for elem in __module_list:
-		debug.verbose("    " + str(elem[0]))
+		#debug.verbose("    " + str(elem[0]))
+		pass
 
 ##
 ## @brief Check if a module exist
@@ -1704,7 +1711,7 @@ def load_module(target, name):
 	for mod in __module_list:
 		if mod[0] == name:
 			sys.path.append(os.path.dirname(mod[1]))
-			debug.verbose("import module : '" + env.get_build_system_base_name() + __start_module_name + name + "'")
+			#debug.verbose("import module : '" + env.get_build_system_base_name() + __start_module_name + name + "'")
 			the_module_file = mod[1]
 			the_module = __import__(env.get_build_system_base_name() + __start_module_name + name)
 			# get basic module properties:
@@ -1753,7 +1760,8 @@ def load_module(target, name):
 			"""
 			# check if create has been done corectly
 			if tmp_element == None:
-				debug.debug("Request load module '" + name + "' not define for this platform")
+				#debug.debug("Request load module '" + name + "' not define for this platform")
+				pass
 			else:
 				target.add_module(tmp_element)
 				return tmp_element

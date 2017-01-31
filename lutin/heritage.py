@@ -61,7 +61,7 @@ class HeritageList:
 		self.regenerate_tree()
 	
 	def regenerate_tree(self):
-		debug.verbose("Regenerate heritage list:")
+		#debug.verbose("Regenerate heritage list:")
 		self.flags = {}
 		# sources list:
 		self.src = { 'src':[],
@@ -73,24 +73,25 @@ class HeritageList:
 		listHeritage = self.list_heritage
 		self.list_heritage = []
 		# first step : add all lib with no dependency:
-		debug.extreme_verbose("    add element with no dependency:")
+		#debug.extreme_verbose("    add element with no dependency:")
 		for herit in listHeritage:
 			if len(herit.depends) == 0:
-				debug.extreme_verbose("        add: " + str(herit.name))
+				#debug.extreme_verbose("        add: " + str(herit.name))
 				self.list_heritage.append(copy.deepcopy(herit))
 				listHeritage.remove(herit)
-		debug.extreme_verbose("    add element with dependency:")
+		#debug.extreme_verbose("    add element with dependency:")
 		while len(listHeritage) > 0:
 			currentHeritageSize = len(listHeritage)
-			debug.verbose("        list heritage = " + str([[x.name, x.depends] for x in listHeritage]))
-			debug.extreme_verbose("        list heritage (rest):")
+			#debug.verbose("        list heritage = " + str([[x.name, x.depends] for x in listHeritage]))
+			#debug.extreme_verbose("        list heritage (rest):")
 			for tmppp_herit in listHeritage:
-				debug.extreme_verbose("            elem= " + str(tmppp_herit.name) + " : " + str(tmppp_herit.depends))
+				#debug.extreme_verbose("            elem= " + str(tmppp_herit.name) + " : " + str(tmppp_herit.depends))
+				pass
 			# Add element only when all dependence are resolved
 			for herit in listHeritage:
 				listDependsName = [y.name for y in self.list_heritage]
 				if all(x in listDependsName for x in herit.depends) == True:
-					debug.extreme_verbose("        add: " + str(herit.name))
+					#debug.extreme_verbose("        add: " + str(herit.name))
 					listHeritage.remove(herit)
 					self.list_heritage.append(copy.deepcopy(herit))
 			if currentHeritageSize == len(listHeritage):
@@ -101,9 +102,10 @@ class HeritageList:
 				debug.warning("new heritage list:")
 				for element in self.list_heritage:
 					debug.warning("	" + element.name + " " + str(element.depends))
-		debug.extreme_verbose("new heritage list:")
+		#debug.extreme_verbose("new heritage list:")
 		for element in self.list_heritage:
-			debug.extreme_verbose("	" + element.name + " " + str(element.depends))
+			#debug.extreme_verbose("	" + element.name + " " + str(element.depends))
+			pass
 		for element in reversed(self.list_heritage):
 			for flags in element.flags:
 				# get value
@@ -134,22 +136,22 @@ class HeritageList:
 			append_to_list(self.src['dynamic'], element.src['dynamic'])
 			append_to_list(self.src['static'], element.src['static'])
 		for element in self.list_heritage:
-			debug.extreme_verbose("    elem: " + str(element.name))
-			debug.extreme_verbose("    Path (base): " + str(self.path))
-			debug.extreme_verbose("         inside: " + str(element.path))
+			#debug.extreme_verbose("    elem: " + str(element.name))
+			#debug.extreme_verbose("    Path (base): " + str(self.path))
+			#debug.extreme_verbose("         inside: " + str(element.path))
 			for ppp in element.path:
 				value = copy.deepcopy(element.path[ppp])
 				if ppp not in self.path:
 					self.path[ppp] = value
 				else:
 					append_to_list(self.path[ppp], value)
-			debug.extreme_verbose("Path : " + str(self.path))
+			#debug.extreme_verbose("Path : " + str(self.path))
 		for ppp in self.path:
 			tmp = self.path[ppp]
 			self.path[ppp] = []
 			for iii in reversed(tmp):
 				self.path[ppp].append(iii)
-		debug.extreme_verbose("Path : " + str(self.path))
+		#debug.extreme_verbose("Path : " + str(self.path))
 	
 	##
 	## @brief Generate a string representing the class (for str(xxx))
@@ -230,7 +232,7 @@ class heritage:
 	
 	def add_sub(self, other):
 		if type(other) == type(None):
-			debug.verbose("input of the heriatege class is None !!!")
+			#debug.verbose("input of the heriatege class is None !!!")
 			return
 		if other.has_been_updated == True:
 			self.has_been_updated = True
