@@ -152,7 +152,7 @@ class System:
 	def configure_module(self, target, module):
 		# add element flags to export
 		for elem in self._export_flags:
-			#debug.verbose("add element :" + str(elem) + " elems=" + str(self._export_flags[elem]))
+			debug.verbose("add element :" + str(elem) + " elems=" + str(self._export_flags[elem]))
 			module.add_flag(elem, self._export_flags[elem], export=True)
 		# add module dependency
 		if self._export_depends != []:
@@ -204,7 +204,7 @@ __start_system_name="System_"
 def import_path(path_list):
 	global __system_list
 	global_base = env.get_build_system_base_name()
-	#debug.debug("SYSTEM: Init with Files list:")
+	debug.debug("SYSTEM: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
@@ -215,12 +215,12 @@ def import_path(path_list):
 		filename = filename[len(global_base):]
 		# Check if it start with the local patern:
 		if filename[:len(__start_system_name)] != __start_system_name:
-			#debug.extreme_verbose("SYSTEM:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			debug.extreme_verbose("SYSTEM:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
 			continue
 		# Remove local patern
 		system_name = filename[len(__start_system_name):]
 		system_type, system_name = system_name.split('_')
-		#debug.verbose("SYSTEM:     Integrate: '" + system_type + "':'" + system_name + "' from '" + elem + "'")
+		debug.verbose("SYSTEM:     Integrate: '" + system_type + "':'" + system_name + "' from '" + elem + "'")
 		if system_type in __system_list:
 			__system_list[system_type].append({"name":system_name,
 			                                   "path":elem,
@@ -235,12 +235,11 @@ def import_path(path_list):
 			                               "loaded":False,
 			                               "exist":False,
 			                               "module":None}]
-	#debug.verbose("New list system: ")
+	debug.verbose("New list system: ")
 	for elem in __system_list:
-		#debug.verbose("    " + str(elem))
+		debug.verbose("    " + str(elem))
 		for val in __system_list[elem]:
-			#debug.verbose("        " + str(val["name"]))
-			pass
+			debug.verbose("        " + str(val["name"]))
 
 ##
 ## @brief Display all the system binary that can be used
@@ -261,7 +260,7 @@ def display():
 ##
 def exist(lib_name, list_target_name, target) :
 	global __system_list
-	#debug.verbose("exist= " + lib_name + " in " + str(list_target_name))
+	debug.verbose("exist= " + lib_name + " in " + str(list_target_name))
 	find_target = False
 	for target_name in list_target_name:
 		if target_name in __system_list:
@@ -275,12 +274,12 @@ def exist(lib_name, list_target_name, target) :
 			if data["name"] == lib_name:
 				# we find it in the List ==> need to check if it is present in the system :
 				if data["loaded"] == False:
-					#debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
+					debug.verbose("add to path: '" + os.path.dirname(data["path"]) + "'")
 					sys.path.append(os.path.dirname(data["path"]))
-					#debug.verbose("import system : '" + data["name"] + "'")
+					debug.verbose("import system : '" + data["name"] + "'")
 					the_system = __import__(env.get_build_system_base_name() + __start_system_name + target_name + "_" + data["name"])
 					#create the system module
-					#debug.verbose("SYSTEM: request: " + str(data["name"]))
+					debug.verbose("SYSTEM: request: " + str(data["name"]))
 					if "System" in dir(the_system):
 						data["system"] = the_system.System(target)
 						data["exist"] = data["system"].get_valid()

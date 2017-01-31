@@ -25,7 +25,7 @@ elif platform.system() == "Darwin":
 else:
 	debug.error("Unknow the Host OS ... '" + platform.system() + "'")
 
-#debug.debug("host.OS = " + OS)
+debug.debug("host.OS = " + OS)
 
 
 if sys.maxsize > 2**32:
@@ -33,5 +33,5 @@ if sys.maxsize > 2**32:
 else:
 	BUS_SIZE = 32
 
-#debug.debug("host.BUS_SIZE = " + str(BUS_SIZE))
+debug.debug("host.BUS_SIZE = " + str(BUS_SIZE))
 

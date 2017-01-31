@@ -44,7 +44,7 @@ class Target:
 		if self.config["arch"] == "auto":
 			debug.error("system error ==> must generate the default 'bus-size' config")
 		
-		#debug.debug("config=" + str(config))
+		debug.debug("config=" + str(config))
 		if arch != "":
 			self.arch = "-arch " + arch
 		else:
@@ -282,7 +282,7 @@ class Target:
 		offset = 1000**(len(list)-1)
 		for elem in list:
 			out += offset*int(elem)
-			#debug.verbose("get : " + str(int(elem)) + " tmp" + str(out))
+			debug.verbose("get : " + str(int(elem)) + " tmp" + str(out))
 			offset /= 1000
 		return out
 	
@@ -294,7 +294,7 @@ class Target:
 	##
 	def set_cross_base(self, cross=""):
 		self.cross = cross
-		#debug.debug("== Target='" + self.cross + "'");
+		debug.debug("== Target='" + self.cross + "'");
 		self.java = "javac"
 		self.javah = "javah"
 		self.jar = "jar"
@@ -319,7 +319,7 @@ class Target:
 		if ret == False:
 			debug.error("Can not get the g++/clang++ version ...")
 		self.xx_version = self.create_number_from_version_string(ret)
-		#debug.debug(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
+		debug.debug(self.config["compilator"] + "++ version=" + str(ret) + " number=" + str(self.xx_version))
 		
 		self.ld = self.cross + "ld"
 		self.nm = self.cross + "nm"
@@ -553,7 +553,7 @@ class Target:
 	## @return None
 	##
 	def add_module(self, new_module):
-		#debug.debug("Add nodule for Taget : " + new_module.get_name())
+		debug.debug("Add nodule for Taget : " + new_module.get_name())
 		self.module_list.append(new_module)
 	
 	##
@@ -710,7 +710,7 @@ class Target:
 			module_name = name
 			action_list = actions
 			for action_name in action_list:
-				#debug.verbose("requested : " + module_name + "?" + action_name + " [START]")
+				debug.verbose("requested : " + module_name + "?" + action_name + " [START]")
 				ret = None;
 				if action_name == "install":
 					try:
@@ -761,7 +761,7 @@ class Target:
 						ret = [heritage.HeritageList(), False]
 					else:
 						for mod in self.module_list:
-							#debug.verbose("compare " + mod.get_name() + " == " + module_name)
+							debug.verbose("compare " + mod.get_name() + " == " + module_name)
 							if mod.get_name() == module_name:
 								if action_name[:4] == "dump":
 									debug.info("dump module '" + module_name + "'")
@@ -776,7 +776,7 @@ class Target:
 									ret = mod.clean(self)
 									break
 								elif action_name[:4] == "gcov":
-									#debug.debug("gcov on module '" + module_name + "'")
+									debug.debug("gcov on module '" + module_name + "'")
 									if len(action_name) > 4:
 										# we have option:
 										option_list = action_name.split(":")
@@ -795,7 +795,7 @@ class Target:
 								elif action_name[:5] == "build":
 									if len(action_name) > 5:
 										debug.warning("action 'build' does not support options ... : '" + action_name + "'")
-									#debug.debug("build module '" + module_name + "'")
+									debug.debug("build module '" + module_name + "'")
 									if optionnal == True:
 										ret = [mod.build(self, package_name), True]
 									else:
@@ -807,7 +807,7 @@ class Target:
 							break
 						if ret == None:
 							debug.error("not know module name : '" + module_name + "' to '" + action_name + "' it")
-				#debug.verbose("requested : " + module_name + "?" + action_name + " [STOP]")
+				debug.verbose("requested : " + module_name + "?" + action_name + " [STOP]")
 			if len(action_list) == 1:
 				return ret
 	
@@ -829,7 +829,7 @@ class Target:
 	## @return None
 	##
 	def add_action(self, name_of_state="PACKAGE", level=5, name="no-name", action=None):
-		#debug.verbose("add action : " + name)
+		debug.verbose("add action : " + name)
 		if name_of_state not in self.action_on_state:
 			self.action_on_state[name_of_state] = [[level, name, action]]
 		else:
@@ -844,7 +844,7 @@ class Target:
 	## @param[in] static The package is build in static mode
 	##
 	def make_package(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
-		#debug.debug("make_package [START]")
+		debug.debug("make_package [START]")
 		#The package generated depend of the type of the element:
 		end_point_module_name = heritage_list.list_heritage[-1].name
 		module = self.get_module(end_point_module_name)
@@ -865,7 +865,7 @@ class Target:
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
 		elif module.get_type() == 'PACKAGE':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
-		#debug.debug("make_package [STOP]")
+		debug.debug("make_package [STOP]")
 		return
 	
 	##
@@ -878,7 +878,7 @@ class Target:
 	## @return False Nothing has been copied
 	##
 	def make_package_binary_data(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
-		#debug.debug("make_package_binary_data [START]")
+		debug.debug("make_package_binary_data [START]")
 		target_shared_path = os.path.join(path_package, self.pkg_path_data)
 		if static == True:
 			path_package_data = os.path.join(target_shared_path, pkg_name)
@@ -887,14 +887,14 @@ class Target:
 		tools.create_directory_of_file(path_package_data)
 		# prepare list of copy files
 		copy_list={}
-		#debug.debug("heritage for " + str(pkg_name) + ":")
+		debug.debug("heritage for " + str(pkg_name) + ":")
 		for heritage in heritage_list.list_heritage:
-			#debug.debug("sub elements: " + str(heritage.name))
+			debug.debug("sub elements: " + str(heritage.name))
 			path_src = self.get_build_path_data(heritage.name)
-			#debug.verbose("      has directory: " + path_src)
+			debug.verbose("      has directory: " + path_src)
 			if os.path.isdir(path_src):
 				if static == True:
-					#debug.debug("      need copy: " + path_src + " to " + path_package_data)
+					debug.debug("      need copy: " + path_src + " to " + path_package_data)
 					#copy all data:
 					tools.copy_anything(path_src,
 					                    path_package_data,
@@ -902,7 +902,7 @@ class Target:
 					                    force_identical=True,
 					                    in_list=copy_list)
 				else:
-					#debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + path_package_data)
+					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + path_package_data)
 					#copy all data:
 					tools.copy_anything(os.path.dirname(path_src),
 					                    path_package_data,
@@ -913,7 +913,7 @@ class Target:
 		ret_copy = tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
 		ret_remove = tools.clean_directory(target_shared_path, copy_list)
-		#debug.debug("make_package_binary_data [STOP]")
+		debug.debug("make_package_binary_data [STOP]")
 		return ret_copy or ret_remove
 	
 	##
@@ -926,7 +926,7 @@ class Target:
 	## @return False Nothing has been copied
 	##
 	def make_package_binary_bin(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
-		#debug.debug("make_package_binary_bin [START]")
+		debug.debug("make_package_binary_bin [START]")
 		copy_list={}
 		# creata basic output path
 		path_package_bin = os.path.join(path_package, self.pkg_path_bin)
@@ -936,51 +936,51 @@ class Target:
 		if os.path.exists(path_src) == True:
 			try:
 				path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary)
-				#debug.verbose("path_dst: " + str(path_dst))
+				debug.verbose("path_dst: " + str(path_dst))
 				tools.copy_file(path_src,
 				                path_dst,
 				                in_list=copy_list)
 			except:
-				#debug.extreme_verbose("can not find : " + path_src)
+				debug.extreme_verbose("can not find : " + path_src)
 				pass
 		path_src = self.get_build_file_bin(pkg_name, static)
 		path_src = path_src[:len(path_src)-4] + "js"
 		if os.path.exists(path_src) == True:
 			try:
 				path_dst = os.path.join(path_package_bin, pkg_name + self.suffix_binary2)
-				#debug.verbose("path_dst: " + str(path_dst))
+				debug.verbose("path_dst: " + str(path_dst))
 				tools.copy_file(path_src,
 				                path_dst,
 				                in_list=copy_list)
 			except:
-				#debug.extreme_verbose("can not find : " + path_src)
+				debug.extreme_verbose("can not find : " + path_src)
 				pass
 		# heritage binary
-		#debug.debug("heritage for " + str(pkg_name) + ":")
+		debug.debug("heritage for " + str(pkg_name) + ":")
 		for heritage in heritage_list.list_heritage:
-			#debug.debug("sub elements: " + str(heritage.name))
+			debug.debug("sub elements: " + str(heritage.name))
 			path_src = self.get_build_file_bin(heritage.name, static)
 			if os.path.exists(path_src) == True:
 				try:
 					path_dst = os.path.join(path_package_bin, heritage.name + self.suffix_binary)
-					#debug.verbose("path_dst: " + str(path_dst))
+					debug.verbose("path_dst: " + str(path_dst))
 					tools.copy_file(path_src,
 					                path_dst,
 					                in_list=copy_list)
 				except:
-					#debug.extreme_verbose("can not find : " + path_src)
+					debug.extreme_verbose("can not find : " + path_src)
 					pass
 			path_src = self.get_build_file_bin(heritage.name, static)
 			path_src = path_src[:len(path_src)-4] + "js"
 			if os.path.exists(path_src) == True:
 				try:
 					path_dst = os.path.join(path_package_bin, heritage.name + self.suffix_binary2)
-					#debug.verbose("path_dst: " + str(path_dst))
+					debug.verbose("path_dst: " + str(path_dst))
 					tools.copy_file(path_src,
 					                path_dst,
 					                in_list=copy_list)
 				except:
-					#debug.extreme_verbose("can not find : " + path_src)
+					debug.extreme_verbose("can not find : " + path_src)
 					pass
 		#real copy files
 		ret_copy = tools.copy_list(copy_list)
@@ -988,7 +988,7 @@ class Target:
 		if self.pkg_path_bin != "":
 			# remove unneded files (NOT folder ...)
 			ret_remove = tools.clean_directory(path_package_bin, copy_list)
-		#debug.debug("make_package_binary_bin [STOP]")
+		debug.debug("make_package_binary_bin [STOP]")
 		return ret_copy or ret_remove
 	
 	##
@@ -1001,19 +1001,19 @@ class Target:
 	## @return False Nothing has been copied
 	##
 	def make_package_binary_lib(self, path_package, pkg_name, base_pkg_path, heritage_list, static):
-		#debug.debug("make_package_binary_lib [START]")
+		debug.debug("make_package_binary_lib [START]")
 		copy_list={}
 		path_package_lib = os.path.join(path_package, self.pkg_path_lib)
 		if static == False:
 			#copy all shred libs...
 			tools.create_directory_of_file(path_package_lib)
-			#debug.verbose("libs for " + str(pkg_name) + ":")
+			debug.verbose("libs for " + str(pkg_name) + ":")
 			for heritage in heritage_list.list_heritage:
-				#debug.debug("sub elements: " + str(heritage.name))
+				debug.debug("sub elements: " + str(heritage.name))
 				file_src = self.get_build_file_dynamic(heritage.name)
-				#debug.verbose("      has directory: " + file_src)
+				debug.verbose("      has directory: " + file_src)
 				if os.path.isfile(file_src):
-					#debug.debug("      need copy: " + file_src + " to " + path_package_lib)
+					debug.debug("      need copy: " + file_src + " to " + path_package_lib)
 					#copy all data:
 					# TODO : We can have a problem when writing over library files ...
 					tools.copy_file(file_src,
@@ -1025,12 +1025,12 @@ class Target:
 		if self.pkg_path_lib != "":
 			# remove unneded files (NOT folder ...)
 			ret_remove = tools.clean_directory(path_package_lib, copy_list)
-		#debug.debug("make_package_binary_lib [STOP]")
+		debug.debug("make_package_binary_lib [STOP]")
 		return ret_copy or ret_remove
 	
 	
 	def make_package_generic_files(self, path_package, pkg_properties, pkg_name, base_pkg_path, heritage_list, static):
-		#debug.debug("make_package_generic_files [START]")
+		debug.debug("make_package_generic_files [START]")
 		## Create version file:
 		ret_version = tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
 		                                    tools.version_to_string(pkg_properties["VERSION"]),
@@ -1061,7 +1061,7 @@ class Target:
 		elif os.path.exists(os.path.join(base_pkg_path, "README.md"))==True:
 			ret_readme = tools.copy_file(os.path.join(base_pkg_path, "README.md"), readme_file_dest)
 		else:
-			#debug.debug("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
+			debug.debug("no file 'README', 'README.md' or 'os-Linux/README' ==> generate an empty one")
 			ret_readme = tools.file_write_data(readme_file_dest,
 			                                   "No documentation for " + pkg_name + "\n",
 			                                   only_if_new=True)
@@ -1087,11 +1087,11 @@ class Target:
 		if os.path.exists(os.path.join(base_pkg_path, "changelog")) == True:
 			ret_changelog = tools.copy_file(os.path.join(base_pkg_path, "changelog"), change_log_file_dest)
 		else:
-			#debug.debug("no file 'changelog' ==> generate an empty one")
+			debug.debug("no file 'changelog' ==> generate an empty one")
 			ret_changelog = tools.file_write_data(change_log_file_dest,
 			                                      "No changelog data " + pkg_name + "\n",
 			                                      only_if_new=True)
-		#debug.debug("make_package_generic_files [STOP]")
+		debug.debug("make_package_generic_files [STOP]")
 		return    ret_version \
 		       or ret_maintainer \
 		       or ret_appl_name \
@@ -1100,27 +1100,27 @@ class Target:
 		       or ret_changelog
 	
 	def install_package(self, pkg_name):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Install package '" + pkg_name + "'")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.error("action not implemented ...")
 	
 	def un_install_package(self, pkg_name):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Un-Install package '" + pkg_name + "'")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.error("action not implemented ...")
 	
 	def run(self, pkg_name, option_list, binary_name = None):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.error("action not implemented ...")
 	
 	def show_log(self, pkg_name):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Show log logcat '" + pkg_name + "'")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.error("action not implemented ...")
 	
 	##
@@ -1150,7 +1150,7 @@ __start_target_name="Target_"
 def import_path(path_list):
 	global __target_list
 	global_base = env.get_build_system_base_name()
-	#debug.debug("TARGET: Init with Files list:")
+	debug.debug("TARGET: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
@@ -1161,31 +1161,30 @@ def import_path(path_list):
 		filename = filename[len(global_base):]
 		# Check if it start with the local patern:
 		if filename[:len(__start_target_name)] != __start_target_name:
-			#debug.extreme_verbose("TARGET:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			debug.extreme_verbose("TARGET:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
 			continue
 		# Remove local patern
 		target_name = filename[len(__start_target_name):]
-		#debug.verbose("TARGET:     Integrate: '" + target_name + "' from '" + elem + "'")
+		debug.verbose("TARGET:     Integrate: '" + target_name + "' from '" + elem + "'")
 		__target_list.append([target_name, elem])
-	#debug.verbose("New list TARGET: ")
+	debug.verbose("New list TARGET: ")
 	for elem in __target_list:
-		#debug.verbose("    " + str(elem[0]))
-		pass
+		debug.verbose("    " + str(elem[0]))
 
 ##
 ## @brief Load a specific target
 ##
 def load_target(name, config):
 	global __target_list
-	#debug.debug("load target: " + name)
+	debug.debug("load target: " + name)
 	if len(__target_list) == 0:
 		debug.error("No target to compile !!!")
-	#debug.debug("list target: " + str(__target_list))
+	debug.debug("list target: " + str(__target_list))
 	for mod in __target_list:
 		if mod[0] == name:
-			#debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
+			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
 			sys.path.append(os.path.dirname(mod[1]))
-			#debug.verbose("import target : '" + env.get_build_system_base_name() + __start_target_name + name + "'")
+			debug.verbose("import target : '" + env.get_build_system_base_name() + __start_target_name + name + "'")
 			theTarget = __import__(env.get_build_system_base_name() + __start_target_name + name)
 			#create the target
 			tmpTarget = theTarget.Target(config)

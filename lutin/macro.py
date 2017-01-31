@@ -29,7 +29,7 @@ __start_macro_name="Macro_"
 def import_path(path_list):
 	global __macro_list
 	global_base = env.get_build_system_base_name()
-	#debug.debug("TARGET: Init with Files list:")
+	debug.debug("TARGET: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
@@ -40,31 +40,30 @@ def import_path(path_list):
 		filename = filename[len(global_base):]
 		# Check if it start with the local patern:
 		if filename[:len(__start_macro_name)] != __start_macro_name:
-			#debug.extreme_verbose("MACRO:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+			debug.extreme_verbose("MACRO:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
 			continue
 		# Remove local patern
 		target_name = filename[len(__start_macro_name):]
-		#debug.verbose("MACRO:     Integrate: '" + target_name + "' from '" + elem + "'")
+		debug.verbose("MACRO:     Integrate: '" + target_name + "' from '" + elem + "'")
 		__macro_list.append([target_name, elem])
-	#debug.verbose("New list MACRO: ")
+	debug.verbose("New list MACRO: ")
 	for elem in __macro_list:
-		#debug.verbose("    " + str(elem[0]))
-		pass
+		debug.verbose("    " + str(elem[0]))
 
 ##
 ## @brief Load a specific target
 ##
 def load_macro(name):
 	global __macro_list
-	#debug.debug("load macro: " + name)
+	debug.debug("load macro: " + name)
 	if len(__macro_list) == 0:
 		debug.error("No macro to compile !!!")
-	#debug.debug("list macro: " + str(__macro_list))
+	debug.debug("list macro: " + str(__macro_list))
 	for mod in __macro_list:
 		if mod[0] == name:
-			#debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
+			debug.verbose("add to path: '" + os.path.dirname(mod[1]) + "'")
 			sys.path.append(os.path.dirname(mod[1]))
-			#debug.verbose("import macro : '" + env.get_build_system_base_name() + __start_macro_name + name + "'")
+			debug.verbose("import macro : '" + env.get_build_system_base_name() + __start_macro_name + name + "'")
 			the_macro = __import__(env.get_build_system_base_name() + __start_macro_name + name)
 			return the_macro
 	raise KeyError("No entry for : " + name)

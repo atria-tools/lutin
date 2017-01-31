@@ -76,9 +76,9 @@ class Target(target.Target):
 		return os.path.join(self.get_staging_path(binary_name, tmp), binary_name + ".app", self.pkg_path_data)
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
-		#debug.debug("------------------------------------------------------------------------")
-		#debug.debug("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
+		debug.debug("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name, tmp=True), pkg_name + ".app")
 		tools.create_directory_of_file(target_outpath)
@@ -130,9 +130,9 @@ class Target(target.Target):
 			tools.file_write_data(build_package_path_done, "done...")
 	
 	def make_package_single_file(self, pkg_name, pkg_properties, base_pkg_path, heritage_list):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("Generate package '" + pkg_name + "'")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.print_element("zip", "data.zip", "<==", "data/*")
 		zipPath = self.get_staging_path(pkg_name) + "/data.zip"
 		zip.create_zip(self.get_staging_path_data(pkg_name), zipPath)
@@ -180,36 +180,36 @@ class Target(target.Target):
 		# package is done
 		tmpFile.flush()
 		tmpFile.close()
-		#debug.verbose("zip position=" + str(positionOfZip) + " = 0x" + h)
+		debug.verbose("zip position=" + str(positionOfZip) + " = 0x" + h)
 	
 	def install_package(self, pkg_name):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("Install package '" + pkg_name + "'")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 		#sudo dpkg -i $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
 	def un_install_package(self, pkg_name):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("Un-Install package '" + pkg_name + "'")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.warning("    ==> TODO")
 		#sudo dpkg -r $(TARGET_OUT_FINAL)/$(PROJECT_NAME) + self.suffix_package
 	
 	def run(self, pkg_name, option_list, binary_name = None):
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		if host.OS == "Windows":
 			debug.error("action not implemented ...")
 			return
-		#debug.debug(" think to configure your wine : 'winecfg' : https://www.winehq.org/docs/wineusr-guide/config-wine-main")
+		debug.debug(" think to configure your wine : 'winecfg' : https://www.winehq.org/docs/wineusr-guide/config-wine-main")
 		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", pkg_name + self.suffix_binary)
 		cmd = "wine " + appl_path + " "
 		for elem in option_list:
 			cmd += elem + " "
 		multiprocess.run_command_no_lock_out(cmd)
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
-		#debug.debug("------------------------------------------------------------------------")
+		debug.debug("------------------------------------------------------------------------")
 

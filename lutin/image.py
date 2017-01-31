@@ -75,7 +75,7 @@ def resize(src_file, dest_file, x, y, cmd_file=None):
 				y = int(float(x) * float(source_height) / float(source_width))
 			y = get_pow_2_multiple(y)
 			debug.print_element("resize Image (" + str(x) + "x" + str(y) + ")", src_file, "==>", dest_file)
-			#debug.debug("Resize image: " + src_file + " size=(" + str(source_width) + "x" + str(source_height) + ") -> (" + str(x) + "x" + str(y) + ")")
+			debug.debug("Resize image: " + src_file + " size=(" + str(source_width) + "x" + str(source_height) + ") -> (" + str(x) + "x" + str(y) + ")")
 			source_image_rect = CoreGraphics.CGRectMake(0, 0, source_width, source_height)
 			new_image = source_image.createWithImageInRect(source_image_rect)
 			colors_space = CoreGraphics.CGColorSpaceCreateDeviceRGB()

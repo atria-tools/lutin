@@ -44,9 +44,9 @@ def filter_path(root, list_files):
 
 def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = ""):
 	out = []
-	#debug.verbose("lutin files: " + str(path) + " [START]")
+	debug.verbose("lutin files: " + str(path) + " [START]")
 	if limit_sub_folder == 0:
-		#debug.debug("Subparsing limitation append ...")
+		debug.debug("Subparsing limitation append ...")
 		return []
 	try:
 		list_files = os.listdir(path)
@@ -55,15 +55,15 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 		debug.warning("error when getting subdirectory of '" + str(path) + "'")
 		return []
 	if path in exclude_path:
-		#debug.debug("find '" + str(path) + "' in exclude_path=" + str(exclude_path))
+		debug.debug("find '" + str(path) + "' in exclude_path=" + str(exclude_path))
 		return []
 	# filter elements:
 	tmp_list_lutin_file = filter_name_and_file(path, list_files, base_name + "*.py")
-	#debug.verbose("lutin files: " + str(path) + " : " + str(tmp_list_lutin_file))
+	debug.verbose("lutin files: " + str(path) + " : " + str(tmp_list_lutin_file))
 	# Import the module:
 	for filename in tmp_list_lutin_file:
 		out.append(os.path.join(path, filename))
-		#debug.extreme_verbose("     Find a file : '" + str(out[-1]) + "'")
+		debug.extreme_verbose("     Find a file : '" + str(out[-1]) + "'")
 	need_parse_sub_folder = True
 	rm_value = -1
 	# check if we need to parse sub_folder
@@ -71,15 +71,15 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 		need_parse_sub_folder = False
 	# check if the file "lutin_parse_sub.py" is present ==> parse SubFolder (force and add +1 in the resursing
 	if base_name + "ParseSubFolders.txt" in list_files:
-		#debug.debug("find SubParser ... " + str(base_name + "ParseSubFolders.txt") + " " + path)
+		debug.debug("find SubParser ... " + str(base_name + "ParseSubFolders.txt") + " " + path)
 		data_file_sub = tools.file_read_data(os.path.join(path, base_name + "ParseSubFolders.txt"))
 		if data_file_sub == "":
-			#debug.debug("    Empty file Load all subfolder in the worktree in '" + str(path) + "'")
+			debug.debug("    Empty file Load all subfolder in the worktree in '" + str(path) + "'")
 			need_parse_sub_folder = True
 			rm_value = 0
 		else:
 			list_sub = data_file_sub.split("\n")
-			#debug.debug("    Parse selected folders " + str(list_sub) + " no parse local folder directory")
+			debug.debug("    Parse selected folders " + str(list_sub) + " no parse local folder directory")
 			need_parse_sub_folder = False
 			for folder in list_sub:
 				if    folder == "" \
@@ -109,7 +109,7 @@ def init():
 	global is_init;
 	if is_init == True:
 		return
-	#debug.verbose("Use Make as a make stadard")
+	debug.verbose("Use Make as a make stadard")
 	sys.path.append(tools.get_run_path())
 	# create the list of basic folder:
 	basic_folder_list = []
@@ -121,7 +121,7 @@ def init():
 		if    elem_path.lower() == "android" \
 		   or elem_path == "out" :
 			continue
-		#debug.debug("Automatic load path: '" + elem_path + "'")
+		debug.debug("Automatic load path: '" + elem_path + "'")
 		basic_folder_list.append([elem_path, False])
 	
 	# create in a single path the basic list of lutin files  (all start with lutin and end with .py)
@@ -141,10 +141,9 @@ def init():
 		for elem in tmp_out:
 			list_of_lutin_files.append(elem)
 	
-	#debug.debug("Files specific lutin: ")
+	debug.debug("Files specific lutin: ")
 	for elem_path in list_of_lutin_files:
-		#debug.debug("    " + elem_path)
-		pass
+		debug.debug("    " + elem_path)
 	# simply import element from the basic list of files (single parse ...)
 	builder.import_path(list_of_lutin_files)
 	module.import_path(list_of_lutin_files)
