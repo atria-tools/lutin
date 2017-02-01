@@ -53,32 +53,6 @@ def create_dependency_file(depend_file, list_files):
 	_create_directory_of_file(depend_file)
 	_file_write_data(depend_file, data)
 
-# Buffer with the whole list of file check access ==> time cache of file
-_list_of_file_time = {}
-
-def clear_cache_file_date():
-	global _list_of_file_time
-	_list_of_file_time = {}
-
-def file_get_time(file_name):
-	global _list_of_file_time
-	if file_name in _list_of_file_time:
-		return _list_of_file_time[file_name]
-	local_time = os.path.getmtime(file_name)
-	_list_of_file_time[file_name] = local_time
-	return local_time
-
-def file_exist(file_name):
-	global _list_of_file_time
-	if file_name in _list_of_file_time:
-		return True
-	if os.path.exists(file_name) == False:
-		return False
-	# we update the date ==> permit to not do an other acces on file
-	local_time = os.path.getmtime(file_name)
-	_list_of_file_time[file_name] = local_time
-	return True
-
 ##
 ## @brief Check if all dependency of a file and dependency file is correct or not
 ## @param[in] dst (string) File that will be generated
@@ -104,12 +78,12 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 	# check if the destination existed:
 	if     dst != "" \
 	   and dst != None \
-	   and file_exist(dst) == False:
+	   and os.path.exists(dst) == False:
 		debug.extreme_verbose("			==> must rebuild (dst does not exist)")
 		return True
 	if     src != "" \
 	   and src != None \
-	   and file_exist(src) == False:
+	   and os.path.exists(src) == False:
 		debug.warning("			==> unexistant file :'" + src + "'")
 		return True
 	# Check the basic date if the 2 files
@@ -117,19 +91,19 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 	   and dst != None \
 	   and src != "" \
 	   and src != None \
-	   and file_get_time(src) > file_get_time(dst):
+	   and os.path.getmtime(src) > os.path.getmtime(dst):
 		debug.extreme_verbose("			==> must rebuild (source time greater)")
 		return True
 	
 	if     depend_file != "" \
 	   and depend_file != None \
-	   and file_exist(depend_file) == False:
+	   and os.path.exists(depend_file) == False:
 		debug.extreme_verbose("			==> must rebuild (no depending file)")
 		return True
 	
 	if     file_cmd != "" \
 	   and file_cmd != None:
-		if file_exist(file_cmd) == False:
+		if os.path.exists(file_cmd) == False:
 			debug.extreme_verbose("			==> must rebuild (no commandLine file)")
 			return True
 		# check if the 2 cmd_line are similar :
@@ -171,11 +145,11 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 			# really check files:
 			if test_file != "":
 				debug.extreme_verbose("					==> test");
-				if file_exist(test_file) == False:
+				if False==os.path.exists(test_file):
 					debug.extreme_verbose("			==> must rebuild (a dependency file does not exist)")
 					file.close()
 					return True
-				if file_get_time(test_file) > file_get_time(dst):
+				if os.path.getmtime(test_file) > os.path.getmtime(dst):
 					debug.extreme_verbose("			==> must rebuild (a dependency file time is newer)")
 					file.close()
 					return True
@@ -236,7 +210,7 @@ def need_re_package(dst, src_list, must_have_src, file_cmd="", cmd_line=""):
 		return True
 	
 	# check if the destination existed:
-	if file_exist(dst) == False:
+	if os.path.exists(dst) == False:
 		debug.extreme_verbose("			==> must re-package (dst does not exist)")
 		return True
 	# chek the basic date if the 2 files
@@ -244,12 +218,12 @@ def need_re_package(dst, src_list, must_have_src, file_cmd="", cmd_line=""):
 		debug.extreme_verbose("			==> must re-package (no source ???)")
 		return True
 	for src in compleate_list:
-		if file_get_time(src) > file_get_time(dst):
+		if os.path.getmtime(src) > os.path.getmtime(dst):
 			debug.extreme_verbose("			==> must re-package (source time greater) : '" + src + "'")
 			return True
 	
 	if ""!=file_cmd:
-		if False==file_exist(file_cmd):
+		if False==os.path.exists(file_cmd):
 			debug.extreme_verbose("			==> must rebuild (no commandLine file)")
 			return True
 		# check if the 2 cmd_line are similar :
