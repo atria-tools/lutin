@@ -92,9 +92,10 @@ def version_to_string(version):
 ##
 def file_write_data(path, data, only_if_new=False):
 	if only_if_new == True:
-		old_data = file_read_data(path)
-		if old_data == data:
-			return False
+		if os.path.exists(path) == True:
+			old_data = file_read_data(path)
+			if old_data == data:
+				return False
 	#real write of data:
 	create_directory_of_file(path)
 	file = open(path, "w")
