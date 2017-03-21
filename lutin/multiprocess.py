@@ -86,6 +86,7 @@ def run_command_direct(cmd_line):
 			return err[:-1];
 		return output[:-1];
 	else:
+		debug.warning("get an error cmd " + str(err))
 		return False
 
 

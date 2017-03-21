@@ -606,7 +606,8 @@ class Module:
 		if len(self._generate_file) > 0:
 			debug.debug("install GENERATED headers / src ...")
 			for elem_generate in self._generate_file:
-				
+				# write data in the generate path ... (all is generated at the same path) ...
+				debug.warning("Create data: " + os.path.join(generate_path, elem_generate["filename"]))
 				ret_write = tools.file_write_data(os.path.join(generate_path, elem_generate["filename"]), elem_generate["data"], only_if_new=True)
 				if ret_write == True:
 					debug.print_element("generate", self._name, "##", elem_generate["filename"])
@@ -619,6 +620,10 @@ class Module:
 						have_only_generate_file = True
 						# TODO : Do it better, we force the include path in the heritage to permit to have a correct inclusion ...
 						self._local_heritage.include = target.get_build_path_include(self._name)
+				elif elem_generate["type"] == "data":
+					# data file to install:
+					if elem_generate["install"] == True:
+						self._files.append([os.path.join(generate_path, elem_generate["filename"]), elem_generate["filename"]])
 				else:
 					# add file to compile
 					self.add_src_file(os.path.join(generate_path, elem_generate["filename"]))
@@ -1269,6 +1274,22 @@ class Module:
 		else:
 			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path)
 	##
+	## @brief Many library need to generate dynamic data file, use this to add dynamic generated files
+	## @param[in] self (handle) Class handle
+	## @param[in] data_file (string) Data of the file that is generated
+	## @param[in] destination_path (string) Path where to install data
+	## @param[in] install_element (bool) add the file in the include path and not only in the generate path
+	## @note this does not rewrite the file if it is not needed
+	## @return None
+	##
+	def add_generated_data_file(self, data_file, destination_path, install_element=False):
+		self._generate_file.append({
+		    "type":"data",
+		    "data":data_file,
+		    "filename":destination_path,
+		    "install":install_element
+		    });
+	##
 	## @brief Many library need to generate dynamic file configuration, use this to generate your configuration and add it in the include path
 	## @param[in] self (handle) Class handle
 	## @param[in] data_file (string) Data of the file that is generated
@@ -1521,7 +1542,7 @@ class Module:
 	## @return None
 	##
 	def set_pkg(self, variable, value):
-		if "COMPAGNY_TYPE" == variable:
+		if variable == "COMPAGNY_TYPE":
 			#	com : Commercial
 			#	net : Network??
 			#	org : Organisation
@@ -1535,7 +1556,7 @@ class Module:
 			else:
 				self._package_prop[variable] = value
 				self._package_prop_default[variable] = False
-		elif "COMPAGNY_NAME" == variable:
+		elif variable == "COMPAGNY_NAME":
 			self._package_prop[variable] = value
 			self._package_prop_default[variable] = False
 			val2 = value.lower()
@@ -1544,7 +1565,7 @@ class Module:
 			val2 = val2.replace('_', '')
 			self._package_prop["COMPAGNY_NAME2"] = val2
 			self._package_prop_default["COMPAGNY_NAME2"] = False
-		elif "ICON" == variable:
+		elif variable == "ICON":
 			if     len(value) > 1 \
 			   and value[0] == '/':
 				# unix case
@@ -1560,10 +1581,10 @@ class Module:
 			else:
 				self._package_prop[variable] = os.path.join(tools.get_current_path(self._origin_file), value)
 			self._package_prop_default[variable] = False
-		elif "MAINTAINER" == variable:
+		elif variable == "MAINTAINER":
 			self._package_prop[variable] = value
 			self._package_prop_default[variable] = False
-		elif "SECTION" == variable:
+		elif variable == "SECTION":
 			# project section : (must be separate by coma
 			#    refer to : http://packages.debian.org/sid/
 			#        admin cli-mono comm database debian-installer
@@ -1576,7 +1597,7 @@ class Module:
 			#        text utils vcs video virtual web x11 xfce zope ...
 			self._package_prop[variable] = value
 			self._package_prop_default[variable] = False
-		elif "PRIORITY" == variable:
+		elif variable == "PRIORITY":
 			#list = ["required","important","standard","optional","extra"]
 			#if isinstance(value, list):
 			if value not in ["required", "important", "standard", "optional", "extra"]:
@@ -1584,7 +1605,7 @@ class Module:
 			else:
 				self._package_prop[variable] = value
 				self._package_prop_default[variable] = False
-		elif "ANDROID_SIGN" == variable:
+		elif variable == "ANDROID_SIGN":
 			if     len(value) > 1 \
 			   and value[0] == '/':
 				# unix case
@@ -1614,7 +1635,7 @@ class Module:
 		                  "LICENSE"]:
 			self._package_prop[variable] = value
 			self._package_prop_default[variable] = False
-		elif "ADMOD_POSITION" == variable:
+		elif variable == "ADMOD_POSITION":
 			if value in ["top", "bottom"]:
 				self._package_prop[variable] = value
 				self._package_prop_default[variable] = False
