@@ -517,7 +517,7 @@ class Module:
 		if target.is_module_build(self._name) == True:
 			if self._sub_heritage_list == None:
 				self._local_heritage = heritage.heritage(self, target)
-				debug.warning("plop " + str(self._local_heritage));
+				debug.debug("plop " + str(self._local_heritage));
 			return copy.deepcopy(self._sub_heritage_list)
 		# create the package heritage
 		self._local_heritage = heritage.heritage(self, target)
@@ -532,7 +532,7 @@ class Module:
 		         or self._type == 'PACKAGE' ) :
 			# this is the endpoint binary ...
 			package_name = self._name
-			debug.warning("package name = " + package_name)
+			debug.debug("package name = " + package_name)
 		else:
 			pass
 		# build dependency before
@@ -607,7 +607,7 @@ class Module:
 			debug.debug("install GENERATED headers / src ...")
 			for elem_generate in self._generate_file:
 				# write data in the generate path ... (all is generated at the same path) ...
-				debug.warning("Create data: " + os.path.join(generate_path, elem_generate["filename"]))
+				debug.debug("Create data: " + os.path.join(generate_path, elem_generate["filename"]))
 				ret_write = tools.file_write_data(os.path.join(generate_path, elem_generate["filename"]), elem_generate["data"], only_if_new=True)
 				if ret_write == True:
 					debug.print_element("generate", self._name, "##", elem_generate["filename"])
