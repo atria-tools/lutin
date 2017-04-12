@@ -25,13 +25,23 @@ class System(system.System):
 			return;
 		dst_data = tools.file_read_data("/usr/include/pulse/version.h")
 		lines = dst_data.split("\n")
-		patern = "#define pa_get_headers_version() (\""
+		patern = "#define pa_get_headers_version() (\""      # " #corect edn error parsing
 		version = None
 		for line in lines:
 			if line[:len(patern)] == patern:
 				#Find the version line
-				version = line[len(patern)]
-				version2 = line[len(patern)+2]
+				offset = len(patern)
+				version = ""
+				while     offset < len(line) \
+				      and line[offset] != '.':
+					version = line[offset]
+					offset += 1
+				offset += 1
+				version2 = ""
+				while     offset < len(line) \
+				      and line[offset] != '.':
+					version2 = line[offset]
+					offset += 1
 				debug.verbose("detect version '" + version + "'")
 				break;
 		if version == None:
