@@ -34,13 +34,13 @@ class System(system.System):
 				version = ""
 				while     offset < len(line) \
 				      and line[offset] != '.':
-					version = line[offset]
+					version += line[offset]
 					offset += 1
 				offset += 1
 				version2 = ""
 				while     offset < len(line) \
 				      and line[offset] != '.':
-					version2 = line[offset]
+					version2 += line[offset]
 					offset += 1
 				debug.verbose("detect version '" + version + "'")
 				break;
