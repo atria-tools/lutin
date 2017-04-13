@@ -59,6 +59,11 @@ class System(system.System):
 			    ])
 		else:
 			# todo : create a searcher of the presence of the library:
+			"""
+			self.add_flag("link-lib", [
+			    "-l/lib/pulseaudio/libpulsecommon-" + version + ".0.so"
+			    ])
+			"""
 			self.add_flag("link-lib", [
 			    "pulsecommon-" + version + ".0",
 			    "pulse-mainloop-glib",
@@ -66,6 +71,7 @@ class System(system.System):
 			    "pulse"
 			    ])
 			self.add_flag("link", "-L/usr/lib/pulseaudio")
+			self.add_flag("link", "-Wl,-R/usr/lib/pulseaudio")
 			self.add_header_file([
 			    "/usr/include/pulse/*",
 			    ],
