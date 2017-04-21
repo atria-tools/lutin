@@ -1668,6 +1668,14 @@ class Module:
 		else:
 			self._package_prop[variable] = [value]
 	
+	##
+	## @brief Get the version of the module (getted in the global value)
+	## @param[in] self (handle) Class handle
+	## @return the list of version parameters
+	##
+	def get_version(self):
+		return self._package_prop["VERSION"]
+	
 
 __module_list=[]
 __start_module_name="_"
