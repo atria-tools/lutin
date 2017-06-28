@@ -47,8 +47,8 @@ Do it ... it does not work ...
 	lutin -C -D -tIOs yourApplication?install
 ```
 
-Appliocation ID
----------------
+Application ID
+--------------
 
 It miss some things to do:
 

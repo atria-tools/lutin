@@ -31,6 +31,6 @@ class System(system.System):
 		    destination_path="GL",
 		    recursive=True)
 		"""
-		self.add_flag('link-lib', "GLESv2")
+		self.add_flag('link-lib', "GLESv3")
 
 
