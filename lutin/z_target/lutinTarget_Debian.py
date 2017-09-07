@@ -57,7 +57,7 @@ class Target(lutinTarget_Linux.Target):
 		# http://alp.developpez.com/tutoriels/debian/creer-paquet/
 		debianpkg_name = re.sub("_", "-", pkg_name)
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate generic '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.info("Generate generic '" + pkg_name + "' v" + tools.version_toString(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
@@ -106,7 +106,7 @@ class Target(lutinTarget_Linux.Target):
 			tools.create_directory_of_file(finalFileControl)
 			tmpFile = open(finalFileControl, 'w')
 			tmpFile.write("Package: " + debianpkg_name + "\n")
-			tmpFile.write("Version: " + tools.version_to_string(pkg_properties["VERSION"]) + "\n")
+			tmpFile.write("Version: " + tools.version_toString(pkg_properties["VERSION"]) + "\n")
 			tmpFile.write("Section: " + self.generate_list_separate_coma(pkg_properties["SECTION"]) + "\n")
 			tmpFile.write("Priority: " + pkg_properties["PRIORITY"] + "\n")
 			tmpFile.write("Architecture: all\n")

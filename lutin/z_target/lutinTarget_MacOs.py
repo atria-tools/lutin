@@ -69,7 +69,7 @@ class Target(target.Target):
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.info("Generate package '" + pkg_name + "' v" + tools.version_toString(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app/Contents")
@@ -111,15 +111,15 @@ class Target(target.Target):
 			data_file += "<plist version=\"1.0\">\n"
 			data_file += "    <dict>\n"
 			data_file += "        <key>CFBundleExecutableFile</key>\n"
-			data_file += "        <string>"+pkg_name+"</string>\n"
+			data_file += "        <etk/String.hpp>"+pkg_name+"</string>\n"
 			data_file += "        <key>CFBundleName</key>\n"
-			data_file += "        <string>"+pkg_name+"</string>\n"
+			data_file += "        <etk/String.hpp>"+pkg_name+"</string>\n"
 			data_file += "        <key>CFBundleIdentifier</key>\n"
-			data_file += "        <string>" + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
+			data_file += "        <etk/String.hpp>" + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
 			data_file += "        <key>CFBundleSignature</key>\n"
-			data_file += "        <string>????</string>\n"
+			data_file += "        <etk/String.hpp>????</string>\n"
 			data_file += "        <key>CFBundleIconFile</key>\n"
-			data_file += "        <string>icon.icns</string>\n"
+			data_file += "        <etk/String.hpp>icon.icns</string>\n"
 			data_file += "    </dict>\n"
 			data_file += "</plist>\n"
 			data_file += "\n\n"

@@ -95,6 +95,8 @@ class Target:
 			self.add_flag("c++", "-Wno-undefined-var-template")
 		self.add_flag("c", "-nodefaultlibs")
 		self.add_flag("c++", "-nostdlib")
+		#self.add_flag("c", "-nostdinc") #ignores standard C include directories
+		#self.add_flag("c++", "-nostdinc++") #ignores standard C++ include directories
 		self.add_flag("ar", 'rcs')
 		
 		if self._name == "Windows":
@@ -1033,7 +1035,7 @@ class Target:
 		debug.debug("make_package_generic_files [START]")
 		## Create version file:
 		ret_version = tools.file_write_data(os.path.join(path_package, self.pkg_path_version_file),
-		                                    tools.version_to_string(pkg_properties["VERSION"]),
+		                                    tools.version_toString(pkg_properties["VERSION"]),
 		                                    only_if_new=True)
 		
 		## Create maintainer file:

@@ -103,7 +103,7 @@ class Target(target.Target):
 	
 	def make_package_binary(self, pkg_name, pkg_properties, base_pkg_path, heritage_list, static):
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("Generate package '" + pkg_name + "' v" + tools.version_to_string(pkg_properties["VERSION"]))
+		debug.info("Generate package '" + pkg_name + "' v" + tools.version_toString(pkg_properties["VERSION"]))
 		debug.debug("------------------------------------------------------------------------")
 		#output path
 		target_outpath = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app")
@@ -171,55 +171,55 @@ class Target(target.Target):
 			data_file += "<plist version=\"1.0\">\n"
 			data_file += "		<dict>\n"
 			data_file += "			<key>CFBundleDevelopmentRegion</key>\n"
-			data_file += "			<string>en</string>\n"
+			data_file += "			<etk/String.hpp>en</string>\n"
 			data_file += "			<key>CFBundleDisplayName</key>\n"
-			data_file += "			<string>" + pkg_properties["NAME"] + "</string>\n"
+			data_file += "			<etk/String.hpp>" + pkg_properties["NAME"] + "</string>\n"
 			data_file += "			<key>CFBundleExecutable</key>\n"
-			data_file += "			<string>" + pkg_name + "</string>\n"
+			data_file += "			<etk/String.hpp>" + pkg_name + "</string>\n"
 			data_file += "			<key>CFBundleIdentifier</key>\n"
-			data_file += "			<string>com." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
+			data_file += "			<etk/String.hpp>com." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n"
 			
 			data_file += "			<key>CFBundleIconFiles</key>\n"
 			data_file += "			<array>\n"
-			data_file += "				<string>Icon-60@2x.png</string>\n"
-			data_file += "				<string>Icon-76.png</string>\n"
-			data_file += "				<string>Icon-76@2x.png</string>\n"
-			data_file += "				<string>Icon-Small-40.png</string>\n"
-			data_file += "				<string>Icon-Small-40@2x.png</string>\n"
-			data_file += "				<string>Icon-Small.png</string>\n"
-			data_file += "				<string>Icon-Small@2x.png</string>\n"
-			data_file += "				<string>iTunesArtwork.png</string>\n"
-			data_file += "				<string>iTunesArtwork@2x.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-60@2x.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-76.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-76@2x.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-Small-40.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-Small-40@2x.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-Small.png</string>\n"
+			data_file += "				<etk/String.hpp>Icon-Small@2x.png</string>\n"
+			data_file += "				<etk/String.hpp>iTunesArtwork.png</string>\n"
+			data_file += "				<etk/String.hpp>iTunesArtwork@2x.png</string>\n"
 			data_file += "			</array>\n"
 			
 			data_file += "			<key>CFBundleInfoDictionaryVersion</key>\n"
-			data_file += "			<string>6.0</string>\n"
+			data_file += "			<etk/String.hpp>6.0</string>\n"
 			data_file += "			<key>CFBundleName</key>\n"
-			data_file += "			<string>" + pkg_name + "</string>\n"
+			data_file += "			<etk/String.hpp>" + pkg_name + "</string>\n"
 			data_file += "			<key>CFBundlePackageType</key>\n"
-			data_file += "			<string>APPL</string>\n"
+			data_file += "			<etk/String.hpp>APPL</string>\n"
 			data_file += "			<key>CFBundleSignature</key>\n"
-			data_file += "			<string>????</string>\n"
+			data_file += "			<etk/String.hpp>????</string>\n"
 			data_file += "			<key>CFBundleSupportedPlatforms</key>\n"
 			data_file += "			<array>\n"
-			data_file += "				<string>iPhoneSimulator</string>\n"
+			data_file += "				<etk/String.hpp>iPhoneSimulator</string>\n"
 			data_file += "			</array>\n"
 			data_file += "			\n"
 			data_file += "			<key>CFBundleShortVersionString</key>\n"
-			data_file += "			<string>"+tools.version_to_string(pkg_properties["VERSION"])+"</string>\n"
+			data_file += "			<etk/String.hpp>"+tools.version_toString(pkg_properties["VERSION"])+"</string>\n"
 			data_file += "			<key>CFBundleVersion</key>\n"
-			data_file += "			<string>"+str(pkg_properties["VERSION_CODE"])+"</string>\n"
+			data_file += "			<etk/String.hpp>"+str(pkg_properties["VERSION_CODE"])+"</string>\n"
 			data_file += "			\n"
 			data_file += "			<key>CFBundleResourceSpecification</key>\n"
-			data_file += "			<string>ResourceRules.plist</string>\n"
+			data_file += "			<etk/String.hpp>ResourceRules.plist</string>\n"
 			if self.get_simulation() == False:
 				data_file += "			<key>LSRequiresIPhoneOS</key>\n"
 				data_file += "			<true/>\n"
 			else:
 				data_file += "			<key>DTPlatformName</key>\n"
-				data_file += "			<string>iphonesimulator</string>\n"
+				data_file += "			<etk/String.hpp>iphonesimulator</string>\n"
 				data_file += "			<key>DTSDKName</key>\n"
-				data_file += "			<string>iphonesimulator7.0</string>\n"
+				data_file += "			<etk/String.hpp>iphonesimulator7.0</string>\n"
 			data_file += "			\n"
 			data_file += "			<key>UIDeviceFamily</key>\n"
 			data_file += "			<array>\n"
@@ -228,23 +228,23 @@ class Target(target.Target):
 			data_file += "			</array>\n"
 			data_file += "			<key>UIRequiredDeviceCapabilities</key>\n"
 			data_file += "			<array>\n"
-			data_file += "				<string>armv7</string>\n"
+			data_file += "				<etk/String.hpp>armv7</string>\n"
 			data_file += "			</array>\n"
 			data_file += "			<key>UIStatusBarHidden</key>\n"
 			data_file += "			<true/>\n"
 			data_file += "			<key>UISupportedInterfaceOrientations</key>\n"
 			data_file += "			<array>\n"
-			data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
-			data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
-			data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
-			data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationPortrait</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationPortraitUpsideDown</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationLandscapeLeft</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationLandscapeRight</string>\n"
 			data_file += "			</array>\n"
 			data_file += "			<key>UISupportedInterfaceOrientations~ipad</key>\n"
 			data_file += "			<array>\n"
-			data_file += "				<string>UIInterfaceOrientationPortrait</string>\n"
-			data_file += "				<string>UIInterfaceOrientationPortraitUpsideDown</string>\n"
-			data_file += "				<string>UIInterfaceOrientationLandscapeLeft</string>\n"
-			data_file += "				<string>UIInterfaceOrientationLandscapeRight</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationPortrait</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationPortraitUpsideDown</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationLandscapeLeft</string>\n"
+			data_file += "				<etk/String.hpp>UIInterfaceOrientationLandscapeRight</string>\n"
 			data_file += "			</array>\n"
 			data_file += "    </dict>\n"
 			data_file += "</plist>\n"
@@ -352,12 +352,12 @@ class Target(target.Target):
 				tmpFile.write("<plist version=\"1.0\">\n")
 				tmpFile.write("    <dict>\n")
 				tmpFile.write("        <key>application-identifier</key>\n")
-				tmpFile.write("        <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
+				tmpFile.write("        <etk/String.hpp>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
 				tmpFile.write("        <key>get-task-allow</key>\n")
 				tmpFile.write("        <true/>\n")
 				tmpFile.write("        <key>keychain-access-groups</key>\n")
 				tmpFile.write("        <array>\n")
-				tmpFile.write("            <string>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
+				tmpFile.write("            <etk/String.hpp>" + pkg_properties["APPLE_APPLICATION_IOS_ID"] + "." + pkg_properties["COMPAGNY_TYPE"] + "." + pkg_properties["COMPAGNY_NAME2"] + "." + pkg_name + "</string>\n")
 				tmpFile.write("        </array>\n")
 				tmpFile.write("    </dict>\n")
 				tmpFile.write("</plist>\n")

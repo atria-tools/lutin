@@ -22,6 +22,7 @@ class System(system.System):
 		self.set_valid(True)
 		if env.get_isolate_system() == False:
 			# We must have it ... all time
+			self.add_flag("c-remove", "-nostdinc")
 			pass
 		else:
 			# grep "This file is part of the GNU C Library" /usr/include/*
@@ -149,7 +150,7 @@ class System(system.System):
 			self.add_header_file([
 			    "/usr/include/linux/*",
 			    ],
-			    destination_path="linux",
+			    destination_path="",
 			    recursive=True)
 			self.add_header_file([
 			    "/usr/include/asm/*",
@@ -171,5 +172,11 @@ class System(system.System):
 			    ],
 			    destination_path="net",
 			    recursive=True)
+			# remove dependency of libc to lib std c++ when compile with g++
+			#self.add_header_file([
+			#    "stdarg.h",
+			#    ],
+			#    destination_path="",
+			#    recursive=True)
 			self.add_flag("link", "-B/usr/lib")
 

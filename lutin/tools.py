@@ -71,7 +71,7 @@ def file_read_data(path, binary=False):
 	file.close()
 	return data_file
 
-def version_to_string(version):
+def version_toString(version):
 	version_ID = ""
 	for id in version:
 		if len(version_ID) != 0:
