@@ -23,5 +23,14 @@ class System(system.System):
 		self.set_valid(True)
 		# todo : create a searcher of the presence of the library:
 		self.add_flag("link-lib", "m")
+		self.add_depend([
+		    'c'
+		    ])
+		if env.get_isolate_system() == True:
+			self.add_header_file([
+			    "/usr/include/math.h"
+			    ],
+			    clip_path="/usr/include",
+			    recursive=False)
 
 

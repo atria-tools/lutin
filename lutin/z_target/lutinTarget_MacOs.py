@@ -14,6 +14,7 @@ from lutin import tools
 from lutin import host
 from lutin import multiprocess
 from lutin import depend
+from lutin import env
 import os
 import stat
 import shutil
@@ -48,6 +49,8 @@ class Target(target.Target):
 		self.pkg_path_bin = "MacOS"
 		self.pkg_path_lib = "lib"
 		self.pkg_path_license = "license"
+		if env.get_isolate_system() == True:
+			self.sysroot = "--sysroot=/aDirectoryThatDoesNotExist/"
 		
 		self.add_flag("link-lib", [
 		    "dl"

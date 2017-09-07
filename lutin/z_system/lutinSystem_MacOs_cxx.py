@@ -12,6 +12,7 @@ from lutin import debug
 from lutin import system
 from lutin import tools
 from lutin import env
+from lutin import multiprocess
 import os
 
 class System(system.System):
@@ -22,8 +23,24 @@ class System(system.System):
 		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend("c")
-		self.add_flag("c++","-D__STDCPP_LLVM__")
-		self.add_flag("c++-remove","-nostdlib")
-		self.add_flag("need-libstdc++", True)
+		self.add_flag("c++", "-D__STDCPP_LLVM__")
+		if env.get_isolate_system() == False:
+			self.add_flag("c++-remove", "-nostdlib")
+			self.add_flag("need-libstdc++", True)
+		else:
+			self.add_flag("link-lib", "stdc++")
+			compilator_gcc = "g++"
+			if target.config["compilator-version"] != "":
+				compilator_gcc = compilator_gcc + "-" + target.config["compilator-version"]
+			
+			#get g++ compilation version :
+			version_cpp = multiprocess.run_command_direct(compilator_gcc + " -dumpversion");
+			if version_cpp == False:
+				debug.error("Can not get the g++ version ...")
+			
+			self.add_header_file([
+			    "/usr/include/c++/" + version_cpp + "/*"
+			    ],
+			    recursive=True)
 
 

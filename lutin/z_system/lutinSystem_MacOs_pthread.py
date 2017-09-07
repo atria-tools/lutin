@@ -31,14 +31,22 @@ class System(system.System):
 		self.add_depend([
 		    'c'
 		    ])
-		"""
 		if env.get_isolate_system() == True:
 			self.add_header_file([
 			    "/usr/include/sched.h",
 			    "/usr/include/pthread.h"
 			    ],
 			    clip_path="/usr/include/")
-		"""
+			self.add_header_file([
+			    "/usr/include/pthread/*",
+			    ],
+			    destination_path="pthread",
+			    recursive=True)
+			self.add_header_file([
+			    "/usr/include/pthread/*",
+			    ],
+			    destination_path="",
+			    recursive=True)
 	
 
 
