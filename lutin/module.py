@@ -575,7 +575,7 @@ class Module:
 		# ----------------------------------------------------
 		# -- Generic library help                           --
 		# ----------------------------------------------------
-		package_version_string = tools.version_toString(self._package_prop["VERSION"]);
+		package_version_string = tools.version_to_string(self._package_prop["VERSION"]);
 		if self._type == 'DATA':
 			debug.print_element("Data", self._name, "-", package_version_string)
 		elif self._type == 'PREBUILD':

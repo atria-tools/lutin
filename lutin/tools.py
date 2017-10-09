@@ -61,6 +61,7 @@ def file_size(path):
 	return statinfo.st_size
 
 def file_read_data(path, binary=False):
+	debug.verbose("path= " + path)
 	if not os.path.isfile(path):
 		return ""
 	if binary == True:
@@ -71,7 +72,7 @@ def file_read_data(path, binary=False):
 	file.close()
 	return data_file
 
-def version_toString(version):
+def version_to_string(version):
 	version_ID = ""
 	for id in version:
 		if len(version_ID) != 0:
