@@ -40,5 +40,7 @@ class System(system.System):
 			    ],
 			    destination_path="",
 			    recursive=True)
+		else:
+			self.add_path("/usr/include/SDL/")
 
 

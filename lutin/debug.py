@@ -26,6 +26,37 @@ color_cyan   = ""
 
 debug_lock = threading.Lock()
 
+# in python2 we have many time error with the utf-8 char, then to prevent error in utf8 print we jest removint its.
+def local_print(value):
+	for elem in value.split("\n"):
+		to_print = ""
+		for val in elem:
+			if ord(val) > 128:
+				to_print += "?"
+			else:
+				to_print += val
+		print(to_print)
+
+def local_print_2(my_string):
+	try:
+		print(my_string2)
+	except UnicodeEncodeError:
+		for elem in my_string2.split("\n"):
+			try:
+				print(elem)
+			except UnicodeEncodeError:
+				to_print = ""
+				for val in elem:
+					if ord(val) > 128:
+						to_print += "?"
+					else:
+						to_print += val
+				print(to_print)
+				#print("****************************\n");
+				#print(elem.encode('utf-8'))
+				#print("****************************\n");
+		#print("[LUTIN ERROR] can not transform into utf8")
+		#print(my_string.encode('utf-8'))
 ##
 ## @brief Set log level of the console log system
 ## @param[in] id (int) Value of the log level:
@@ -40,7 +71,7 @@ debug_lock = threading.Lock()
 def set_level(id):
 	global debug_level
 	debug_level = id
-	#print "SetDebug level at " + str(debug_level)
+	#local_print("SetDebug level at " + str(debug_level))
 
 ##
 ## @brief Get the current debug leval
@@ -103,7 +134,7 @@ def extreme_verbose(input, force=False):
 	if    debug_level >= 6 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_blue + input + color_default)
+		local_print(color_blue + input + color_default)
 		debug_lock.release()
 
 ##
@@ -117,7 +148,7 @@ def verbose(input, force=False):
 	if    debug_level >= 5 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_blue + input + color_default)
+		local_print(color_blue + input + color_default)
 		debug_lock.release()
 
 ##
@@ -131,7 +162,7 @@ def debug(input, force=False):
 	if    debug_level >= 4 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_green + input + color_default)
+		local_print(color_green + input + color_default)
 		debug_lock.release()
 
 ##
@@ -145,7 +176,7 @@ def info(input, force=False):
 	if    debug_level >= 3 \
 	   or force == True:
 		debug_lock.acquire()
-		print(input + color_default)
+		local_print(input + color_default)
 		debug_lock.release()
 
 ##
@@ -159,7 +190,7 @@ def warning(input, force=False):
 	if    debug_level >= 2 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_purple + "[WARNING] " + input + color_default)
+		local_print(color_purple + "[WARNING] " + input + color_default)
 		debug_lock.release()
 
 ##
@@ -173,7 +204,7 @@ def todo(input, force=False):
 	if    debug_level >= 3 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_purple + "[TODO] " + input + color_default)
+		local_print(color_purple + "[TODO] " + input + color_default)
 		debug_lock.release()
 
 ##
@@ -189,7 +220,7 @@ def error(input, thread_id=-1, force=False, crash=True):
 	if    debug_level >= 1 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_red + "[ERROR] " + input + color_default)
+		local_print(color_red + "[ERROR] " + input + color_default)
 		debug_lock.release()
 	if crash == True:
 		from . import multiprocess
@@ -215,7 +246,7 @@ def print_element(type, lib, dir, name, force=False):
 	if    debug_level >= 3 \
 	   or force == True:
 		debug_lock.acquire()
-		print(color_cyan + type + color_default + " : " + color_yellow + lib + color_default + " " + dir + " " + color_blue + name + color_default)
+		local_print(color_cyan + type + color_default + " : " + color_yellow + lib + color_default + " " + dir + " " + color_blue + name + color_default)
 		debug_lock.release()
 
 ##
@@ -236,7 +267,7 @@ def print_compilator(my_string):
 		my_string = my_string.replace('-COLOROUT-', color_default)
 	
 	debug_lock.acquire()
-	print(my_string)
+	local_print(my_string);
 	debug_lock.release()
 
 ##
