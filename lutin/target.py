@@ -95,6 +95,8 @@ class Target:
 			self.add_flag("c++", "-Wno-undefined-var-template")
 		self.add_flag("c", "-nodefaultlibs")
 		self.add_flag("c++", "-nostdlib")
+		# this disable the need to have the __cxa_guard_release
+		self.add_flag("c++", "-fno-threadsafe-statics")
 		#self.add_flag("c", "-nostdinc") #ignores standard C include directories
 		#self.add_flag("c++", "-nostdinc++") #ignores standard C++ include directories
 		self.add_flag("ar", 'rcs')
