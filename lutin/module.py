@@ -1021,13 +1021,13 @@ class Module:
 				if     len(elem) > 1 \
 				   and elem[0] == '/':
 					# unix case
-					debug.warning(" add_path(" + list + ")")
+					debug.warning(" add_path(" + str(list) + ")")
 					debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
 					add_list.append(elem)
 				elif     len(elem) > 2 \
 				     and elem[1] == ':':
 					# windows case :
-					debug.warning(" add_path(" + list + ")")
+					debug.warning(" add_path(" + str(list) + ")")
 					debug.warning("[" + self._name + "] Not permited to add a path that start in '" + elem[0] + ":' directory (only relative path) (compatibility until 2.x)")
 					add_list.append(elem)
 				if elem == ".":
@@ -1038,13 +1038,13 @@ class Module:
 			if     len(list) > 1 \
 			   and list[0] == '/':
 				# unix case
-				debug.warning(" add_path(" + list + ")")
+				debug.warning(" add_path(" + str(list) + ")")
 				debug.warning("[" + self._name + "] Not permited to add a path that start in / directory (only relative path) (compatibility until 2.x)")
 				add_list = list
 			elif     len(list) > 2 \
 			     and list[1] == ':':
 				# windows case :
-				debug.warning(" add_path(" + list + ")")
+				debug.warning(" add_path(" + str(list) + ")")
 				debug.warning("[" + self._name + "] Not permited to add a path that start in '" + list[0] + ":' directory (only relative path) (compatibility until 2.x)")
 				add_list = list
 			elif list == ".":
