@@ -86,8 +86,12 @@ def link(file, binary, target, depancy, flags, name, basic_path, static=False):
 			lib_name = elem[:-len(target.suffix_lib_static)] + target.suffix_lib_dynamic
 			if lib_name not in depancy.src['dynamic']:
 				list_static.append(elem)
+	# set ccache interface:
+	compilator_ccache = ""
+	if env.get_ccache() == True:
+		compilator_ccache = "ccache"
 	#create command Line
-	cmd = []
+	cmd = [compilator_ccache]
 	# a specific case to not depend on the libstdc++ automaticly added by the G++ or clang++ compilator ==> then need to compile with GCC or CLANG if use libcxx from llvm or other ...
 	if     "need-libstdc++" in depancy.flags \
 	   and depancy.flags["need-libstdc++"] == True:

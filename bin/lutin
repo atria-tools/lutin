@@ -38,6 +38,7 @@ myArgs.add("s", "force-strip", desc="Force the stripping of the compile elements
 myArgs.add("o", "force-optimisation", desc="Force optimisation of the build")
 myArgs.add("w", "warning", desc="Store warning in a file build file")
 myArgs.add("i", "isolate-system", desc="Isolate system build (copy header of c and c++ system lib to not include unneeded external libs) EXPERIMENTAL (archlinux)")
+myArgs.add("K", "ccache", desc="Enable the ccache interface")
 
 myArgs.add_section("properties", "keep in the sequency of the cible")
 myArgs.add("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'")
@@ -216,6 +217,13 @@ def parseGenericArg(argument, active):
 		if active == True:
 			env.set_parse_depth(int(argument.get_arg()))
 		return True
+	elif argument.get_option_name()=="ccache":
+		if active == True:
+			if check_boolean(argument.get_arg()) == True:
+				env.set_ccache(True)
+			else:
+				env.set_ccache(False)
+		return True
 	elif argument.get_option_name() == "verbose":
 		if active == True:
 			debug.set_level(int(argument.get_arg()))
@@ -290,6 +298,11 @@ if os.path.isfile(config_file) == True:
 		data = configuration_file.get_parsing_depth()
 		debug.debug(" get default config 'get_parsing_depth' val='" + str(data) + "'")
 		parseGenericArg(arguments.ArgElement("depth", str(data)), True)
+	
+	if "get_ccache" in dir(configuration_file):
+		data = configuration_file.get_ccache()
+		debug.debug(" get default config 'get_ccache' val='" + str(data) + "'")
+		parseGenericArg(arguments.ArgElement("ccache", str(data)), True)
 	
 	if "get_default_jobs" in dir(configuration_file):
 		data = configuration_file.get_default_jobs()

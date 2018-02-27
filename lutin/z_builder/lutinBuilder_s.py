@@ -14,6 +14,7 @@
 from lutin import multiprocess
 from lutin import tools
 from lutin import depend
+from lutin import env
 
 ##
 ## Initialize the builder, if needed ... to get dependency between builder (for example)
@@ -60,8 +61,13 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	file_depend = target.get_full_dependency(name, basic_path, file)
 	file_warning = target.get_full_name_warning(name, basic_path, file)
 	
+	# set ccache interface:
+	compilator_ccache = ""
+	if env.get_ccache() == True:
+		compilator_ccache = "ccache"
 	# create the command line befor requesting start:
 	cmd = [
+		compilator_ccache,
 		target.cc,
 		"-o", file_dst,
 		target.arch,

@@ -16,6 +16,7 @@ from lutin import tools
 from lutin import builder
 from lutin import debug
 from lutin import depend
+from lutin import env
 
 local_ref_on_builder_cpp = None
 
@@ -65,8 +66,13 @@ def compile(file, binary, target, depancy, flags, path, name, basic_path, module
 	file_dst = target.get_full_name_destination(name, basic_path, file, get_output_type())
 	file_depend = target.get_full_dependency(name, basic_path, file)
 	file_warning = target.get_full_name_warning(name, basic_path, file)
+	# set ccache interface:
+	compilator_ccache = ""
+	if env.get_ccache() == True:
+		compilator_ccache = "ccache"
 	# create the command line befor requesting start:
 	cmd = [
+		compilator_ccache,
 		target.xx,
 		"-o", file_dst,
 		target.arch,

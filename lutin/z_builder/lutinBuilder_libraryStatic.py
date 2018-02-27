@@ -68,7 +68,12 @@ def link(file, binary, target, depancy, flags, name, basic_path):
 	debug.extreme_verbose("file_cmd     = " + file_cmd)
 	debug.extreme_verbose("file_warning = " + file_warning)
 	
+	# set ccache interface:
+	compilator_ccache = ""
+	if env.get_ccache() == True:
+		compilator_ccache = "ccache"
 	cmd = [
+		compilator_ccache,
 		target.ar
 		]
 	try:
