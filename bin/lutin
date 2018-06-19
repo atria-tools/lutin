@@ -168,6 +168,7 @@ def usage(full=False):
 	print("	ex multiple platform : " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
 	print("	ex complex arguments : " + sys.argv[0] + " -cclang -mdebug zeus-package-base?build?run%zeus-launcher:--srv=user:--elog-level=5")
 	print("	ex gcov: " + sys.argv[0] + " -cgcc --gcov -mdebug etk-test?build?run etk?gcov")
+	print("	ex gcov with output: " + sys.argv[0] + " -cgcc --gcov -mdebug etk-test?build?run etk?gcov:output")
 	exit(0)
 
 def check_boolean(value):
