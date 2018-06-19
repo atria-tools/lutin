@@ -163,8 +163,11 @@ def usage(full=False):
 				print("				maintainers:")
 				for elem in mod["maintainer"]:
 					print("					" + str(elem))
-	print("	ex: " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
-	print("	ex: " + sys.argv[0] + " -cclang -mdebug zeus-package-base?build?run%zeus-launcher:--srv=user:--elog-level=5")
+	print("	ex simple 1: " + sys.argv[0])
+	print("	ex simple 2: " + sys.argv[0] + " -t Windows")
+	print("	ex multiple platform : " + sys.argv[0] + " all --target=Android all -t Windows -m debug all")
+	print("	ex complex arguments : " + sys.argv[0] + " -cclang -mdebug zeus-package-base?build?run%zeus-launcher:--srv=user:--elog-level=5")
+	print("	ex gcov: " + sys.argv[0] + " -cgcc --gcov -mdebug etk-test?build?run etk?gcov")
 	exit(0)
 
 def check_boolean(value):
