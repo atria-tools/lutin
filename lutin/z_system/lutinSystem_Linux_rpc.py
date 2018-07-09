@@ -25,7 +25,7 @@ class System(system.System):
 		    'c'
 		    ])
 		# todo : create a searcher of the presence of the library:
-		self.add_flag("link-lib", "rpcsvc")
+		#self.add_flag("link-lib", "rpcsvc")
 		if env.get_isolate_system() == True:
 			self.add_header_file([
 			    "/usr/include/rpc/*"
