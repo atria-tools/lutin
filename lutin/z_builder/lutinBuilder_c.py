@@ -146,21 +146,31 @@ def get_version_compilation_flags(flags, dependency_flags):
 		is_gnu = default_version_gnu
 	
 	version = max(version_local, dependency_version)
-	if version == 2011:
+	if version == 2018:
+		if is_gnu ==True:
+			out = ["-std=gnu18", "-D__C_VERSION__=2018"]
+		else:
+			out = ["-std=c18", "-D__C_VERSION__=2018"]
+	elif version == 2017:
+		if is_gnu ==True:
+			out = ["-std=gnu17", "-D__C_VERSION__=2017"]
+		else:
+			out = ["-std=c17", "-D__C_VERSION__=2017"]
+	elif version == 2011:
 		if is_gnu ==True:
 			out = ["-std=gnu11", "-D__C_VERSION__=2011"]
 		else:
-			out = ["-std=c11", "-D__C_VERSION__=1989"]
+			out = ["-std=c11", "-D__C_VERSION__=2011"]
 	elif version == 1999:
 		if is_gnu ==True:
 			out = ["-std=gnu99", "-D__C_VERSION__=1999"]
 		else:
-			out = ["-std=c99", "-D__C_VERSION__=1989"]
+			out = ["-std=c99", "-D__C_VERSION__=1999"]
 	elif version == 1990:
 		if is_gnu ==True:
 			out = ["-std=gnu90", "-D__C_VERSION__=1990"]
 		else:
-			out = ["-std=c90", "-D__C_VERSION__=1989"]
+			out = ["-std=c90", "-D__C_VERSION__=1990"]
 	else:
 		if is_gnu ==True:
 			out = ["-std=gnu89", "-D__C_VERSION__=1989"]
