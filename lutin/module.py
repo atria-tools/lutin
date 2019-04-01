@@ -626,6 +626,7 @@ class Module:
 						self._files.append([os.path.join(generate_path, elem_generate["filename"]), elem_generate["filename"]])
 				else:
 					# add file to compile
+					debug.warning("Add file to build : " + os.path.join(generate_path, elem_generate["filename"]) )
 					self.add_src_file(os.path.join(generate_path, elem_generate["filename"]))
 		if have_only_generate_file == True:
 			self._add_path(generate_path)
@@ -1399,7 +1400,7 @@ class Module:
 		
 		self._print_list('depends',self._depends)
 		self._print_list('depends_optionnal', self._depends_optionnal)
-		print('    action count=' + str(self._actions))
+		print('    action count=' + str(len(self._actions)) + str(self._actions))
 		
 		for element in self._flags["local"]:
 			value = self._flags["local"][element]

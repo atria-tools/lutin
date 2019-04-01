@@ -283,6 +283,10 @@ def exist(lib_name, list_target_name, target) :
 					if "System" in dir(the_system):
 						data["system"] = the_system.System(target)
 						data["exist"] = data["system"].get_valid()
+						"""
+						if data["exist"] == False:
+							debug.warning("Can not Import: '" + data["name"] + "' ==> disabled")
+						"""
 					else:
 						debug.warning("Not find: '" + data["name"] + "' ==> get exception")
 				return data["exist"]

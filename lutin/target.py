@@ -727,8 +727,11 @@ class Target:
 					except AttributeError:
 						debug.error("target have no 'un_install_package' instruction")
 				elif action_name[:3] == "run":
-					if mod.get_type() != "BINARY":
+					"""
+					if     mod.get_type() != "BINARY" \
+					   and mod.get_type() != "PACKAGE":
 						debug.error("Can not run other than 'BINARY' ... pakage='" + mod.get_type() + "' for module='" + module_name + "'")
+					"""
 					bin_name = None
 					if len(action_name) > 3:
 						if action_name[3] == '%':
