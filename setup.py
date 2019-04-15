@@ -44,6 +44,11 @@ setup(name='lutin',
 
 #To developp: sudo ./setup.py install
 #             sudo ./setup.py develop
-#TO register all in pip: ./setup.py register sdist upload
 #pylint test: pylint2 --rcfile=pylintRcFile.txt lutin/module.py
+
+#TO register all in pip: use external tools:
+#  pip install twine
+#  # create the archive
+#  ./setup.py sdist
+#  twine upload dist/*
 
