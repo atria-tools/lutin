@@ -10,7 +10,7 @@
 import sys
 import copy
 # Local import
-from . import debug
+from realog import debug
 
 
 def append_to_list(list_out, elem):

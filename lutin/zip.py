@@ -12,7 +12,7 @@ import platform
 import os
 import zipfile
 # Local import
-from . import debug
+from realog import debug
 from . import tools
 
 

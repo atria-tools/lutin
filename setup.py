@@ -31,7 +31,7 @@ setup(name='lutin',
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Programming Language :: Python',
-        'Topic :: Software Development :: Compilers',
+        'Topic :: Software Development :: Build Tools',
       ],
       keywords='builder c++ c android ios macos makefile cmake',
       scripts=['bin/lutin'],
@@ -39,6 +39,10 @@ setup(name='lutin',
       #data_file=[
       #    ('/etc/bash_completion.d', ['bash-autocompletion/lutin']),
       #],
+      install_requires=[
+          'realog',
+          'death',
+      ],
       include_package_data = True,
       zip_safe=False)
 

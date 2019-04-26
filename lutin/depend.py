@@ -9,7 +9,7 @@
 ##
 import os
 # Local import
-from . import debug
+from realog import debug
 from . import env
 
 def _create_directory_of_file(file):

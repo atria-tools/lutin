@@ -14,7 +14,7 @@ import errno
 import fnmatch
 import stat
 # Local import
-from . import debug
+from realog import debug
 from . import depend
 from . import env
 

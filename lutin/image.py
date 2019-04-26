@@ -10,7 +10,7 @@
 import platform
 import os
 # Local import
-from . import debug
+from realog import debug
 from . import tools
 from . import multiprocess
 from . import depend

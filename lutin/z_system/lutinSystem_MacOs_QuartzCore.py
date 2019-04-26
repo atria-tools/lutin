@@ -8,7 +8,7 @@
 ## @license MPL v2.0 (see license file)
 ##
 
-from lutin import debug
+from realog import debug
 from lutin import system
 from lutin import tools
 from lutin import env

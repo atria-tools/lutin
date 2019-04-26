@@ -14,7 +14,7 @@ import inspect
 import fnmatch
 import datetime
 # Local import
-from . import debug
+from realog import debug
 from . import heritage
 from . import tools
 from . import module

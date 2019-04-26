@@ -16,7 +16,7 @@ import fnmatch
 # Local import
 from . import host
 from . import tools
-from . import debug
+from realog import debug
 from . import heritage
 from . import builder
 from . import multiprocess

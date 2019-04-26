@@ -12,8 +12,8 @@
 import sys
 import os
 import copy
+from realog import debug as debug
 import lutin
-import lutin.debug as debug
 import lutin.arg as arguments
 import lutin.host as host
 import lutin.module as module

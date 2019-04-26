@@ -13,7 +13,7 @@
 ##
 from lutin import multiprocess
 from lutin import tools
-from lutin import debug
+from realog import debug
 from lutin import depend
 from lutin import env
 

@@ -17,7 +17,7 @@ from . import builder
 from . import system
 from . import host
 from . import tools
-from . import debug
+from realog import debug
 from . import module
 from . import env
 is_init = False

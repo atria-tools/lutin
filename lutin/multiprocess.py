@@ -20,7 +20,7 @@ import os
 import subprocess
 import shlex
 # Local import
-from . import debug
+from realog import debug
 from . import tools
 from . import env
 from . import depend
@@ -211,6 +211,10 @@ class myThread(threading.Thread):
 def set_error_occured():
 	global exit_flag
 	exit_flag = True
+
+# set the debug system call us to stop threading
+debug.set_callback_error(set_error_occured)
+
 
 def set_core_number(number_of_core):
 	global processor_availlable
