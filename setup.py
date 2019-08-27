@@ -9,14 +9,25 @@
 ##
 
 from setuptools import setup
+import os
 
 def readme():
 	with open('README.rst') as f:
 		return f.read()
 
+def read_version_file():
+	if not os.path.isfile("version.txt"):
+		return ""
+	file = open("version.txt", "r")
+	data_file = file.read()
+	file.close()
+	if len(data_file) > 4 and data_file[-4:] == "-dev":
+		data_file = data_file[:-4]
+	return data_file
+
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 setup(name='lutin',
-      version='2.5.0',
+      version=read_version_file(),
       description='Lutin generic builder (might replace makefile, CMake ...)',
       long_description=readme(),
       url='http://github.com/HeeroYui/lutin',
