@@ -1,2 +1,3 @@
 include README.rst
 include bash-autocompletion/lutin
+include version.txt
