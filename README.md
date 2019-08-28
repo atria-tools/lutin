@@ -4,23 +4,7 @@ Lutin
 `lutin` is a generic builder and package maker is a FREE software tool.
 
 
-.. image:: https://badge.fury.io/py/lutin.png
-    :target: https://pypi.python.org/pypi/lutin
-
-Release (master)
-----------------
-
-.. image:: https://travis-ci.org/HeeroYui/lutin.svg?branch=master
-    :target: https://travis-ci.org/HeeroYui/lutin
-
-
-
-Developement (dev)
-------------------
-
-.. image:: https://travis-ci.org/HeeroYui/lutin.svg?branch=dev
-    :target: https://travis-ci.org/HeeroYui/lutin
-
+[![Badge](https://badge.fury.io/py/lutin.png](https://pypi.python.org/pypi/lutin)
 
 Instructions
 ------------
@@ -51,21 +35,24 @@ Installation
 Requirements: ``Python >= 2.7`` and ``pip``
 
 Just run:
-
-  pip install lutin
+```
+pip install lutin
+```
 
 Install pip on debian/ubuntu:
-
-  sudo apt-get install pip
+```
+sudo apt-get install pip
+```
 
 Install pip on ARCH-linux:
-
-  sudo pacman -S pip
+```
+sudo pacman -S pip
+```
 
 Install pip on MacOs:
-
-  sudo easy_install pip
-
+```
+sudo easy_install pip
+```
 
 License (MPL v2.0)
 ---------------------

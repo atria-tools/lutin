@@ -45,6 +45,7 @@ setup(name='lutin',
         'Programming Language :: Python',
         'Topic :: Software Development :: Build Tools',
       ],
+      long_description_content_type="text/markdown",
       keywords='builder c++ c android ios macos makefile cmake',
       scripts=['bin/lutin'],
       # Does not work on MacOs
