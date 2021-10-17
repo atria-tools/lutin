@@ -203,38 +203,45 @@ __start_system_name="System_"
 ##
 def import_path(path_list):
 	global __system_list
+	gld_base = env.get_gld_build_system_base_name()
 	global_base = env.get_build_system_base_name()
 	debug.debug("SYSTEM: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
 		filename = os.path.basename(elem)
-		# Remove .py at the end:
-		filename = filename[:-3]
 		# Remove global base name:
-		filename = filename[len(global_base):]
-		# Check if it start with the local patern:
-		if filename[:len(__start_system_name)] != __start_system_name:
-			debug.extreme_verbose("SYSTEM:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+		if filename[:len(gld_base)] == gld_base:
+			filename = filename[len(gld_base):-5]
+			# Check if it start with the local patern:
+			if filename[:len(__start_system_name)] != __start_system_name:
+				debug.extreme_verbose("SYSTEM:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
 			continue
-		# Remove local patern
-		system_name = filename[len(__start_system_name):]
-		system_type, system_name = system_name.split('_')
-		debug.verbose("SYSTEM:     Integrate: '" + system_type + "':'" + system_name + "' from '" + elem + "'")
-		if system_type in __system_list:
-			__system_list[system_type].append({"name":system_name,
-			                                   "path":elem,
-			                                   "system":None,
-			                                   "loaded":False,
-			                                   "exist":False,
-			                                   "module":None})
-		else:
-			__system_list[system_type] = [{"name":system_name,
-			                               "path":elem,
-			                               "system":None,
-			                               "loaded":False,
-			                               "exist":False,
-			                               "module":None}]
+		elif filename[:len(global_base)] == global_base:
+			filename = filename[len(global_base):-3]
+			# Check if it start with the local patern:
+			if filename[:len(__start_system_name)] != __start_system_name:
+				debug.extreme_verbose("SYSTEM:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
+			# Remove local patern
+			system_name = filename[len(__start_system_name):]
+			system_type, system_name = system_name.split('_')
+			debug.verbose("SYSTEM:     Integrate: '" + system_type + "':'" + system_name + "' from '" + elem + "'")
+			if system_type in __system_list:
+				__system_list[system_type].append({"name":system_name,
+				                                   "path":elem,
+				                                   "system":None,
+				                                   "loaded":False,
+				                                   "exist":False,
+				                                   "module":None})
+			else:
+				__system_list[system_type] = [{"name":system_name,
+				                               "path":elem,
+				                               "system":None,
+				                               "loaded":False,
+				                               "exist":False,
+				                               "module":None}]
 	debug.verbose("New list system: ")
 	for elem in __system_list:
 		debug.verbose("    " + str(elem))

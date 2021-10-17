@@ -28,6 +28,7 @@ __start_macro_name="Macro_"
 ##
 def import_path(path_list):
 	global __macro_list
+	gld_base = env.get_gld_build_system_base_name()
 	global_base = env.get_build_system_base_name()
 	debug.debug("TARGET: Init with Files list:")
 	for elem in path_list:
@@ -37,15 +38,23 @@ def import_path(path_list):
 		# Remove .py at the end:
 		filename = filename[:-3]
 		# Remove global base name:
-		filename = filename[len(global_base):]
-		# Check if it start with the local patern:
-		if filename[:len(__start_macro_name)] != __start_macro_name:
-			debug.extreme_verbose("MACRO:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+		if filename[:len(gld_base)] == gld_base:
+			filename = filename[len(gld_base):]
+			# Check if it start with the local patern:
+			if filename[:len(__start_macro_name)] != __start_macro_name:
+				debug.extreme_verbose("MACRO:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
 			continue
-		# Remove local patern
-		target_name = filename[len(__start_macro_name):]
-		debug.verbose("MACRO:     Integrate: '" + target_name + "' from '" + elem + "'")
-		__macro_list.append([target_name, elem])
+		elif filename[:len(global_base)] == global_base:
+			filename = filename[len(global_base):]
+			# Check if it start with the local patern:
+			if filename[:len(__start_macro_name)] != __start_macro_name:
+				debug.extreme_verbose("MACRO:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
+			# Remove local patern
+			target_name = filename[len(__start_macro_name):]
+			debug.verbose("MACRO:     Integrate: '" + target_name + "' from '" + elem + "'")
+			__macro_list.append([target_name, elem])
 	debug.verbose("New list MACRO: ")
 	for elem in __macro_list:
 		debug.verbose("    " + str(elem[0]))

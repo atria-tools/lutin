@@ -57,13 +57,22 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 	if path in exclude_path:
 		debug.debug("find '" + str(path) + "' in exclude_path=" + str(exclude_path))
 		return []
-	# filter elements:
+	# filter elements for lutin:
 	tmp_list_lutin_file = filter_name_and_file(path, list_files, base_name + "*.py")
 	debug.verbose("lutin files: " + str(path) + " : " + str(tmp_list_lutin_file))
 	# Import the module:
 	for filename in tmp_list_lutin_file:
 		out.append(os.path.join(path, filename))
 		debug.extreme_verbose("     Find a file : '" + str(out[-1]) + "'")
+	
+	# filter elements for GLD:
+	tmp_list_gld_file = filter_name_and_file(path, list_files, "GLD_*.json")
+	debug.verbose("GLD files: " + str(path) + " : " + str(tmp_list_lutin_file))
+	# Import the module:
+	for filename in tmp_list_gld_file:
+		out.append(os.path.join(path, filename))
+		debug.extreme_verbose("     Find a file : '" + str(out[-1]) + "'")
+	
 	need_parse_sub_folder = True
 	rm_value = -1
 	# check if we need to parse sub_folder
@@ -109,7 +118,6 @@ def init():
 	global is_init;
 	if is_init == True:
 		return
-	debug.verbose("Use Make as a make stadard")
 	sys.path.append(tools.get_run_path())
 	# create the list of basic folder:
 	basic_folder_list = []

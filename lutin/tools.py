@@ -417,6 +417,9 @@ def get_version_from_file_or_direct(path_module, filename_or_version):
 	if type(filename_or_version) == list:
 		return filename_or_version
 	# this use a version file
+	if filename_or_version[:7] == "file://":
+		filename_or_version = filename_or_version[7:];
+	# this use a version file
 	file_data = file_read_data(os.path.join(path_module, filename_or_version))
 	if len(file_data) == 0:
 		debug.warning("not enought data in the file version size=0 " + path_module + " / " + filename_or_version)
@@ -455,6 +458,8 @@ def get_maintainer_from_file_or_direct(path_module, filename_or_author):
 	if type(filename_or_author) == list:
 		return filename_or_author
 	# this use a version file
+	if filename_or_author[:7] == "file://":
+		filename_or_author = filename_or_author[7:];
 	file_data = file_read_data(os.path.join(path_module, filename_or_author))
 	if len(file_data) == 0:
 		debug.warning("not enought data in the file author size=0 " + path_module + " / " + filename_or_author)

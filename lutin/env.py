@@ -86,6 +86,12 @@ def get_build_system_base_name():
 	global build_system_base_name
 	return build_system_base_name
 
+gld_build_system_base_name = "GLD"
+
+def get_gld_build_system_base_name():
+	global gld_build_system_base_name
+	return gld_build_system_base_name
+
 
 print_pretty_mode=False
 

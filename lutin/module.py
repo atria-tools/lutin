@@ -13,6 +13,7 @@ import os
 import copy
 import inspect
 import fnmatch
+import json
 # Local import
 from . import host
 from . import tools
@@ -23,6 +24,10 @@ from . import multiprocess
 from . import image
 from . import license
 from . import env
+from . import moduleGLD
+from warnings import catch_warnings
+from xmlrpc.client import boolean
+
 
 ##
 ## @brief Module class represent all system needed for a specific
@@ -57,15 +62,7 @@ class Module:
 		self._origin_file = file;
 		self._origin_path = tools.get_current_path(self._origin_file)
 		# type of the module:
-		if    module_type == 'BINARY' \
-		   or module_type == 'BINARY_SHARED' \
-		   or module_type == 'BINARY_STAND_ALONE' \
-		   or module_type == 'LIBRARY' \
-		   or module_type == 'LIBRARY_DYNAMIC' \
-		   or module_type == 'LIBRARY_STATIC' \
-		   or module_type == 'PACKAGE' \
-		   or module_type == 'PREBUILD' \
-		   or module_type == 'DATA':
+		if    module_type in moduleGLD.get_module_type_availlable():
 			self._type=module_type
 		else :
 			debug.error('for module "%s"' %module_name)
@@ -962,7 +959,9 @@ class Module:
 			debug.info("remove path : '" + pathbuild + "'")
 			tools.remove_path_and_sub_path(pathbuild)
 			return True
-		elif    self._type=='BINARY' \
+		elif    self._type == 'BINARY' \
+		     or self._type == 'BINARY_SHARED' \
+		     or self._type == 'BINARY_STAND_ALONE' \
 		     or self._type=='PACKAGE':
 			# remove path of the lib ... for this targer
 			pathbuild = target.get_build_path(self._name)
@@ -972,7 +971,7 @@ class Module:
 			debug.info("remove path : '" + pathStaging + "'")
 			tools.remove_path_and_sub_path(pathStaging)
 			return True
-		debug.error("Dit not know the element type ... (impossible case) type=" + self._type)
+		debug.error("Did not known the element type ... (impossible case) type=" + self._type)
 		return False
 	
 	##
@@ -1004,7 +1003,11 @@ class Module:
 	## @param[in] header_file ([string,...]) File to add in header if the dependecy if found.
 	## @return None
 	##
-	def add_optionnal_depend(self, module_name, compilation_flags=["", ""], export=False, src_file=[], header_file=[], compilation_flags_not_found=["", ""]):
+	def add_optionnal_depend(self, module_name, compilation_flags=None, export=False, src_file=[], header_file=[], compilation_flags_not_found=None):
+		if compilation_flags == None:
+			compilation_flags = ["", ""]
+		if compilation_flags_not_found == None:
+			compilation_flags_not_found = ["", ""]
 		tools.list_append_and_check(self._depends_optionnal, [module_name, compilation_flags, export, src_file, header_file, compilation_flags_not_found], True)
 	
 	##
@@ -1391,37 +1394,40 @@ class Module:
 	## @return None
 	##
 	def display(self):
-		print('-----------------------------------------------')
-		print(' module : "' + self._name + "'")
-		print('-----------------------------------------------')
-		print('    type:"' + str(self._type) + "'")
-		print('    file:"' + str(self._origin_file) + "'")
-		print('    path:"' + str(self._origin_path) + "'")
+		print('-----------------------------------------------');
+		print(' module : "' + self._name + "'");
+		print('-----------------------------------------------');
+		print('    type:"' + str(self._type) + "'");
+		print('    file:"' + str(self._origin_file) + "'");
+		print('    path:"' + str(self._origin_path) + "'");
+		if "LICENSE" in self._package_prop.keys(): 
+			print('    license:"' + str(self._package_prop["LICENSE"]) + "'");
 		
-		self._print_list('depends',self._depends)
-		self._print_list('depends_optionnal', self._depends_optionnal)
-		print('    action count=' + str(len(self._actions)) + str(self._actions))
+		self._print_list('depends',self._depends);
+		self._print_list('depends_optionnal', self._depends_optionnal);
+		print('    action count=' + str(len(self._actions)) + str(self._actions));
 		
 		for element in self._flags["local"]:
-			value = self._flags["local"][element]
-			self._print_list('flags "' + str(element) + '"', value)
+			value = self._flags["local"][element];
+			self._print_list('flags "' + str(element) + '"', value);
 		
 		for element in self._flags["export"]:
-			value = self._flags["export"][element]
-			self._print_list('flags export "' + str(element) + '"', value)
+			value = self._flags["export"][element];
+			self._print_list('flags export "' + str(element) + '"', value);
 		
-		self._print_list('src', self._src)
-		self._print_list('files', self._files)
-		self._print_list('paths', self._paths)
+		self._print_list('sources', self._src);
+		self._print_list('files', self._files);
+		self._print_list('headers', [ iii['src'] for iii in self._header]);
+		self._print_list('paths', self._paths);
 		for element in self._path["local"]:
-			value = self._path["local"][element]
-			self._print_list('local path "' + str(element) + '" ' + str(len(value)), value)
+			value = self._path["local"][element];
+			self._print_list('local path "' + str(element) + '" ' + str(len(value)), value);
 		
 		for element in self._path["export"]:
-			value = self._path["export"][element]
-			self._print_list('export path "' + str(element) + '" ' + str(len(value)), value)
+			value = self._path["export"][element];
+			self._print_list('export path "' + str(element) + '" ' + str(len(value)), value);
 		print('-----------------------------------------------')
-		return True
+		return True;
 	
 	def check_rules(self, type, rules):
 		if    (     (    type == 'LIBRARY' \
@@ -1688,24 +1694,36 @@ __start_module_name="_"
 ##
 def import_path(path_list):
 	global __module_list
+	gld_base = env.get_gld_build_system_base_name()
 	global_base = env.get_build_system_base_name()
 	debug.debug("MODULE: Init with Files list:")
 	for elem in path_list:
 		sys.path.append(os.path.dirname(elem))
 		# Get file name:
 		filename = os.path.basename(elem)
-		# Remove .py at the end:
-		filename = filename[:-3]
 		# Remove global base name:
-		filename = filename[len(global_base):]
-		# Check if it start with the local patern:
-		if filename[:len(__start_module_name)] != __start_module_name:
-			debug.extreme_verbose("MODULE:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
-			continue
-		# Remove local patern
-		module_name = filename[len(__start_module_name):]
-		debug.verbose("MODULE:     Integrate: '" + module_name + "' from '" + elem + "'")
-		__module_list.append([module_name, elem])
+		if filename[:len(gld_base)] == gld_base:
+			# Remove .json at the end:
+			filename = filename[len(gld_base):-5]
+			# Check if it start with the local patern:
+			if filename[:len(__start_module_name)] != __start_module_name:
+				debug.extreme_verbose("MODULE:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
+			# Remove local patern
+			module_name = filename[len(__start_module_name):]
+			debug.verbose("MODULE:     Integrate: '" + module_name + "' from '" + elem + "'")
+			__module_list.append([module_name, elem, False])
+		elif filename[:len(global_base)] == global_base:
+			# Remove .py at the end:
+			filename = filename[len(global_base):-3]
+			# Check if it start with the local patern:
+			if filename[:len(__start_module_name)] != __start_module_name:
+				debug.extreme_verbose("MODULE:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
+			# Remove local patern
+			module_name = filename[len(__start_module_name):]
+			debug.verbose("MODULE:     Integrate: '" + module_name + "' from '" + elem + "'")
+			__module_list.append([module_name, elem, True])
 	debug.verbose("New list module: ")
 	for elem in __module_list:
 		debug.verbose("    " + str(elem[0]))
@@ -1733,60 +1751,67 @@ def load_module(target, name):
 	global __module_list
 	for mod in __module_list:
 		if mod[0] == name:
-			sys.path.append(os.path.dirname(mod[1]))
-			debug.verbose("import module : '" + env.get_build_system_base_name() + __start_module_name + name + "'")
-			the_module_file = mod[1]
-			the_module = __import__(env.get_build_system_base_name() + __start_module_name + name)
-			# get basic module properties:
-			property = get_module_option(os.path.dirname(mod[1]), the_module, name)
-			# configure the module:
-			if "configure" in dir(the_module):
-				# create the module:
-				tmp_element = Module(the_module_file, name, property["type"])
-				# overwrite some package default property (if not set by user)
-				if property["compagny-type"] != None:
-					tmp_element._pkg_set_if_default("COMPAGNY_TYPE", property["compagny-type"])
-				if property["compagny-name"] != None:
-					tmp_element._pkg_set_if_default("COMPAGNY_NAME", property["compagny-name"])
-				if property["maintainer"] != None:
-					tmp_element._pkg_set_if_default("MAINTAINER", property["maintainer"])
-				if property["name"] != None:
-					tmp_element._pkg_set_if_default("NAME", property["name"])
-				if property["description"] != None:
-					tmp_element._pkg_set_if_default("DESCRIPTION", property["description"])
-				if property["license"] != None:
-					tmp_element._pkg_set_if_default("LICENSE", property["license"])
-				if property["version"] != None:
-					tmp_element._pkg_set_if_default("VERSION", property["version"])
-				# call user to configure it:
-				ret = the_module.configure(target, tmp_element)
-				if ret == False:
-					# the user request remove the capabilities of this module for this platform
-					tmp_element = None
+			if mod[2]== False:
+				# read GLD file
+				the_module = moduleGLD.load_module_from_GLD(target, mod[0], os.path.dirname(mod[1]), mod[1])
+				target.add_module(the_module)
+				return the_module;
 			else:
-				debug.warning(" no function 'create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
-				continue
-			"""
-			if property["type"] == "":
-				continue
-			# configure the module:
-			if "configure" in dir(the_module):
-				tmp_element = module.Module(the_module_file, name, property["type"], property)
-				ret = the_module.configure(target, tmp_element)
-				if ret == True:
-					debug.warning("configure done corectly : " + mod[0] + " from:'" + mod[1] + "'")
+				# Import internal element
+				sys.path.append(os.path.dirname(mod[1]))
+				debug.verbose("import module : '" + env.get_build_system_base_name() + __start_module_name + name + "'")
+				the_module_file = mod[1]
+				the_module = __import__(env.get_build_system_base_name() + __start_module_name + name)
+				# get basic module properties:
+				property = get_module_option(os.path.dirname(mod[1]), the_module, name)
+				# configure the module:
+				if "configure" in dir(the_module):
+					# create the module:
+					tmp_element = Module(the_module_file, name, property["type"])
+					# overwrite some package default property (if not set by user)
+					if property["compagny-type"] != None:
+						tmp_element._pkg_set_if_default("COMPAGNY_TYPE", property["compagny-type"])
+					if property["compagny-name"] != None:
+						tmp_element._pkg_set_if_default("COMPAGNY_NAME", property["compagny-name"])
+					if property["maintainer"] != None:
+						tmp_element._pkg_set_if_default("MAINTAINER", property["maintainer"])
+					if property["name"] != None:
+						tmp_element._pkg_set_if_default("NAME", property["name"])
+					if property["description"] != None:
+						tmp_element._pkg_set_if_default("DESCRIPTION", property["description"])
+					if property["license"] != None:
+						tmp_element._pkg_set_if_default("LICENSE", property["license"])
+					if property["version"] != None:
+						tmp_element._pkg_set_if_default("VERSION", property["version"])
+					# call user to configure it:
+					ret = the_module.configure(target, tmp_element)
+					if ret == False:
+						# the user request remove the capabilities of this module for this platform
+						tmp_element = None
 				else:
-					debug.warning("configure NOT done corectly : " + mod[0] + " from:'" + mod[1] + "'")
-			else:
-				debug.warning(" no function 'configure' in the module : " + mod[0] + " from:'" + mod[1] + "'")
-				continue
-			"""
-			# check if create has been done corectly
-			if tmp_element == None:
-				debug.debug("Request load module '" + name + "' not define for this platform")
-			else:
-				target.add_module(tmp_element)
-				return tmp_element
+					debug.warning(" no function 'create' in the module : " + mod[0] + " from:'" + mod[1] + "'")
+					continue
+				"""
+				if property["type"] == "":
+					continue
+				# configure the module:
+				if "configure" in dir(the_module):
+					tmp_element = module.Module(the_module_file, name, property["type"], property)
+					ret = the_module.configure(target, tmp_element)
+					if ret == True:
+						debug.warning("configure done corectly : " + mod[0] + " from:'" + mod[1] + "'")
+					else:
+						debug.warning("configure NOT done corectly : " + mod[0] + " from:'" + mod[1] + "'")
+				else:
+					debug.warning(" no function 'configure' in the module : " + mod[0] + " from:'" + mod[1] + "'")
+					continue
+				"""
+				# check if create has been done correctly
+				if tmp_element == None:
+					debug.debug("Request load module '" + name + "' not define for this platform")
+				else:
+					target.add_module(tmp_element)
+					return tmp_element
 
 ##
 ## @brief List all module name
@@ -1796,7 +1821,8 @@ def list_all_module():
 	global __module_list
 	tmpListName = []
 	for mod in __module_list:
-		tmpListName.append(mod[0])
+		if mod[0] not in tmpListName:
+			tmpListName.append(mod[0])
 	return tmpListName
 
 ##
@@ -1804,13 +1830,24 @@ def list_all_module():
 ## @return ([...,...]) List of all module option @ref get_module_option()
 ##
 def list_all_module_with_desc():
-	global __module_list
-	tmp_list = []
+	global __module_list;
+	tmp_list = [];
 	for mod in __module_list:
-		sys.path.append(os.path.dirname(mod[1]))
-		the_module = __import__(env.get_build_system_base_name() + __start_module_name + mod[0])
-		tmp_list.append(get_module_option(os.path.dirname(mod[1]), the_module, mod[0]))
-	return tmp_list
+		sys.path.append(os.path.dirname(mod[1]));
+		if mod[2] == False:
+			try:
+				data = json.load(open(mod[1],));
+				property = moduleGLD.get_module_option_GLD(os.path.dirname(mod[1]), data, mod[0]);
+				tmp_list.append(property);
+			except json.decoder.JSONDecodeError as ex:
+				debug.error("inconsistent file " + str(mod[1]) + " ==> " + str(ex))
+				
+		else:
+			the_module = __import__(env.get_build_system_base_name() + __start_module_name + mod[0]);
+			property = get_module_option(os.path.dirname(mod[1]), the_module, mod[0]);
+			tmp_list.append(property);
+	return tmp_list;
+
 
 
 ##
@@ -1830,6 +1867,7 @@ def get_module_option(path, the_module, name):
 	maintainer = None
 	version = None
 	version_id = None
+	group_id = None
 	
 	list_of_function_in_factory = dir(the_module)
 	
@@ -1872,6 +1910,12 @@ def get_module_option(path, the_module, name):
 	
 	if "get_version_id" in list_of_function_in_factory:
 		version_id = the_module.get_version_id()
+	if compagny_type != None:
+		group_id = compagny_type;
+		if compagny_name != None:
+			group_id += "." + compagny_name
+	elif compagny_name != None:
+		group_id = compagny_name;
 	
 	return {
 	       "name":name,
@@ -1879,8 +1923,10 @@ def get_module_option(path, the_module, name):
 	       "type":type,
 	       "sub-type":sub_type,
 	       "license":license,
+	       "license-file": None,
 	       "compagny-type":compagny_type,
 	       "compagny-name":compagny_name,
+	       "group-id":group_id,
 	       "maintainer":maintainer,
 	       "version":version,
 	       "version-id":version_id

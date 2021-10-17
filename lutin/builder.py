@@ -33,6 +33,7 @@ __start_builder_name="Builder_"
 ##
 def import_path(path_list):
 	global builder_list
+	gld_base = env.get_gld_build_system_base_name()
 	global_base = env.get_build_system_base_name()
 	debug.debug("BUILDER: Init with Files list:")
 	for elem in path_list:
@@ -43,19 +44,27 @@ def import_path(path_list):
 		filename = filename[:-3]
 		base_file_name = filename
 		# Remove global base name:
-		filename = filename[len(global_base):]
-		# Check if it start with the local patern:
-		if filename[:len(__start_builder_name)] != __start_builder_name:
-			debug.extreme_verbose("BUILDER:     Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+		if filename[:len(gld_base)] == gld_base:
+			filename = filename[len(gld_base):]
+			# Check if it start with the local patern:
+			if filename[:len(__start_builder_name)] != __start_builder_name:
+				debug.extreme_verbose("BUILDER:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
 			continue
-		# Remove local patern
-		builder_name = filename[len(__start_builder_name):]
-		debug.verbose("BUILDER:     Integrate: '" + builder_name + "' from '" + elem + "'")
-		the_builder = __import__(base_file_name)
-		builder_list.append({"name":builder_name,
-		                     "element":the_builder
-		                    })
-		debug.debug('BUILDER:     type=' + the_builder.get_type() + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
+		elif filename[:len(global_base)] == global_base:
+			filename = filename[len(global_base):]
+			# Check if it start with the local patern:
+			if filename[:len(__start_builder_name)] != __start_builder_name:
+				debug.extreme_verbose("BUILDER:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
+			# Remove local patern
+			builder_name = filename[len(__start_builder_name):]
+			debug.verbose("BUILDER:     Integrate: '" + builder_name + "' from '" + elem + "'")
+			the_builder = __import__(base_file_name)
+			builder_list.append({"name":builder_name,
+			                     "element":the_builder
+			                    })
+			debug.debug('BUILDER:     type=' + the_builder.get_type() + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
 	debug.verbose("List of BUILDER: ")
 	for elem in builder_list:
 		debug.verbose("    " + str(elem["name"]))

@@ -1158,6 +1158,7 @@ __start_target_name="Target_"
 ##
 def import_path(path_list):
 	global __target_list
+	gld_base = env.get_gld_build_system_base_name()
 	global_base = env.get_build_system_base_name()
 	debug.debug("TARGET: Init with Files list:")
 	for elem in path_list:
@@ -1167,15 +1168,23 @@ def import_path(path_list):
 		# Remove .py at the end:
 		filename = filename[:-3]
 		# Remove global base name:
-		filename = filename[len(global_base):]
-		# Check if it start with the local patern:
-		if filename[:len(__start_target_name)] != __start_target_name:
-			debug.extreme_verbose("TARGET:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+		if filename[:len(gld_base)] == gld_base:
+			filename = filename[len(gld_base):]
+			# Check if it start with the local patern:
+			if filename[:len(__start_target_name)] != __start_target_name:
+				debug.extreme_verbose("TARGET:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
 			continue
-		# Remove local patern
-		target_name = filename[len(__start_target_name):]
-		debug.verbose("TARGET:     Integrate: '" + target_name + "' from '" + elem + "'")
-		__target_list.append([target_name, elem])
+		elif filename[:len(global_base)] == global_base:
+			filename = filename[len(global_base):]
+			# Check if it start with the local patern:
+			if filename[:len(__start_target_name)] != __start_target_name:
+				debug.extreme_verbose("TARGET:     NOT-Integrate: '" + filename + "' from '" + elem + "' ==> rejected")
+				continue
+			# Remove local patern
+			target_name = filename[len(__start_target_name):]
+			debug.verbose("TARGET:     Integrate: '" + target_name + "' from '" + elem + "'")
+			__target_list.append([target_name, elem])
 	debug.verbose("New list TARGET: ")
 	for elem in __target_list:
 		debug.verbose("    " + str(elem[0]))
@@ -1187,7 +1196,7 @@ def load_target(name, config):
 	global __target_list
 	debug.debug("load target: " + name)
 	if len(__target_list) == 0:
-		debug.error("No target to compile !!!")
+		debug.error("No target to execute !!!")
 	debug.debug("list target: " + str(__target_list))
 	for mod in __target_list:
 		if mod[0] == name:
