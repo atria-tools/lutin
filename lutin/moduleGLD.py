@@ -54,7 +54,7 @@ list_of_property_module=[
         "maintainer",
         "version",
         "version-id",
-        "extra-flag"
+        "code-quality"
     ];
 
 list_of_element_ignored=[
@@ -69,9 +69,12 @@ list_of_element_availlable=[
         "dependency",
         "copy",
         "flag",
+        "compilator", # todo
         "mode",
-        "platform",
-        "arch"
+        "target",
+        "arch",
+        "bus-size", # todo
+        "sanity-compilation" # todo "isolate", "intricate", "*" permit to specify element to copy for the isolation mode. intricate is for current mode where everything is mixed together ...
     ];
 
 """
@@ -85,10 +88,10 @@ list_of_element_availlable=[
     "author":"file://../authors.txt",
     "version":"1.5.3",
     "__version":"file://../version.txt",
-    "extra-flag":"MEDIUM",
+    "code-quality":"MEDIUM",
     "mode": {
         "*": {
-            "platform": {
+            "target": {
                 "*": {
                     "arch": {
                         "*": {},
@@ -101,10 +104,9 @@ list_of_element_availlable=[
             
         },
         "debug": {
-    
-    
-    "source": {
-        "list":[
+        }
+    },
+    "source": [
             {
                 "source":"xxx/plop.cpp",
                 "flag":[
@@ -114,13 +116,27 @@ list_of_element_availlable=[
             "xxx/Yyy.cpp",
             "xxx/YuyTer.cpp"
             "xxx/plouf.java"
-        ]
+    ],
+    "source": {
+        "c": [
+            ...
+        ],
+        "c++": [
+            ...
+        ],
+        "nasm": [
+            ...
+        ] ...
     },
-    "header": {
-        "list": [
+    "header": [
             "xxx/Yyy.hpp",
             "xxx/YuyTer.hpp"
-            ]
+    ],
+    "header": {
+        "c": [
+            "xxx/Yyy.hpp",
+            "xxx/YuyTer.hpp"
+        ]
     },
     "path":[
         "."
@@ -138,14 +154,20 @@ list_of_element_availlable=[
         ...
     ];
     "mode": {
+        "*": {
+        
+        },
         "debug": {
             
         },
         "release": {
             
+        },
+        "coverage": {
+            
         }
     },
-    "platform": {
+    "target": {
         "*": {
         
         },
@@ -181,6 +203,9 @@ list_of_element_availlable=[
                     }
                 },
         },
+        "Debian": { ## Debian/Ubuntu/Suze/RedHat/ArchLinux/Gento ... heritate from linux ...
+        
+        },
         "IOs": {
         
         },
@@ -196,19 +221,70 @@ list_of_element_availlable=[
         },
     }
     "arch": {
-        "X86_32": {
+        "x86": {
             
         },
-        "X86_64": {
+        "arm": {
             
         },
-        "ARM-v9": {
+        "ppc": {
             
-        },
-        "ARM_64": {
+        }
+        "misc": {
             
         }
     },
+    "bus-size": {
+        "*": {
+        
+        },
+        "8": {
+        
+        },
+        "16": {
+        
+        },
+        "32": {
+        
+        },
+        "64": {
+        
+        },
+        "128": {
+        
+        }
+    },
+    "compilator": {
+        "*": {
+        
+        },
+        "gcc": {
+        
+        },
+        "clang": {
+        
+        },
+        "mingw": {
+        
+        },
+        "msvc": {
+        
+        },
+        "intel": {
+        
+        }
+    },
+    "sanity-compilation": {
+        "*": {
+        
+        },
+        "isolate": {
+        
+        },
+        "intricate": {
+        
+        }
+    }
 }
 
 get_compilator
@@ -295,7 +371,7 @@ def parse_node_mode(target, path, json_path, my_module, data):
 
 def parse_node_platform(target, path, json_path, my_module, data):
     for elem in data.keys():
-        if check_compatible("platform", elem, target.get_type(), json_path):
+        if check_compatible("target", elem, target.get_type(), json_path):
             parse_node_generic(target, path, json_path, my_module, data[elem]);
 
 def parse_node_generic(target, path, json_path, my_module, data, first = False ):
@@ -369,8 +445,8 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
     if "arch" in data.keys():
         parse_node_arch(target, path, json_path, my_module, data["arch"]);
         
-    if "platform" in data.keys():
-        parse_node_platform(target, path, json_path, my_module, data["platform"]);
+    if "target" in data.keys():
+        parse_node_platform(target, path, json_path, my_module, data["target"]);
         
     if "mode" in data.keys():
         parse_node_mode(target, path, json_path, my_module, data["mode"]);
