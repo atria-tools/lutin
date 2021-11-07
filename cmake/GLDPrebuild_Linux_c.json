@@ -1,0 +1,17 @@
+{
+	"type":"LIBRARY",
+	"sub-type":"PREBUILD",
+	"group-id":"gnu",
+	"description":"C: Generic gnu C library",
+	"license":"LGPL",
+	"sanity-compilation": {
+		"intricate": {
+			"flag":[
+				"c-remove": "-nostdinc"
+			]
+		},
+		"!intricate":{
+			"error":true
+		}
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"type":"LIBRARY",
+	"sub-type":"PREBUILD",
+	"group-id":"gnu",
+	"description":"CXX: Generic gnu C++ library",
+	"license":"LGPL",
+	"sanity-compilation": {
+		"intricate": {
+			"flag":{
+				"c++-remove": "-nostdlib",
+				"c++": "-D__STDCPP_GNU__"
+			},
+			"dependency":[
+				"c",
+				"m",
+				"pthread"
+			]
+		},
+		"!intricate":{
+			"error":true
+		}
+	}
+}

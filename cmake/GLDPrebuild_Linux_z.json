@@ -1,0 +1,19 @@
+{
+	"type":"LIBRARY",
+	"sub-type":"PREBUILD",
+	"group-id":"gnu",
+	"description":"Z : z library ",
+	"sanity-compilation": {
+		"intricate": {
+			"flag":{
+				"c-link": "-lz"
+			},
+			"dependency":[
+				"c"
+			]
+		},
+		"!intricate":{
+			"error":true
+		}
+	}
+}

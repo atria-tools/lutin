@@ -118,6 +118,9 @@ list_of_element_availlable=[
             "xxx/plouf.java"
     ],
     "source": {
+        "*": [
+            ...
+        ],
         "c": [
             ...
         ],
@@ -138,12 +141,17 @@ list_of_element_availlable=[
             "xxx/YuyTer.hpp"
         ]
     },
+    ############## TODO: rename "include"
     "path":[
         "."
     ],
-    "compilation-version": {
+    "compilation-version": { ## old ==> to remove
         "language": "c++",
         "version": 2017
+    },
+    "compilation-version": {
+        "c++": 2017,
+        "java": 16
     },
     "dependency": [
         "c",
@@ -282,9 +290,16 @@ list_of_element_availlable=[
         
         },
         "intricate": {
-        
+         
         }
+    },
+    "instruction-set":{
+        not present right now... :the instruction mode available...:
     }
+    #### TODO: later
+    "import": [ 
+        "GDSFGH.json" ## import an other file to have generic definitions ...
+    ]
 }
 
 get_compilator

@@ -1,0 +1,20 @@
+{
+	"type":"LIBRARY",
+	"sub-type":"PREBUILD",
+	"group-id":"gnu",
+	"description":"pthread: Generic multithreading system",
+	"license":"LGPL",
+	"sanity-compilation": {
+		"intricate": {
+			"flag":{
+				"c-link": "-lpthread"
+			},
+			"dependency":[
+				"c"
+			]
+		},
+		"!intricate":{
+			"error":true
+		}
+	}
+}

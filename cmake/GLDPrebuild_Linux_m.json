@@ -1,0 +1,20 @@
+{
+	"type":"LIBRARY",
+	"sub-type":"PREBUILD",
+	"group-id":"gnu",
+	"description":"M: Generic math library",
+	"license":"LGPL",
+	"sanity-compilation": {
+		"intricate": {
+			"flag":{
+				"c-link": "-lm"
+			},
+			"dependency":[
+				"c"
+			]
+		},
+		"!intricate":{
+			"error":true
+		}
+	}
+}

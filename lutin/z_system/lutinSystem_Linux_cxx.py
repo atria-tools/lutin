@@ -30,7 +30,7 @@ class System(system.System):
 		self.add_flag("c++", "-D__STDCPP_GNU__")
 		if env.get_isolate_system() == False:
 			self.add_flag("c++-remove", "-nostdlib")
-			self.add_flag("need-libstdc++", True)
+			self.add_flag("need-libstdc++", True) # regarder a quoi ca sert !!!!
 		else:
 			self.add_flag("link-lib", "stdc++")
 			compilator_gcc = "g++"
