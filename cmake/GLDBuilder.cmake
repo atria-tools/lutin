@@ -1,210 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 
-if (WIN32)
-	set(CPACK_GENERATOR "ZIP")
-else()
-	set(CPACK_GENERATOR "TGZ")
-endif()
-set(CPACK_VERBATIM_VARIABLES YES)
-include(CPack)
-
-
-## fist step is determining the target:
-if (WIN32)
-	set(GLD_TARGET "Windows" CACHE INTERNAL "")
-elseif(APPLE)
-	set(GLD_TARGET "MacOs" CACHE INTERNAL "")
-elseif(LINUX)
-	set(GLD_TARGET "Linux" CACHE INTERNAL "")
-elseif(UNIX AND NOT APPLE)
-	set(GLD_TARGET "Linux" CACHE INTERNAL "")
-else()
-	message("GLD Can not determine the target !!!")
-	exit(-1)
-endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(GLD_COMPILATOR "clang" CACHE INTERNAL "")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	set(GLD_COMPILATOR "gcc" CACHE INTERNAL "")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-	set(GLD_COMPILATOR "intel" CACHE INTERNAL "")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	set(GLD_COMPILATOR "msvc" CACHE INTERNAL "")
-else()
-	message("GLD Can not determine the compilator !!!")
-	exit(-1)
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(GLD_MODE "debug" CACHE INTERNAL "")
-elseif(CMAKE_BUILD_TYPE STREQUAL "debug")
-	set(GLD_MODE "debug" CACHE INTERNAL "")
-else()
-	set(GLD_MODE "release" CACHE INTERNAL "")
-endif()
-            
-            
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"
-   OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64)
-	set(GLD_ARCH "x86" CACHE INTERNAL "")
-	set(GLD_BUS_SIZE "64" CACHE INTERNAL "")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"
-       OR CMAKE_SYSTEM_PROCESSOR STREQUAL "i686")
-	set(GLD_ARCH "x86" CACHE INTERNAL "")
-	set(GLD_BUS_SIZE "32" CACHE INTERNAL "")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64")
-	set(GLD_ARCH "ppc" CACHE INTERNAL "")
-	set(GLD_BUS_SIZE "64" CACHE INTERNAL "")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc")
-	set(GLD_ARCH "ppc" CACHE INTERNAL "")
-	set(GLD_BUS_SIZE "32" CACHE INTERNAL "")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64"
-       OR CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-	set(GLD_ARCH "arm" CACHE INTERNAL "")
-	set(GLD_BUS_SIZE "64" CACHE INTERNAL "")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm"
-       OR CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7l"
-       OR CMAKE_SYSTEM_PROCESSOR STREQUAL "armv9")
-	set(GLD_ARCH "arm" CACHE INTERNAL "")
-	set(GLD_BUS_SIZE "32" CACHE INTERNAL "")
-else()
-	message("GLD Can not determine the architecture and bus-size !!!")
-	exit(-1)
-endif()
-
-# cmake does not support other mode than "intricate" the "isolate" mode is too much complicated to do. 
-set(GLD_SANITY_MODE "intricate" CACHE INTERNAL "")
-# list of current supported language:
-#     - 'c': C language
-#     - 'c++': C++ language
-#     - 'asm': asembler language
-#     - 'm': Objective-C language
-#     - 'mm': Objective-C++ language
-#     - 'java': Java language
-#     - 'javah': generated c header with Java description (for JNI)
-# TODO: maybe permit user to add some other... like "in", "masm", or other pre-step generation code??? 
-set(GLD_SUPPORT_LANGUAGE "c;asm;c++;m;mm;java;javah" CACHE INTERNAL "")
-set(GLD_SUPPORT_LANGUAGE_VARIABLE "C;ASM;CXX;M;MM;JAVA;JAVAH" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_C     "c;C" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_CXX   "cpp;CPP;cxx;CXX" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_ASM   "s;S" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_M     "m;M" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_MM    "mm;MM" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_JAVA  "java" CACHE INTERNAL "")
-set(GLD_LANGUAGE_EXTENTION_JAVAH "javah" CACHE INTERNAL "")
-
-# where is build the module
-set(GLD_GLOBAL_BUILD_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/${GLD_TARGET}_${GLD_ARCH}_${GLD_BUS_SIZE}/${GLD_MODE}/build/${GLD_COMPILATOR}/" CACHE INTERNAL "")
-# where the package is prepared
-set(GLD_GLOBAL_STAGING_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/${GLD_TARGET}_${GLD_ARCH}_${GLD_BUS_SIZE}/${GLD_MODE}/staging/${GLD_COMPILATOR}/" CACHE INTERNAL "")
-# whe the bundle (tar, jar ...) is set
-set(GLD_GLOBAL_FINAL_FOLDER "${CMAKE_CURRENT_BINARY_DIR}/${GLD_TARGET}_${GLD_ARCH}_${GLD_BUS_SIZE}/${GLD_MODE}/final/${GLD_COMPILATOR}/" CACHE INTERNAL "")
-	
-message("Global GLD properties:")
-message("	GLD_MODE :        ${GLD_MODE}")
-message("	GLD_COMPILATOR :  ${GLD_COMPILATOR}")
-message("	GLD_TARGET :      ${GLD_TARGET}")
-message("	GLD_ARCH :        ${GLD_ARCH}")
-message("	GLD_BUS_SIZE :    ${GLD_BUS_SIZE}")
-message("	GLD_SANITY_MODE : ${GLD_SANITY_MODE}")
-message("	GLD_GLOBAL_BUILD_FOLDER :   ${GLD_GLOBAL_BUILD_FOLDER}")
-message("	GLD_GLOBAL_STAGING_FOLDER : ${GLD_GLOBAL_STAGING_FOLDER}")
-message("	GLD_GLOBAL_FINAL_FOLDER :   ${GLD_GLOBAL_FINAL_FOLDER}")
-
-##
-## @brief get the type of a variable
-## @param[in] INPUT_JSON Json data.
-## @param[in] VARIABLE Name of the variable.
-## @param[out] OUT_VAR Retrun type of the node: NULL, NUMBER, STRING, BOOLEAN, ARRAY, OBJECT or NOTFOUND (if does not exist)
-##
-function(json_get_type OUT_VAR INPUT_JSON VARIABLE)
-	string(JSON VALUE ERROR_VARIABLE ${VARIABLE} TYPE ${INPUT_JSON} ${VARIABLE})
-	if (${VALUE} STREQUAL ${VARIABLE}-NOTFOUND)
-		set(${OUT_VAR} "NOTFOUND" PARENT_SCOPE)
-	else()
-		set(${OUT_VAR} "${VALUE}" PARENT_SCOPE)
-	endif()
-endfunction()
-
-
-function(json_size OUT_VAR INPUT_JSON VARIABLE)
-	string(JSON VALUE ERROR_VARIABLE ${VARIABLE} LENGTH ${INPUT_JSON} ${VARIABLE})
-	if (${VALUE} STREQUAL ${VARIABLE}-NOTFOUND)
-		set("${OUT_VAR}" 0 PARENT_SCOPE)
-	else ()
-		set("${OUT_VAR}" ${VALUE} PARENT_SCOPE)
-	endif()
-endfunction()
-
-function(json_get_data OUT_VAR INPUT_JSON VARIABLE)
-	string(JSON VALUE GET ${INPUT_JSON} ${VARIABLE})
-	set("${OUT_VAR}" ${VALUE} PARENT_SCOPE)
-endfunction()
-
-function(json_object_key OUT_VAR INPUT_JSON IDX)
-	string(JSON VALUE MEMBER ${INPUT_JSON} ${IDX})
-	set("${OUT_VAR}" ${VALUE} PARENT_SCOPE)
-endfunction()
-
-function(json_object_keys OUT_VAR MY_JSON_STRING VARIABLE)
-	json_size(SIZE ${MY_JSON_STRING} ${VARIABLE})
-	#message("target SIZE = ${SIZE}")
-	json_get_data(OBJECT_DATA ${MY_JSON_STRING} ${VARIABLE})
-	MATH(EXPR SIZE "${SIZE}-1")
-	set(OUT "")
-	foreach(IDX RANGE ${SIZE})
-		json_object_key(ELEMENT ${OBJECT_DATA} ${IDX})
-		#message("   - : ${ELEMENT}")
-		list(APPEND OUT ${ELEMENT})
-	endforeach()
-	set("${OUT_VAR}" ${OUT} PARENT_SCOPE)
-endfunction()
-
-function(json_object_values OUT_VAR INPUT_JSON VARIABLE KEYS)
-	string(JSON VALUE GET ${INPUT_JSON} ${VARIABLE} ${KEYS})
-	set("${OUT_VAR}" ${VALUE} PARENT_SCOPE)
-endfunction()
-
-function(json_get_list OUT_VAR INPUT_JSON VARIABLE)
-	string(JSON LIST_JSON_ELEMENTS ERROR_VARIABLE ${VARIABLE} GET ${INPUT_JSON} ${VARIABLE})
-	if (${LIST_JSON_ELEMENTS} STREQUAL ${VARIABLE}-NOTFOUND)
-		set("${OUT_VAR}" PARENT_SCOPE)
-		retrun()
-	endif()
-	#message("LIST_JSON_ELEMENTS      : ${LIST_JSON_ELEMENTS}")
-	
-	string(JSON LENGTH_VALUE LENGTH ${LIST_JSON_ELEMENTS})
-	#message("LENGTH_VALUE      : ${LENGTH_VALUE}")
-	if (${LENGTH_VALUE} EQUAL 0)
-		set("${OUT_VAR}" PARENT_SCOPE)
-		retrun()
-	endif()
-	set(OUT_LIST)
-	MATH(EXPR LENGTH_VALUE "${LENGTH_VALUE}-1")
-	foreach(IDX RANGE ${LENGTH_VALUE})
-		string(JSON ELEM GET ${LIST_JSON_ELEMENTS} ${IDX})
-		#message("   - : ${ELEM}")
-		list(APPEND OUT_LIST ${ELEM})
-	endforeach()
-	#message("OUT_LIST : ${OUT_LIST}")
-	set("${OUT_VAR}" ${OUT_LIST} PARENT_SCOPE)
-endfunction()
-
-
-
-function(json_get_element OUT_VAR INPUT_JSON VARIABLE)
-	string(JSON ELEMENT ERROR_VARIABLE ${VARIABLE} GET ${INPUT_JSON} ${VARIABLE})
-	if ("${ELEMENT}" STREQUAL "${VARIABLE}-NOTFOUND")
-		set("${OUT_VAR}" "" PARENT_SCOPE)
-	elseif ("${ELEMENT}" STREQUAL "NOTFOUND")
-		set("${OUT_VAR}" "" PARENT_SCOPE)
-	else()
-		set("${OUT_VAR}" ${ELEMENT} PARENT_SCOPE)
-	endif()
-endfunction()
-
-
+include("cmake/GLDJson.cmake")
+include("cmake/GLDTargetConfig.cmake")
+include("cmake/GLDTools.cmake")
 
 function(GLD_import_full_group NAME_GLD_MODULE MY_JSON_STRING ELEMENT_TO_CHECK TYPE_VARIABLE)
 	json_get_type(TYPE ${MY_JSON_STRING} ${ELEMENT_TO_CHECK})
@@ -245,47 +43,49 @@ function(GLD_import_element_dependency NAME_GLD_MODULE MY_JSON_STRING)
 	if (${TYPE} STREQUAL "ARRAY")
 		json_size(SIZE ${MY_JSON_STRING} "dependency")
 		#message("Dependency SIZE = ${SIZE}")
-		json_get_data(OBJECT_DATA ${MY_JSON_STRING} "dependency")
-		MATH(EXPR SIZE "${SIZE}-1")
-		set(VAR_OUT_TMP "")
-		foreach(IDX RANGE ${SIZE})
-			json_get_data(ELEMENT ${OBJECT_DATA} ${IDX})
-			json_get_type(TYPE ${OBJECT_DATA} ${IDX})
-			if (${TYPE} STREQUAL "STRING")
-				message("   - <dep> : ${ELEMENT}")
-				list(APPEND VAR_OUT_TMP ${ELEMENT})
-			elseif (${TYPE} STREQUAL "OBJECT")
-				json_get_type(TYPE ${ELEMENT} "name")
+		if (SIZE GREATER 0)
+			json_get_data(OBJECT_DATA ${MY_JSON_STRING} "dependency")
+			MATH(EXPR SIZE "${SIZE}-1")
+			set(VAR_OUT_TMP "")
+			foreach(IDX RANGE ${SIZE})
+				json_get_data(ELEMENT ${OBJECT_DATA} ${IDX})
+				json_get_type(TYPE ${OBJECT_DATA} ${IDX})
 				if (${TYPE} STREQUAL "STRING")
-					json_get_data(DEPENDENCY_NAME ${ELEMENT} "name")
-					json_get_type(TYPE ${ELEMENT} "optional")
-					#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
-					if (${TYPE} STREQUAL "BOOLEAN")
-						json_get_data(DEPENDENCY_OPTIONAL ${ELEMENT} "optional")
-						if (${DEPENDENCY_OPTIONAL})
-							message("   - <dep> : ${DEPENDENCY_NAME} (optional) ==> not managed now ...")
-							#message("optional value ==========================> '${DEPENDENCY_OPTIONAL}' ==> MAYBE")
-							list(APPEND LIST_OPTIONAL_VALUE ${DEPENDENCY_NAME})
+					message("   - <dep> : ${ELEMENT}")
+					list(APPEND VAR_OUT_TMP ${ELEMENT})
+				elseif (${TYPE} STREQUAL "OBJECT")
+					json_get_type(TYPE ${ELEMENT} "name")
+					if (${TYPE} STREQUAL "STRING")
+						json_get_data(DEPENDENCY_NAME ${ELEMENT} "name")
+						json_get_type(TYPE ${ELEMENT} "optional")
+						#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
+						if (${TYPE} STREQUAL "BOOLEAN")
+							json_get_data(DEPENDENCY_OPTIONAL ${ELEMENT} "optional")
+							if (${DEPENDENCY_OPTIONAL})
+								message("   - <dep> : ${DEPENDENCY_NAME} (optional) ==> not managed now ...")
+								#message("optional value ==========================> '${DEPENDENCY_OPTIONAL}' ==> MAYBE")
+								list(APPEND LIST_OPTIONAL_VALUE ${DEPENDENCY_NAME})
+							else()
+								message("   - <dep> : ${DEPENDENCY_NAME}")
+								#message("optional value ==========================> '${DEPENDENCY_OPTIONAL}' ==> MUST")
+								list(APPEND VAR_OUT_TMP ${DEPENDENCY_NAME})
+							endif()
 						else()
 							message("   - <dep> : ${DEPENDENCY_NAME}")
-							#message("optional value ==========================> '${DEPENDENCY_OPTIONAL}' ==> MUST")
 							list(APPEND VAR_OUT_TMP ${DEPENDENCY_NAME})
 						endif()
+						#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
 					else()
-						message("   - <dep> : ${DEPENDENCY_NAME}")
-						list(APPEND VAR_OUT_TMP ${DEPENDENCY_NAME})
+						message("Dependency 'name' is not a string or is missing type: ${TYPE}")
 					endif()
-					#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
 				else()
-					message("Dependency 'name' is not a string or is missing type: ${TYPE}")
+					message("dependency element not manage data : ${ELEMENT}")
+					## TODO add in dependency if optional : check if the element exit in the current module list ...
+					
 				endif()
-			else()
-				message("dependency element not manage data : ${ELEMENT}")
-				## TODO add in dependency if optional : check if the element exit in the current module list ...
-				
-			endif()
-		endforeach()
-		list(APPEND LIST_VALUE ${VAR_OUT_TMP})
+			endforeach()
+			list(APPEND LIST_VALUE ${VAR_OUT_TMP})
+		endif()
 	elseif(${TYPE} STREQUAL "NOTFOUND")
 		return()
 	endif()
@@ -308,33 +108,36 @@ function(GLD_import_element_source NAME_GLD_MODULE MY_JSON_STRING)
 		json_get_data(OBJECT_DATA ${MY_JSON_STRING} "source")
 		json_size(SIZE ${MY_JSON_STRING} "source")
 		#message("Dependency SIZE = ${SIZE}")
-		MATH(EXPR SIZE "${SIZE}-1")
-		set(VAR_OUT_TMP "")
-		foreach(IDX RANGE ${SIZE})
-			json_get_data(ELEMENT ${OBJECT_DATA} ${IDX})
-			json_get_type(TYPE ${OBJECT_DATA} ${IDX})
-			if (${TYPE} STREQUAL "STRING")
-				message("   - <src> : ${ELEMENT}")
-				list(APPEND LIST_VALUE ${ELEMENT})
-			elseif (${TYPE} STREQUAL "OBJECT")
-				json_get_type(TYPE ${ELEMENT} "source")
-				json_get_data(ELEMENT_SOURCE ${ELEMENT} "source")
+		if (SIZE GREATER 0)
+			MATH(EXPR SIZE "${SIZE}-1")
+			set(VAR_OUT_TMP "")
+			foreach(IDX RANGE ${SIZE})
+				json_get_data(ELEMENT ${OBJECT_DATA} ${IDX})
+				json_get_type(TYPE ${OBJECT_DATA} ${IDX})
 				if (${TYPE} STREQUAL "STRING")
-					message("   - <src> : ${ELEMENT_SOURCE}")
-					list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
-					#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
-				elseif (${TYPE} STREQUAL "ARRAY")
-					message("   - <src> : ${ELEMENT_SOURCE}")
-					list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
+					message("   - <src> : ${ELEMENT}")
+					list(APPEND LIST_VALUE ${ELEMENT})
+				elseif (${TYPE} STREQUAL "OBJECT")
+					message("   - <src2> : ${ELEMENT}")
+					json_get_type(TYPE ${ELEMENT} "source")
+					json_get_data(ELEMENT_SOURCE ${ELEMENT} "source")
+					if (${TYPE} STREQUAL "STRING")
+						message("   - <src> : ${ELEMENT_SOURCE}")
+						list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
+						#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
+					elseif (${TYPE} STREQUAL "ARRAY")
+						message("   - <src> : ${ELEMENT_SOURCE}")
+						list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
+					else()
+						message("Dependency 'name' is not a string or is missing type: ${TYPE}")
+					endif()
+					# TODO: add the source specific flags or other things ... 
 				else()
-					message("Dependency 'name' is not a string or is missing type: ${TYPE}")
+					message("'source' element not manage data : ${ELEMENT}")
+					## TODO add in dependency if optional : check if the element exit in the current module list ...
 				endif()
-				# TODO: add the source specific flags or other things ... 
-			else()
-				message("'source' element not manage data : ${ELEMENT}")
-				## TODO add in dependency if optional : check if the element exit in the current module list ...
-			endif()
-		endforeach()
+			endforeach()
+		endif()
 	elseif (${TYPE} STREQUAL "OBJECT")
 		# todo: manage object with source like { "c++":[...]...}
 	elseif(${TYPE} STREQUAL "NOTFOUND")
@@ -360,33 +163,63 @@ function(GLD_import_element_header NAME_GLD_MODULE MY_JSON_STRING)
 		json_get_data(OBJECT_DATA ${MY_JSON_STRING} "header")
 		json_size(SIZE ${MY_JSON_STRING} "header")
 		#message("Dependency SIZE = ${SIZE}")
-		MATH(EXPR SIZE "${SIZE}-1")
-		set(VAR_OUT_TMP "")
-		foreach(IDX RANGE ${SIZE})
-			json_get_data(ELEMENT ${OBJECT_DATA} ${IDX})
-			json_get_type(TYPE ${OBJECT_DATA} ${IDX})
-			if (${TYPE} STREQUAL "STRING")
-				message("   - <header> : ${ELEMENT}")
-				list(APPEND LIST_VALUE ${ELEMENT})
-			elseif (${TYPE} STREQUAL "OBJECT")
-				json_get_type(TYPE ${ELEMENT} "source")
-				json_get_data(ELEMENT_SOURCE ${ELEMENT} "source")
+		if (SIZE GREATER 0)
+			MATH(EXPR SIZE "${SIZE}-1")
+			set(VAR_OUT_TMP "")
+			foreach(IDX RANGE ${SIZE})
+				json_get_data(ELEMENT ${OBJECT_DATA} ${IDX})
+				json_get_type(TYPE ${OBJECT_DATA} ${IDX})
 				if (${TYPE} STREQUAL "STRING")
-					message("   - <header> : ${ELEMENT_SOURCE}")
-					list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
-					#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
-				elseif (${TYPE} STREQUAL "ARRAY")
-					message("   - <header> : ${ELEMENT_SOURCE}")
-					list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
+					message("   - <header> : ${ELEMENT}")
+					list(APPEND LIST_VALUE ${ELEMENT})
+				elseif (${TYPE} STREQUAL "OBJECT")
+					json_get_type(TYPE ${ELEMENT} "source")
+					if (${TYPE} STREQUAL "NOTFOUND")
+						json_get_type(TYPE ${ELEMENT} "path")
+						if (${TYPE} STREQUAL "STRING")
+							json_get_data(ELEMENT_PATH ${ELEMENT} "path")
+							
+							json_get_data_or_default(ELEMENT_FILTER ${ELEMENT} "filter" "*")
+							json_get_data_or_default(ELEMENT_RECURSIVE ${ELEMENT} "path" OFF)
+							json_get_data_or_default(ELEMENT_TO ${ELEMENT} "to" "")
+							find_all_files(ALL_HEADER_FILES "${MODULE_MAP_${LOCAL_MODULE_NAME}_FOLDER}/${ELEMENT_PATH}" "${ELEMENT_FILTER}" 50)
+							#message("***********************************************************************")
+							#foreach(III ${ALL_HEADER_FILES})
+							#	message("    ==> ${III}")
+							#endforeach()
+							#message("STATIC_PART = ${MODULE_MAP_${LOCAL_MODULE_NAME}_FOLDER}/${STATIC_PART}")
+							replace_base_path(ALL_HEADER_FILES_2 "${MODULE_MAP_${LOCAL_MODULE_NAME}_FOLDER}/${ELEMENT_PATH}" "${ALL_HEADER_FILES}")
+							#message("***********************************************************************")
+							set(ALL_HEADER_FILES "")
+							foreach(III ${ALL_HEADER_FILES_2})
+								#message("    ==> ${III}!${ELEMENT_PATH}:${ELEMENT_TO}")
+								list(APPEND ALL_HEADER_FILES "${III}!${ELEMENT_PATH}:${ELEMENT_TO}")
+							endforeach()
+							list(APPEND LIST_VALUE ${ALL_HEADER_FILES})
+						else()
+							message("Dependency 'path' is not a string or is missing type: ${TYPE} : STRING ...")
+						endif()
+					else()
+						if (${TYPE} STREQUAL "STRING")
+							json_get_data(ELEMENT_SOURCE ${ELEMENT} "source")
+							message("   - <header> : ${ELEMENT_SOURCE}")
+							list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
+							#message("optional type = ${TYPE} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${DEPENDENCY_NAME}")
+						elseif (${TYPE} STREQUAL "ARRAY")
+							json_get_data(ELEMENT_SOURCE ${ELEMENT} "source")
+							message("   - <header> : ${ELEMENT_SOURCE}")
+							list(APPEND LIST_VALUE ${ELEMENT_SOURCE})
+						else()
+							message("Dependency 'source' is not a string or is missing type: ${TYPE} : STRING or ARRAY ...")
+						endif()
+					endif()
+					# TODO: add the source specific flags or other things ... 
 				else()
-					message("Dependency 'name' is not a string or is missing type: ${TYPE}")
+					message("'header' element not manage data : ${ELEMENT}")
+					## TODO add in dependency if optional : check if the element exit in the current module list ...
 				endif()
-				# TODO: add the source specific flags or other things ... 
-			else()
-				message("'header' element not manage data : ${ELEMENT}")
-				## TODO add in dependency if optional : check if the element exit in the current module list ...
-			endif()
-		endforeach()
+			endforeach()
+		endif()
 	elseif (${TYPE} STREQUAL "OBJECT")
 		json_get_data(OBJECT_DATA ${MY_JSON_STRING} "header")
 		# todo: manage object with source like { "c++":[...]...}
@@ -476,7 +309,7 @@ function(GLD_import_full NAME_GLD_MODULE MY_JSON_STRING)
 	
 	GLD_import_full_group(${NAME_GLD_MODULE} ${MY_JSON_STRING} "bus-size" ${GLD_BUS_SIZE})
 	
-	GLD_import_full_group(${NAME_GLD_MODULE} ${MY_JSON_STRING} "compilator" ${GLD_COMPILATOR})
+	GLD_import_full_group(${NAME_GLD_MODULE} ${MY_JSON_STRING} "compiler" ${GLD_COMPILER})
 	
 	GLD_import_full_group(${NAME_GLD_MODULE} ${MY_JSON_STRING} "sanity-compilation" ${GLD_SANITY_MODE})
 	
@@ -494,6 +327,33 @@ function(GLD_load_from_file_if_needed VAR_OUT LIBRARY_PATH ELEMENT)
 	else()
 		set(${VAR_OUT} "${ELEMENT}" PARENT_SCOPE)
 	endif()
+endfunction()
+
+
+function(GLD_get_import_folder VAR_OUT NAME_GLD_MODULE)
+	set(LIST_OUT "")
+	
+	
+	set(${VAR_OUT} "${LIST_OUT}" PARENT_SCOPE)
+endfunction()
+
+function(GLD_get_import_folder VAR_OUT NAME_GLD_MODULE)
+	set(LIST_OUT "")
+	
+	
+	set(${VAR_OUT} "${LIST_OUT}" PARENT_SCOPE)
+endfunction()
+
+function(GLD_get_project_dependency VAR_OUT NAME_GLD_MODULE DEPENDENCY)
+	GLD_get_module_name(LOCAL_MODULE_NAME ${NAME_GLD_MODULE})
+	set(LIST_OUT "")
+	if (DEPENDENCY)
+		foreach(III "${DEPENDENCY}") 
+			GLD_get_module_name(TMP_MODULE_NAME ${III})
+			list(APPEND LIST_OUT ${III})
+		endforeach()
+	endif()
+	set(${VAR_OUT} "${LIST_OUT}" PARENT_SCOPE)
 endfunction()
 
 function(GLD_import NAME_GLD_MODULE)
@@ -556,6 +416,8 @@ function(GLD_import NAME_GLD_MODULE)
 		project(${LIBRARY_NAME222})
 	endif()
 	
+	
+	
 	set(MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_LOCAL "" CACHE INTERNAL "")
 	
 	# TODO : Remove if no element in header...
@@ -587,96 +449,117 @@ function(GLD_import NAME_GLD_MODULE)
 	message("    _SOURCE        : ${MODULE_MAP_${LOCAL_MODULE_NAME}_SOURCE}")
 	message("    _HEADER        : ${MODULE_MAP_${LOCAL_MODULE_NAME}_HEADER}")
 	
+	
+	GLD_get_project_dependency(LIST_PROJECT_DEPENDENCY ${NAME_GLD_MODULE} "${MODULE_MAP_${LOCAL_MODULE_NAME}_DEPENDENCY}")
+	message("===> dep = ${LIST_PROJECT_DEPENDENCY}")
+	
+	
+	
 	set(TMP_LIST "")
 	foreach(III ${MODULE_MAP_${LOCAL_MODULE_NAME}_SOURCE})
 		get_filename_component(BASE_FOLDER ${MODULE_MAP_${LOCAL_MODULE_NAME}_FOLDER}/${III} ABSOLUTE)
 		list(APPEND TMP_LIST "${BASE_FOLDER}")
 	endforeach()
-	add_library(${LIBRARY_NAME222}_OBJ OBJECT ${TMP_LIST})
-	# allow relocation code for shared library:
-	set_property(TARGET ${LIBRARY_NAME222}_OBJ PROPERTY POSITION_INDEPENDENT_CODE 1)
-	
+	set(HAS_DATA_TO_BUILD OFF)
+	if(TMP_LIST)
+		set(HAS_DATA_TO_BUILD ON)
+		add_library(${LIBRARY_NAME222}_OBJ OBJECT ${TMP_LIST})
+		# allow relocation code for shared library:
+		set_property(TARGET ${LIBRARY_NAME222}_OBJ PROPERTY POSITION_INDEPENDENT_CODE 1)
+	endif()
 	
 	foreach(III ${MODULE_MAP_${LOCAL_MODULE_NAME}_HEADER})
-		configure_file(${MODULE_MAP_${LOCAL_MODULE_NAME}_FOLDER}/${III} ${MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_PUBLIC}/${III} COPYONLY)
-	endforeach()
-	
-	set(TMP_LIST ${MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_LOCAL})
-	list(APPEND TMP_LIST ${MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_PUBLIC})
-	target_include_directories(${LIBRARY_NAME222}_OBJ PUBLIC "${TMP_LIST}")
-	add_library(${LIBRARY_NAME222}_dynamic SHARED $<TARGET_OBJECTS:${LIBRARY_NAME222}_OBJ>)
-	add_library(${LIBRARY_NAME222}_static STATIC $<TARGET_OBJECTS:${LIBRARY_NAME222}_OBJ>)
-	
-	if ("${GLD_TARGET}" STREQUAL "Windows")
-		set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES OUTPUT_NAME ${LIBRARY_NAME222})
-		# static will keep the element static at the end (the windows architecture fore shared object need to have a static library to access to the DLL ==> create a conflict!!!
-	else()
-		set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES OUTPUT_NAME ${LIBRARY_NAME222})
-		set_target_properties(${LIBRARY_NAME222}_static PROPERTIES OUTPUT_NAME ${LIBRARY_NAME222})
-	endif()
-	if (LIBRARY_VERSION)
-		set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES VERSION ${LIBRARY_VERSION})
-		set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES SOVERSION ${LIBRARY_VERSION})
-	endif()
-	if (LIBRARY_DECRIPTION)
-		set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES DESCRIPTION ${LIBRARY_DECRIPTION})
-	endif()
-	
-	# install dynamic & static library
-	install(TARGETS ${LIBRARY_NAME222}_dynamic EXPORT ${LIBRARY_NAME222}Targets
-	        RUNTIME DESTINATION ${MODULE_MAP_${LOCAL_MODULE_NAME}_LIB_PATH}
-	         )
-	install(TARGETS ${LIBRARY_NAME222}_static
-	        RUNTIME DESTINATION ${MODULE_MAP_${LOCAL_MODULE_NAME}_LIB_PATH})
-	
-	
-	#install(TARGETS ${LIBRARY_NAME222} EXPORT ${LIBRARY_NAME222}Targets
-	#  LIBRARY DESTINATION lib
-	#  ARCHIVE DESTINATION lib
-	#  RUNTIME DESTINATION bin
-	#  INCLUDES DESTINATION include
-	#)
-	# install exported headers
-	# this copy all the headers in a single folder:
-	#install(FILES ${EXPORT_HEADER_LIST} DESTINATION include)
-	# this keep the basic path for each folders:
-	set(BASE "${PROJECT_SOURCE_DIR}/install")
-	foreach(ITEM ${EXPORT_HEADER_LIST})
-	  get_filename_component(ITEM_PATH ${ITEM} PATH)
-	  string(REPLACE ${BASE} "" ITEM_PATH ${ITEM_PATH})
-	  install(FILES ${ITEM}
-	          DESTINATION "include/${ITEM_PATH}"
-	          COMPONENT Devel)
+		copy_file_with_reference(${MODULE_MAP_${LOCAL_MODULE_NAME}_FOLDER} ${III} ${MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_PUBLIC})
 	endforeach()
 	
 	
+	if(HAS_DATA_TO_BUILD)
+		set(TMP_LIST ${MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_LOCAL})
+		list(APPEND TMP_LIST ${MODULE_MAP_${LOCAL_MODULE_NAME}_INCLUDE_PUBLIC})
+		if(TMP_LIST)
+			target_include_directories(${LIBRARY_NAME222}_OBJ PUBLIC "${TMP_LIST}")
+		endif()
+		add_library(${LIBRARY_NAME222}_dynamic SHARED $<TARGET_OBJECTS:${LIBRARY_NAME222}_OBJ>)
+		add_library(${LIBRARY_NAME222}_static STATIC $<TARGET_OBJECTS:${LIBRARY_NAME222}_OBJ>)
+		if (LIST_PROJECT_DEPENDENCY)
+			foreach(III ${LIST_PROJECT_DEPENDENCY})
+				message(">>>>>>>> ${III}")
+				add_dependencies(${LIBRARY_NAME222}_dynamic "${III}_dynamic")
+				add_dependencies(${LIBRARY_NAME222}_static "${III}_static")
+			endforeach()
+		endif()
 	
-	
-	include(CMakePackageConfigHelpers)
-	#write_basic_package_version_file(
-	#  "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME222}/${LIBRARY_NAME222}ConfigVersion.cmake"
-	#  VERSION ${LIBRARY_VERSION}
-	#  COMPATIBILITY AnyNewerVersion
-	#)
-	#
-	#export(EXPORT ${LIBRARY_NAME222}Targets
-	#  FILE "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME222}/${LIBRARY_NAME222}Targets.cmake"
-	#  NAMESPACE Upstream::
-	#)
-	##configure_file(cmake/${LIBRARY_NAME222}Config.cmake
-	##  "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME222}/${LIBRARY_NAME222}Config.cmake"
-	##  COPYONLY
-	##)
-	
-	set(CONFIG_PACKAGE_LOCATION cmake/${LIBRARY_NAME222})
-	install(EXPORT ${LIBRARY_NAME222}Targets
-	  FILE
-	    ${LIBRARY_NAME222}Targets.cmake
-	  NAMESPACE
-	    ${LIBRARY_NAME222}::
-	  DESTINATION
-	    ${CONFIG_PACKAGE_LOCATION}
-	)
+		if ("${GLD_TARGET}" STREQUAL "Windows")
+			set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES OUTPUT_NAME ${LIBRARY_NAME222})
+			# static will keep the element static at the end (the windows architecture fore shared object need to have a static library to access to the DLL ==> create a conflict!!!
+		else()
+			set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES OUTPUT_NAME ${LIBRARY_NAME222})
+			set_target_properties(${LIBRARY_NAME222}_static PROPERTIES OUTPUT_NAME ${LIBRARY_NAME222})
+		endif()
+		if (LIBRARY_VERSION)
+			set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES VERSION ${LIBRARY_VERSION})
+			set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES SOVERSION ${LIBRARY_VERSION})
+		endif()
+		if (LIBRARY_DECRIPTION)
+			set_target_properties(${LIBRARY_NAME222}_dynamic PROPERTIES DESCRIPTION ${LIBRARY_DECRIPTION})
+		endif()
+		
+		# install dynamic & static library
+		install(TARGETS ${LIBRARY_NAME222}_dynamic EXPORT ${LIBRARY_NAME222}Targets
+		        RUNTIME DESTINATION ${MODULE_MAP_${LOCAL_MODULE_NAME}_LIB_PATH}
+		         )
+		install(TARGETS ${LIBRARY_NAME222}_static
+		        RUNTIME DESTINATION ${MODULE_MAP_${LOCAL_MODULE_NAME}_LIB_PATH})
+		
+		
+		#install(TARGETS ${LIBRARY_NAME222} EXPORT ${LIBRARY_NAME222}Targets
+		#  LIBRARY DESTINATION lib
+		#  ARCHIVE DESTINATION lib
+		#  RUNTIME DESTINATION bin
+		#  INCLUDES DESTINATION include
+		#)
+		# install exported headers
+		# this copy all the headers in a single folder:
+		#install(FILES ${EXPORT_HEADER_LIST} DESTINATION include)
+		# this keep the basic path for each folders:
+		set(BASE "${PROJECT_SOURCE_DIR}/install")
+		foreach(ITEM ${EXPORT_HEADER_LIST})
+		  get_filename_component(ITEM_PATH ${ITEM} PATH)
+		  string(REPLACE ${BASE} "" ITEM_PATH ${ITEM_PATH})
+		  install(FILES ${ITEM}
+		          DESTINATION "include/${ITEM_PATH}"
+		          COMPONENT Devel)
+		endforeach()
+		
+		
+		
+		
+		include(CMakePackageConfigHelpers)
+		#write_basic_package_version_file(
+		#  "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME222}/${LIBRARY_NAME222}ConfigVersion.cmake"
+		#  VERSION ${LIBRARY_VERSION}
+		#  COMPATIBILITY AnyNewerVersion
+		#)
+		#
+		#export(EXPORT ${LIBRARY_NAME222}Targets
+		#  FILE "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME222}/${LIBRARY_NAME222}Targets.cmake"
+		#  NAMESPACE Upstream::
+		#)
+		##configure_file(cmake/${LIBRARY_NAME222}Config.cmake
+		##  "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME222}/${LIBRARY_NAME222}Config.cmake"
+		##  COPYONLY
+		##)
+		
+		set(CONFIG_PACKAGE_LOCATION cmake/${LIBRARY_NAME222})
+		install(EXPORT ${LIBRARY_NAME222}Targets
+		  FILE
+		    ${LIBRARY_NAME222}Targets.cmake
+		  NAMESPACE
+		    ${LIBRARY_NAME222}::
+		  DESTINATION
+		    ${CONFIG_PACKAGE_LOCATION}
+		)
+	endif()
 	#install(
 	#  FILES
 	#    cmake/${LIBRARY_NAME222}Config.cmake
@@ -725,69 +608,6 @@ function(GLD_generate_cmake_wrapping LIST_OF_MODULE_AVAILLABLE)
 	message("Generate cmake wrapping (DONE)")
 endfunction()
 
-
-##
-## @brief List all folder in a specific inout folder.
-## @param[out] VAR_OUT Result list of folders.
-## @param[in] BASE_FOLDER Basic folder to parse.
-##
-function(sub_dir_list VAR_OUT BASE_FOLDER)
-  #message("                                 Search: ${BASE_FOLDER}" )
-  file(GLOB children "${BASE_FOLDER}/*")
-  #message("     ==>>>  ${children}" )
-  set(dirlist "")
-  foreach(child ${children})
-    #message("     -  ${child}" )
-    if(IS_DIRECTORY ${child})
-      #message("         ==> is directory" )
-      list(APPEND dirlist ${child})
-    endif()
-  endforeach()
-  set(${VAR_OUT} ${dirlist} PARENT_SCOPE)
-endfunction()
-
-
-##
-## @brief Recursive search of a specific patter (stop whan find the pattern in a folder.
-##        (have a limit of parsing ==> optimise resarch in a worktree).
-## @param[out] VAR_OUT List of all files that corespond of the reg-exp
-## @param[in] BASE_FOLDER Basic folder to parse.
-## @param[in] REG_EXP Regular expression to search the data.
-## @param[in] LIMIT Lismit of folder to recursively parse.
-##
-function(find_all_files VAR_OUT BASE_FOLDER REG_EXP LIMIT)
-	if (${LIMIT} LESS_EQUAL 0)
-		set(${VAR_OUT} "" PARENT_SCOPE)
-		return()
-	endif()
-	MATH(EXPR LIMIT "${LIMIT}-1")
-	get_filename_component(BASE_FOLDER ${BASE_FOLDER} ABSOLUTE)
-	#message("KK Search in subDiratory: ${BASE_FOLDER}/${REG_EXP}" )
-	file(GLOB GLD_FILES "${BASE_FOLDER}/${REG_EXP}")
-	#message("Find file: '${GLD_FILES}'" )
-	if("${GLD_FILES}" STREQUAL "")
-		#message("Search in subDiratory: ${BASE_FOLDER}" )
-		# no element continue search...
-		set(SUBDIRS "")
-		sub_dir_list(SUBDIRS "${BASE_FOLDER}")
-		#message("            =!=> : ${SUBDIRS}" )
-		foreach(ELEM ${SUBDIRS})
-			get_filename_component(DIR_NAME_RELATIVE ${ELEM} NAME)
-			#message("            =!=> DIR_NAME_RELATIVE = ${DIR_NAME_RELATIVE}" )
-			if("${DIR_NAME_RELATIVE}" STREQUAL ".git" OR "${DIR_NAME_RELATIVE}" STREQUAL ".island" OR "${DIR_NAME_RELATIVE}" STREQUAL "archive" OR "${DIR_NAME_RELATIVE}" STREQUAL "out" OR "${DIR_NAME_RELATIVE}" STREQUAL "target")
-				continue()
-			endif()
-			if("${ELEM}" STREQUAL "${BASE_FOLDER}" OR "${ELEM}" STREQUAL "${BASE_FOLDER}/")
-				continue()
-			endif()
-			#message("        element: ${ELEM}" )
-			#message("    BASE_FOLDER: ${BASE_FOLDER}" )
-			find_all_files(OUT_SUB_LIST "${ELEM}" "${REG_EXP}" ${LIMIT})
-			list(APPEND GLD_FILES ${OUT_SUB_LIST})
-		endforeach()
-	endif()
-	set(${VAR_OUT} ${GLD_FILES} PARENT_SCOPE)
-endfunction()
 
 
 function(GLD_get_full_dependency_group VAR_OUT VAR_OPTIONAL_OUT MY_JSON_STRING ELEMENT_TO_CHECK TYPE_VARIABLE)
@@ -899,7 +719,7 @@ function(GLD_get_full_dependency VAR_OUT VAR_OPTIONAL_OUT MY_JSON_STRING)
 	list(APPEND LIST_VALUE ${VAR_OUT_TMP})
 	list(APPEND LIST_OPTIONAL_VALUE ${LIST_OPTIONAL_VALUE_TMP})
 	
-	GLD_get_full_dependency_group(VAR_OUT_TMP LIST_OPTIONAL_VALUE_TMP MY_JSON_STRING "compilator" ${GLD_COMPILATOR})
+	GLD_get_full_dependency_group(VAR_OUT_TMP LIST_OPTIONAL_VALUE_TMP MY_JSON_STRING "compiler" ${GLD_COMPILER})
 	list(APPEND LIST_VALUE ${VAR_OUT_TMP})
 	list(APPEND LIST_OPTIONAL_VALUE ${LIST_OPTIONAL_VALUE_TMP})
 	
@@ -1069,7 +889,7 @@ endfunction()
 function(GLD_load_all ROOT_FOLDER BASE_NAME COMMENT_ACTION)
 	message("Parse all files ${BASE_NAME}*.json: base: ${ROOT_FOLDER}")
 	#file(GLOB_RECURSE GLD_FILES "${ROOT_FOLDER}/GLD_*.json")
-	find_all_files(GLD_FILES "${ROOT_FOLDER}" "${BASE_NAME}*.json" 5)
+	find_all_files_exeption(GLD_FILES "${ROOT_FOLDER}" "${BASE_NAME}*.json" 5)
 	message("List of GLD files:")
 	foreach(III ${GLD_FILES})
 		GET_FILENAME_COMPONENT(FILENAME ${III} NAME_WE)

@@ -69,7 +69,7 @@ list_of_element_availlable=[
         "dependency",
         "copy",
         "flag",
-        "compilator", # todo
+        "compiler",
         "mode",
         "target",
         "arch",
@@ -440,13 +440,10 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
             debug.error("Wrong type for node 'dependency' []");
     
     if "compilation-version" in data.keys():
-        if type(data["compilation-version"]) == list:
-            for elem in data["compilation-version"]:
-                GLD_compile_version(my_module, elem);
-        elif type(data["compilation-version"]) == dict:
+        if type(data["compilation-version"]) == dict:
             GLD_compile_version(my_module, data["compilation-version"]);
         else:
-            debug.error("Wrong type for node 'compilation-version' [] or {}");
+            debug.error("Wrong type for node 'compilation-version' {'??lang??':1234}");
     
     if "copy" in data.keys():
         if type(data["copy"]) == list:
@@ -546,6 +543,12 @@ def GLD_add_depend(my_module, data):
                 header_file = [ data["header"] ];
             else:
                 debug.error("Can not have dependency 'header' in an other type than [] or string: '" + str(data["header"]) + "'");
+        compiler={}
+        if "compiler" in data.keys():
+            if type(data["compiler"]) == dict:
+                compiler = data["compiler"];
+            else:
+                debug.error("Can not have dependency 'compiler' in an other type than {}: '" + str(data["compiler"]) + "'");
         
         
         if optional == False:
@@ -559,11 +562,9 @@ def GLD_add_depend(my_module, data):
         debug.error("dependency only support [ {} or string ]");
 
 def GLD_compile_version(my_module, data):
-    if "language" in data.keys() and "version" in data.keys():
-        my_module.compile_version(data["language"], data["version"])
-    else:
-        debug.error("missing 'language' and/or 'version' in node 'compilation-version:{}'");
-
+    for elem in data.keys():
+        my_module.compile_version(elem, data[elem])
+    
 def GLD_copy(my_module, data):
     path_src = None;
     file_src = None;
