@@ -72,7 +72,6 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 	for filename in tmp_list_gld_file:
 		out.append(os.path.join(path, filename))
 		debug.extreme_verbose("     Find a file : '" + str(out[-1]) + "'")
-	
 	need_parse_sub_folder = True
 	rm_value = -1
 	# check if we need to parse sub_folder
@@ -112,7 +111,6 @@ def import_path_local(path, limit_sub_folder, exclude_path = [], base_name = "")
 			for elem in tmp_out:
 				out.append(elem)
 	return out
-
 
 def init():
 	global is_init;

@@ -98,6 +98,8 @@ class Module:
 		self._paths = []
 		# The module has been already build ...
 		self._isbuild = False
+		# add include install path after building package
+		self._include_header_after = False
 		# configure default heritage
 		self._local_heritage = None
 		# TODO : Do a better dynamic property system => not really versatile
@@ -143,6 +145,14 @@ class Module:
 		                             }
 		self._sub_heritage_list = None
 		self._generate_file = []
+	
+	##
+	## @brief set the header not used for the compilation, thay are copied in the include folder, but they are only used for external library include.
+	## @param[in] self (handle) Class handle.
+	## @param[in] calue (boolean) Value of the variable.
+	##
+	def set_include_header_after(self, value):
+		self._include_header_after = value;
 	
 	##
 	## @brief Generate a string representing the class (for str(xxx))
@@ -333,8 +343,9 @@ class Module:
 			return
 		# list of path that can apear in the output data :
 		gcov_path_file = []
-		gcov_path_file.append(target.get_build_path_include(self._name)) # for include (that is installed)
-		gcov_path_file.append(" " + target.get_build_path_include(self._name))
+		if self._include_header_after == False:
+			gcov_path_file.append(target.get_build_path_include(self._name)) # for include (that is installed)
+		#gcov_path_file.append(" " + target.get_build_path_include(self._name))
 		gcov_path_file.append(self._origin_path) # for sources.
 		gcov_path_file.append(" " + self._origin_path)
 		# squash header and src...
@@ -652,7 +663,8 @@ class Module:
 		# remove unneded files (NOT folder ...)
 		tools.clean_directory(include_path, copy_list)
 		# add the pat to the usable dirrectory
-		self._add_path(include_path)
+		if self._include_header_after == False:
+			self._add_path(include_path)
 		
 		# ---------------------------------------------------------------------------
 		# -- Sources compilation                                                   --
@@ -1086,6 +1098,8 @@ class Module:
 		else:
 			tools.list_append_to_2(self._flags["local"], type, list)
 	
+	def add_link_model(self, base_path, libs, static=True, dynamic=True, export=False):
+		pass
 	##
 	## @brief Set the compilation version of the 
 	## @param[in] self (handle) Class handle

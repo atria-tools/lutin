@@ -22,7 +22,7 @@ class System(system.System):
 		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend([
-		    'khr',
+		    # TODO: needed for wayland : 'khr',
 		    ])
 		self.add_flag('link-lib', 'EGL')
 		if env.get_isolate_system() == True:

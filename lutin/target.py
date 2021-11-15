@@ -109,7 +109,7 @@ class Target:
 		if "debug" == self.config["mode"]:
 			self.add_flag("c", [
 			    "-g",
-			    "-DDEBUG"
+			    #"-DDEBUG"
 			    ])
 			if env.get_force_optimisation() == False:
 				self.add_flag("c", "-O0")
@@ -117,7 +117,7 @@ class Target:
 				self.add_flag("c", "-O3")
 		else:
 			self.add_flag("c", [
-			    "-DNDEBUG",
+			    #"-DNDEBUG",
 			    "-O3"
 			    ])
 		

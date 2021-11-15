@@ -22,7 +22,7 @@ class System(system.System):
 		self.set_valid(True)
 		# no check needed ==> just add this:
 		self.add_depend(['c'])
-		self.add_flag('link-lib', 'xkbcommon')
+		#self.add_flag('link-lib', 'xkbcommon')
 		if env.get_isolate_system() == True:
 			self.add_header_file([
 			    "/usr/include/xkbcommon/*"

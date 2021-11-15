@@ -54,7 +54,8 @@ list_of_property_module=[
         "maintainer",
         "version",
         "version-id",
-        "code-quality"
+        "code-quality",
+        "header-install-mode"
     ];
 
 list_of_element_ignored=[
@@ -82,8 +83,8 @@ list_of_element_availlable=[
     "type":"LIBRARY",
     "group-id":"com.atria-soft",
     "description":"Ewol tool kit (base: container)",
-    "licence":"MPL-2",
-    "licence-file":"file://LICENCE.txt",
+    "license":"MPL-2",
+    "license-file":"file://license.txt",
     "maintainer":"Edouard DUPIN <yui.heero@gmail.com>",
     "author":"file://../authors.txt",
     "version":"1.5.3",
@@ -117,7 +118,7 @@ list_of_element_availlable=[
             "xxx/YuyTer.cpp"
             "xxx/plouf.java"
     ],
-    "source": {
+    "source": { # this is the canocical mode ==> mermit to separate the language, otherwise this is auto-detection mode ...
         "*": [
             ...
         ],
@@ -129,26 +130,28 @@ list_of_element_availlable=[
         ],
         "nasm": [
             ...
+        ],
+        "java": [
+            ...
+        ],
+        "javah": [
+            ...
         ] ...
     },
+    "header-install-mode": "AFTER", # or "BEFORE"<< default is before ==> better to isolate the include folder...
     "header": [
             "xxx/Yyy.hpp",
             "xxx/YuyTer.hpp"
     ],
-    "header": {
+    "header": { # this is the canocical mode ==> mermit to separate the language, otherwise this is auto-detection mode ...
         "c": [
             "xxx/Yyy.hpp",
             "xxx/YuyTer.hpp"
         ]
     },
-    ############## TODO: rename "include"
     "path":[
         "."
     ],
-    "compilation-version": { ## old ==> to remove
-        "language": "c++",
-        "version": 2017
-    },
     "compilation-version": {
         "c++": 2017,
         "java": 16
@@ -416,7 +419,31 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
     
     if "header" in data.keys():
         if type(data["header"]) == list:
-            my_module.add_header_file(data["header"]);
+            for elem in data["header"]:
+                if type(elem) == list:
+                    my_module.add_header_file(elem);
+                elif type(elem) == str:
+                    my_module.add_header_file(elem);
+                elif type(elem) == dict:
+                    pass;
+                    #{'path': 'thirdparty/src/', 'filter': '*.h', 'to': 'g3log'}
+                    elem_path = "";
+                    elem_to = "";
+                    elem_recursive = True;
+                    elem_filter = "*"
+                    if "path" in elem:
+                        elem_path = elem["path"];
+                    if "to" in elem:
+                        elem_to = elem["to"];
+                    if "recursive" in elem:
+                        elem_recursive = elem["recursive"];
+                    if "filter" in elem:
+                        elem_filter = elem["filter"];
+                    if elem_path == "":
+                        debug.error("header does not support type of dict: " + str(elem) + " ==> missing 'path'")
+                    my_module.add_header_path(elem_path, regex=elem_filter, clip_path=None, recursive=elem_recursive, destination_path=elem_to);
+                else:
+                    debug.error("headers does not manage other than string, list and object");
         elif type(data["header"]) == dict:
             if "list" in data["header"].keys():
                 my_module.add_header_file(data["header"]["list"]);
@@ -428,8 +455,12 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
     if "path" in data.keys():
         if type(data["path"]) == list:
             my_module.add_path(data["path"]);
+        elif type(data["path"]) == dict:
+            for key in data["path"]:
+                my_module.add_path(data["path"][key], type = key);
+            
         else:
-            debug.error("Wrong type for node 'path' []");
+            debug.error("Wrong type for node 'path' [] or {}");
     
     
     if "dependency" in data.keys():
@@ -489,6 +520,29 @@ def load_module_from_GLD(target, name, path, json_path):
         my_module._pkg_set_if_default("LICENSE", property["license"])
     if property["version"] != None:
         my_module._pkg_set_if_default("VERSION", property["version"])
+        
+    
+    if "header-install-mode" in data.keys():
+        if data["header-install-mode"] == "AFTER":
+            my_module.set_include_header_after(True);
+        elif data["header-install-mode"] == "BEFORE":
+            my_module.set_include_header_after(False);
+        else:
+            debug.warning("can not support for element: 'header-install-mode' other value than [BEFORE,AFTER]");
+    
+    if "code-quality" in data.keys():
+        if data["header-install-mode"] == "LOW":
+            pass;
+        elif data["header-install-mode"] == "MEDIUM":
+            pass;
+        elif data["header-install-mode"] == "HARD":
+            pass;
+        elif data["header-install-mode"] == "PROFESSIONAL":
+            pass;
+        else:
+            debug.warning("Does not support other level than [LOW, MEDIUM, HARD, PROFESSIONAL]");
+        
+        
     # parsing all the file to configure:
     parse_node_generic(target, path, json_path, my_module, data, True);
     
@@ -645,5 +699,5 @@ def get_module_option_GLD(path, data, name):
            "group-id":group_id,
            "maintainer":maintainer,
            "version":version,
-           "version-id":version_id
+           "version-id":version_id,
            }
