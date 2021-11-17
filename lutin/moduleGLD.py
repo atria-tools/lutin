@@ -392,6 +392,10 @@ def parse_node_platform(target, path, json_path, my_module, data):
         if check_compatible("target", elem, target.get_type(), json_path):
             parse_node_generic(target, path, json_path, my_module, data[elem]);
 
+def parse_node_flag(target, path, json_path, my_module, data):
+    for elem in data.keys():
+        my_module.add_flag(elem, data[elem]);
+
 def parse_node_generic(target, path, json_path, my_module, data, first = False ):
     for elem in data.keys():
         if elem in list_of_property_module:
@@ -493,6 +497,9 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
         
     if "mode" in data.keys():
         parse_node_mode(target, path, json_path, my_module, data["mode"]);
+        
+    if "flag" in data.keys():
+        parse_node_flag(target, path, json_path, my_module, data["flag"]);
 
 def load_module_from_GLD(target, name, path, json_path):
     debug.debug("Parse file: "+ json_path + "'");
@@ -531,14 +538,8 @@ def load_module_from_GLD(target, name, path, json_path):
             debug.warning("can not support for element: 'header-install-mode' other value than [BEFORE,AFTER]");
     
     if "code-quality" in data.keys():
-        if data["header-install-mode"] == "LOW":
-            pass;
-        elif data["header-install-mode"] == "MEDIUM":
-            pass;
-        elif data["header-install-mode"] == "HARD":
-            pass;
-        elif data["header-install-mode"] == "PROFESSIONAL":
-            pass;
+        if data["code-quality"] in ["LOW","MEDIUM","HARD","PROFESSIONAL"]:
+            my_module.set_code_quality(data["code-quality"]);
         else:
             debug.warning("Does not support other level than [LOW, MEDIUM, HARD, PROFESSIONAL]");
         
@@ -571,10 +572,8 @@ def GLD_add_depend(my_module, data):
                 debug.error("Can not have dependency 'export' in an other type than boolean ...");
         flags_data = None;
         if "flag" in data.keys():
-            if "language" in data["flag"].keys() and "value" in data["flag"].keys():
-                flags_data = [data["flag"]["language"], data["flag"]["value"]]
-            else:
-                debug.error("Can not have dependency 'flag' without value 'language' and 'value' ...");
+            for elem in data["flag"].keys():
+                flags_data = [elem, data["flag"][elem]]
         missing_flags_data = None;
         if "missing-flag" in data.keys():
             if "language" in data["missing-flag"].keys() and "value" in data["missing-flag"].keys():
