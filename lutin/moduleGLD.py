@@ -70,6 +70,7 @@ list_of_element_availlable=[
         "dependency",
         "copy",
         "flag",
+        "flag-export",
         "compiler",
         "mode",
         "target",
@@ -205,12 +206,10 @@ list_of_element_availlable=[
                         "gale/context/X11/Context.cpp"
                     ],
                     "flag": {
-                        "language": "c++",
-                        "value": "-DGALE_BUILD_X11"
+                        "c++": "-DGALE_BUILD_X11"
                     },
                     "missing-flag": {
-                        "language": "c++",
-                        "value": "-DGALE_DOES_NOT_BUILD_X11"
+                        "c++": "-DGALE_DOES_NOT_BUILD_X11"
                     }
                 },
         },
@@ -231,6 +230,14 @@ list_of_element_availlable=[
         
         },
     }
+    "flag": {
+        "c++": "-DGALE_BUILD_X11",
+        "c": [
+            "-DAPPL_VERSION={{{project.version}}}",
+            "-DAPPL_NAME={{{project.name}}}",
+            "-DAPPL_TYPE={{{project.type}}}"
+        ]
+    },
     "arch": {
         "x86": {
             
@@ -376,6 +383,15 @@ def check_compatible(mode, value, list_to_check, json_path):
     return False;
     
 
+def replace_dynamic_tags(my_module, data):
+    out = data;
+    out = out.replace("{{{project.version}}}", tools.version_to_string(my_module.get_version()));
+    out = out.replace("{{{project.name}}}", my_module.get_name());
+    out = out.replace("{{{project.type}}}", my_module.get_type());
+    out = out.replace("{{{quote}}}", "\\'");
+    out = out.replace("{{{quote2}}}", "\\\""); # "
+    return out;
+
 
 def parse_node_arch(target, path, json_path, my_module, data):
     for elem in data.keys():
@@ -392,9 +408,19 @@ def parse_node_platform(target, path, json_path, my_module, data):
         if check_compatible("target", elem, target.get_type(), json_path):
             parse_node_generic(target, path, json_path, my_module, data[elem]);
 
-def parse_node_flag(target, path, json_path, my_module, data):
+def parse_node_flag(target, path, json_path, my_module, data, export = False):
+    if type(data) != dict:
+        debug.error("Can not parseflag other than dictionnary in: " + str(json_path));
     for elem in data.keys():
-        my_module.add_flag(elem, data[elem]);
+        if type(data[elem]) == list:
+            tmp = []
+            for elenFlag in data[elem]:
+                tmp.append(replace_dynamic_tags(my_module, elenFlag));
+            my_module.add_flag(elem, tmp, export);
+        elif type(data[elem]) == str:
+            my_module.add_flag(elem, replace_dynamic_tags(my_module, data[elem]), export);
+        else:
+            debug.error("not manage list of flag other than string and list of string, but it is " + str(type(data[elem])) + " in: '" + str(json_path) + "' for: " + str(data));
 
 def parse_node_generic(target, path, json_path, my_module, data, first = False ):
     for elem in data.keys():
@@ -411,7 +437,9 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
             debug.warning("Available List: " + str(list_of_element_ignored) + " or: " + str(list_of_element_availlable));
     
     if "source" in data.keys():
-        if type(data["source"]) == list:
+        if type(data["source"]) == str:
+            my_module.add_src_file(data["source"]);
+        elif type(data["source"]) == list:
             my_module.add_src_file(data["source"]);
         elif type(data["source"]) == dict:
             if "list" in data["source"].keys():
@@ -419,7 +447,7 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
             else:
                 debug.error("missing 'list' in node 'source:{}'");
         else:
-            debug.error("Wrong type for node 'source' [] or {}");
+            debug.error("'" + json_path + "'Wrong type for node 'source' [] or {} or string");
     
     if "header" in data.keys():
         if type(data["header"]) == list:
@@ -471,8 +499,12 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
         if type(data["dependency"]) == list:
             for elem in data["dependency"]:
                 GLD_add_depend(my_module, elem);
+        elif type(data["dependency"]) == str:
+            GLD_add_depend(my_module, data["dependency"]);
+        elif type(data["dependency"]) == dict:
+            GLD_add_depend(my_module, data["dependency"]);
         else:
-            debug.error("Wrong type for node 'dependency' []");
+            debug.error("Wrong type for node 'dependency' [] or {} or \"\"");
     
     if "compilation-version" in data.keys():
         if type(data["compilation-version"]) == dict:
@@ -499,7 +531,10 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
         parse_node_mode(target, path, json_path, my_module, data["mode"]);
         
     if "flag" in data.keys():
-        parse_node_flag(target, path, json_path, my_module, data["flag"]);
+        parse_node_flag(target, path, json_path, my_module, data["flag"], False);
+    
+    if "flag-export" in data.keys():
+        parse_node_flag(target, path, json_path, my_module, data["flag-export"], True);
 
 def load_module_from_GLD(target, name, path, json_path):
     debug.debug("Parse file: "+ json_path + "'");
@@ -619,29 +654,36 @@ def GLD_compile_version(my_module, data):
         my_module.compile_version(elem, data[elem])
     
 def GLD_copy(my_module, data):
-    path_src = None;
-    file_src = None;
-    path_to = "";
-    recursive = False;
-    if "path" in data.keys():
-        path_src = data["path"];
-    if "file" in data.keys():
-        file_src = data["file"];
-    if "to" in data.keys():
-        path_to = data["to"];
-    if "recursive" in data.keys():
-        if type(data["recursive"]) == bool:
-            recursive = data["recursive"];
+    try:
+        if type(data) == dict:
+            path_src = None;
+            file_src = None;
+            path_to = "";
+            recursive = False;
+            if "path" in data.keys():
+                path_src = data["path"];
+            if "file" in data.keys():
+                file_src = data["file"];
+            if "to" in data.keys():
+                path_to = data["to"];
+            if "recursive" in data.keys():
+                if type(data["recursive"]) == bool:
+                    recursive = data["recursive"];
+                else:
+                    debug.error("recursive is a boolean !!!");
+            if path_src == None and file_src == None:
+                debug.error("copy must at least have 'path' or 'file' !!!");
+            if path_src != None:
+                my_module.copy_path(path_src, path_to);
+            if file_src != None:
+                my_module.copy_file(file_src, path_to);
+        elif type(data) == str:
+            my_module.copy_file(data, "");
         else:
-            debug.error("recursive is a boolean !!!");
-    if path_src == None and file_src == None:
-        debug.error("copy must at least have 'path' or 'file' !!!");
-    if path_src != None:
-        my_module.copy_path(path_src, path_to);
-    if file_src != None:
-        my_module.copy_file(file_src, path_to);
-        
-        
+            debug.error("in module : " + my_module.get_name() + " not supported type for copy: " + type(data) + " string or object data=" + str(data));
+    except Exception as e:
+        debug.warning("in module : " + my_module.get_name());
+        raise e;
 
 def get_module_option_GLD(path, data, name):
     type = None;

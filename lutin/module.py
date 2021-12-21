@@ -1140,7 +1140,7 @@ class Module:
     ## @param[in] self (handle) Class handle
     ## @param[in] type (string) inclusion group name 'c', 'c++', 'java' ...
     ## @param[in] list ([string,...] or string) List of path to include
-    ## @param[in] export (bool) export the flat that has been requested to add if module is present.
+    ## @param[in] export (bool) export the flag that has been requested to add if module is present.
     ## @return None
     ##
     def add_flag(self, type, list, export=False):
