@@ -35,6 +35,13 @@ def get_type():
 	return "compiler"
 
 ##
+## @brief get the order of the current builder
+## @return the string that define the build order
+##
+def get_order():
+	return 400
+
+##
 ## @brief Get builder input file type
 ## @return List of extention supported
 ##

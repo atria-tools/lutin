@@ -310,6 +310,17 @@ def filter_extention(list_files, extentions, invert=False):
 			out.append(file)
 	return out
 
+def filter_map(input_data, extentions, invert=False):
+	out = {}
+	for key in input_data.keys():
+		if invert:
+			if key not in extentions:
+				out[key] = input_data[key];
+		else:
+			if key in extentions:
+				out[key] = input_data[key];
+	return out
+
 
 def move_if_needed(src, dst):
 	if not os.path.isfile(src):

@@ -62,9 +62,10 @@ def import_path(path_list):
 			debug.verbose("BUILDER:     Integrate: '" + builder_name + "' from '" + elem + "'")
 			the_builder = __import__(base_file_name)
 			builder_list.append({"name":builder_name,
+			                     "order":the_builder.get_order(),
 			                     "element":the_builder
 			                    })
-			debug.debug('BUILDER:     type=' + the_builder.get_type() + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
+			debug.debug('BUILDER:     type=' + the_builder.get_type() + " order=" + str(the_builder.get_order()) + " in=" + str(the_builder.get_input_type()) + " out=" + str(the_builder.get_output_type()))
 	debug.verbose("List of BUILDER: ")
 	for elem in builder_list:
 		debug.verbose("    " + str(elem["name"]))
@@ -81,8 +82,8 @@ def init():
 			element["element"].init()
 
 ##
-## @brief Get a builder tool with specifiying the input type (like cpp, S ...)
-## @param[in] input_type (string) extention file that can be compile
+## @brief Get a builder tool with specifying the input type (like cpp, S ...)
+## @param[in] input_type (string) extension file that can be compile
 ##
 def get_builder(input_type):
 	global builder_list
@@ -93,10 +94,59 @@ def get_builder(input_type):
 	# we can not find the builder ...
 	debug.error("Can not find builder for type : '" + str(input_type) + "'")
 	raise ValueError('type error :' + str(input_type))
+##
+## @brief Get a builder tool with his name
+## @param[in] name (string) name of the builder
+##
+def get_builder_named(name):
+	global builder_list
+	for element in builder_list:
+		if element["name"] == name:
+			return element["element"]
+	# we can not find the builder ...
+	debug.error("Can not find builder for type : '" + str(input_type) + "'")
+	raise ValueError('type error :' + str(input_type))
 
 ##
-## @brief Get a builder tool with specifiying the output type (like .exe, .jar ...)
-## @param[in] input_type (string) extention file that can be generated
+## @brief get all the builder with extension to detect automaticly mode to compile
+## @return a map with the key name of the builder, and a table of extension files
+##
+def get_full_builder_extention():
+	global builder_list
+	out = {};
+	for element in builder_list:
+		if element["element"] != None:
+			out[element["name"]] = element["element"].get_input_type();
+	return out;
+
+##
+## @brief get all the builder in the common order build
+## @return a list with the ordered builder names
+##
+def get_ordered_builder_list():
+	global builder_list
+	table = {};
+	for element in builder_list:
+		table[element["order"]] = element["name"];
+	out = []
+	for key in sorted(table.keys()):
+		out.append(table[key]);
+	debug.extreme_verbose("builder ordered=" + str(table));
+	debug.extreme_verbose("    ==> " + str(out));
+	return out;
+
+def find_builder_with_input_extention(extension):
+	extention_map = get_full_builder_extention();
+	for builder_name in get_ordered_builder_list():
+		debug.extreme_verbose("builder_name: " + str(extension) + " in " + str(extention_map[builder_name]));
+		if extension in extention_map[builder_name]:
+			return builder_name;
+	debug.warning("does not find the builder: for extension: " + str(extension))
+	return "?";
+
+##
+## @brief Get a builder tool with specifying the output type (like .exe, .jar ...)
+## @param[in] input_type (string) extension file that can be generated
 ##
 def get_builder_with_output(output_type):
 	global builder_list

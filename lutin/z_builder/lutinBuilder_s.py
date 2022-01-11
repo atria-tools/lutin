@@ -30,23 +30,30 @@ def get_type():
 	return "compiler"
 
 ##
+## @brief get the order of the current builder
+## @return the string that define the build order
+##
+def get_order():
+	return 300
+
+##
 ## @brief Get builder input file type
-## @return List of extention supported
+## @return List of extension supported
 ##
 def get_input_type():
 	return ["s", "S"]
 
 ##
 ## @brief Get builder output file type
-## @return List of extention supported
+## @return List of extension supported
 ##
 def get_output_type():
 	return ["o"]
 
 ##
 ## @brief Get builder support multi-threading or not
-## @return True Multithreading supported
-## @return False Multithreading NOT supported
+## @return True Multi-threading supported
+## @return False Multi-threading NOT supported
 ##
 def get_support_multithreading():
 	return True

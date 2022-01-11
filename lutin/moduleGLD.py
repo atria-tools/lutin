@@ -55,7 +55,8 @@ list_of_property_module=[
         "version",
         "version-id",
         "code-quality",
-        "header-install-mode"
+        "header-install-mode",
+        "package" # package is for specifie some right in LUTIN
     ];
 
 list_of_element_ignored=[
@@ -76,7 +77,8 @@ list_of_element_availlable=[
         "target",
         "arch",
         "bus-size", # todo
-        "sanity-compilation" # todo "isolate", "intricate", "*" permit to specify element to copy for the isolation mode. intricate is for current mode where everything is mixed together ...
+        "sanity-compilation", # todo "isolate", "intricate", "*" permit to specify element to copy for the isolation mode. intricate is for current mode where everything is mixed together ...
+        "compilator"
     ];
 
 """
@@ -442,10 +444,8 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
         elif type(data["source"]) == list:
             my_module.add_src_file(data["source"]);
         elif type(data["source"]) == dict:
-            if "list" in data["source"].keys():
-                my_module.add_src_file(data["source"]["list"]);
-            else:
-                debug.error("missing 'list' in node 'source:{}'");
+            for builder_key in data["source"].keys():
+                my_module.add_src_file_type(data["source"][builder_key], builder_key);
         else:
             debug.error("'" + json_path + "'Wrong type for node 'source' [] or {} or string");
     
@@ -477,10 +477,8 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
                 else:
                     debug.error("headers does not manage other than string, list and object");
         elif type(data["header"]) == dict:
-            if "list" in data["header"].keys():
-                my_module.add_header_file(data["header"]["list"]);
-            else:
-                debug.error("missing 'list' in node 'header:{}'");
+            for builder_key in data["header"].keys():
+                my_module.add_header_file(data["header"][builder_key], builder_key);
         else:
             debug.error("Wrong type for node 'headers' [] or {}");
     

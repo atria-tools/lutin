@@ -31,6 +31,12 @@ def init():
 def get_type():
 	return "linker"
 
+##
+## @brief get the order of the current builder
+## @return the string that define the build order
+##
+def get_order():
+	return 1100
 
 ##
 ## @brief Get builder input file type

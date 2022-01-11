@@ -41,6 +41,13 @@ def get_input_type():
 	return ["cpp", "CPP", "cxx", "CXX", "xx", "XX", "CC", "cc"]
 
 ##
+## @brief get the order of the current builder
+## @return the string that define the build order
+##
+def get_order():
+	return 600
+
+##
 ## @brief Get builder output file type
 ## @return List of extention supported
 ##
@@ -152,11 +159,16 @@ def get_version_compilation_flags(flags, dependency_flags):
 		is_gnu = default_version_gnu
 	
 	version = max(version_local, dependency_version)
-	if version == 2020:
+	if version == 2023:
 		if is_gnu == True:
-			out = ["-std=gnu++2a", "-D__CPP_VERSION__=2020"]
+			out = ["-std=gnu++23", "-D__CPP_VERSION__=2023"]
 		else:
-			out = ["-std=c++2a", "-D__CPP_VERSION__=2020"]
+			out = ["-std=c++23", "-D__CPP_VERSION__=2023"]
+	elif version == 2020:
+		if is_gnu == True:
+			out = ["-std=gnu++20", "-D__CPP_VERSION__=2020"]
+		else:
+			out = ["-std=c++20", "-D__CPP_VERSION__=2020"]
 	elif version == 2017:
 		if is_gnu == True:
 			out = ["-std=gnu++17", "-D__CPP_VERSION__=2017"]
