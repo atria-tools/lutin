@@ -445,7 +445,7 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
             my_module.add_src_file(data["source"]);
         elif type(data["source"]) == dict:
             for builder_key in data["source"].keys():
-                my_module.add_src_file_type(data["source"][builder_key], builder_key);
+                my_module.add_src_file(data["source"][builder_key], builder_name=builder_key);
         else:
             debug.error("'" + json_path + "'Wrong type for node 'source' [] or {} or string");
     
@@ -478,7 +478,7 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
                     debug.error("headers does not manage other than string, list and object");
         elif type(data["header"]) == dict:
             for builder_key in data["header"].keys():
-                my_module.add_header_file(data["header"][builder_key], builder_key);
+                my_module.add_header_file(data["header"][builder_key], builder_name=builder_key);
         else:
             debug.error("Wrong type for node 'headers' [] or {}");
     

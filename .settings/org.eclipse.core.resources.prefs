@@ -21,6 +21,7 @@ encoding//lutin/z_builder/lutinBuilder_libraryDynamic.py=utf-8
 encoding//lutin/z_builder/lutinBuilder_libraryStatic.py=utf-8
 encoding//lutin/z_builder/lutinBuilder_m.py=utf-8
 encoding//lutin/z_builder/lutinBuilder_mm.py=utf-8
+encoding//lutin/z_builder/lutinBuilder_nasm.py=utf-8
 encoding//lutin/z_builder/lutinBuilder_s.py=utf-8
 encoding//lutin/z_system/lutinSystem_Android_c.py=utf-8
 encoding//lutin/z_system/lutinSystem_Android_cxx.py=utf-8

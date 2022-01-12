@@ -698,21 +698,22 @@ class Module:
 		# -- install header (do it first for extern lib and gcov better interface) --
 		# ---------------------------------------------------------------------------
 		debug.debug("install headers ...")
-		for file in self._header:
-			src_path = os.path.join(self._origin_path, file["src"])
-			if "multi-dst" in file:
-				dst_path = os.path.join(include_path, file["multi-dst"])
-				tools.copy_anything(src_path,
+		for builder_name in self._header.keys():
+			for file in self._header[builder_name]:
+				src_path = os.path.join(self._origin_path, file["src"])
+				if "multi-dst" in file:
+					dst_path = os.path.join(include_path, file["multi-dst"])
+					tools.copy_anything(src_path,
+										dst_path,
+										recursive=file["recursive"],
+										force_identical=True,
+										in_list=copy_list)
+				else:
+					dst_path = os.path.join(include_path, file["dst"])
+					tools.copy_file(src_path,
 									dst_path,
-									recursive=file["recursive"],
 									force_identical=True,
 									in_list=copy_list)
-			else:
-				dst_path = os.path.join(include_path, file["dst"])
-				tools.copy_file(src_path,
-								dst_path,
-								force_identical=True,
-								in_list=copy_list)
 		#real copy files
 		tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
@@ -1174,33 +1175,30 @@ class Module:
 												}
 			self._flags["export"]["c-version"] = api_version
 			if gnu == True and same_as_api == True:
-				debug.debug("[" + self._name + "] Can not propagate the gnu extention of the C vesion for API");
+				debug.debug("[" + self._name + "] Can not propagate the gnu extension of the C version for API");
 		else:
 			debug.warning("[" + self._name + "] Can not set version of compilator:" + str(compilator_type));
 	
 	##
 	## @brief Add source file to compile
 	## @param[in] self (handle) Class handle
-	## @param[in] list ([string,...] or string) File(s) to compile (auto detect the compiler to use...)
-	## @return None
-	##
-	def add_src_file(self, list):
-		for elem in list:
-			extention = elem.split(".")[-1]
-			builder_name = builder.find_builder_with_input_extention(extention);
-			self.add_src_file_type(elem, builder_name)
-	##
-	## @brief Add source file to compile with specific type
-	## @param[in] self (handle) Class handle
+	## @param[in] list_values ([string,...] or string) File(s) to compile (auto detect the compiler to use...)
 	## @param[in] builder_name (string) builder name
-	## @param[in] list ([string,...] or string) File(s) to compile
 	## @return None
 	##
-	def add_src_file_type(self, list_values, builder_name):
-		debug.extreme_verbose(" add_src_file_type  ==> " + str(self._src.keys()) + " with builder name " + str(builder_name));
-		if builder_name not in self._src.keys():
-			self._src[builder_name] = [];
-		tools.list_append_to(self._src[builder_name], list_values, True);
+	def add_src_file(self, list_values, builder_name=None):
+		if type(list_values) == str:
+			list_values = [list_values]
+		if builder_name == None:
+			for elem in list_values:
+				extention = elem.split(".")[-1]
+				builder_name = builder.find_builder_with_input_extention(extention);
+				self.add_src_file(elem, builder_name)
+		else:
+			debug.extreme_verbose(" add_src_file_type  ==> " + str(self._src.keys()) + " with builder name " + str(builder_name));
+			if builder_name not in self._src.keys():
+				self._src[builder_name] = [];
+			tools.list_append_to(self._src[builder_name], list_values, True);
 	
 	##
 	## @brief Add all files in a specific path as source file to compile
@@ -1271,7 +1269,7 @@ class Module:
 	## 
 	## @return None
 	##
-	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False):
+	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False, builder_name="*"):
 		if destination_path != None:
 			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
@@ -1323,7 +1321,9 @@ class Module:
 						new_list.append({"src":elem,
 										 "dst":out_elem,
 										 "recursive":recursive})
-		tools.list_append_to(self._header, new_list, True)
+		if builder_name not in self._header.keys():
+			self._header[builder_name] = [];
+		tools.list_append_to(self._header[builder_name], new_list, True)
 	
 	##
 	## @brief An an header path in the install directory
@@ -1473,11 +1473,11 @@ class Module:
 		
 		for element in self._flags["local"]:
 			value = self._flags["local"][element];
-			self._print_list('flags "' + str(element) + '"', value);
+			self._print_list('flags(' + str(element) + ')', value);
 		
 		for element in self._flags["export"]:
 			value = self._flags["export"][element];
-			self._print_list('flags export "' + str(element) + '"', str(value));
+			self._print_list('flags export(' + str(element) + ')', str(value));
 		if len(self._src.keys()) != 0:
 			for key in self._src.keys():
 				value = self._src[key];
