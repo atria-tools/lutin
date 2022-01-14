@@ -61,6 +61,30 @@ def run_command_no_lock_out(cmd_line):
 	# launch the subprocess:
 	p.communicate()
 
+
+def run_command_pwd(cmd_line, cwd):
+	# prepare command line:
+	args = shlex.split(cmd_line)
+	debug.verbose("cmd = " + str(args))
+	try:
+		# create the subprocess
+		"""
+		if cwd != None:
+			debug.info("path = " + cwd)
+		"""
+		p = subprocess.Popen(args, cwd=cwd);
+	except subprocess.CalledProcessError as e:
+		debug.error("subprocess.CalledProcessError : " + str(args))
+	except Exception as eee:
+		debug.warning("On : " + str(args))
+		debug.error("Exception: " + str(eee))
+	except:
+	    print("Unexpected error:", sys.exc_info()[0])
+	    raise
+	p.communicate();
+	# Check error :
+	return p.returncode
+
 ##
 ## @brief Execute the command and ruturn generate data
 ##

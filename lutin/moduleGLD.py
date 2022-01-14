@@ -424,6 +424,47 @@ def parse_node_flag(target, path, json_path, my_module, data, export = False):
         else:
             debug.error("not manage list of flag other than string and list of string, but it is " + str(type(data[elem])) + " in: '" + str(json_path) + "' for: " + str(data));
 
+def parse_node_header_dict(target, path, json_path, my_module, data, builder_name = None):
+    if "path" in data.keys() or "to" in data.keys() or "recursive" in data.keys() or "filter" in data.keys():                
+        #{'path': 'thirdparty/src/', 'filter': '*.h', 'to': 'g3log'}
+        elem_path = "";
+        elem_to = "";
+        elem_recursive = True;
+        elem_filter = "*"
+        if "path" in data:
+            elem_path = data["path"];
+        if "to" in data:
+            elem_to = data["to"];
+        if "recursive" in data:
+            elem_recursive = data["recursive"];
+        if "filter" in data:
+            elem_filter = data["filter"];
+        if elem_path == "":
+            debug.error("header does not support type of dict: " + str(data) + " ==> missing 'path'")
+        my_module.add_header_path(elem_path, regex=elem_filter, clip_path=None, recursive=elem_recursive, destination_path=elem_to, builder_name=builder_name);
+    else:
+        for builder_key in data.keys():
+            my_module.add_header_file(data[builder_key], builder_name=builder_key);
+    
+def parse_node_header_list(target, path, json_path, my_module, data, builder_name = None):
+    for elem in data:
+        if type(elem) == list or type(elem) == str:
+            my_module.add_header_file(elem, builder_name = builder_name);
+        elif type(elem) == dict:
+            parse_node_header_dict(target, path, json_path, my_module, elem, builder_name);
+        else:
+            debug.error("headers does not manage other than string, list and object");
+
+def parse_node_header(target, path, json_path, my_module, data, builder_name = None):
+        if type(data) == str:
+            my_module.add_header_file(data, builder_name = builder_name);
+        if type(data) == list:
+            parse_node_header_list(target, path, json_path, my_module, data, builder_name);
+        elif type(data) == dict:
+            parse_node_header_dict(target, path, json_path, my_module, data, builder_name);
+        else:
+            debug.error("Wrong type for node 'headers' [] or {}");
+
 def parse_node_generic(target, path, json_path, my_module, data, first = False ):
     for elem in data.keys():
         if elem in list_of_property_module:
@@ -450,37 +491,7 @@ def parse_node_generic(target, path, json_path, my_module, data, first = False )
             debug.error("'" + json_path + "'Wrong type for node 'source' [] or {} or string");
     
     if "header" in data.keys():
-        if type(data["header"]) == list:
-            for elem in data["header"]:
-                if type(elem) == list:
-                    my_module.add_header_file(elem);
-                elif type(elem) == str:
-                    my_module.add_header_file(elem);
-                elif type(elem) == dict:
-                    pass;
-                    #{'path': 'thirdparty/src/', 'filter': '*.h', 'to': 'g3log'}
-                    elem_path = "";
-                    elem_to = "";
-                    elem_recursive = True;
-                    elem_filter = "*"
-                    if "path" in elem:
-                        elem_path = elem["path"];
-                    if "to" in elem:
-                        elem_to = elem["to"];
-                    if "recursive" in elem:
-                        elem_recursive = elem["recursive"];
-                    if "filter" in elem:
-                        elem_filter = elem["filter"];
-                    if elem_path == "":
-                        debug.error("header does not support type of dict: " + str(elem) + " ==> missing 'path'")
-                    my_module.add_header_path(elem_path, regex=elem_filter, clip_path=None, recursive=elem_recursive, destination_path=elem_to);
-                else:
-                    debug.error("headers does not manage other than string, list and object");
-        elif type(data["header"]) == dict:
-            for builder_key in data["header"].keys():
-                my_module.add_header_file(data["header"][builder_key], builder_name=builder_key);
-        else:
-            debug.error("Wrong type for node 'headers' [] or {}");
+        parse_node_header(target, path, json_path, my_module, data["header"]);
     
     if "path" in data.keys():
         if type(data["path"]) == list:
@@ -657,9 +668,12 @@ def GLD_copy(my_module, data):
             path_src = None;
             file_src = None;
             path_to = "";
+            group_folder = "in-shared";
             recursive = False;
             if "path" in data.keys():
                 path_src = data["path"];
+            if "group" in data.keys():
+                group_folder = data["group"];
             if "file" in data.keys():
                 file_src = data["file"];
             if "to" in data.keys():
@@ -672,11 +686,11 @@ def GLD_copy(my_module, data):
             if path_src == None and file_src == None:
                 debug.error("copy must at least have 'path' or 'file' !!!");
             if path_src != None:
-                my_module.copy_path(path_src, path_to);
+                my_module.copy_path(path_src, path_to, group_folder=group_folder);
             if file_src != None:
-                my_module.copy_file(file_src, path_to);
+                my_module.copy_file(file_src, path_to, group_folder=group_folder);
         elif type(data) == str:
-            my_module.copy_file(data, "");
+            my_module.copy_file(data, "", group_folder=group_folder);
         else:
             debug.error("in module : " + my_module.get_name() + " not supported type for copy: " + type(data) + " string or object data=" + str(data));
     except Exception as e:

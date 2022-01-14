@@ -14,6 +14,7 @@ import copy
 import inspect
 import fnmatch
 import json
+import re
 # Local import
 from . import host
 from . import tools
@@ -314,13 +315,13 @@ class Module:
 				image.resize(source, temporary_file, sizeX, sizeY, file_cmd)
 				# Copy file in statndard mode
 				tools.copy_file(temporary_file,
-								os.path.join(target.get_build_path_data(self._name), destination),
+								os.path.join(target.get_build_path_data(self._name, group="in-shared"), destination),
 								file_cmd,
 								in_list=copy_list)
 			else:
 				debug.verbose("Might copy file : " + display_source + " ==> " + destination)
 				tools.copy_file(source,
-								os.path.join(target.get_build_path_data(self._name), destination),
+								os.path.join(target.get_build_path_data(self._name, group="in-shared"), destination),
 								file_cmd,
 								in_list=copy_list)
 	
@@ -332,7 +333,7 @@ class Module:
 	## @return None
 	##
 	def files_to_build(self, target, copy_list):
-		for source, destination in self._files:
+		for source, destination, group in self._files:
 			display_source = source
 			source = os.path.join(self._origin_path, source)
 			if destination == "":
@@ -340,9 +341,9 @@ class Module:
 				debug.verbose("Regenerate Destination : '" + destination + "'")
 			# TODO : set it back : file_cmd = target.get_build_path_data(self.name)
 			file_cmd = ""
-			debug.verbose("Might copy file : " + display_source + " ==> " + destination)
+			debug.warning("Might copy file : " + display_source + "==> (" + str(group) + ") " + destination)
 			tools.copy_file(source,
-							os.path.join(target.get_build_path_data(self._name), destination),
+							os.path.join(target.get_build_path_data(self._name, group=group_folder), destination),
 							force_identical=True,
 							in_list=copy_list)
 	
@@ -354,8 +355,8 @@ class Module:
 	## @return None
 	##
 	def paths_to_build(self, target, copy_list):
-		for source, destination in self._paths:
-			debug.debug("Might copy path : " + source + "==>" + destination)
+		for source, destination, group in self._paths:
+			debug.warning("Might copy path : " + source + "==> (" + str(group) + ") " + destination)
 			tmp_path = os.path.dirname(os.path.realpath(os.path.join(self._origin_path, source)))
 			tmp_rule = os.path.basename(source)
 			for root, dirnames, filenames in os.walk(tmp_path):
@@ -374,10 +375,10 @@ class Module:
 					# TODO : maybe an error when changing subdirectory ...
 					#if root[len(source)-1:] != "":
 					#	new_destination = os.path.join(new_destination, root[len(source)-1:])
-					debug.verbose("Might copy : '" + os.path.join(root, cycle_file) + "' ==> '" + os.path.join(target.get_build_path_data(self._name), new_destination, cycle_file) + "'" )
+					debug.verbose("Might copy : '" + os.path.join(root, cycle_file) + "' ==> '" + os.path.join(target.get_build_path_data(self._name, group=group), new_destination, cycle_file) + "'" )
 					file_cmd = "" # TODO : ...
 					tools.copy_file(os.path.join(root, cycle_file),
-									os.path.join(target.get_build_path_data(self._name), new_destination, cycle_file),
+									os.path.join(target.get_build_path_data(self._name, group=group), new_destination, cycle_file),
 									file_cmd,
 									in_list=copy_list)
 	
@@ -729,12 +730,12 @@ class Module:
 		   and self._type != 'PACKAGE':
 			# build local sources in a specific order:
 			for builder_name in self._ordered_builder:
-				debug.warning("Execute builder : " + builder_name);
+				debug.verbose("Execute builder : " + builder_name);
 				if builder_name not in self._src.keys():
-					debug.warning("    ==> nothing to do...");
+					debug.verbose("    ==> nothing to do...");
 					continue;
 				for file in self._src[builder_name]:
-					debug.info(" " + self._name + " <== " + file);
+					debug.verbose(" " + self._name + " <== " + file);
 					fileExt = file.split(".")[-1]
 					try:
 						tmp_builder = builder.get_builder_named(builder_name);
@@ -962,7 +963,8 @@ class Module:
 		#real copy files
 		tools.copy_list(copy_list)
 		# remove unneded files (NOT folder ...)
-		tools.clean_directory(target.get_build_path_data(self._name), copy_list)
+		tools.clean_directory(target.get_build_path_data(self._name, group = "in-shared"), copy_list)
+		tools.clean_directory(target.get_build_path_data(self._name, group = "in-bin"), copy_list)
 		
 		# create local heritage specification
 		self._local_heritage.auto_add_build_header()
@@ -1269,7 +1271,9 @@ class Module:
 	## 
 	## @return None
 	##
-	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False, builder_name="*"):
+	def add_header_file(self, list, destination_path=None, clip_path=None, recursive=False, builder_name=None):
+		if builder_name == None:
+			builder_name = "*";
 		if destination_path != None:
 			debug.verbose("Change destination PATH: '" + str(destination_path) + "'")
 		new_list = []
@@ -1335,12 +1339,12 @@ class Module:
 	## @param[in] destination_path (string) Path to install the files (remove all the path of the file)
 	## @return None
 	##
-	def add_header_path(self, base_path, regex="*", clip_path=None, recursive=False, destination_path=None):
+	def add_header_path(self, base_path, regex="*", clip_path=None, recursive=False, destination_path=None, builder_name=None):
 		if	base_path[-1] == '/' \
 		   or base_path[-1] == '\\':
-			self.add_header_file(base_path + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path)
+			self.add_header_file(base_path + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path, builder_name=builder_name)
 		else:
-			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path)
+			self.add_header_file(base_path + "/" + regex, clip_path=clip_path, recursive=recursive, destination_path=destination_path, builder_name=builder_name)
 	##
 	## @brief Many library need to generate dynamic data file, use this to add dynamic generated files
 	## @param[in] self (handle) Class handle
@@ -1422,8 +1426,11 @@ class Module:
 	## @param[in] destination (string) Destination path to install data
 	## @return None
 	##
-	def copy_file(self, source, destination=''):
-		self._files.append([source, destination])
+	def copy_file(self, source, destination='', group_folder="in-shared"):
+		groups = ["in-shared", "in-bin"];
+		if group_folder not in groups:
+			debug.error("Can not add file in other group than " + str(groups) + " but require: " + str(group_folder))
+		self._files.append([source, destination, group_folder])
 	
 	##
 	## @brief Copy the path in the module datas
@@ -1432,8 +1439,11 @@ class Module:
 	## @param[in] destination (string) Destination path to install data
 	## @return None
 	##
-	def copy_path(self, source, destination=''):
-		self._paths.append([source, destination])
+	def copy_path(self, source, destination='', group_folder="in-shared"):
+		groups = ["in-shared", "in-bin"];
+		if group_folder not in groups:
+			debug.error("Can not add file in other group than " + str(groups) + " but require: " + str(group_folder))
+		self._paths.append([source, destination, group_folder])
 	
 	##
 	## @brief Print the list to help
@@ -1806,8 +1816,11 @@ def import_path(path_list):
 def exist(target, name):
 	global __module_list
 	for mod in __module_list:
-		if mod[0] == name:
-			return True
+		return_check = bool(re.match(name, mod[0]));
+		debug.warning("check exist: " + name + " => " + mod[0]);
+		#if mod[0] == name:
+		if return_check:
+			return True;
 	return False
 
 ##
@@ -1816,10 +1829,15 @@ def exist(target, name):
 ## @param[in] name (string) Name of the module
 ## @return (handle) @ref Module handle
 ##
-def load_module(target, name):
+def load_module(target, name_reg):
 	global __module_list
+	#debug.warning("Load module: " + str(len(__module_list)) + " => " + str(__module_list));
 	for mod in __module_list:
-		if mod[0] == name:
+		return_check = bool(re.match(name_reg, mod[0]));
+		debug.warning("check load: " + name_reg + " => " + mod[0]);
+		#if mod[0] == name :
+		if return_check:
+			name = mod[0]
 			if mod[2]== False:
 				# read GLD file
 				the_module = moduleGLD.load_module_from_GLD(target, mod[0], os.path.dirname(mod[1]), mod[1])

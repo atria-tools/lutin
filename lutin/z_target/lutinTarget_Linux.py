@@ -165,14 +165,17 @@ class Target(target.Target):
 	def run(self, pkg_name, option_list, binary_name = None):
 		if binary_name == None:
 			binary_name = pkg_name;
+		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "bin")
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' executable: '" + binary_name + "' + option: " + str(option_list))
+		debug.info("-- Run path (PWD) '" + str(appl_path))
 		debug.debug("------------------------------------------------------------------------")
-		appl_path = os.path.join(self.get_staging_path(pkg_name), pkg_name + ".app", "bin", binary_name)
-		cmd = appl_path + " "
+		cmd = os.path.join(appl_path, binary_name) + " ";
 		for elem in option_list:
-			cmd += elem + " "
-		multiprocess.run_command_no_lock_out(cmd)
+			cmd += elem + " ";
+		ret = multiprocess.run_command_pwd(cmd, appl_path);
+		if ret != 0:
+			debug.error("application exit with error: " + str(ret));
 		debug.debug("------------------------------------------------------------------------")
 		debug.info("-- Run package '" + pkg_name + "' Finished")
 		debug.debug("------------------------------------------------------------------------")

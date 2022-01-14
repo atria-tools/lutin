@@ -72,14 +72,14 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 	debug.extreme_verbose("		force_identical='" + str(force_identical) + "'")
 	# if force mode selected ==> just force rebuild ...
 	if env.get_force_mode():
-		debug.extreme_verbose("			==> must rebuild (force mode)")
+		debug.verbose("			==> must rebuild (force mode)")
 		return True
 	
 	# check if the destination existed:
 	if     dst != "" \
 	   and dst != None \
 	   and os.path.exists(dst) == False:
-		debug.extreme_verbose("			==> must rebuild (dst does not exist)")
+		debug.verbose("			==> must rebuild (dst does not exist)")
 		return True
 	if     src != "" \
 	   and src != None \
@@ -92,25 +92,25 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 	   and src != "" \
 	   and src != None \
 	   and os.path.getmtime(src) > os.path.getmtime(dst):
-		debug.extreme_verbose("			==> must rebuild (source time greater)")
+		debug.verbose("			==> must rebuild (source time greater)")
 		return True
 	
 	if     depend_file != "" \
 	   and depend_file != None \
 	   and os.path.exists(depend_file) == False:
-		debug.extreme_verbose("			==> must rebuild (no depending file)")
+		debug.verbose("			==> must rebuild (no depending file)")
 		return True
 	
 	if     file_cmd != "" \
 	   and file_cmd != None:
 		if os.path.exists(file_cmd) == False:
-			debug.extreme_verbose("			==> must rebuild (no commandLine file)")
+			debug.verbose("			==> must rebuild (no commandLine file)")
 			return True
 		# check if the 2 cmd_line are similar :
 		file2 = open(file_cmd, "r")
 		first_and_unique_line = file2.read()
 		if first_and_unique_line != cmd_line:
-			debug.extreme_verbose("			==> must rebuild (cmd_lines are not identical)")
+			debug.verbose("			==> must rebuild (cmd_lines are not identical)")
 			debug.extreme_verbose("				==> '" + cmd_line + "'")
 			debug.extreme_verbose("				==> '" + first_and_unique_line + "'")
 			file2.close()
@@ -124,35 +124,37 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 		file = open(depend_file, "r")
 		for cur_line in file.readlines():
 			# normal file : end with : ": \\n"
-			cur_line = cur_line[:len(cur_line)-1]
+			cur_line_data = cur_line[:len(cur_line)-1]
+			
 			# removing last \ ...
-			if cur_line[len(cur_line)-1:] == '\\' :
-				cur_line = cur_line[:len(cur_line)-1]
+			if cur_line_data[len(cur_line_data)-1:] == '\\' :
+				cur_line_data = cur_line_data[:len(cur_line_data)-1]
 			# remove white space : 
 			#debug.verbose("				Line (read) : '" + cur_line + "'");
-			cur_line = cur_line.strip()
+			cur_line_data = cur_line_data.strip()
 			#debug.verbose("				Line (strip) : '" + cur_line + "'");
 			
-			test_file=""
-			if cur_line[len(cur_line)-1:] == ':':
-				debug.extreme_verbose("				Line (no check (already done) : '" + cur_line + "'");
-			elif    len(cur_line) == 0 \
-			     or cur_line == '\\':
-				debug.extreme_verbose("				Line (Not parsed) : '" + cur_line + "'");
-			else:
-				test_file = cur_line
-				debug.extreme_verbose("				Line (might check) : '" + test_file + "'");
-			# really check files:
-			if test_file != "":
-				debug.extreme_verbose("					==> test");
-				if False==os.path.exists(test_file):
-					debug.extreme_verbose("			==> must rebuild (a dependency file does not exist)")
-					file.close()
-					return True
-				if os.path.getmtime(test_file) > os.path.getmtime(dst):
-					debug.extreme_verbose("			==> must rebuild (a dependency file time is newer)")
-					file.close()
-					return True
+			for cur_line in cur_line_data.split(" "):
+				test_file=""
+				if cur_line[len(cur_line)-1:] == ':':
+					debug.extreme_verbose("				Line (no check (already done) : '" + cur_line + "'");
+				elif    len(cur_line) == 0 \
+				     or cur_line == '\\':
+					debug.extreme_verbose("				Line (Not parsed) : '" + cur_line + "'");
+				else:
+					test_file = cur_line
+					debug.extreme_verbose("				Line (might check) : '" + test_file + "'");
+				# really check files:
+				if test_file != "":
+					debug.extreme_verbose("					==> test");
+					if False==os.path.exists(test_file):
+						debug.verbose("			==> must rebuild (a dependency file does not exist) " + str(test_file))
+						file.close()
+						return True
+					if os.path.getmtime(test_file) > os.path.getmtime(dst):
+						debug.verbose("			==> must rebuild (a dependency file time is newer)" + str(test_file))
+						file.close()
+						return True
 		# close the current file :
 		file.close()
 	# check the 2 files are identical:
@@ -161,12 +163,12 @@ def need_re_build(dst, src, depend_file=None, file_cmd="", cmd_line="", force_id
 		size_src = _file_size(src)
 		size_dst = _file_size(dst)
 		if size_src != size_dst:
-			debug.extreme_verbose("			Force Rewrite not the same size     size_src=" + str(size_src) + " != size_dest=" + str(size_dst))
+			debug.info("			Force Rewrite not the same size     size_src=" + str(size_src) + " != size_dest=" + str(size_dst))
 			return True
 		data_src = _file_read_data(src, binary=True)
 		data_dst = _file_read_data(dst, binary=True)
 		if data_src != data_dst:
-			debug.extreme_verbose("			Force Rewrite not the same data")
+			debug.info("			Force Rewrite not the same data")
 			return True
 	
 	debug.extreme_verbose("			==> Not rebuild (all dependency is OK)")

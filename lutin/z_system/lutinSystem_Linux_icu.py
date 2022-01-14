@@ -24,7 +24,7 @@ class System(system.System):
 		# todo : create a searcher of the presence of the library:
 		self.add_flag("link-lib", "icuuc")
 		self.add_flag("link-lib", "icui18n")
-		self.add_flag("link-lib", "icuData")
+		self.add_flag("link-lib", "icudata")
 		self.add_depend([
 		    'c'
 		    ])

@@ -129,7 +129,8 @@ def usage(full=False):
 			"""
 		
 		print(data_print)
-		if mod["description"] != "":
+		if     mod["description"] != None \
+		   and mod["description"] != "":
 			print("			" + mod["description"])
 		if full == True:
 			if     mod["type"] != None \

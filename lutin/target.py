@@ -144,6 +144,8 @@ class Target:
 		self.path_bin="bin"
 		self.path_lib="lib"
 		self.path_data="share"
+		self.path_data_in_shared="data_share"
+		self.path_data_in_bin="data_bin"
 		self.path_doc="doc"
 		self.path_include="include"
 		self.path_temporary_generate="generate"
@@ -444,10 +446,15 @@ class Target:
 	## @brief Get the data path where pre-write the install "data" files
 	## @param[in] self (handle) Class handle
 	## @param[in] name (string) Name of the module
+	## @param[in] group (enum [in-bin, in-shared]) Group of the destination
 	## @return (string) The path
 	##
-	def get_build_path_data(self, name):
-		return os.path.join(self.get_build_path(name), self.path_data, name)
+	def get_build_path_data(self, name, group):
+		if group == "in-shared":
+			return os.path.join(self.get_build_path(name), self.path_data_in_shared, name)
+		elif group == "in-bin":
+			return os.path.join(self.get_build_path(name), self.path_data_in_bin, name)
+		debug.error("wrong type (impossible case...)")
 	
 	##
 	## @brief Get the include path where pre-install "include" headers files
@@ -519,10 +526,15 @@ class Target:
 	## @brief Get the data path for staging step
 	## @param[in] self (handle) Class handle
 	## @param[in] name (string) Name of the package
+	## @param[in] group (enum [in-bin, in-shared]) Group of the destination
 	## @return (string) The path
 	##
-	def get_staging_path_data(self, name, tmp=False):
-		return os.path.join(self.get_staging_path(name, tmp), self.path_data, name)
+	def get_staging_path_data(self, name, tmp=False, group = "in-shared"):
+		if group == "in-shared":
+			return os.path.join(self.get_staging_path(name, tmp), self.path_data, name)
+		elif group == "in-bin":
+			return os.path.join(self.get_staging_path(name, tmp), self.path_bin, name)
+		debug.error("wrong type (impossible case...)")
 	
 	##
 	## @brief Get the include path for staging step
@@ -730,7 +742,7 @@ class Target:
 					"""
 					if     mod.get_type() != "BINARY" \
 					   and mod.get_type() != "PACKAGE":
-						debug.error("Can not run other than 'BINARY' ... pakage='" + mod.get_type() + "' for module='" + module_name + "'")
+						debug.error("Can not run other than 'BINARY' ... package='" + mod.get_type() + "' for module='" + module_name + "'")
 					"""
 					bin_name = None
 					if len(action_name) > 3:
@@ -769,8 +781,9 @@ class Target:
 					   and optionnal == True:
 						ret = [heritage.HeritageList(), False]
 					else:
+						debug.warning("compare " + str(self.module_list) + "  " + module_name)
 						for mod in self.module_list:
-							debug.verbose("compare " + mod.get_name() + " == " + module_name)
+							debug.warning("compare " + mod.get_name() + " == " + module_name)
 							if mod.get_name() == module_name:
 								if action_name[:4] == "dump":
 									debug.info("dump module '" + module_name + "'")
@@ -899,7 +912,7 @@ class Target:
 		debug.debug("heritage for " + str(pkg_name) + ":")
 		for heritage in heritage_list.list_heritage:
 			debug.debug("sub elements: " + str(heritage.name))
-			path_src = self.get_build_path_data(heritage.name)
+			path_src = self.get_build_path_data(heritage.name, group="in-shared")
 			debug.verbose("      has directory: " + path_src)
 			if os.path.isdir(path_src):
 				if static == True:
@@ -991,6 +1004,29 @@ class Target:
 				except:
 					debug.extreme_verbose("can not find : " + path_src)
 					pass
+		# copy data for the data inside bin (stupid, but needed)
+		debug.debug("heritage for " + str(pkg_name) + ":")
+		for heritage in heritage_list.list_heritage:
+			debug.debug("sub elements: " + str(heritage.name))
+			path_src = self.get_build_path_data(heritage.name, group="in-bin")
+			if os.path.isdir(path_src):
+				if static == True:
+					debug.debug("      need copy: " + path_src + " to " + path_package_bin)
+					#copy all data:
+					tools.copy_anything(path_src,
+					                    path_package_bin,
+					                    recursive=True,
+					                    force_identical=True,
+					                    in_list=copy_list)
+				else:
+					debug.debug("      need copy: " + os.path.dirname(path_src) + " to " + path_package_bin)
+					#copy all data:
+					tools.copy_anything(os.path.dirname(path_src),
+					                    path_package_bin,
+					                    recursive=True,
+					                    force_identical=True,
+					                    in_list=copy_list)
+		
 		#real copy files
 		ret_copy = tools.copy_list(copy_list)
 		ret_remove = False
