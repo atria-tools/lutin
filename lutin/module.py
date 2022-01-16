@@ -41,9 +41,9 @@ from xmlrpc.client import boolean
 ##
 class Module:
 	##
-	## @brief Contructor
+	## @brief Constructor
 	## @param[in] self (handle) Class handle
-	## @param[in] file (string) Plugin file name (use __file__ to get it)
+	## @param[in] file (string) Plug-in file name (use __file__ to get it)
 	## @param[in] module_name (string) Name of the module
 	## @param[in] module_type (string) Type of the module:
 	##	 - BINARY
@@ -59,7 +59,7 @@ class Module:
 	## @return None
 	##
 	def __init__(self, file, module_name, module_type):
-		## Remove all variable to prevent error of multiple deffinition of the module ...
+		## Remove all variable to prevent error of multiple definition of the module ...
 		if module_type == "BINARY_SHARED":
 			module_type = "BINARY_DYNAMIC";
 		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + module_type)
@@ -80,7 +80,7 @@ class Module:
 		self._actions = []
 		# Dependency list:
 		self._depends = []
-		# Dependency list (optionnal module):
+		# Dependency list (optional module):
 		self._depends_optionnal = []
 		self._depends_find = []
 		# Documentation list:
@@ -161,7 +161,7 @@ class Module:
 	##
 	## @brief Generate a string representing the class (for str(xxx))
 	## @param[in] self (handle) Class handle
-	## @return (string) string of str() convertion
+	## @return (string) string of str() conversion
 	##
 	def __repr__(self):
 		return "{lutin.Module:" + str(self._name) + "}"
@@ -268,7 +268,6 @@ class Module:
 				"-Wno-pointer-to-int-cast",
 				"-Wredundant-decls",
 				]);
-			
 		if id >= 3:
 			# PROFESSIONAL
 			self.add_flag('c', [
@@ -833,6 +832,7 @@ class Module:
 			 or self._type == 'BINARY_DYNAMIC' \
 			 or self._type == 'BINARY_STAND_ALONE':
 			shared_mode = False
+			static_mode = True
 			if "Android" in target.get_type():
 				debug.warning("Android mode ...")
 				# special case for android ...
@@ -842,7 +842,6 @@ class Module:
 						# abstract GUI interface ...
 						shared_mode = True
 						break;
-			static_mode = True
 			if target.support_dynamic_link == True:
 				if self._type == 'BINARY_DYNAMIC':
 					static_mode = False
@@ -877,7 +876,7 @@ class Module:
 					debug.error("UN-SUPPORTED link format: '.jar'")
 			else:
 				# try to build the binary with dependency of .so and the standalone binary (Not package dependent)
-				if target.support_dynamic_link == True:
+				if static_mode == True:
 					try:
 						tmp_builder = builder.get_builder_with_output("bin");
 						res_file = tmp_builder.link(list_sub_file_needed_to_build,
