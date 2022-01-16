@@ -1829,15 +1829,11 @@ def exist(target, name):
 ## @param[in] name (string) Name of the module
 ## @return (handle) @ref Module handle
 ##
-def load_module(target, name_reg):
+def load_module(target, nameg):
 	global __module_list
 	#debug.warning("Load module: " + str(len(__module_list)) + " => " + str(__module_list));
 	for mod in __module_list:
-		return_check = bool(re.match(name_reg, mod[0]));
-		debug.warning("check load: " + name_reg + " => " + mod[0]);
-		#if mod[0] == name :
-		if return_check:
-			name = mod[0]
+		if mod[0] == name :
 			if mod[2]== False:
 				# read GLD file
 				the_module = moduleGLD.load_module_from_GLD(target, mod[0], os.path.dirname(mod[1]), mod[1])
