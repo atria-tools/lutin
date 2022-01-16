@@ -723,121 +723,128 @@ class Target:
 			for mod in self.module_list:
 				mod.clean(self)
 		else:
-			module_name = name
-			action_list = actions
-			for action_name in action_list:
-				debug.verbose("requested : " + module_name + "?" + action_name + " [START]")
-				ret = None;
-				if action_name == "install":
-					try:
-						self.install_package(module_name)
-					except AttributeError:
-						debug.error("target have no 'install_package' instruction")
-				elif action_name == "uninstall":
-					try:
-						self.un_install_package(module_name)
-					except AttributeError:
-						debug.error("target have no 'un_install_package' instruction")
-				elif action_name[:3] == "run":
-					"""
-					if     mod.get_type() != "BINARY" \
-					   and mod.get_type() != "PACKAGE":
-						debug.error("Can not run other than 'BINARY' ... package='" + mod.get_type() + "' for module='" + module_name + "'")
-					"""
-					bin_name = None
-					if len(action_name) > 3:
-						if action_name[3] == '%':
-							bin_name = ""
-							for elem in action_name[4:]:
-								if elem == ":":
-									break;
-								bin_name += elem
-						# we have option:
-						action_name2 = action_name.replace("\:", "1234COLUMN4321")
-						option_list = action_name2.split(":")
-						if len(option_list) == 0:
-							if bin_name != None:
-								debug.warning("action 'run' wrong options options ... : '" + action_name + "' might be separate with ':'")
-							option_list = []
+			if name.find("*") != -1:
+				list_of_all_element = module.list_filtered_module(name);
+			else:
+				list_of_all_element = [name]
+			for module_name in list_of_all_element:
+				action_list = actions
+				for action_name in action_list:
+					debug.verbose("requested : " + module_name + "?" + action_name + " [START]")
+					ret = None;
+					if action_name == "install":
+						try:
+							self.install_package(module_name)
+						except AttributeError:
+							debug.error("target have no 'install_package' instruction")
+					elif action_name == "uninstall":
+						try:
+							self.un_install_package(module_name)
+						except AttributeError:
+							debug.error("target have no 'un_install_package' instruction")
+					elif action_name[:3] == "run":
+						"""
+						if     mod.get_type() != "BINARY" \
+						   and mod.get_type() != "PACKAGE":
+							debug.error("Can not run other than 'BINARY' ... pakage='" + mod.get_type() + "' for module='" + module_name + "'")
+						"""
+						bin_name = None
+						if len(action_name) > 3:
+							if action_name[3] == '%':
+								bin_name = ""
+								for elem in action_name[4:]:
+									if elem == ":":
+										break;
+									bin_name += elem
+							# we have option:
+							action_name2 = action_name.replace("\:", "1234COLUMN4321")
+							option_list = action_name2.split(":")
+							if len(option_list) == 0:
+								if bin_name != None:
+									debug.warning("action 'run' wrong options options ... : '" + action_name + "' might be separate with ':'")
+								option_list = []
+							else:
+								option_list = []
+							#try:
+							self.run(module_name, option_list, bin_name)
+							#except AttributeError:
+							#	debug.error("target have no 'run' instruction")
+						elif action_name == "log":
+							try:
+								self.show_log(module_name)
+							except AttributeError:
+								debug.error("target have no 'show_log' instruction")
 						else:
-							option_list_tmp = option_list[1:]
 							option_list = []
-							for elem in option_list_tmp:
-								option_list.append(elem.replace("1234COLUMN4321", ":"))
+						#try:
+						self.run(module_name, option_list, bin_name)
+						#except AttributeError:
+						#	debug.error("target have no 'run' instruction")
+					elif action_name == "log":
+						try:
+							self.show_log(module_name)
+						except AttributeError:
+							debug.error("target have no 'show_log' instruction")
 					else:
-						option_list = []
-					#try:
-					self.run(module_name, option_list, bin_name)
-					#except AttributeError:
-					#	debug.error("target have no 'run' instruction")
-				elif action_name == "log":
-					try:
-						self.show_log(module_name)
-					except AttributeError:
-						debug.error("target have no 'show_log' instruction")
-				else:
-					present = self.load_if_needed(module_name, optionnal=optionnal)
-					if     present == False \
-					   and optionnal == True:
-						ret = [heritage.HeritageList(), False]
-					else:
-						debug.warning("compare " + str(self.module_list) + "  " + module_name)
-						for mod in self.module_list:
-							debug.warning("compare " + mod.get_name() + " == " + module_name)
-							if mod.get_name() == module_name:
-								if action_name[:4] == "dump":
-									debug.info("dump module '" + module_name + "'")
-									if len(action_name) > 4:
-										debug.warning("action 'dump' does not support options ... : '" + action_name + "'")
-									ret = mod.display()
-									break
-								elif action_name[:5] == "clean":
-									debug.info("clean module '" + module_name + "'")
-									if len(action_name) > 5:
-										debug.warning("action 'clean' does not support options ... : '" + action_name + "'")
-									ret = mod.clean(self)
-									break
-								elif action_name[:4] == "gcov":
-									debug.debug("gcov on module '" + module_name + "'")
-									if len(action_name) > 4:
-										# we have option:
-										option_list = action_name.split(":")
-										if len(option_list) == 0:
-											debug.warning("action 'gcov' wrong options options ... : '" + action_name + "' might be separate with ':'")
-											option_list = []
-										else:
-											option_list = option_list[1:]
-									else:
-										option_list = []
-									if "output" in option_list:
-										ret = mod.gcov(self, generate_output=True)
-									else:
-										ret = mod.gcov(self, generate_output=False)
-									break
-								elif action_name[:5] == "build":
-									if len(action_name) > 5:
-										debug.warning("action 'build' does not support options ... : '" + action_name + "'")
-									debug.debug("build module '" + module_name + "'")
-									if optionnal == True:
-										ret = [mod.build(self, package_name), True]
-									else:
-										ret = mod.build(self, package_name)
-									break
-						if     optionnal == True \
-						   and ret == None:
+						present = self.load_if_needed(module_name, optionnal=optionnal)
+						if     present == False \
+						   and optionnal == True:
 							ret = [heritage.HeritageList(), False]
-							break
-						if ret == None:
-							debug.error("not know module name : '" + module_name + "' to '" + action_name + "' it")
-				debug.verbose("requested : " + module_name + "?" + action_name + " [STOP]")
-			if len(action_list) == 1:
-				return ret
+						else:
+							for mod in self.module_list:
+								debug.verbose("compare " + mod.get_name() + " == " + module_name)
+								if mod.get_name() == module_name:
+									if action_name[:4] == "dump":
+										debug.info("dump module '" + module_name + "'")
+										if len(action_name) > 4:
+											debug.warning("action 'dump' does not support options ... : '" + action_name + "'")
+										ret = mod.display()
+										break
+									elif action_name[:5] == "clean":
+										debug.info("clean module '" + module_name + "'")
+										if len(action_name) > 5:
+											debug.warning("action 'clean' does not support options ... : '" + action_name + "'")
+										ret = mod.clean(self)
+										break
+									elif action_name[:4] == "gcov":
+										debug.debug("gcov on module '" + module_name + "'")
+										if len(action_name) > 4:
+											# we have option:
+											option_list = action_name.split(":")
+											if len(option_list) == 0:
+												debug.warning("action 'gcov' wrong options options ... : '" + action_name + "' might be separate with ':'")
+												option_list = []
+											if "output" in option_list:
+												ret = mod.gcov(self, generate_output=True)
+											else:
+												ret = mod.gcov(self, generate_output=False)
+											break
+									elif action_name[:5] == "build":
+										if len(action_name) > 5:
+											debug.warning("action 'build' does not support options ... : '" + action_name + "'")
+										debug.debug("build module '" + module_name + "'")
+										if optionnal == True:
+											ret = [mod.build(self, package_name), True]
+										else:
+											ret = mod.build(self, package_name)
+										break
+							# at the end of the build selected...
+							if     optionnal == True \
+							   and ret == None:
+								ret = [heritage.HeritageList(), False]
+								break
+							if ret == None:
+								debug.error("not know module name : '" + module_name + "' to '" + action_name + "' it")
+						debug.verbose("requested : " + module_name + "?" + action_name + " [STOP]")
+					if len(action_list) == 1 and len(list_of_all_element) == 1:
+						return ret
+				# end of all element processing...
 	
 	##
 	## @brief Add action to do for package specific part when build upper element
 	## @param[in] name_of_state (string) a state to call action
 	##     - BINARY
-	##     - BINARY_SHARED
+	##     - BINARY_DYNAMIC
 	##     - BINARY_STAND_ALONE
 	##     - LIBRARY
 	##     - LIBRARY_DYNAMIC
@@ -883,7 +890,7 @@ class Target:
 		elif    module.get_type() == 'BINARY' \
 		     or module.get_type() == 'BINARY_STAND_ALONE':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = True)
-		elif module.get_type() == 'BINARY_SHARED':
+		elif module.get_type() == 'BINARY_DYNAMIC':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)
 		elif module.get_type() == 'PACKAGE':
 			self.make_package_binary(pkg_name, pkg_properties, base_pkg_path, heritage_list, static = False)

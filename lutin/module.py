@@ -7,7 +7,7 @@
 ##
 ## @license MPL v2.0 (see license file)
 ##
-
+import re
 import sys
 import os
 import copy
@@ -47,7 +47,8 @@ class Module:
 	## @param[in] module_name (string) Name of the module
 	## @param[in] module_type (string) Type of the module:
 	##	 - BINARY
-	##	 - BINARY_SHARED
+	##	 - BINARY_SHARED // deprecated ...
+	##	 - BINARY_DYNAMIC
 	##	 - BINARY_STAND_ALONE
 	##	 - LIBRARY
 	##	 - LIBRARY_DYNAMIC
@@ -59,6 +60,8 @@ class Module:
 	##
 	def __init__(self, file, module_name, module_type):
 		## Remove all variable to prevent error of multiple deffinition of the module ...
+		if module_type == "BINARY_SHARED":
+			module_type = "BINARY_DYNAMIC";
 		debug.verbose("Create a new module : '" + module_name + "' TYPE=" + module_type)
 		self._origin_file = file;
 		self._origin_path = tools.get_current_path(self._origin_file)
@@ -591,7 +594,7 @@ class Module:
 				action["action"](target, self, action["data"]);
 		if	 package_name == None \
 		   and (	self._type == 'BINARY'
-				 or self._type == 'BINARY_SHARED' \
+				 or self._type == 'BINARY_DYNAMIC' \
 				 or self._type == 'BINARY_STAND_ALONE' \
 				 or self._type == 'PACKAGE' ) :
 			# this is the endpoint binary ...
@@ -626,7 +629,7 @@ class Module:
 			local_type = 'LIBRARY'
 		if self._type == 'LIBRARY_STATIC':
 			local_type = 'LIBRARY'
-		if self._type == 'BINARY_SHARED':
+		if self._type == 'BINARY_DYNAMIC':
 			local_type = 'BINARY'
 		if self._type == 'BINARY_STAND_ALONE':
 			local_type = 'BINARY'
@@ -652,8 +655,8 @@ class Module:
 			debug.print_element("Library(static)", self._name, "-", package_version_string)
 		elif self._type == 'BINARY':
 			debug.print_element("Binary(auto)", self._name, "-", package_version_string)
-		elif self._type == 'BINARY_SHARED':
-			debug.print_element("Binary (shared)", self._name, "-", package_version_string)
+		elif self._type == 'BINARY_DYNAMIC':
+			debug.print_element("Binary (dynamic)", self._name, "-", package_version_string)
 		elif self._type == 'BINARY_STAND_ALONE':
 			debug.print_element("Binary (stand alone)", self._name, "-", package_version_string)
 		elif self._type == 'PACKAGE':
@@ -827,7 +830,7 @@ class Module:
 			except ValueError:
 				debug.error(" UN-SUPPORTED link format:  '.jar'")
 		elif	self._type == 'BINARY' \
-			 or self._type == 'BINARY_SHARED' \
+			 or self._type == 'BINARY_DYNAMIC' \
 			 or self._type == 'BINARY_STAND_ALONE':
 			shared_mode = False
 			if "Android" in target.get_type():
@@ -841,7 +844,7 @@ class Module:
 						break;
 			static_mode = True
 			if target.support_dynamic_link == True:
-				if self._type == 'BINARY_SHARED':
+				if self._type == 'BINARY_DYNAMIC':
 					static_mode = False
 			if shared_mode == True:
 				try:
@@ -1010,7 +1013,7 @@ class Module:
 			tools.remove_path_and_sub_path(pathbuild)
 			return True
 		elif	self._type == 'BINARY' \
-			 or self._type == 'BINARY_SHARED' \
+			 or self._type == 'BINARY_DYNAMIC' \
 			 or self._type == 'BINARY_STAND_ALONE' \
 			 or self._type=='PACKAGE':
 			# remove path of the lib ... for this targer
@@ -1520,7 +1523,7 @@ class Module:
 		   or (	 type == 'PACKAGE'\
 				and "K" not in rules) \
 		   or (	 (	type == 'BINARY' \
-					  or type == 'BINARY_SHARED' \
+					  or type == 'BINARY_DYNAMIC' \
 					  or type == 'BINARY_STAND_ALONE')\
 				and "B" not in rules ) :
 			return True
@@ -1553,7 +1556,7 @@ class Module:
 				tmp_file.write('		color=lightblue;\n');
 				tmp_file.write('		];\n');
 			elif	self._type == 'BINARY' \
-				 or self._type == 'BINARY_SHARED' \
+				 or self._type == 'BINARY_DYNAMIC' \
 				 or self._type == 'BINARY_STAND_ALONE':
 				tmp_file.write('	node [\n');
 				tmp_file.write('		shape=rectangle;\n');
@@ -1816,10 +1819,8 @@ def import_path(path_list):
 def exist(target, name):
 	global __module_list
 	for mod in __module_list:
-		return_check = bool(re.match(name, mod[0]));
-		debug.warning("check exist: " + name + " => " + mod[0]);
-		#if mod[0] == name:
-		if return_check:
+		debug.verbose("check exist: " + name + " => " + mod[0]);
+		if mod[0] == name:
 			return True;
 	return False
 
@@ -1829,11 +1830,11 @@ def exist(target, name):
 ## @param[in] name (string) Name of the module
 ## @return (handle) @ref Module handle
 ##
-def load_module(target, nameg):
+def load_module(target, name):
 	global __module_list
 	#debug.warning("Load module: " + str(len(__module_list)) + " => " + str(__module_list));
 	for mod in __module_list:
-		if mod[0] == name :
+		if mod[0] == name:
 			if mod[2]== False:
 				# read GLD file
 				the_module = moduleGLD.load_module_from_GLD(target, mod[0], os.path.dirname(mod[1]), mod[1])
@@ -1902,11 +1903,22 @@ def load_module(target, nameg):
 ##
 def list_all_module():
 	global __module_list
-	tmpListName = []
+	out = []
 	for mod in __module_list:
-		if mod[0] not in tmpListName:
-			tmpListName.append(mod[0])
-	return tmpListName
+		if mod[0] not in out:
+			out.append(mod[0])
+	out.sort()
+	return out
+
+##
+## @brief List all module with specific filter name
+## @param[in] filter (string) regular expression to filter the modules
+## @return ([string,...]) List of all module names filter with needed element
+##
+def list_filtered_module(filter):
+	list_of_all_module = list_all_module();
+	regex = re.compile(filter)
+	return [xxx for xxx in list_of_all_module if regex.match(xxx)]#list(filter(list_of_all_module,r.match))
 
 ##
 ## @brief List all module name whith their desc

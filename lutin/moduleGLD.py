@@ -32,7 +32,7 @@ from xmlrpc.client import boolean
 def get_module_type_availlable():
     return [
         'BINARY',
-        'BINARY_SHARED',
+        'BINARY_DYNAMIC',
         'BINARY_STAND_ALONE',
         'LIBRARY',
         'LIBRARY_DYNAMIC',

@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//bin/lutin=utf-8
 encoding//lutin/__init__.py=utf-8
 encoding//lutin/builder.py=utf-8
 encoding//lutin/depend.py=utf-8
