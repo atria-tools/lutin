@@ -769,24 +769,32 @@ class Target:
 							else:
 								option_list = []
 							
-							ret = self.run(module_name, option_list, bin_name);
+							ret_value = self.run(module_name, option_list, bin_name);
 						else:
 							option_list = []
 						#try:
-						ret = self.run(module_name, option_list, bin_name)
-						if env.get_async_fail():
-							if ret != 0:
+						ret_value = self.run(module_name, option_list, bin_name)
+						if not env.get_async_fail():
+							if ret_value != 0:
 								debug.error("FAIL in execute process : '" + str(module_name) + "' ==> bin name='" + str(bin_name) + "' with option: " + str(option_list) + " RETURN value: " + str(ret));
-							else:
-								debug.warning("FAIL in execute process : '" + str(module_name) + "' ==> bin name='" + str(bin_name) + "' with option: " + str(option_list) + " RETURN value: " + str(ret));
 						else:
-							global_run_error.append({
-								"module": module_name,
-								"bin": bin_name,
-								"options": option_list,
-								"return": ret,
-								"type": "Execution Fail ..."
-								})
+							if ret_value != 0:
+								debug.warning("FAIL execute process : '" + str(module_name) + "' ==> bin name='" + str(bin_name) + "' with option: " + str(option_list) + " RETURN value: " + str(ret));
+								global_run_error.append({
+									"module": module_name,
+									"bin": bin_name,
+									"options": option_list,
+									"return": ret_value,
+									"type": "Execution Fail ..."
+									})
+							else:
+								global_run_error.append({
+									"module": module_name,
+									"bin": bin_name,
+									"options": option_list,
+									"return": ret_value,
+									"type": "Execution OK ..."
+									})
 						#except AttributeError:
 						#	debug.error("target have no 'run' instruction")
 					elif action_name == "log":
@@ -798,7 +806,7 @@ class Target:
 						present = self.load_if_needed(module_name, optionnal=optionnal)
 						if     present == False \
 						   and optionnal == True:
-							ret = [heritage.HeritageList(), False, None]
+							ret = [heritage.HeritageList(), False, []]
 						else:
 							for mod in self.module_list:
 								debug.verbose("compare " + mod.get_name() + " == " + module_name)
@@ -832,12 +840,12 @@ class Target:
 										if len(action_name) > 5:
 											debug.warning("action 'build' does not support options ... : '" + action_name + "'")
 										debug.debug("build module '" + module_name + "'")
-										ret = [mod.build(self, package_name), True, None]
+										ret = [mod.build(self, package_name), True, []]
 										break
 							# at the end of the build selected...
 							if     optionnal == True \
 							   and ret == None:
-								ret = [heritage.HeritageList(), False, None]
+								ret = [heritage.HeritageList(), False, []]
 								break
 							if ret == None:
 								debug.error("not know module name : '" + module_name + "' to '" + action_name + "' it")
@@ -847,10 +855,9 @@ class Target:
 						pass;
 					else:
 						if len(action_list) == 1 and len(list_of_all_element) == 1:
-							return ret
+							return [None, False, global_run_error];
 				# end of all element processing...
-			if len(global_run_error) != 0:
-				return [None, False, global_run_error];
+			return [None, False, global_run_error];
 	##
 	## @brief Add action to do for package specific part when build upper element
 	## @param[in] name_of_state (string) a state to call action
