@@ -607,7 +607,7 @@ class Module:
 		# optionnal dependency :
 		for dep, option, export, src_file, header_file, option_not_found in self._depends_optionnal:
 			debug.verbose("try find optionnal dependency: '" + str(dep) + "'")
-			inherit_list, isBuilt = target.build(dep, True, package_name=package_name)
+			inherit_list, isBuilt, build_errors = target.build(dep, True, package_name=package_name)
 			if isBuilt == True:
 				self._local_heritage.add_depends(dep);
 				self.add_flag(option[0], option[1], export=export);
@@ -619,7 +619,7 @@ class Module:
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		for dep in self._depends:
 			debug.debug("module: '" + str(self._name) + "'   request: '" + dep + "'")
-			inherit_list = target.build(dep, False, package_name=package_name)
+			inherit_list, isBuilt, build_errors = target.build(dep, False, package_name=package_name)
 			# add at the heritage list :
 			self._sub_heritage_list.add_heritage_list(inherit_list)
 		# do sub library action for automatic generating ...

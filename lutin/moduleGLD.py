@@ -156,7 +156,7 @@ list_of_element_availlable=[
         "."
     ],
     "compilation-version": {
-        "c++": 2017,
+        "c++": 2017, # -2017 for gnu17
         "java": 16
     },
     "dependency": [
@@ -660,7 +660,10 @@ def GLD_add_depend(my_module, data):
 
 def GLD_compile_version(my_module, data):
     for elem in data.keys():
-        my_module.compile_version(elem, data[elem])
+    	if data[elem] < 0:
+        	my_module.compile_version(elem, -data[elem], gnu=True)
+    	else:
+        	my_module.compile_version(elem, data[elem])
     
 def GLD_copy(my_module, data):
     try:

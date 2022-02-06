@@ -657,6 +657,7 @@ class Target:
 	## @return (None|Module handle| ...) complicated return ...
 	##
 	def build(self, name, optionnal=False, actions=[], package_name=None):
+		debug.extreme_verbose("call build ... " + str(name));
 		if    len(name.split("?")) != 1\
 		   or len(name.split("@")) != 1:
 			debug.error("need update")
@@ -727,6 +728,7 @@ class Target:
 				list_of_all_element = module.list_filtered_module(name);
 			else:
 				list_of_all_element = [name]
+			global_run_error = [];
 			for module_name in list_of_all_element:
 				action_list = actions
 				for action_name in action_list:
@@ -743,16 +745,17 @@ class Target:
 						except AttributeError:
 							debug.error("target have no 'un_install_package' instruction")
 					elif action_name[:3] == "run":
+						sub_action_name = action_name[3:];
 						"""
 						if     mod.get_type() != "BINARY" \
 						   and mod.get_type() != "PACKAGE":
 							debug.error("Can not run other than 'BINARY' ... pakage='" + mod.get_type() + "' for module='" + module_name + "'")
 						"""
 						bin_name = None
-						if len(action_name) > 3:
-							if action_name[3] == '%':
+						if len(sub_action_name) > 0:
+							if sub_action_name[0] == '%':
 								bin_name = ""
-								for elem in action_name[4:]:
+								for elem in sub_action_name[1:]:
 									if elem == ":":
 										break;
 									bin_name += elem
@@ -765,19 +768,25 @@ class Target:
 								option_list = []
 							else:
 								option_list = []
-							#try:
-							self.run(module_name, option_list, bin_name)
-							#except AttributeError:
-							#	debug.error("target have no 'run' instruction")
-						elif action_name == "log":
-							try:
-								self.show_log(module_name)
-							except AttributeError:
-								debug.error("target have no 'show_log' instruction")
+							
+							ret = self.run(module_name, option_list, bin_name);
 						else:
 							option_list = []
 						#try:
-						self.run(module_name, option_list, bin_name)
+						ret = self.run(module_name, option_list, bin_name)
+						if env.get_async_fail():
+							if ret != 0:
+								debug.error("FAIL in execute process : '" + str(module_name) + "' ==> bin name='" + str(bin_name) + "' with option: " + str(option_list) + " RETURN value: " + str(ret));
+							else:
+								debug.warning("FAIL in execute process : '" + str(module_name) + "' ==> bin name='" + str(bin_name) + "' with option: " + str(option_list) + " RETURN value: " + str(ret));
+						else:
+							global_run_error.append({
+								"module": module_name,
+								"bin": bin_name,
+								"options": option_list,
+								"return": ret,
+								"type": "Execution Fail ..."
+								})
 						#except AttributeError:
 						#	debug.error("target have no 'run' instruction")
 					elif action_name == "log":
@@ -789,7 +798,7 @@ class Target:
 						present = self.load_if_needed(module_name, optionnal=optionnal)
 						if     present == False \
 						   and optionnal == True:
-							ret = [heritage.HeritageList(), False]
+							ret = [heritage.HeritageList(), False, None]
 						else:
 							for mod in self.module_list:
 								debug.verbose("compare " + mod.get_name() + " == " + module_name)
@@ -823,23 +832,25 @@ class Target:
 										if len(action_name) > 5:
 											debug.warning("action 'build' does not support options ... : '" + action_name + "'")
 										debug.debug("build module '" + module_name + "'")
-										if optionnal == True:
-											ret = [mod.build(self, package_name), True]
-										else:
-											ret = mod.build(self, package_name)
+										ret = [mod.build(self, package_name), True, None]
 										break
 							# at the end of the build selected...
 							if     optionnal == True \
 							   and ret == None:
-								ret = [heritage.HeritageList(), False]
+								ret = [heritage.HeritageList(), False, None]
 								break
 							if ret == None:
 								debug.error("not know module name : '" + module_name + "' to '" + action_name + "' it")
 						debug.verbose("requested : " + module_name + "?" + action_name + " [STOP]")
-					if len(action_list) == 1 and len(list_of_all_element) == 1:
-						return ret
+					#display errors
+					if len(global_run_error) != 0:
+						pass;
+					else:
+						if len(action_list) == 1 and len(list_of_all_element) == 1:
+							return ret
 				# end of all element processing...
-	
+			if len(global_run_error) != 0:
+				return [None, False, global_run_error];
 	##
 	## @brief Add action to do for package specific part when build upper element
 	## @param[in] name_of_state (string) a state to call action
@@ -1152,28 +1163,29 @@ class Target:
 		       or ret_changelog
 	
 	def install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
-		debug.error("action not implemented ...")
+		debug.debug("------------------------------------------------------------------------");
+		debug.info("-- Install package '" + pkg_name + "'");
+		debug.debug("------------------------------------------------------------------------");
+		debug.error("action not implemented ...");
 	
 	def un_install_package(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Un-Install package '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
-		debug.error("action not implemented ...")
+		debug.debug("------------------------------------------------------------------------");
+		debug.info("-- Un-Install package '" + pkg_name + "'");
+		debug.debug("------------------------------------------------------------------------");
+		debug.error("action not implemented ...");
 	
 	def run(self, pkg_name, option_list, binary_name = None):
-		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list))
-		debug.debug("------------------------------------------------------------------------")
-		debug.error("action not implemented ...")
+		debug.debug("------------------------------------------------------------------------");
+		debug.info("-- Run package '" + pkg_name + "' + option: " + str(option_list));
+		debug.debug("------------------------------------------------------------------------");
+		debug.warning("action not implemented ...");
+		return -1;
 	
 	def show_log(self, pkg_name):
-		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Show log logcat '" + pkg_name + "'")
-		debug.debug("------------------------------------------------------------------------")
-		debug.error("action not implemented ...")
+		debug.debug("------------------------------------------------------------------------");
+		debug.info("-- Show log logcat '" + pkg_name + "'");
+		debug.debug("------------------------------------------------------------------------");
+		debug.error("action not implemented ...");
 	
 	##
 	## @brief convert a s list of string in a string separated by a ","

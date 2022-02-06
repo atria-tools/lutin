@@ -118,17 +118,29 @@ def get_warning_mode():
 	global store_warning
 	return store_warning
 
-ccache=False
+ccache=False;
 def set_ccache(val):
-	global ccache
+	global ccache;
 	if val == True:
-		ccache = True
+		ccache = True;
 	else:
-		ccache = False
+		ccache = False;
 
 def get_ccache():
-	global ccache
-	return ccache
+	global ccache;
+	return ccache;
+
+async_fail=False
+def set_async_fail(val):
+	global async_fail;
+	if val == True:
+		async_fail = True;
+	else:
+		async_fail = False;
+
+def get_async_fail():
+	global async_fail;
+	return async_fail;
 
 def end_with(name, list):
 	for appl in list:

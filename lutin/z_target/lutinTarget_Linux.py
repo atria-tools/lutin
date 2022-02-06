@@ -174,10 +174,9 @@ class Target(target.Target):
 		for elem in option_list:
 			cmd += elem + " ";
 		ret = multiprocess.run_command_pwd(cmd, appl_path);
-		if ret != 0:
-			debug.error("application exit with error: " + str(ret));
 		debug.debug("------------------------------------------------------------------------")
-		debug.info("-- Run package '" + pkg_name + "' Finished")
+		debug.info("-- Run package '" + pkg_name + "' Finished ret=" + str(ret))
 		debug.debug("------------------------------------------------------------------------")
+		return ret;
 
 

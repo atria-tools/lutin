@@ -41,6 +41,7 @@ myArgs.add("o", "force-optimisation", desc="Force optimisation of the build")
 myArgs.add("w", "warning", desc="Store warning in a file build file")
 myArgs.add("i", "isolate-system", desc="Isolate system build (copy header of c and c++ system lib to not include unneeded external libs) EXPERIMENTAL (archlinux)")
 myArgs.add("K", "ccache", desc="Enable the ccache interface")
+myArgs.add("A", "async-fail", desc="Asynchronous fail of all the run execution, this permit to execute all test and report all fails")
 
 myArgs.add_section("properties", "keep in the sequency of the cible")
 myArgs.add("t", "target", haveParam=True, desc="Select a target (by default the platform is the computer that compile this) To know list : 'lutin.py --list-target'")
@@ -62,27 +63,29 @@ localArgument = myArgs.parse()
 	display the help of this makefile
 """
 def usage(full=False):
-	color = debug.get_color_set()
+	color = debug.get_color_set();
 	# generic argument displayed : 
-	myArgs.display()
-	print("		All target can finish with '?clean' '?dump' '?gcov' ... ?action (@ can replace ?)" )
-	print("		" + color['green'] + "all" + color['default'])
-	print("			build all (only for the current selected board) (bynary and packages)")
-	print("		" + color['green'] + "clean" + color['default'])
-	print("			clean all (same as previous)")
-	print("		" + color['green'] + "dump" + color['default'])
-	print("			Dump all the module dependency and properties")
-	print("		" + color['green'] + "dependency" + color['default'])
-	print("			generate a file dependency.dot that represent all the dependency link")
-	print("			Select what in included: 'dependency:LPBDK'")
-	print("				L: Library")
-	print("				P: Pre-build")
-	print("				D: Data")
-	print("				B: Binary")
-	print("				K: Package")
-	print("			eg: lutin dependency:LD ; dot -Tsvg dependency.dot -o dependency.svg ; firefox dependency.svg")
-	print("		" + color['green'] + "gcov" + color['default'])
-	print("			Parse all the code of the library with the gcov resolution")
+	myArgs.display();
+	print("		All target can finish with '?clean' '?dump' '?gcov' ... ?action (@ can replace ?)" );
+	print("		" + color['green'] + "all" + color['default']);
+	print("			build all (only for the current selected board) (bynary and packages)");
+	print("		" + color['green'] + "clean" + color['default']);
+	print("			clean all (same as previous)");
+	print("		" + color['green'] + "dump" + color['default']);
+	print("			Dump all the module dependency and properties");
+	print("		" + color['green'] + "dependency" + color['default']);
+	print("			generate a file dependency.dot that represent all the dependency link");
+	print("			Select what in included: 'dependency:LPBDK'");
+	print("				L: Library");
+	print("				P: Pre-build");
+	print("				D: Data");
+	print("				B: Binary");
+	print("				K: Package");
+	print("			eg: lutin dependency:LD ; dot -Tsvg dependency.dot -o dependency.svg ; firefox dependency.svg");
+	print("		" + color['green'] + "gcov" + color['default']);
+	print("			Parse all the code of the library with the gcov resolution");
+	print("		" + color['green'] + "run" + color['default']);
+	print("			Execute the application in the module. add ':' to add parameter to set in the program parameters");
 	listOfAllModule = module.list_all_module_with_desc()
 	for mod in listOfAllModule:
 		data_print = "		"
@@ -172,6 +175,7 @@ def usage(full=False):
 	print("	ex complex arguments : " + sys.argv[0] + " -cclang -mdebug zeus-package-base?build?run%zeus-launcher:--srv=user:--elog-level=5")
 	print("	ex gcov: " + sys.argv[0] + " -cgcc --gcov -mdebug etk-test?build?run etk?gcov")
 	print("	ex gcov with output: " + sys.argv[0] + " -cgcc --gcov -mdebug etk-test?build?run etk?gcov:output")
+	print("	ex multiple test execution with end resume: " + sys.argv[0] + " --async-fail -cgcc -mdebug *-test?build?run")
 	exit(0)
 
 
@@ -224,22 +228,29 @@ def parseGenericArg(argument, active):
 		return True
 	if argument.get_option_name() == "list-target":
 		if active == False:
-			list_of_target = target.list_all_target()
-			retValue = ""
+			list_of_target = target.list_all_target();
+			retValue = "";
 			for targetName in list_of_target:
 				if retValue != "":
-					retValue += " "
-				retValue += targetName
-			print(retValue)
-			exit(0)
+					retValue += " ";
+				retValue += targetName;
+			print(retValue);
+			exit(0);
 		return True
 	elif argument.get_option_name()=="jobs":
 		if active == True:
-			multiprocess.set_core_number(int(argument.get_arg()))
+			multiprocess.set_core_number(int(argument.get_arg()));
 		return True
 	elif argument.get_option_name()=="depth":
 		if active == True:
-			env.set_parse_depth(int(argument.get_arg()))
+			env.set_parse_depth(int(argument.get_arg()));
+		return True
+	elif argument.get_option_name()=="async-fail":
+		if active == True:
+			if check_boolean(argument.get_arg()) == True:
+				env.set_async_fail(True);
+			else:
+				env.set_async_fail(False);
 		return True
 	elif argument.get_option_name()=="ccache":
 		if active == True:
@@ -379,36 +390,37 @@ config = {
 	"gcov":False,
 	"compilator-version":""
 	}
+elementErrors = [];
 # load the default target :
-my_target = None
-actionDone=False
+my_target = None;
+actionDone=False;
 # parse all argument
 for argument in localArgument:
 	if parseGenericArg(argument, False) == True:
-		continue
+		continue;
 	elif argument.get_option_name() == "compilator-version":
-		config["compilator-version"] = argument.get_arg()
+		config["compilator-version"] = argument.get_arg();
 	elif argument.get_option_name() == "package":
-		config["generate-package"]=False
+		config["generate-package"]=False;
 	elif argument.get_option_name() == "simulation":
-		config["simulation"]=True
+		config["simulation"]=True;
 	elif argument.get_option_name() == "gcov":
-		config["gcov"]=True
+		config["gcov"]=True;
 	elif argument.get_option_name() == "bus":
-		config["bus-size"]=argument.get_arg()
+		config["bus-size"]=argument.get_arg();
 	elif argument.get_option_name() == "arch":
-		config["arch"]=argument.get_arg()
+		config["arch"]=argument.get_arg();
 	elif argument.get_option_name() == "compilator":
 		if config["compilator"] != argument.get_arg():
-			debug.debug("change compilator ==> " + argument.get_arg())
-			config["compilator"] = argument.get_arg()
+			debug.debug("change compilator ==> " + argument.get_arg());
+			config["compilator"] = argument.get_arg();
 			#remove previous target
-			my_target = None
+			my_target = None;
 	elif argument.get_option_name() == "target":
 		# No check input ==> this will be verify automaticly chen the target will be loaded
 		if targetName != argument.get_arg():
-			targetName = argument.get_arg()
-			debug.debug("change target ==> '" + targetName + "' & reset mode : gcc&release")
+			targetName = argument.get_arg();
+			debug.debug("change target ==> '" + targetName + "' & reset mode : gcc&release");
 			#reset properties by defauult:
 			config = {
 			             "compilator":lutinHost.HOST_DEFAULT_COMPILATOR,
@@ -419,53 +431,76 @@ for argument in localArgument:
 			             "simulation":False,
 			             "gcov":False,
 			             "compilator-version":""
-			          }
+			          };
 			#remove previous target
-			my_target = None
+			my_target = None;
 	elif argument.get_option_name() == "mode":
 		if config["mode"] != argument.get_arg():
-			config["mode"] = argument.get_arg()
-			debug.debug("change mode ==> " + config["mode"])
+			config["mode"] = argument.get_arg();
+			debug.debug("change mode ==> " + config["mode"]);
 			#remove previous target
-			my_target = None
+			my_target = None;
 	else:
-		argument_value = argument.get_arg()
-		debug.debug("something request : '" + argument_value + "'")
+		argument_value = argument.get_arg();
+		debug.debug("something request : '" + argument_value + "'");
 		if argument.get_option_name() != "":
-			debug.warning("Can not understand argument : '" + argument.get_option_name() + "'")
-			usage()
+			debug.warning("Can not understand argument : '" + argument.get_option_name() + "'");
+			usage();
 			break;
-		name2 = argument_value.replace("@", "?")
-		gettedElement = name2.split("?")
-		module_name = gettedElement[0]
-		action_list = gettedElement[1:]
+		name2 = argument_value.replace("@", "?");
+		gettedElement = name2.split("?");
+		module_name = gettedElement[0];
+		action_list = gettedElement[1:];
 		if len(action_list) == 0:
-			action_list = "build"
-		debug.debug("requested: '" + module_name + "' ? actions:'" + str(action_list) + "'")
-		multiple_module_list = []
+			action_list = "build";
+		debug.debug("requested: '" + module_name + "' ? actions:'" + str(action_list) + "'");
+		multiple_module_list = [];
 		if module_name[-1] == "*":
-			base_name = module_name[:-1]
+			base_name = module_name[:-1];
 			for mod in module.list_all_module():
 				if mod[:len(base_name)] == base_name:
 					debug.verbose("need do it for: " + mod);
-					multiple_module_list.append(mod)
+					multiple_module_list.append(mod);
 		else:
-			multiple_module_list.append(module_name)
-		debug.debug("Will do: '" + str(multiple_module_list) + "' ? actions:'" + str(action_list) + "'")
+			multiple_module_list.append(module_name);
+		debug.debug("Will do: '" + str(multiple_module_list) + "' ? actions:'" + str(action_list) + "'");
 		for module_name in multiple_module_list:
 			#load the target if needed :
 			if my_target == None:
-				my_target = target.load_target(targetName, copy.deepcopy(config))
-			my_target.build(module_name, actions=action_list)
-			actionDone=True
+				my_target = target.load_target(targetName, copy.deepcopy(config));
+			heritage, is_build, error_nodes =  my_target.build(module_name, actions=action_list);
+			if error_nodes != None:
+				for err in error_nodes:
+					elementErrors.append(err);
+			actionDone=True;
 
 # if no action done : we do "all" ...
 if actionDone==False:
 	#load the target if needed :
 	if my_target == None:
-		my_target = target.load_target(targetName, config)
-	my_target.build("all")
+		my_target = target.load_target(targetName, config);
+	heritage, is_build, error_nodes = my_target.build("all");
+	if error_nodes != None:
+		for err in error_nodes:
+			elementErrors.append(err);
 
+if len(elementErrors) != 0:
+	have_error = False;
+	for elret in elementErrors:
+		out = " '" + str(elret["module"]) + "'";
+		if elret["bin"] != None:
+			out += " ==> bin name='" + str(elret["bin"]) + "'"; 
+		if len(elret["options"]) != 0:
+			out += " with option: " + str(elret["options"]);
+			
+		if elret["return"] != 0:
+			debug.warning("[  FAIL  ] " + out + " RETURN value: " + str(elret["return"]));
+			have_error = True;
+		else:
+			debug.info("[   OK   ] " + out);
+	if have_error:
+		debug.error("Execution fail...");
+		
 # stop all started threads;
 multiprocess.un_init()
 
